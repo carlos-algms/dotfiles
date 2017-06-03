@@ -33,4 +33,6 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias g5='egrep -nrH -A5 -B5 --color=auto'
 
+alias ls='ls --color=auto'
 alias ll='ls -alF'
+

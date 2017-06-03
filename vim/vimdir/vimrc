@@ -5,7 +5,7 @@ endif
 
 syntax on
 
-colorscheme fu
+colorscheme zenburn
 
 set tabstop=4 shiftwidth=4 softtabstop=4
 set expandtab
@@ -34,8 +34,8 @@ scriptencoding utf-8
 set fileencodings=utf-8
 set encoding=utf-8
 
-set colorcolumn=81
-hi ColorColumn ctermbg=236 guibg=#444444
+" set colorcolumn=101
+" hi ColorColumn ctermbg=236 guibg=#444444
 
 nmap <S-F5> :tabn<CR>
 nmap <S-F6> :tabp<CR>
