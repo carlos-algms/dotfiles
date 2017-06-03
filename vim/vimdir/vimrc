@@ -40,7 +40,7 @@ nmap <S-F6> :tabp<CR>
 nmap <F5> <C-w>W
 nmap <F6> <C-w>w
 
-colorscheme desert
+colorscheme koehler
 set cursorline
 
 execute pathogen#infect('pathogens/{}')
