@@ -5,7 +5,7 @@ endif
 
 syntax on
 
-colorscheme zenburn
+colorscheme zenburncustom
 
 set tabstop=4 shiftwidth=4 softtabstop=4
 set expandtab
