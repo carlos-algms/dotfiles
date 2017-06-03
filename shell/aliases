@@ -1,0 +1,36 @@
+
+alias Rsync="rsync -ravz"
+
+alias to-sites-available="cd /etc/nginx/sites-available"
+
+alias to-www="cd /var/www"
+
+alias ng-restart="sudo service nginx restart"
+alias ng-stop="sudo service nginx stop"
+
+alias a2-restart="sudo service apache2 restart"
+alias a2-stop="sudo service apache2 stop"
+
+alias php-restart="sudo service php5.6-fpm restart && sudo service php7.1-fpm restart"
+alias php5-restart="sudo service php5.6-fpm restart"
+alias php7-restart="sudo service php7.1-fpm restart"
+
+
+enableSite() {
+  sudo ln -s "/etc/nginx/sites-available/$1" "/etc/nginx/sites-enabled/"
+}
+
+alias enableSite=enableSite
+
+disableSite() {
+  sudo rm "/etc/nginx/sites-enabled/$1"
+}
+
+alias disableSite=disableSite
+
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias g5='egrep -nrH -A5 -B5 --color=auto'
+
+alias ll='ls -alF'

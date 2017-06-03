@@ -1,0 +1,15 @@
+[alias]
+	gl = log --graph --oneline --decorate=short
+	whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+	whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+	d = difftool
+	s = status -b -s
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+[diff]
+	tool = vimdiff
+[difftool]
+	prompt = false

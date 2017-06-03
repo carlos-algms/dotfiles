@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# used on /etc/logrotate.d/mailog at pre-rotate
+
+FILE="/tmp/track-sasl.txt"
+
+
+node /root/scripts/track-sasl-postfix.js > $FILE
+
+
+sendemail \
+	-t carlos.algms@gmail.com \
+	-u "track-sasl `date`" \
+	-m "Please, see the atached file." \
+	-a $FILE \
+	-f admin@wigam.ws \
+	-xu admin@wigam.ws \
+	-xp ws-wigam291
+
+

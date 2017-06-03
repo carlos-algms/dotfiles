@@ -1,0 +1,137 @@
+#!/bin/sh
+
+#
+# Armazenado em
+# /etc/cron.daily/mailtrim
+#
+
+
+PASTAVMAIL="/home/vmail"
+#DAYSOLD=30
+DAYSOLD=5
+#COMMAND="ls "
+COMMAND="rm -v"
+
+# path do arquivo de log
+#ALOG="/var/log/mail.log"
+ALOG="/var/log/mail.trim"
+
+# esvaziar o arquivo de log
+#echo "" > ${ALOG}
+
+# armazena o texto antes de escrever no arquivo de log para ficar tudo em série e nao misturar com os logs de outros apps
+T=""
+
+# marca par ir escrevendo direto no arquivo ao invez de armazenar na variavel e escrever só quando acabar
+LOGAR_DIRETO=true
+
+#nova linha no texto
+NL="\r"
+
+if ${LOGAR_DIRETO}; then
+	NL=""
+fi
+
+Log()
+{
+	if ${LOGAR_DIRETO}; then
+
+		echo -e "${1} ${NL}" >> ${ALOG}
+
+	else
+
+		T="${T}${1}${NL}"
+
+	fi
+}
+
+
+Log "----------------------------------------" 
+Log "-- SISTEMA DE LIMPEZA DOS E-MAILS --"
+Log "$(date)$NL$NL$NL"
+
+cd $PASTAVMAIL
+
+for dominio in $(ls -d */); do
+
+	cd $dominio
+
+	Log "====== Dominio: ${dominio} ======${NL}"
+
+	#for caixa in $(ls -d */); do
+	for caixa in $(find -maxdepth 1 -type d ! -iname ".*" ); do
+
+		cd $caixa
+
+		Log "${NL}== usuario: ${caixa}"
+
+		Log "$(pwd)"
+
+		if [ ! -d "Maildir" ]; then
+
+			Log "usuário inválido, não possui a pasta Maildir"
+
+		else
+
+			cd "Maildir"
+
+			pastasAlvo=$(find -type d -iname .Lixeira -o -iname .Junk -o -iname .Trash -o -iname .Itens\ excluidos  -o -iname .Span -o -iname .Spam )
+
+			for pasta in ${pastasAlvo} ; do
+
+				Log "Pasta atual: ${pasta}"
+
+				pastaDel="${pasta}/cur"
+
+				if [ -d ${pastaDel} ]; then
+
+					#find $pasta/cur -type f -ctime +$DAYSOLD -exec echo {} \; >> $ALOG
+					Log "$(find ${pastaDel} -type f -mtime +${DAYSOLD} -exec ${COMMAND} {} \;)"
+
+				else
+					Log "Pasta não existe: ${pastaDel}"
+				fi
+
+
+				pastaDel="${pasta}/new"
+
+				if [ -d ${pastaDel} ]; then
+
+					#find $pasta/cur -type f -ctime +$DAYSOLD -exec echo {} \; >> $ALOG
+					Log "$(find ${pastaDel} -type f -mtime +${DAYSOLD} -exec ${COMMAND} {} \; )"
+
+				else
+					Log "Pasta não existe: ${pastaDel}"
+				fi
+
+
+			done # pasta
+			
+			Log "${NL}${NL}"
+
+		fi
+
+		cd "${PASTAVMAIL}/${dominio}"
+				
+
+    done # caixa
+
+    Log "${NL}====== Fim do dominio: ${dominio} ====== ${NL}${NL}"
+
+    cd "$PASTAVMAIL"
+
+done # dominio
+
+Log "-- FIM DO SISTEMA DE LIMPEZA DOS E-MAILS"
+Log "$(date)"
+Log "----------------------------------------"
+Log "${NL}${NL}"
+
+if ! ${LOGAR_DIRETO} ; then 
+
+	echo -e ${T} >> ${ALOG}
+
+fi
+
+exit 0
+
