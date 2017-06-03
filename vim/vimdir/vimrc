@@ -5,8 +5,6 @@ endif
 
 syntax on
 
-colorscheme zenburncustom
-
 set tabstop=4 shiftwidth=4 softtabstop=4
 set expandtab
 set list listchars=tab:\|-,trail:~,extends:>,precedes:<
@@ -41,5 +39,7 @@ nmap <S-F5> :tabn<CR>
 nmap <S-F6> :tabp<CR>
 nmap <F5> <C-w>W
 nmap <F6> <C-w>w
+
+colorscheme zenburncustom
 
 execute pathogen#infect('pathogens/{}')
