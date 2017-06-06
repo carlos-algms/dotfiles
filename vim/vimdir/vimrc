@@ -39,6 +39,7 @@ nmap <S-F5> :tabn<CR>
 nmap <S-F6> :tabp<CR>
 nmap <F5> <C-w>W
 nmap <F6> <C-w>w
+map <C-n> :NERDTreeToggle<CR>
 
 colorscheme koehler
 set cursorline
