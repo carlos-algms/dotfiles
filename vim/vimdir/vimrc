@@ -16,6 +16,7 @@ set nocompatible
 set foldmethod=syntax
 set foldlevelstart=99
 set scrolloff=50
+set ignorecase
 
 
 "map <C-W> :qa!<Enter>
