@@ -8,32 +8,32 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 SSH_ENV="$HOME/.ssh/environment"
 
 # Set proper ls colors
-export CLICOLOR=1
+# export CLICOLOR=1
 # Default linux terminal colors
-export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
+# export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
 # Maybe better contrast for black bg?
 # export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
 # set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color|*-256color) color_prompt=yes;;
-esac
+# case "$TERM" in
+# xterm-color|*-256color) color_prompt=yes;;
+# esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-force_color_prompt=yes
+# force_color_prompt=yes
 
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-        # We have color support; assume it's compliant with Ecma-48
-        # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-        # a case would tend to support setf rather than setaf.)
-        color_prompt=yes
-    else
-        color_prompt=
-    fi
-fi
+# if [ -n "$force_color_prompt" ]; then
+#     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+#         # We have color support; assume it's compliant with Ecma-48
+#         # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+#         # a case would tend to support setf rather than setaf.)
+#         color_prompt=yes
+#     else
+#         color_prompt=
+#     fi
+# fi
 
 
 #source ~/dotfiles/git/git_prompt.sh
@@ -44,13 +44,13 @@ fi
 #}
 
 
-USER_COLOR='\033[01;32m'
-HOST_COLOR='\033[01;32m'
-WHERE_COLOR='\033[38;5;11m'
-BRANCH_COLOR='\e[0;33m'
-NORMAL_COLOR='\e[0m'
-MSYSTEM_COLOR='\e[0;35m'
-UNAME_S=`uname -s`
+# USER_COLOR='\033[01;32m'
+# HOST_COLOR='\033[01;32m'
+# WHERE_COLOR='\033[38;5;11m'
+# BRANCH_COLOR='\e[0;33m'
+# NORMAL_COLOR='\e[0m'
+# MSYSTEM_COLOR='\e[0;35m'
+# UNAME_S=`uname -s`
 
 
 # Ubuntu default
@@ -58,34 +58,38 @@ UNAME_S=`uname -s`
 # with GIT branch
 #PS1="\[$USER_COLOR\]\u\[$HOST_COLOR\]@\h\[\033[00m\]:\[$WHERE_COLOR\]\w\[$BRANCH_COLOR\]$(print_git_info)\[$NORMAL_COLOR\]\n\$ "
 
-PS1="\[$USER_COLOR\]\u\[$HOST_COLOR\]@\h\[\033[00m\]:\[$WHERE_COLOR\]\w\[$NORMAL_COLOR\]\n\$ "
+# PS1="\[$USER_COLOR\]\u\[$HOST_COLOR\]@\h\[\033[00m\]:\[$WHERE_COLOR\]\w\[$NORMAL_COLOR\]\n\$ "
 
-unset color_prompt force_color_prompt
+# unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+# case "$TERM" in
+# xterm*|rxvt*)
+#     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+#     ;;
+# *)
+#     ;;
+# esac
 
 # enable color support of ls
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-fi
+# if [ -x /usr/bin/dircolors ]; then
+#     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+# fi
 
 # colored GCC warnings and errors
-export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+# export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 
 function start_agent {
     echo "Initialising new SSH agent..."
+
     /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    echo succeeded
+
+    echo "SSH agent started"
+
     chmod 600 "${SSH_ENV}"
     . "${SSH_ENV}" > /dev/null
+
     /usr/bin/ssh-add;
 }
 
@@ -104,15 +108,13 @@ function kill_ssh_agent {
     eval $(ssh-agent -k)
 }
 
-export SVN_EDITOR=vim
-
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
+# if ! shopt -oq posix; then
+#   if [ -f /usr/share/bash-completion/bash_completion ]; then
+#     . /usr/share/bash-completion/bash_completion
+#   elif [ -f /etc/bash_completion ]; then
+#     . /etc/bash_completion
+#   fi
+# fi
