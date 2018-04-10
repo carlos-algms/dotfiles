@@ -1,0 +1,3 @@
+#!/bin/bash
+
+egrep -nrH -A5 -B5 --color=auto "$@"
