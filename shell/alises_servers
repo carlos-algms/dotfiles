@@ -1,5 +1,3 @@
-alias Rsync="rsync -ravz"
-
 alias to-www="cd /var/www"
 
 alias to-ng-sites-available="cd /etc/nginx/sites-available"
@@ -27,12 +25,7 @@ disableSite() {
 
 alias disableSite=disableSite
 
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias g5='egrep -nrH -A5 -B5 --color=auto'
-
-#alias ls='ls -F --color=auto --group-directories-first'
-alias ll='ls -la'
-
-alias path-show='echo $PATH | sed "s/:/\n/g"'
+if [ -f ~/.aliases_common ]
+then
+    source ~/.aliases_common
+fi
