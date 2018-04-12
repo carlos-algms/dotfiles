@@ -1,4 +1,3 @@
-
 if [ -f ~/.bash_aliases ]; then
     source ~/.bash_aliases
 fi
@@ -8,40 +7,13 @@ PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 SSH_ENV="$HOME/.ssh/environment"
 
 # Set proper ls colors
-# export CLICOLOR=1
-# Default linux terminal colors
-# export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
-# Maybe better contrast for black bg?
-# export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
-
-# set a fancy prompt (non-color, unless we know we "want" color)
-# case "$TERM" in
-# xterm-color|*-256color) color_prompt=yes;;
-# esac
+export CLICOLOR=1
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-# force_color_prompt=yes
-
-# if [ -n "$force_color_prompt" ]; then
-#     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-#         # We have color support; assume it's compliant with Ecma-48
-#         # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-#         # a case would tend to support setf rather than setaf.)
-#         color_prompt=yes
-#     else
-#         color_prompt=
-#     fi
-# fi
-
-
-#source ~/dotfiles/git/git_prompt.sh
-
-#function print_git_info() {
-#    local git_ps1=`__git_ps1 %s 2>/dev/null`
-#    test -n "$git_ps1" && echo " (git::"$git_ps1")"
-#}
+force_color_prompt=yes
+color_prompt=yes
 
 
 # USER_COLOR='\033[01;32m'
@@ -60,25 +32,11 @@ SSH_ENV="$HOME/.ssh/environment"
 
 # PS1="\[$USER_COLOR\]\u\[$HOST_COLOR\]@\h\[\033[00m\]:\[$WHERE_COLOR\]\w\[$NORMAL_COLOR\]\n\$ "
 
-# unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-# case "$TERM" in
-# xterm*|rxvt*)
-#     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-#     ;;
-# *)
-#     ;;
-# esac
 
 # enable color support of ls
-# if [ -x /usr/bin/dircolors ]; then
-#     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-# fi
-
-# colored GCC warnings and errors
-# export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+fi
 
 function start_agent {
     echo "Initialising new SSH agent..."
@@ -118,3 +76,36 @@ function kill_ssh_agent {
 #     . /etc/bash_completion
 #   fi
 # fi
+
+# append to history
+shopt -s histappend
+# Combine multiline commands into one in history
+shopt -s cmdhist
+# Ignore duplicates, ls without options and builtin commands
+HISTCONTROL=ignoredups
+export HISTIGNORE="&:ls:[bf]g:exit:clear:ll:la"
+
+# Do not autocomplete when accidentally pressing Tab on an empty line.
+shopt -s no_empty_cmd_completion;
+
+# Easy extract
+extract () {
+  if [ -f $1 ] ; then
+      case $1 in
+          *.tar.bz2)   tar xvjf $1    ;;
+          *.tar.gz)    tar xvzf $1    ;;
+          *.bz2)       bunzip2 $1     ;;
+          *.rar)       rar x $1       ;;
+          *.gz)        gunzip $1      ;;
+          *.tar)       tar xvf $1     ;;
+          *.tbz2)      tar xvjf $1    ;;
+          *.tgz)       tar xvzf $1    ;;
+          *.zip)       unzip $1       ;;
+          *.Z)         uncompress $1  ;;
+          *.7z)        7z x $1        ;;
+          *)           echo "don't know how to extract '$1'..." ;;
+      esac
+  else
+      echo "'$1' is not a valid file!"
+  fi
+}
