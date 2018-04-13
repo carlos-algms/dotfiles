@@ -1,4 +1,4 @@
-PATH="$HOME/bin:$HOME/.local/bin:${DOTFILES_PATH}/shell/bin:$PATH"
+PATH="$HOME/bin:$HOME/.local/bin:${DOTFILES_PATH}/bin:$PATH"
 
 # Set proper ls colors
 export CLICOLOR=1
