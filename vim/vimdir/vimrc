@@ -3,6 +3,25 @@ if has('win32') || has('win64')
     set runtimepath^=~/.vim
 endif
 
+" Automate plug.vim installation
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" install plugins
+call plug#begin('~/.vim/plugged')
+
+Plug 'sheerun/vim-polyglot'
+Plug 'itchyny/lightline.vim'
+Plug 'chr4/nginx.vim', { 'for': 'nginx' }
+" Plug 'nanotech/jellybeans.vim'
+Plug 'joshdick/onedark.vim'
+Plug 'terryma/vim-multiple-cursors'
+
+call plug#end()
+
 syntax on
 
 set tabstop=4 shiftwidth=4 softtabstop=4
@@ -19,7 +38,7 @@ set scrolloff=50
 set ignorecase
 
 
-"map <C-W> :qa!<Enter>
+" map <C-W> :qa!<Enter>
 
 set laststatus=2
 set statusline=%f%m%r%h%w\ (%{&ff}){%Y}\ [%l,%v]%=[%p%%,%L\ lines]
@@ -42,7 +61,11 @@ nmap <F5> <C-w>W
 nmap <F6> <C-w>w
 map <C-n> :NERDTreeToggle<CR>
 
-colorscheme koehler
-set cursorline
+" enable theme for lightline
+let g:lightline = {
+  \ 'colorscheme': 'onedark',
+  \ }
 
-execute pathogen#infect('pathogens/{}')
+" colorscheme koehler
+colorscheme onedark
+set cursorline
