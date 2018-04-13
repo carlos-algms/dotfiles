@@ -17,15 +17,6 @@ enableSite() {
   sudo ln -s "/etc/nginx/sites-available/$1" "/etc/nginx/sites-enabled/"
 }
 
-alias enableSite=enableSite
-
 disableSite() {
   sudo rm "/etc/nginx/sites-enabled/$1"
 }
-
-alias disableSite=disableSite
-
-if [ -f ~/.aliases_common ]
-then
-    source ~/.aliases_common
-fi
