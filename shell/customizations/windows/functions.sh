@@ -1,0 +1,3 @@
+sudo() {
+    cygstart --action=runas "$@"
+}

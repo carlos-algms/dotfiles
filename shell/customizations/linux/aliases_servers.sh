@@ -11,12 +11,3 @@ alias a2-stop="sudo service apache2 stop"
 alias php5-restart="sudo systemctl restart php5.6-fpm.service"
 alias php7-restart="sudo systemctl restart php7.1-fpm.service"
 alias php-restart="sudo systemctl restart php5.6-fpm.service php7.1-fpm.service"
-
-
-enableSite() {
-  sudo ln -s "/etc/nginx/sites-available/$1" "/etc/nginx/sites-enabled/"
-}
-
-disableSite() {
-  sudo rm "/etc/nginx/sites-enabled/$1"
-}
