@@ -1,17 +1,16 @@
-if has('win32') || has('win64')
-    " Make windows use ~/.vim too, I don't want to use _vimfiles
-    set runtimepath^=~/.vim
-endif
+let VIMDIR=expand($DOTFILES_VIM_PATH) . "/vimdir"
+
+set runtimepath^=$DOTFILES_VIM_PATH/vimdir
 
 " Automate plug.vim installation
-if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+if empty(glob(VIMDIR . '/autoload/plug.vim'))
+  silent !curl -fLo $DOTFILES_VIM_PATH/vimdir/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 " install plugins
-call plug#begin('~/.vim/plugged')
+call plug#begin(VIMDIR . '/plugged')
 
 Plug 'sheerun/vim-polyglot'
 Plug 'itchyny/lightline.vim'
@@ -59,7 +58,6 @@ nmap <S-F5> :tabn<CR>
 nmap <S-F6> :tabp<CR>
 nmap <F5> <C-w>W
 nmap <F6> <C-w>w
-map <C-n> :NERDTreeToggle<CR>
 
 " enable theme for lightline
 let g:lightline = {
