@@ -22,30 +22,37 @@ export IS_MAC
 
 # function to DRY
 sourceFiles() {
-    for f in ${DOTFILES_PATH}/customizations/$1*.sh; do
+    for f in $1/*.sh; do
         if [ -f "$f" ]; then
             source "$f"
         fi
     done
 }
 
+
+# load additional files stored into ~/.bash_extras to keep repo clean
+# it need to be the first to be loaded to override EVN or other configs
+sourceFiles $HOME/.bash_extras
+
+customizationsFolder=${DOTFILES_PATH}/customizations
+
 # load default customizations
-sourceFiles ""
+sourceFiles "$customizationsFolder"
 
 
 # load windows specific files
 if [ "$IS_WIN" = true ]; then
-    sourceFiles "windows/"
+    sourceFiles "$customizationsFolder/windows"
 fi
 
 
 # load UNIX/Server specific files
 if [ "$IS_UNIX" = true ]; then
-    sourceFiles "linux/"
+    sourceFiles "$customizationsFolder/linux"
 fi
 
 
 # load MAC specific files
-if [ "$IS_UNIX" = true ]; then
-    sourceFiles "mac/"
+if [ "$IS_MAC" = true ]; then
+    sourceFiles "$customizationsFolder/mac"
 fi
