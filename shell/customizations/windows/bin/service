@@ -7,7 +7,7 @@ printUsage() {
     echo "Usage: service [name] [start|stop|restart]"
 }
 
-if [ "$#" != 2 ] || [ -z "$serviceName" ] || [ -z "$action" ] ; then
+if [ "$#" -lt 2 ] || [ -z "$serviceName" ] || [ -z "$action" ] ; then
     printUsage
     exit 1
 fi
@@ -19,11 +19,14 @@ service="${servicesPath}/${serviceName}"
 
 if [ ! -f ${service} ]; then
     echo "Service '${serviceName}' does not exists. "
-    available="$(ls ${servicesPath})"
+    available=$(find "${servicesPath}" -type f -printf "%f ")
     echo "Services available: [ ${available} ]"
 
     exit 1
 fi
 
+# remove the service name to pass all other params to the actual service
+shift
 
-${service} ${action}
+
+${service} ${@}

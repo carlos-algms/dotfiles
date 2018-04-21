@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+action="${1}"
+shift
+
+getPhpPID() {
+    getPID "php.exe"
+}
+
+printUsage() {
+    echo "Usage: service php [ start port directory | stop ]"
+}
+
+start() {
+    local port="$1"
+    local path="$2"
+
+    if [ -z "${path}" ]; then
+        path="${port}"
+        port=8080
+    fi
+
+    if [ -z "${path}" ]; then
+        path=$(pwd)
+    fi
+
+    if [ ! -d "${path}" ]; then
+        echo "Not a valid folder: '${path}'"
+        exit 1
+    fi
+
+    local pid=`getPhpPID`
+
+    if [[ -z "${pid}" ]]; then # not running
+        echo "Initialising PHP builtin service..."
+
+        nohup php -S 0.0.0.0:${port} -t "${path}" </dev/null &>/dev/null &
+        disown -ah
+        jobs
+        disown %1
+        jobs
+
+        echo "PHP started with PID "$!" serving content on '${path}' "
+        echo "Navigate to http://localhost:${port}/ "
+    else # is running
+        echo "PHP is already running with PID ${pid}"
+    fi
+}
+
+
+stop() {
+    local pid=`getPhpPID`
+
+    if [[ -z "${pid}" ]]; then # PHP is not running
+        echo "PHP is not running"
+        return 0
+    fi
+
+    /usr/bin/kill -9 -f "${pid}"
+
+    if [[ $? -ne 0 ]]; then
+        return 1
+    fi
+
+    echo "Stopped PHP with PID ${pid}"
+    return 0
+
+}
+
+
+case "${action}" in
+    start)
+            start ${@}
+            exit "$?"
+            ;;
+
+    stop)   stop
+            exit "$?"
+            ;;
+
+    *)     echo "Sorry, I don't understand '"${action}"' ";;
+esac

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ps -aW | /usr/bin/grep "$1" | awk '{ print $1 }'
