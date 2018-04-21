@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+action="${1}"
+
+getMysqlPID() {
+    ps -aW | ../../../bin/grep mysqld.exe | awk '{ print $1 }'
+}
+
+
+start_mysql() {
+    echo "Initialising MySQL..."
+
+    local pid=`getMysqlPID`
+
+    if [[ -z "${pid}" ]]; then # MySql is not running
+        mysqld </dev/null &>/dev/null &
+        disown -ah
+        echo "MySQL started with PID "$!""
+    else # MySql is running
+        echo "MySQL is already running with PID ${pid}"
+    fi
+}
+
+
+stop_mysql() {
+    local pid=`getMysqlPID`
+
+    if [[ -z "${pid}" ]]; then # MySql is not running
+        echo "MySQL is not running"
+        return 0
+    fi
+
+    /usr/bin/kill -9 -f "${pid}"
+
+    if [[ $? -ne 0 ]]; then
+        return 1
+    fi
+
+    echo "Stopped MySQL with PID ${pid}"
+    return 0
+
+}
+
+
+case "${action}" in
+    start)
+            start_mysql
+            exit "$?"
+            ;;
+
+    stop)   stop_mysql
+            exit "$?"
+            ;;
+
+    *)     echo "Sorry, I don't understand '"${action}"' ";;
+esac

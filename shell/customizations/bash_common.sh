@@ -1,4 +1,18 @@
+#!/usr/bin/env bash
+
 PATH="$HOME/bin:$HOME/.bin:$HOME/.local/bin:${DOTFILES_SHELL_PATH}/bin:$PATH"
+
+if [ "$IS_UNIX" = true ]; then
+    PATH="${DOTFILES_SHELL_PATH}/customizations/linux/bin:$PATH"
+fi
+
+if [ "$IS_WIN" = true ]; then
+    PATH="${DOTFILES_SHELL_PATH}/customizations/windows/bin:$PATH"
+fi
+
+if [ "$IS_MAC" = true ]; then
+    PATH="${DOTFILES_SHELL_PATH}/customizations/mac/bin:$PATH"
+fi
 
 # Set proper ls colors
 export CLICOLOR=1

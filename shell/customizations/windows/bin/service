@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+serviceName="$1"
+action="$2"
+
+printUsage() {
+    echo "Usage: service [name] [start|stop|restart]"
+}
+
+if [ "$#" != 2 ] || [ -z "$serviceName" ] || [ -z "$action" ] ; then
+    printUsage
+    exit 1
+fi
+
+
+servicesPath="$(dirname $(dirname "$0"))/services"
+service="${servicesPath}/${serviceName}"
+
+
+if [ ! -f ${service} ]; then
+    echo "Service '${serviceName}' does not exists. "
+    available="$(ls ${servicesPath})"
+    echo "Services available: [ ${available} ]"
+
+    exit 1
+fi
+
+
+${service} ${action}
