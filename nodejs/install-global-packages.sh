@@ -4,14 +4,19 @@
 npm i -g \
     @types/node \
     babel-cli \
-    babel-cli \
+    babel-register \
     babel-preset-env \
     babel-preset-flow \
     flow-bin \
     http-server \
     npx \
     ts-node \
-    typescript
+    typescript \
+    tslint \
+    tslint-config-airbnb \
+    tslint-eslint-rules \
+    @angular/cli
+
 
 
 # install eslint as suggested by airbnb https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base

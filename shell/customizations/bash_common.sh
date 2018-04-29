@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-PATH="$HOME/bin:$HOME/.bin:$HOME/.local/bin:${DOTFILES_SHELL_PATH}/bin:$PATH"
-export NODE_PATH="$(cygpath -u "$(npm get prefix)/node_modules")"
+PATH="$HOME/bin:$HOME/.bin:$HOME/.local/bin:${DOTFILES_SHELL_PATH}/bin:${DOTFILES_PATH}/nodejs/bin:$PATH"
+export NODE_PATH="$(cygpath -u "$(npm -g root)")"
 
 if [ "$IS_UNIX" = true ]; then
     PATH="${DOTFILES_SHELL_PATH}/customizations/linux/bin:$PATH"

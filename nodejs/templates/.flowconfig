@@ -1,0 +1,14 @@
+[ignore]
+.*.vscode/.*
+.*/dist/.*
+.*/.temp/.*
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+
+[strict]

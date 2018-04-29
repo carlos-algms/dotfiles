@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cp ${DOTFILES_PATH}/nodejs/templates/.flowconfig ./.flowconfig
+cp ${DOTFILES_PATH}/nodejs/templates/.babelrc ./.babelrc
+
+
