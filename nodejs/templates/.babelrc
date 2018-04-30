@@ -1,0 +1,13 @@
+{
+  "presets": [
+    [
+      "c:/Program Files/nodejs/node_modules/babel-preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    "c:/Program Files/nodejs/node_modules/babel-preset-flow"
+  ]
+}

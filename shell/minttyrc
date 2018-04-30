@@ -1,3 +1,11 @@
 BoldAsFont=-1
 Columns=140
 Rows=20
+Transparency=high
+OpaqueWhenFocused=no
+Locale=pt_BR
+Charset=UTF-8
+Language=en_US
+BellType=0
+BellPopup=yes
+Printer=Microsoft Print to PDF
