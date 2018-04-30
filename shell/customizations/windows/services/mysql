@@ -30,7 +30,7 @@ stop_mysql() {
         return 0
     fi
 
-    /usr/bin/kill -9 -f "${pid}"
+    /bin/kill -9 -f "${pid}"
 
     if [[ $? -ne 0 ]]; then
         return 1

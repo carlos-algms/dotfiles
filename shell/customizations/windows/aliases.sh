@@ -1,1 +1,1 @@
-alias ps="/usr/bin/ps -W "
+alias ps="/bin/ps -W "
