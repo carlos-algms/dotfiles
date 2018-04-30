@@ -7,41 +7,20 @@
     "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,
-    "comment-format": [
-      true,
-      "check-space"
-    ],
-    "curly": true,
     "deprecation": {
       "severity": "warn"
     },
-    "eofline": true,
     "forin": true,
-    "import-blacklist": [
-      true,
-      "rxjs",
-      "rxjs/Rx"
-    ],
     "import-spacing": true,
-    "indent": [
-      true,
-      "spaces"
-    ],
     "interface-over-type-literal": true,
-    "label-position": true,
-    "max-line-length": [
-      true,
-      140
-    ],
-    "member-access": false,
     "member-ordering": [
       true,
       {
         "order": [
-          "static-field",
-          "instance-field",
-          "static-method",
-          "instance-method"
+          "public-static-field",
+          "public-instance-field",
+          "public-static-method",
+          "public-instance-method"
         ]
       }
     ],
@@ -55,50 +34,22 @@
       "timeEnd",
       "trace"
     ],
-    "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
     "no-empty": true,
     "no-empty-interface": true,
-    "no-eval": true,
     "no-inferrable-types": [
       true,
       "ignore-params"
     ],
     "no-misused-new": true,
-    "no-non-null-assertion": true,
     "no-shadowed-variable": true,
-    "no-string-literal": false,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unnecessary-initializer": true,
     "no-unused-expression": true,
     "no-use-before-declare": true,
-    "no-var-keyword": true,
-    "object-literal-sort-keys": false,
-    "one-line": [
-      true,
-      "check-open-brace",
-      "check-catch",
-      "check-else",
-      "check-whitespace"
-    ],
-    "prefer-const": true,
-    "quotemark": [
-      true,
-      "single",
-      "avoid-escape"
-    ],
-    "radix": true,
-    "semicolon": [
-      true,
-      "always"
-    ],
-    "triple-equals": [
-      true,
-      "allow-null-check"
-    ],
     "typedef-whitespace": [
       true,
       {
@@ -115,15 +66,6 @@
       "check-format",
       "ban-keywords"
     ],
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-separator",
-      "check-type"
-    ],
-    "no-unused-variable": true,
     "no-this-assignment": [
       true,
       {
@@ -142,34 +84,22 @@
     "no-default-export": true,
     "array-type": [true, "array"],
     "encoding": true,
-    "jsdoc-format": [true, "check-multiline-start"],
-    "newline-per-chained-call": false,
     "new-parens": true,
     "no-irregular-whitespace": true,
     "no-redundant-jsdoc": true,
     "no-unnecessary-callback-wrapper": true,
-    "number-literal-format": false,
     "prefer-method-signature": true,
     "prefer-template": [true, "allow-single-concat"],
-    "no-unnecessary-class": ["allow-empty-class", "allow-constructor-only"],
-
-
     "no-duplicate-parameter-names": true,
     "no-multiline-string": true,
     "no-typeof-undefined": true,
     "no-unnecessary-override": true,
     "prefer-type-cast": true,
-
-
-    "early-exit": false,
     "no-accessor-recursion": true,
     "no-collapsible-if": true,
     "no-unnecessary-else": true,
     "no-else-after-return": [true, "allow-else-if"],
     "no-static-this": true,
-
-
-
     "no-sparse-arrays": true,
     "ban": true,
     "no-invalid-this": true,
@@ -196,23 +126,9 @@
       "functions"
     ],
     "no-invalid-regexp": true,
-    "no-regex-spaces": true,
     "no-unexpected-multiline": true,
     "no-unsafe-finally": true,
     "use-isnan": true,
-    "valid-jsdoc": [
-      false,
-      {
-        "prefer": {
-        },
-        "requireReturn": false,
-        "requireParamDescription": false,
-        "requireReturnDescription": false,
-        "requireParamType": false,
-        "requireReturnType": false
-      }
-    ],
-    "valid-typeof": true,
     "no-multi-spaces": true,
     "ter-no-proto": true,
     "ter-no-script-url": true,
@@ -233,7 +149,7 @@
       true,
       {
         "blocks": "never",
-        "classes": "always",
+        "classes": "never",
         "switches": "never"
       }
     ],
@@ -244,6 +160,7 @@
       {
         "requireReturnForObjectLiteral": false
       }
-    ]
+    ],
+    "no-parameter-reassignment": true
   }
 }
