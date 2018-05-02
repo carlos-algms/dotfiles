@@ -7,12 +7,10 @@ export DOTFILES_VIM_PATH="$DOTFILES_PATH/vim"
 # identify OS
 IS_WIN=false;
 IS_UNIX=false;
-IS_MAC=false;
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     IS_UNIX=true;;
-    Darwin*)    IS_MAC=true;;
     CYGWIN*)    IS_WIN=true;;
     MINGW*)     IS_WIN=true;;
     *)          machine="UNKNOWN:${unameOut}"
@@ -20,7 +18,6 @@ esac
 
 export IS_WIN
 export IS_UNIX
-export IS_MAC
 
 # function to DRY
 sourceFiles() {
@@ -33,7 +30,7 @@ sourceFiles() {
 
 
 # load additional files stored into ~/.bash_extras to keep repo clean
-# it need to be the first to be loaded to override EVN or other configs
+# it need to be the first to be loaded to override ENV or other configs
 sourceFiles $HOME/.bash_extras
 
 customizationsFolder=${DOTFILES_SHELL_PATH}/customizations
@@ -51,12 +48,6 @@ fi
 # load UNIX/Server specific files
 if [ "$IS_UNIX" = true ]; then
     sourceFiles "$customizationsFolder/linux"
-fi
-
-
-# load MAC specific files
-if [ "$IS_MAC" = true ]; then
-    sourceFiles "$customizationsFolder/mac"
 fi
 
 # Load user specific aliases

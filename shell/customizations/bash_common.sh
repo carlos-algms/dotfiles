@@ -11,10 +11,6 @@ if [ "$IS_WIN" = true ]; then
     PATH="${DOTFILES_SHELL_PATH}/customizations/windows/bin:$PATH"
 fi
 
-if [ "$IS_MAC" = true ]; then
-    PATH="${DOTFILES_SHELL_PATH}/customizations/mac/bin:$PATH"
-fi
-
 # Set proper ls colors
 export CLICOLOR=1
 
