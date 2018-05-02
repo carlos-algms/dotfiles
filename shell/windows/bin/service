@@ -13,7 +13,7 @@ if [ "$#" -lt 2 ] || [ -z "$serviceName" ] || [ -z "$action" ] ; then
 fi
 
 
-servicesPath="$(dirname $(dirname "$0"))/services"
+servicesPath="${DOTFILES_SHELL_PATH}/windows/services"
 service="${servicesPath}/${serviceName}"
 
 

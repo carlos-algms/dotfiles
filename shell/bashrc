@@ -4,21 +4,6 @@ export DOTFILES_SHELL_PATH="$(dirname "$(readlink "$HOME/.bashrc")")"
 export DOTFILES_PATH="$(dirname "$DOTFILES_SHELL_PATH")"
 export DOTFILES_VIM_PATH="$DOTFILES_PATH/vim"
 
-# identify OS
-IS_WIN=false;
-IS_UNIX=false;
-
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     IS_UNIX=true;;
-    CYGWIN*)    IS_WIN=true;;
-    MINGW*)     IS_WIN=true;;
-    *)          machine="UNKNOWN:${unameOut}"
-esac
-
-export IS_WIN
-export IS_UNIX
-
 # function to DRY
 sourceFiles() {
     for f in $1/*.sh; do
@@ -28,26 +13,20 @@ sourceFiles() {
     done
 }
 
-
 # load additional files stored into ~/.bash_extras to keep repo clean
 # it need to be the first to be loaded to override ENV or other configs
 sourceFiles $HOME/.bash_extras
 
-customizationsFolder=${DOTFILES_SHELL_PATH}/customizations
-
-# load default customizations
-sourceFiles "$customizationsFolder"
+# Load common bash files
+sourceFiles "${DOTFILES_SHELL_PATH}/common"
 
 
-# load windows specific files
-if [ "$IS_WIN" = true ]; then
-    sourceFiles "$customizationsFolder/windows"
-fi
-
-
-# load UNIX/Server specific files
-if [ "$IS_UNIX" = true ]; then
-    sourceFiles "$customizationsFolder/linux"
+if [ ! -z "$WINDIR" ]; then
+    # Load windows specific bash files
+    sourceFiles "${DOTFILES_SHELL_PATH}/windows/bash"
+else
+    # Load Linux specific bash files
+    sourceFiles "${DOTFILES_SHELL_PATH}/linux/bash"
 fi
 
 # Load user specific aliases
