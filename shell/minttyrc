@@ -1,7 +1,7 @@
 BoldAsFont=-1
 Columns=140
 Rows=20
-Transparency=high
+Transparency=off
 OpaqueWhenFocused=no
 Locale=pt_BR
 Charset=UTF-8
