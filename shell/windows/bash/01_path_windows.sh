@@ -5,6 +5,3 @@ cleanPath="/mingw64/bin:/usr/local/bin:/usr/bin:/bin:/c/Windows/system32:/c/Wind
 PATH="$HOME/bin:$HOME/.bin:$HOME/.local/bin:${DOTFILES_SHELL_PATH}/windows/bin:${DOTFILES_SHELL_PATH}/bin:${cleanPath}"
 
 export NODE_PATH="/c/Program Files/nodejs/node_modules"
-
-export CYGWIN=winsymlinks:nativestrict
-export MSYS=winsymlinks:nativestrict
