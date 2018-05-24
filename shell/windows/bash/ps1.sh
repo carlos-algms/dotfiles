@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # export COLOR_NC='\[\e[0m\]' # No Color
 # export COLOR_BLACK='\[\e[0;30m\]'
 # export COLOR_BLUE='\[\e[0;34m\]'
@@ -20,7 +18,7 @@
 
 # get current branch in git repo
 function parse_git_branch() {
-    BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+    BRANCH=`git branch 2> /dev/null | /bin/sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
     if [ ! "${BRANCH}" == "" ]; then
         STAT=`parse_git_dirty`
         echo "${BRANCH}${STAT}"
@@ -83,10 +81,13 @@ function format_git_branch {
 # User @ Host
 PS1="\[\e[1;37;46m\]  \u@\h\[\e[0m\]"
 PS1="${PS1}\[\e[0;36;42m\]\[\e[0m\]"
+
 # current dir
 PS1="${PS1}\[\e[37;42m\]  \w\[\e[0m\]"
+
 # git
 PS1="${PS1}`format_git_branch`\[\e[0m\] "
+
 # new line
 PS1="${PS1}\nλ "
 
