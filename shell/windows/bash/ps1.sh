@@ -20,75 +20,76 @@
 function parse_git_branch() {
     BRANCH=`git branch 2> /dev/null | /bin/sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
     if [ ! "${BRANCH}" == "" ]; then
-        STAT=`parse_git_dirty`
-        echo "${BRANCH}${STAT}"
+        # STAT=`parse_git_dirty`
+        echo "${BRANCH}"
+        # echo "${BRANCH}${STAT}"
     else
         echo ""
     fi
 }
 
 # get current status of git repo
-function parse_git_dirty {
-    status=`git status 2>&1 | tee`
-    dirty=`echo -n "${status}" 2> /dev/null | grep "modified:" &> /dev/null; echo "$?"`
-    untracked=`echo -n "${status}" 2> /dev/null | grep "Untracked files" &> /dev/null; echo "$?"`
-    ahead=`echo -n "${status}" 2> /dev/null | grep "Your branch is ahead of" &> /dev/null; echo "$?"`
-    newfile=`echo -n "${status}" 2> /dev/null | grep "new file:" &> /dev/null; echo "$?"`
-    renamed=`echo -n "${status}" 2> /dev/null | grep "renamed:" &> /dev/null; echo "$?"`
-    deleted=`echo -n "${status}" 2> /dev/null | grep "deleted:" &> /dev/null; echo "$?"`
-    bits=''
+# function parse_git_dirty {
+#     status=`git status 2>&1 | tee`
+#     dirty=`echo -n "${status}" 2> /dev/null | grep "modified:" &> /dev/null; echo "$?"`
+#     untracked=`echo -n "${status}" 2> /dev/null | grep "Untracked files" &> /dev/null; echo "$?"`
+#     ahead=`echo -n "${status}" 2> /dev/null | grep "Your branch is ahead of" &> /dev/null; echo "$?"`
+#     newfile=`echo -n "${status}" 2> /dev/null | grep "new file:" &> /dev/null; echo "$?"`
+#     renamed=`echo -n "${status}" 2> /dev/null | grep "renamed:" &> /dev/null; echo "$?"`
+#     deleted=`echo -n "${status}" 2> /dev/null | grep "deleted:" &> /dev/null; echo "$?"`
+#     bits=''
 
-    if [ "${renamed}" == "0" ]; then
-        bits=">${bits}"
-    fi
-    if [ "${ahead}" == "0" ]; then
-        bits="*${bits}"
-    fi
-    if [ "${newfile}" == "0" ]; then
-        bits="+${bits}"
-    fi
-    if [ "${untracked}" == "0" ]; then
-        bits="?${bits}"
-    fi
-    if [ "${deleted}" == "0" ]; then
-        bits="x${bits}"
-    fi
-    if [ "${dirty}" == "0" ]; then
-        bits="!${bits}"
-    fi
+#     if [ "${renamed}" == "0" ]; then
+#         bits=">${bits}"
+#     fi
+#     if [ "${ahead}" == "0" ]; then
+#         bits="*${bits}"
+#     fi
+#     if [ "${newfile}" == "0" ]; then
+#         bits="+${bits}"
+#     fi
+#     if [ "${untracked}" == "0" ]; then
+#         bits="?${bits}"
+#     fi
+#     if [ "${deleted}" == "0" ]; then
+#         bits="x${bits}"
+#     fi
+#     if [ "${dirty}" == "0" ]; then
+#         bits="!${bits}"
+#     fi
 
-    if [ ! "${bits}" == "" ]; then
-        echo " ${bits}"
-    else
-        echo ""
-    fi
-}
+#     if [ ! "${bits}" == "" ]; then
+#         echo " ${bits}"
+#     else
+#         echo ""
+#     fi
+# }
 
 
 function format_git_branch {
     branch="$(parse_git_branch)"
 
     if [ "${branch}" == "" ]; then
-        branch="\[\e[32m\]"
+        branch="\e[32m\e[0m"
     else
-        branch="\[\e[32;5;43m\]\[\e[0m\]\[\e[30;5;43m\]  ${branch} \[\e[0m\]"
-        branch="${branch}\[\e[1;33m\]\[\e[0m\]"
+        branch="\e[32;5;43m\e[0m\e[30;5;43m  ${branch} \e[0m"
+        branch="${branch}\e[1;33m\e[0m"
     fi
 
-    echo "$branch";
+    echo -e "$branch";
 }
 
 # User @ Host
-PS1="\[\e[1;37;46m\]  \u@\h\[\e[0m\]"
-PS1="${PS1}\[\e[0;36;42m\]\[\e[0m\]"
+PS1="\n\e[1;37;46m  \u@\h\e[0m"
+PS1="${PS1}\e[0;36;42m\e[0m"
 
 # current dir
-PS1="${PS1}\[\e[37;42m\]  \w\[\e[0m\]"
+PS1="${PS1}\e[37;42m  \w\e[0m"
 
 # git
-PS1="${PS1}`format_git_branch`\[\e[0m\] "
+PS1="${PS1}"'`format_git_branch`'
 
 # new line
-PS1="${PS1}\nλ "
+PS1="\e[0m${PS1}\nλ "
 
 export PS1;
