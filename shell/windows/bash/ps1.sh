@@ -75,7 +75,7 @@ function format_git_branch {
         branch="${branch}\[\e[1;33m\]\[\e[0m\]"
     fi
 
-    echo $branch;
+    echo "$branch";
 }
 
 # User @ Host
