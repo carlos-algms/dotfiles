@@ -9,3 +9,7 @@ Language=en_US
 BellType=0
 BellPopup=yes
 Printer=Microsoft Print to PDF
+Font=Hack Nerd Font Mono
+Term=xterm-256color
+FontSmoothing=full
+AllowBlinking=yes
