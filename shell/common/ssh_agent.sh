@@ -1,7 +1,7 @@
 export SSH_ENV="${HOME}/.ssh/environment"
 
 function start_agent {
-    echo "Initialising new SSH agent..."
+    echo "DOTFILES is initialising new SSH agent..."
 
     if [ ! -d "${HOME}/.ssh" ]; then
         echo "Folder '${HOME}/.ssh' does not exists, please create."
