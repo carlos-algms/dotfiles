@@ -39,7 +39,7 @@ if [ -f ~/.bash_functions ]; then
     source ~/.bash_functions
 fi
 
-# Load user specific configurations
+# Load custom configuration
 if [ -f ~/.dotfilesrc ]; then
     source ~/.dotfilesrc
 fi
