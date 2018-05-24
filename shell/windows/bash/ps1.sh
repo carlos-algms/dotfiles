@@ -81,10 +81,10 @@ function format_git_branch {
 }
 
 # User @ Host
-PS1="\[\e[1;37;46m\] \u@\h\[\e[0m\]"
+PS1="\[\e[1;37;46m\]  \u@\h\[\e[0m\]"
 PS1="${PS1}\[\e[0;36;42m\]\[\e[0m\]"
 # current dir
-PS1="${PS1}\[\e[37;42m\]\w\[\e[0m\]"
+PS1="${PS1}\[\e[37;42m\]  \w\[\e[0m\]"
 # git
 PS1="${PS1}`format_git_branch`\[\e[0m\] "
 # new line
