@@ -72,24 +72,38 @@ function format_git_branch {
     if [ "${branch}" == "" ]; then
         branch="\e[32m\e[0m"
     else
-        branch="\e[32;5;43m\e[0m\e[30;5;43m  ${branch} \e[0m"
+        branch="\e[32;5;43m\e[0m\e[0;30;5;43m  ${branch} \e[0m"
         branch="${branch}\e[1;33m\e[0m"
     fi
 
     echo -e "$branch";
 }
 
+
 # User @ Host
-PS1="\n\e[1;37;46m  \u@\h\e[0m"
-PS1="${PS1}\e[0;36;42m\e[0m"
+FANCY_PS1="\n\e[1;37;46m  \u@\h\e[0m"
+FANCY_PS1="${FANCY_PS1}\e[0;36;42m\e[0m"
 
 # current dir
-PS1="${PS1}\e[37;42m  \w\e[0m"
+FANCY_PS1="${FANCY_PS1}\e[1;37;42m  \w\e[0m"
 
 # git
-PS1="${PS1}"'`format_git_branch`'
+FANCY_PS1="${FANCY_PS1}"'`format_git_branch`'
 
 # new line
-PS1="\e[0m${PS1}\nλ "
+FANCY_PS1="\e[0m${FANCY_PS1}\nλ "
+
+export FANCY_PS1;
+
+ORIGINAL_PS1="$PS1"
+PS1="$FANCY_PS1"
 
 export PS1;
+
+function restore_ps1 {
+    PS1="$ORIGINAL_PS1"
+}
+
+function fancy_ps1 {
+    PS1="$FANCY_PS1"
+}
