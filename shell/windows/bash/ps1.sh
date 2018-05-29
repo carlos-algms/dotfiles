@@ -79,6 +79,14 @@ function format_git_branch {
     echo -e "$branch";
 }
 
+# Start trying to load the git bash-completions
+# If /bin/bash git-completion is loaded automatically
+# If /usr/bin/bash no
+type __git_complete > /dev/null 2>&1
+
+if [ ! $? -eq 0 ]; then
+    source /mingw64/share/git/completion/git-completion.bash
+fi
 
 # User @ Host
 FANCY_PS1="\n\e[1;37;46m  \u@\h\e[0m"
