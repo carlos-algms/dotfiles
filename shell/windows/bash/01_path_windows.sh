@@ -1,9 +1,28 @@
 
 export ORIGINAL_PATH="$PATH"
-cleanPath="/usr/local/bin:/usr/bin:/bin:/mingw64/bin:/c/Windows/system32:/c/Windows:/c/Windows/System32/WindowsPowerShell/v1.0"
-cleanPath="${cleanPath}:${HOME}/AppData/Roaming/nvm:/c/Program Files/nodejs:/cmd:/c/Program Files/Microsoft VS Code/bin";
-cleanPath="${cleanPath}:/usr/bin/vendor_perl:/usr/bin/core_perl"
 
-PATH="$HOME/bin:$HOME/.bin:$HOME/.local/bin:${DOTFILES_SHELL_PATH}/windows/bin:${DOTFILES_SHELL_PATH}/bin:${cleanPath}"
+cleanPath="$HOME/bin"
+cleanPath="${cleanPath}:$HOME/.bin"
+cleanPath="${cleanPath}:$HOME/.local/bin"
+cleanPath="${cleanPath}:${DOTFILES_SHELL_PATH}/windows/bin"
+cleanPath="${cleanPath}:${DOTFILES_SHELL_PATH}/bin"
 
+cleanPath="${cleanPath}:/usr/local/bin"
+cleanPath="${cleanPath}:/usr/bin"
+cleanPath="${cleanPath}:/bin"
+cleanPath="${cleanPath}:/mingw64/bin"
+cleanPath="${cleanPath}:/cmd"
+cleanPath="${cleanPath}:/c/Program Files/nodejs"
+cleanPath="${cleanPath}:/usr/bin/vendor_perl"
+cleanPath="${cleanPath}:/usr/bin/core_perl"
+
+cleanPath="${cleanPath}:/c/Program Files/nodejs";
+cleanPath="${cleanPath}:$HOME/AppData/Local/Programs/Microsoft VS Code/bin";
+cleanPath="${cleanPath}:/c/Program Files (x86)/Yarn/bin"
+
+cleanPath="${cleanPath}:/c/Windows/system32"
+cleanPath="${cleanPath}:/c/Windows"
+cleanPath="${cleanPath}:/c/Windows/System32/WindowsPowerShell/v1.0"
+
+export PATH="${cleanPath}"
 export NODE_PATH="/c/Program Files/nodejs/node_modules"
