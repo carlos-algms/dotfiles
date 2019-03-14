@@ -1,3 +1,6 @@
+if [ ! -z "$IS_MAC" ]; then
+    return 0
+fi
 
 # append to history
 shopt -s histappend

@@ -1,3 +1,9 @@
+if [ ! -z "$IS_MAC" ]; then
+    return 0
+fi
+
+e_error "Should not load"
+
 # Set proper ls colors
 export CLICOLOR=1
 
@@ -26,4 +32,3 @@ color_prompt=yes
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 fi
-

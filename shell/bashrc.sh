@@ -7,6 +7,10 @@ if [ -z "${DOTFILES_PATH}" ]; then
 
     # function to DRY
     sourceFiles() {
+        if [ ! -d "$1" ]; then
+            return 1
+        fi
+
         for f in $1/*.sh; do
             if [ -f "$f" ]; then
                 source "$f"
@@ -21,13 +25,17 @@ if [ -z "${DOTFILES_PATH}" ]; then
     # Load common bash files
     sourceFiles "${DOTFILES_SHELL_PATH}/common"
 
-
-    if [ ! -z "$WINDIR" ]; then
+    if [[ ! -z "$IS_WIN" ]]; then
         # Load windows specific bash files
         sourceFiles "${DOTFILES_SHELL_PATH}/windows/bash"
-    else
+    elif [[ ! -z "$IS_MAC" ]]; then
+        # Load mac specific bash files
+        sourceFiles "${DOTFILES_SHELL_PATH}/mac/bash"
+    elif [[ ! -z "$IS_LINUX" ]]; then
         # Load Linux specific bash files
         sourceFiles "${DOTFILES_SHELL_PATH}/linux/bash"
+    else
+        e_error "No OS identified to source files"
     fi
 
     # Load user specific aliases
