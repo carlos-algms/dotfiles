@@ -30,7 +30,7 @@ if [ -z "${DOTFILES_PATH}" ]; then
         sourceFiles "${DOTFILES_SHELL_PATH}/windows/bash"
     elif [[ ! -z "$IS_MAC" ]]; then
         # Load mac specific bash files
-        sourceFiles "${DOTFILES_SHELL_PATH}/mac/bash"
+        sourceFiles "${DOTFILES_SHELL_PATH}/macos/bash"
     elif [[ ! -z "$IS_LINUX" ]]; then
         # Load Linux specific bash files
         sourceFiles "${DOTFILES_SHELL_PATH}/linux/bash"

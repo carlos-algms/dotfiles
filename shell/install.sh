@@ -9,7 +9,7 @@ source "${SCRIPT_DIR}/common/01_logging.sh"
 if [[ ! -z "$IS_WIN" ]]; then
     "${SCRIPT_DIR}/windows/install-windows.sh"
 elif [[ ! -z "$IS_MAC" ]]; then
-    "${SCRIPT_DIR}/mac/install-mac.sh"
+    "${SCRIPT_DIR}/macos/install-mac.sh"
 elif [[ ! -z "$IS_LINUX" ]]; then
     "${SCRIPT_DIR}/linux/install-linux.sh"
 else
@@ -47,4 +47,4 @@ fi
 # Unix needs to add execution rights
 chmod u+x $SCRIPT_DIR/bin/*
 chmod u+x $SCRIPT_DIR/linux/bin/*
-chmod u+x $SCRIPT_DIR/mac/bin/*
+chmod u+x $SCRIPT_DIR/macos/bin/*
