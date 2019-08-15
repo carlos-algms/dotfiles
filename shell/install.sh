@@ -37,7 +37,6 @@ e_header "Linking config files"
 
 ln -snf $SCRIPT_DIR/bashrc.sh              $HOME/.bash_profile
 ln -snf $SCRIPT_DIR/bashrc.sh              $HOME/.bashrc
-ln -snf $SCRIPT_DIR/zshrc.sh               $HOME/.zshrc
 
 # Link mintTTY config file only for windows
 if [ ! -z "$IS_WIN" ]; then
