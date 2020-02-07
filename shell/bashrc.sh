@@ -1,6 +1,6 @@
 # Avoid re-source files when starting
-if [ -z "${DOTFILES_PATH}" ]; then
-
+# Need to measure impact on windows and linux, but on Mac it was not working if you start a new shell session
+# if [ -z "${DOTFILES_PATH}" ]; then
     export DOTFILES_SHELL_PATH="$(dirname "$(readlink "$HOME/.bashrc")")"
     export DOTFILES_PATH="$(dirname "$DOTFILES_SHELL_PATH")"
     export DOTFILES_VIM_PATH="$DOTFILES_PATH/vim"
@@ -53,4 +53,4 @@ if [ -z "${DOTFILES_PATH}" ]; then
         source ~/.dotfilesrc
     fi
 
-fi
+# fi

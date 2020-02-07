@@ -2,7 +2,9 @@ if [ ! -z "$IS_MAC" ]; then
     return 0
 fi
 
-e_error "Should not load"
+if [[ "$SHELL" =~ zsh$ ]]; then
+    return 0
+fi
 
 # Set proper ls colors
 export CLICOLOR=1
