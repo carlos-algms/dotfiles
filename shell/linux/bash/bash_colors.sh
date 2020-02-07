@@ -1,4 +1,4 @@
-if [! -z "$IS_ZSH"]; then
+if [ ! -z "$IS_ZSH" ]; then
     return 0
 fi
 
