@@ -1,8 +1,4 @@
-if [ ! -z "$IS_MAC" ]; then
-    return 0
-fi
-
-if [[ "$SHELL" =~ zsh$ ]]; then
+if [ ! -z "$IS_MAC" ] || [! -z "$IS_ZSH"]; then
     return 0
 fi
 

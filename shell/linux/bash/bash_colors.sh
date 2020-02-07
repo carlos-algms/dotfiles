@@ -1,4 +1,4 @@
-if [[ "$SHELL" =~ zsh$ ]]; then
+if [! -z "$IS_ZSH"]; then
     return 0
 fi
 
