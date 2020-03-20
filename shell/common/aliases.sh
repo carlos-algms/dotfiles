@@ -10,3 +10,8 @@ alias _find='$(which find) . ! -path "**node_modules/**" ! -path "**.vscode/**" 
 alias ff='_find -type f -name '
 
 alias search='ack --context=2 --ignore-dir=.vscode --ignore-dir=node_modules --ignore-dir=vendor '
+
+alias yf="yarn --frozen-lockfile "
+alias yff="yf --force "
+
+alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist'"
