@@ -16,7 +16,6 @@ cleanPath="${cleanPath}:/c/Program Files/nodejs"
 cleanPath="${cleanPath}:/usr/bin/vendor_perl"
 cleanPath="${cleanPath}:/usr/bin/core_perl"
 
-cleanPath="${cleanPath}:/c/Program Files/nodejs";
 cleanPath="${cleanPath}:$HOME/AppData/Local/Programs/Microsoft VS Code/bin";
 cleanPath="${cleanPath}:/c/Program Files (x86)/Yarn/bin"
 
