@@ -43,7 +43,7 @@ FANCY_PS1="\n"
 # FANCY_PS1="${FANCY_PS1}\e[0;36;42m\e[0m"
 
 # current dir
-FANCY_PS1="${FANCY_PS1}\e[1;37;42m  \w\e[0m"
+FANCY_PS1="${FANCY_PS1}\e[1;37;42m \w\e[0m"
 
 # git
 FANCY_PS1="${FANCY_PS1}"'`format_git_branch`'
