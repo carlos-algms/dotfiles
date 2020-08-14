@@ -20,6 +20,7 @@ cleanPath="${cleanPath}:$HOME/AppData/Local/Programs/Microsoft VS Code/bin";
 cleanPath="${cleanPath}:/c/Program Files (x86)/Yarn/bin"
 
 cleanPath="${cleanPath}:/c/Windows/system32"
+cleanPath="${cleanPath}:/c/Windows/System32/wbem"
 cleanPath="${cleanPath}:/c/Windows"
 cleanPath="${cleanPath}:/c/Windows/System32/WindowsPowerShell/v1.0"
 
