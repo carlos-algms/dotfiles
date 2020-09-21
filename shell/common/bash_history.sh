@@ -20,5 +20,8 @@ if [ -x "$(command -v setopt)" ] || [ ! -z "$(command -v setopt)" ] ; then
 fi
 
 # Ignore duplicates, ls without options and builtin commands
-HISTCONTROL=ignoredups
-export HISTIGNORE="&:ls:[bf]g:exit:clear:ll:la"
+export HISTCONTROL=ignoredups
+export HISTIGNORE="&:ls:[bf]g:exit:clear:ll:la:[ \t]*"
+
+# zsh
+export HISTORY_IGNORE="(ls|pwd|exit|clear|ll|ls|cd ..|cd -)"
