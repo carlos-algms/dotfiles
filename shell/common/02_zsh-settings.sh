@@ -1,6 +1,6 @@
 IS_ZSH=""
 
-if [[ "$SHELL" =~ zsh$ ]]; then
+if [[ -n "$ZSH_VERSION" ]]; then
     IS_ZSH=true
     export PS1=$'\n'"$PS1"$'\n'"λ "
     ### Allow use keyboard to navigate
