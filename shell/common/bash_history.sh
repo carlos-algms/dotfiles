@@ -1,7 +1,7 @@
 # TODO need to check if it is properly working on Win and Linux
 if [ -x "$(command -v shopt)" ] || [ ! -z "$(command -v shopt)" ] ; then
     # append to history
-    shopt -s histappend
+    # shopt -s histappend
     # Combine multiline commands into one in history
     shopt -s cmdhist
     # Do not autocomplete when accidentally pressing Tab on an empty line.
@@ -17,6 +17,7 @@ if [ -x "$(command -v setopt)" ] || [ ! -z "$(command -v setopt)" ] ; then
     setopt HIST_FIND_NO_DUPS
     setopt HIST_SAVE_NO_DUPS
     setopt HIST_REDUCE_BLANKS
+    unsetopt share_history
 fi
 
 # Ignore duplicates, ls without options and builtin commands
