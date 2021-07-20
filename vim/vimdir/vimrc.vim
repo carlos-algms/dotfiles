@@ -4,10 +4,13 @@ set runtimepath^=$DOTFILES_VIM_PATH/vimdir
 
 " Automate plug.vim installation
 if empty(glob(VIMDIR . '/autoload/plug.vim'))
-  silent !curl -fLo $DOTFILES_VIM_PATH/vimdir/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+  silent execute '!curl -fLo '.VIMDIR.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 endif
+
+" Run PlugInstall if there are missing plugins
+autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+  \| PlugInstall --sync | source $MYVIMRC
+\| endif
 
 " install plugins
 call plug#begin(VIMDIR . '/plugged')
