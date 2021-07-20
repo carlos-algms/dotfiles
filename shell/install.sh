@@ -14,6 +14,7 @@ elif [[ ! -z "$IS_LINUX" ]]; then
     "${SCRIPT_DIR}/linux/install-linux.sh"
 else
     e_error "No OS identified to install"
+    exit 1
 fi
 
 
@@ -27,10 +28,6 @@ fi
 
 if [ -f $HOME/.bashrc ]; then
     mv $HOME/.bashrc "$HOME/.bashrc-${TODAY}"
-fi
-
-if [ -f $HOME/.zshrc ]; then
-    mv $HOME/.zshrc "$HOME/.zshrc-${TODAY}"
 fi
 
 e_header "Linking config files"
