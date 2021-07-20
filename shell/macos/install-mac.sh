@@ -21,7 +21,7 @@ fi
 e_header "Updating Homebrew"
 brew doctor
 brew update
-brew install coreutils wget
+brew install coreutils wget git
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
     e_success "oh-my-zsh is already installed"
