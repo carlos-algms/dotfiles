@@ -1,23 +1,17 @@
-
 export ORIGINAL_PATH="$PATH"
 
-cleanPath="$HOME/bin"
-cleanPath="${cleanPath}:$HOME/.bin"
-cleanPath="${cleanPath}:$HOME/.local/bin"
-cleanPath="${cleanPath}:${DOTFILES_SHELL_PATH}/windows/bin"
-cleanPath="${cleanPath}:${DOTFILES_SHELL_PATH}/bin"
+### Less important paths on the top
+enhancedPath="${PATH}";
 
-cleanPath="${cleanPath}:/usr/local/bin"
-cleanPath="${cleanPath}:/usr/bin"
-cleanPath="${cleanPath}:/bin"
-cleanPath="${cleanPath}:/mingw64/bin"
-cleanPath="${cleanPath}:/cmd"
-cleanPath="${cleanPath}:/usr/bin/vendor_perl"
-cleanPath="${cleanPath}:/usr/bin/core_perl"
+# for some reason git-sdk was not including this automatically
+enhancedPath="/mingw64/bin:${enhancedPath}"
+enhancedPath="/cmd:${enhancedPath}"
 
-cleanPath="${cleanPath}:/c/Windows/system32"
-cleanPath="${cleanPath}:/c/Windows/System32/wbem"
-cleanPath="${cleanPath}:/c/Windows"
-cleanPath="${cleanPath}:/c/Windows/System32/WindowsPowerShell/v1.0"
 
-export PATH="${cleanPath}"
+enhancedPath="${DOTFILES_SHELL_PATH}/bin:${enhancedPath}"
+enhancedPath="${DOTFILES_SHELL_PATH}/windows/bin:${enhancedPath}"
+enhancedPath="$HOME/.local/bin:${enhancedPath}"
+enhancedPath="$HOME/.bin:${enhancedPath}"
+
+
+export PATH="${enhancedPath}"
