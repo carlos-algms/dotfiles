@@ -8,6 +8,7 @@ enhancedPath="/mingw64/bin:${enhancedPath}"
 enhancedPath="/cmd:${enhancedPath}"
 
 
+enhancedPath="/mingw64/libexec/git-core:${enhancedPath}"
 enhancedPath="${DOTFILES_SHELL_PATH}/bin:${enhancedPath}"
 enhancedPath="${DOTFILES_SHELL_PATH}/windows/bin:${enhancedPath}"
 enhancedPath="$HOME/.local/bin:${enhancedPath}"
