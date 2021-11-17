@@ -8,6 +8,7 @@ extract () {
         case $1 in
             *.tar.bz2)   tar xvjf $1 -C "$target"   ;;
             *.tar.gz)    tar xvzf $1 -C "$target"   ;;
+            *.tar.xz)    tar xJf $1 -C "$target"    ;;
             *.bz2)       bunzip2 $1                 ;;
             *.rar)       rar x $1 "$target"         ;;
             *.gz)        gunzip $1                  ;;
