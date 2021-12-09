@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-/bin/grep -nH -A5 -B5 --color=auto "$@"

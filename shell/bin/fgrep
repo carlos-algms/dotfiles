@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-/bin/fgrep --color=auto "$@"
