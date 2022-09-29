@@ -22,7 +22,7 @@ fi
 
 # Ignore duplicates, ls without options and builtin commands
 export HISTCONTROL=ignoredups
-export HISTIGNORE="&:ls:[bf]g:exit:clear:ll:la:[ \t]*"
+export HISTIGNORE="&:ls:[bf]g:exit:clear:ll:la:lsa:[ \t]*"
 
 # zsh
-export HISTORY_IGNORE="(ls|pwd|exit|clear|ll|ls|cd ..|cd -)"
+export HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -)"

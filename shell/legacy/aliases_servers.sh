@@ -11,3 +11,5 @@ alias a2-stop="sudo service apache2 stop"
 alias php5-restart="sudo systemctl restart php5.6-fpm.service"
 alias php7-restart="sudo systemctl restart php7.1-fpm.service"
 alias php-restart="sudo systemctl restart php5.6-fpm.service php7.1-fpm.service"
+
+alias restart-http-server="sudo systemctl restart nginx.service php7.0-fpm.service php5.6-fpm.service"

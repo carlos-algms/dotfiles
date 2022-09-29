@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-sudo systemctl restart nginx.service php7.0-fpm.service php5.6-fpm.service
