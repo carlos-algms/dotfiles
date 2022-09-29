@@ -1,19 +1,9 @@
-let VIMDIR=expand($DOTFILES_VIM_PATH) . "/vimdir"
+" https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation
+" The installation is being done only once now in the install script
 
-set runtimepath^=$DOTFILES_VIM_PATH/vimdir
 
-" Automate plug.vim installation
-if empty(glob(VIMDIR . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.VIMDIR.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-endif
-
-" Run PlugInstall if there are missing plugins
-autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-  \| PlugInstall --sync | source $MYVIMRC
-\| endif
-
-" install plugins
-call plug#begin(VIMDIR . '/plugged')
+" load plugins
+call plug#begin()
 
 Plug 'sheerun/vim-polyglot'
 Plug 'itchyny/lightline.vim'
@@ -67,6 +57,9 @@ let g:lightline = {
   \ 'colorscheme': 'onedark',
   \ }
 
+set cursorline
+
+"  if ! empty(glob('~/.vim/plugged/onedark.vim'))
 " colorscheme koehler
 colorscheme onedark
-set cursorline
+"  endif
