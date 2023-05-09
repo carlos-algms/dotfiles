@@ -8,6 +8,7 @@ source "${SCRIPT_DIR}/common/01_logging.sh"
 if [[ ! "$(type brew)" ]]; then
     e_header "Installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 else
     e_success "Brew is already installed"
 fi
@@ -18,10 +19,10 @@ if [ ! "$(type brew)" ]; then
     exit 1
 fi
 
-e_header "Updating Homebrew"
+# e_header "Updating Homebrew"
 brew doctor
 brew update
-brew install coreutils wget git
+brew install coreutils wget git watch
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
     e_success "oh-my-zsh is already installed"
@@ -30,21 +31,12 @@ else
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-# Hide username from ZSH
-CONFIG_STR="DEFAULT_USER=`whoami`"
+e_header "Linking custom zsh config file"
 
-grep -q -F "${CONFIG_STR}" ~/.zshrc
+ln -sf `realpath $SCRIPT_DIR/custom.zsh` $HOME/.oh-my-zsh/custom/custom.zsh
 
-if [ $? -ne 0 ]; then
-    e_header "Hiding username from PS1"
-    echo $'\n'"$CONFIG_STR"$'\n' >> ~/.zshrc
-fi
+e_header "Linking custom zsh agnoster with λ theme"
 
+ln -sf `realpath $SCRIPT_DIR/zsh/themes/agnoster.zsh-theme` ~/.oh-my-zsh/custom/themes/agnoster.zsh-theme
 
-# include a line to source common shell configs
-grep -q -F 'source ~/.bashrc' ~/.zshrc
-
-if [ $? -ne 0 ]; then
-    e_header "Including source to bashrc into zshrc"
-    echo -e $'\n'"source ~/.bashrc"$'\n\n' >> ~/.zshrc
-fi
+e_success "Done installing 🍎 Mac dotfiles"

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# It needs to receive the path as argument, as at this point, we don't know which SHELL is being used
+DOTFILES_SHELL_PATH=$1
+
+# function to DRY
+sourceFiles() {
+    if [ ! -d "$1" ]; then
+        return 1
+    fi
+
+    for f in `find $1 -type f -name "*.sh"`; do
+        if [ -f "$f" ]; then
+            . "$f"
+        fi
+    done
+}
+
+# # load additional files stored into ~/.bash_extras to keep repo clean
+# # it need to be the first to be loaded to override ENV or other configs
+# sourceFiles $HOME/.bash_extras
+
+# Load common bash files
+sourceFiles "${DOTFILES_SHELL_PATH}/common"
+
+if [[ ! -z "$IS_WIN" ]]; then
+    # Load windows specific bash files
+    sourceFiles "${DOTFILES_SHELL_PATH}/windows/bash"
+elif [[ ! -z "$IS_MAC" ]]; then
+    # Load mac specific bash files
+    sourceFiles "${DOTFILES_SHELL_PATH}/macos/bash"
+elif [[ ! -z "$IS_LINUX" ]]; then
+    # Load Linux specific bash files
+    sourceFiles "${DOTFILES_SHELL_PATH}/linux/bash"
+else
+    e_error "No OS identified to source files"
+    exit 1
+fi
+
+unset sourceFiles
