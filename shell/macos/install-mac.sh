@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd )"
+local shellDir="`dirname ${0:a:h}`"
 
-source "${SCRIPT_DIR}/common/01_logging.sh"
+source "$shellDir/common/01_logging.sh"
 
 # Install Homebrew.
 if [[ ! "$(type brew)" ]]; then
@@ -23,20 +23,5 @@ fi
 brew doctor
 brew update
 brew install coreutils wget git watch
-
-if [ -d "$HOME/.oh-my-zsh" ]; then
-    e_success "oh-my-zsh is already installed"
-else
-    e_header "Installing oh-my-zsh"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
-
-e_header "Linking custom zsh config file"
-
-ln -sf `realpath $SCRIPT_DIR/custom.zsh` $HOME/.oh-my-zsh/custom/custom.zsh
-
-e_header "Linking custom zsh agnoster with λ theme"
-
-ln -sf `realpath $SCRIPT_DIR/zsh/themes/agnoster.zsh-theme` ~/.oh-my-zsh/custom/themes/agnoster.zsh-theme
 
 e_success "Done installing 🍎 Mac dotfiles"

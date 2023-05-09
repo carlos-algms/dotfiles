@@ -28,9 +28,7 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -)"
 
-
-thisFilePath=`realpath ${0:a}`
-
-DOTFILES_SHELL_PATH="$(dirname $thisFilePath)"
+export DOTFILES_SHELL_PATH="$(dirname $(dirname `readlink -f ${0:a}`))"
+export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
 . $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH

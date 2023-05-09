@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# It needs to receive the path as argument, as at this point, we don't know which SHELL is being used
-DOTFILES_SHELL_PATH=$1
-
 # function to DRY
 sourceFiles() {
     if [ ! -d "$1" ]; then

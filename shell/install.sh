@@ -12,8 +12,10 @@ if [[ ! -z "$IS_WIN" ]]; then
     ln -snf $SCRIPT_DIR/minttyrc $HOME/.minttyrc
 elif [[ ! -z "$IS_MAC" ]]; then
     "${SCRIPT_DIR}/macos/install-mac.sh"
+    "${SCRIPT_DIR}/zsh/install-zsh.sh"
 elif [[ ! -z "$IS_LINUX" ]]; then
     "${SCRIPT_DIR}/linux/install-linux.sh"
+    "${SCRIPT_DIR}/zsh/install-zsh.sh"
 else
     e_error "No OS identified to install"
     exit 1
