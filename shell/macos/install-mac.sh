@@ -24,4 +24,8 @@ brew doctor
 brew update
 brew install coreutils wget git watch
 
+brew tap homebrew/cask-fonts
+brew install --cask font-hack-nerd-font
+brew install --cask the-unarchiver
+
 e_success "Done installing 🍎 Mac dotfiles"
