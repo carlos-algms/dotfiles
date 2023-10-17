@@ -2,4 +2,5 @@
 alias gbda='git branch | grep -v master | xargs git branch -D'
 
 # override git commit command to remove --verbose
-alias gc="git commit"
+## commenting for now to test Copilot suggestions
+# alias gc="git commit"
