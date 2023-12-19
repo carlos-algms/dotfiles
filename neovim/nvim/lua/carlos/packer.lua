@@ -22,6 +22,8 @@ return require('packer').startup(function(use)
         end
     })
 
+    use { "catppuccin/nvim", as = "catppuccin" }
+
 
     use({
         'joshdick/onedark.vim',
@@ -38,6 +40,7 @@ return require('packer').startup(function(use)
     })
 
     use('nvim-lua/plenary.nvim')
+
     use({
         'ThePrimeagen/harpoon',
         diabled = vscode
@@ -69,6 +72,26 @@ return require('packer').startup(function(use)
     use('github/copilot.vim')
 
     use('machakann/vim-sandwich')
+
+-- from: https://www.youtube.com/watch?v=J9yqSdvAKXY&list=TLPQMTkxMjIwMjMeWDFsn3jtJw&index=3
+    use("tpope/vim-commentary")
+    use("mattn/emmet-vim")
+    use("nvim-tree/nvim-tree.lua")
+    use("lewis6991/gitsigns.nvim")
+    use("tpope/vim-fugitive")
+    use("tpope/vim-surround")
+    use("hrsh7th/nvim-cmp")
+    use("hrsh7th/cmp-nvim-lsp")
+    use("L3MON4D3/LuaSnip")
+    use("saadparwaiz1/cmp_luasnip")
+    use("rafamadriz/friendly-snippets")
+    use {
+        "nvim-lualine/lualine.nvim"
+        requires = {
+            'nvim-tree/nvim-web-devicons', opt = true
+        }
+    }
+
 
 end)
 
