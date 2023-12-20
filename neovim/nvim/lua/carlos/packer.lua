@@ -75,22 +75,36 @@ return require("packer").startup(function(use)
     use({ "neovim/nvim-lspconfig" })
     use({ "hrsh7th/nvim-cmp" })
     use({ "hrsh7th/cmp-nvim-lsp" })
-    use({ "L3MON4D3/LuaSnip" })
+    use({
+        "L3MON4D3/LuaSnip",
+        -- follow latest release.
+        tag = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+        -- install jsregexp (optional!:).
+        run = "make install_jsregexp",
+    })
 
     use({
         "mfussenegger/nvim-dap",
-        -- event = "VeryLazy",
     })
 
     use({
         "rcarriga/nvim-dap-ui",
-        -- event = "VeryLazy",
+        dependencies = "mfussenegger/nvim-dap",
+    })
+
+    use({
+        "theHamsta/nvim-dap-virtual-text",
+        dependencies = "mfussenegger/nvim-dap",
+    })
+
+    use({
+        "nvim-telescope/telescope-dap.nvim",
         dependencies = "mfussenegger/nvim-dap",
     })
 
     use("github/copilot.vim")
 
-    use("machakann/vim-sandwich")
+    -- use("machakann/vim-sandwich")
     use("tpope/vim-surround")
 
     -- from: https://www.youtube.com/watch?v=J9yqSdvAKXY&list=TLPQMTkxMjIwMjMeWDFsn3jtJw&index=3

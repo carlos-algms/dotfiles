@@ -7,6 +7,13 @@ vim.keymap.set("n", "<leader>da", function()
     dap.continue({ before = get_args })
 end)
 
+-- # Sign
+vim.fn.sign_define("DapBreakpoint", { text = "🔴", texthl = "", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpointCondition", { text = "🉑", texthl = "", linehl = "", numhl = "" })
+vim.fn.sign_define("DapLogPoint", { text = "ℹ️", texthl = "", linehl = "", numhl = "" })
+vim.fn.sign_define("DapStopped", { text = "➡️", texthl = "", linehl = "", numhl = "" })
+vim.fn.sign_define("DapBreakpointRejected", { text = "⚪️", texthl = "", linehl = "", numhl = "" })
+
 dap.adapters["pwa-node"] = {
     type = "server",
     host = "127.0.0.1",
@@ -24,7 +31,8 @@ for _, language in ipairs({ "typescript", "javascript" }) do
             name = "Launch file",
             program = "${file}",
             cwd = "${workspaceFolder}",
-            runtimeExecutable = "ts-node",
+            runtimeExecutable = "node",
+            runtimeArgs = { "--inspect-brk=8123", "ts-node/register", "-r", "tsconfig-paths/register" },
             sourceMaps = true,
         },
         {
@@ -52,3 +60,5 @@ end
 dap.listeners.before.event_exited["dapui_config"] = function()
     dapui.close()
 end
+
+require("nvim-dap-virtual-text").setup()
