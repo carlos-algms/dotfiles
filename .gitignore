@@ -3,3 +3,4 @@
 .vscode
 !.vscode/*.json
 *_compiled.lua
+lazy-lock.json
