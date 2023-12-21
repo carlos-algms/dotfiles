@@ -1,9 +1,30 @@
 local telescope = require("telescope")
 
+-- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
+local telescopeConfig = require("telescope.config")
+-- Clone the default Telescope configuration
+local vimgrep_arguments = { table.unpack(telescopeConfig.values.vimgrep_arguments) }
+
+-- I want to search in hidden/dot files.
+table.insert(vimgrep_arguments, "--hidden")
+-- I don't want to search in the `.git` directory.
+table.insert(vimgrep_arguments, "--glob")
+table.insert(vimgrep_arguments, "!**/.git/*")
+
 telescope.setup({
     defaults = {
         file_ignore_patterns = {
             "node_modules",
+            "build",
+            "dist",
+            "yarn.lock",
+        },
+        vimgrep_arguments = vimgrep_arguments,
+    },
+    pickers = {
+        find_files = {
+            -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
+            find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
         },
     },
     extensions = {
