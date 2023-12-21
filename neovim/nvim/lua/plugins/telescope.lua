@@ -18,7 +18,11 @@ return {
             -- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
             local telescopeConfig = require("telescope.config")
             -- Clone the default Telescope configuration
-            local vimgrep_arguments = { table.unpack(telescopeConfig.values.vimgrep_arguments) }
+            if not unpack then
+                unpack = table.unpack
+            end
+
+            local vimgrep_arguments = { unpack(telescopeConfig.values.vimgrep_arguments) }
 
             -- I want to search in hidden/dot files.
             table.insert(vimgrep_arguments, "--hidden")
