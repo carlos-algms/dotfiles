@@ -12,8 +12,10 @@ return require("packer").startup(function(use)
         tag = "0.1.5",
         -- or                            , branch = '0.1.x',
         requires = { { "nvim-lua/plenary.nvim" } },
-        disabled = vscode,
+        -- disabled = vscode,
     })
+
+    use({ "nvim-telescope/telescope-ui-select.nvim" })
 
     use({
         "doums/darcula",
@@ -36,19 +38,19 @@ return require("packer").startup(function(use)
     use({
         "nvim-treesitter/nvim-treesitter",
         { run = ":TSUpdate" },
-        disabled = vscode,
+        -- disabled = vscode,
     })
 
     use("nvim-lua/plenary.nvim")
 
     use({
         "ThePrimeagen/harpoon",
-        diabled = vscode,
+        -- disabled = vscode,
     })
 
     use({
         "mbbill/undotree",
-        disabled = vscode,
+        -- disabled = vscode,
     })
 
     -- use({

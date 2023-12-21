@@ -6,9 +6,15 @@ telescope.setup({
             "node_modules",
         },
     },
+    extensions = {
+        ["ui-select"] = {
+            require("telescope.themes").get_dropdown({}),
+        },
+    },
 })
 
 telescope.load_extension("dap")
+telescope.load_extension("ui-select")
 
 local builtin = require("telescope.builtin")
 
@@ -17,6 +23,10 @@ vim.keymap.set("n", "<C-p>", builtin.find_files, { desc = "[pf] Find all files i
 vim.keymap.set("n", "<leader>pg", builtin.git_files, { desc = "[C-p] Find all files in the current git repository" })
 vim.keymap.set("n", "<leader>pb", builtin.buffers, { desc = "[pb] Find all open buffers" })
 vim.keymap.set("n", "<leader>po", builtin.oldfiles, { desc = "[po] Find all recently opened files" })
+
+-- GIT
+vim.keymap.set("n", "<leader>Gs", builtin.git_status, { desc = "[Gs] Show git status" })
+vim.keymap.set("n", "<leader>Gb", builtin.git_branches, { desc = "[Gb] Show git branches" })
 
 vim.keymap.set("n", "<leader>ps", function()
     builtin.grep_string({ search = vim.fn.input("Grep > ") })
