@@ -46,6 +46,9 @@ return {
                 yaml = {
                     require("formatter.filetypes.yaml").prettier,
                 },
+                python = {
+                    require("formatter.filetypes.python").black,
+                },
                 ["*"] = {
                     require("formatter.filetypes.any").remove_trailing_whitespace,
                 },

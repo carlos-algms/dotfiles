@@ -5,6 +5,7 @@ return {
         { "williamboman/mason-lspconfig.nvim" },
         { "neovim/nvim-lspconfig" },
         { "hrsh7th/cmp-nvim-lsp" },
+        { "WhoIsSethDaniel/mason-tool-installer.nvim" },
     },
 
     config = function()
@@ -40,6 +41,19 @@ return {
 
         require("mason").setup()
 
+        require("mason-tool-installer").setup({
+
+            -- a list of all tools you want to ensure are installed upon
+            -- start
+            ensure_installed = {
+                "prettier",
+                "shfmt",
+                "stylua",
+                "js-debug-adapter",
+                "black",
+            },
+        })
+
         local masonLspconfig = require("mason-lspconfig")
 
         masonLspconfig.setup({
@@ -49,6 +63,7 @@ return {
                 "html",
                 "cssls",
                 "lua_ls",
+                "intelephense",
             },
         })
 
