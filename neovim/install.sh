@@ -2,8 +2,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${SCRIPT_DIR}/common/00_os.sh"
-source "${SCRIPT_DIR}/common/01_logging.sh"
+source "${SCRIPT_DIR}/../shell/common/00_os.sh"
+source "${SCRIPT_DIR}/../shell/common/01_logging.sh"
 
 if [ -z "$(command -v nvim)" ]; then
     if [[ ! -z "$IS_MAC" ]]; then
