@@ -89,6 +89,9 @@ return {
                     previewer = false,
                 }))
             end, { desc = "[/] Fuzzily search in current buffer on Modal with results" })
+
+            -- LSP
+            vim.keymap.set("n", "gr", builtin.lsp_references)
         end,
     },
 }
