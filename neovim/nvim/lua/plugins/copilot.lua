@@ -5,6 +5,7 @@ return {
             yml = true,
             yaml = true,
             markdown = true,
+            gitcommit = true,
         }
     end,
 }
