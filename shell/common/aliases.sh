@@ -1,4 +1,4 @@
-alias Rsync="`which -p rsync` --recursive --progress --links --human-readable --times --perms"
+alias Rsync="$(which -p rsync) --recursive --progress --links --human-readable --times --perms"
 
 alias path-show='echo $PATH | tr ":" "\n"'
 
@@ -15,3 +15,11 @@ alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist|vendor'"
 
 ## adding watch so it can use other aliases
 alias watch="watch "
+
+if [ ! -z "$(command -v nvim)" ]; then
+    alias v="nvim "
+elif [ ! -z "$(command -v vim)" ]; then
+    alias v="vim "
+elif [ ! -z "$(command -v vi)" ]; then
+    alias v="vi "
+fi
