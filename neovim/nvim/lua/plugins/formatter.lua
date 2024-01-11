@@ -49,6 +49,9 @@ return {
                 python = {
                     require("formatter.filetypes.python").black,
                 },
+                sh = {
+                    require("formatter.filetypes.sh").shfmt,
+                },
                 ["*"] = {
                     require("formatter.filetypes.any").remove_trailing_whitespace,
                 },
