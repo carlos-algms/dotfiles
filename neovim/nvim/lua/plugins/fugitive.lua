@@ -1,6 +1,25 @@
 return {
     "tpope/vim-fugitive",
+    dependencies = {
+        "nvim-telescope/telescope.nvim",
+    },
     config = function()
+        local telescopeBuiltin = require("telescope.builtin")
+
+        vim.keymap.set(
+            "n",
+            "<leader>gs",
+            ":Git<CR>:17wincmd _<CR>",
+            { desc = "Show [g]it [s]tatus" }
+        )
+
+        vim.keymap.set(
+            "n",
+            "<leader>gb",
+            telescopeBuiltin.git_branches,
+            { desc = "Show [g]it [b]ranches" }
+        )
+
         vim.api.nvim_create_autocmd("FileType", {
             desc = "Fugitive overrides",
             pattern = { "fugitive" },

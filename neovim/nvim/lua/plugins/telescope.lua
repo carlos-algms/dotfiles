@@ -97,30 +97,11 @@ return {
                 { desc = "Find recently opened files" }
             )
 
-            -- GIT
-            vim.keymap.set(
-                "n",
-                "<leader>Gs",
-                builtin.git_status,
-                { desc = "Show [g]it [s]tatus" }
-            )
-            vim.keymap.set(
-                "n",
-                "<leader>Gb",
-                builtin.git_branches,
-                { desc = "Show [g]it [b]ranches" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>ps",
-                function()
-                    builtin.grep_string({ search = vim.fn.input("Grep > ") })
-                end,
-                {
-                    desc = "[ps] Grep string in the current folder and open results in a Modal",
-                }
-            )
+            vim.keymap.set("n", "<leader>ps", function()
+                builtin.grep_string({ search = vim.fn.input("Grep > ") })
+            end, {
+                desc = "[ps] Grep string in the current folder and open results in a Modal",
+            })
 
             vim.keymap.set("n", "<leader>/", function()
                 -- You can pass additional configuration to telescope to change theme, layout, etc.
