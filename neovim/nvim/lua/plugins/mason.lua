@@ -15,9 +15,24 @@ return {
 
         -- note: diagnostics are not exclusive to lsp servers
         -- so these can be global keybindings
-        vim.keymap.set("n", "gl", vim.diagnostic.open_float)
-        vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
-        vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
+        vim.keymap.set(
+            "n",
+            "gl",
+            vim.diagnostic.open_float,
+            { desc = "Open problems in a floating window" }
+        )
+        vim.keymap.set(
+            "n",
+            "[d",
+            vim.diagnostic.goto_prev,
+            { desc = "Go to previous problem" }
+        )
+        vim.keymap.set(
+            "n",
+            "]d",
+            vim.diagnostic.goto_next,
+            { desc = "Go to next problem" }
+        )
 
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -25,23 +40,73 @@ return {
             callback = function(ev)
                 -- Enable completion triggered by <c-x><c-o>
                 vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-                local opts = { buffer = ev.buf }
 
-                vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-                vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-                vim.keymap.set("n", "go", vim.lsp.buf.type_definition, opts)
-                vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+                local lspKeymap = function(when, keyCombination, action, desc)
+                    local opts = { buffer = ev.buf }
+                    if desc then
+                        opts.desc = desc
+                    end
+
+                    vim.keymap.set(when, keyCombination, action, opts)
+                end
+
+                lspKeymap(
+                    "n",
+                    "gd",
+                    vim.lsp.buf.definition,
+                    "[G]o to [d]efinition"
+                )
+                lspKeymap(
+                    "n",
+                    "gD",
+                    vim.lsp.buf.declaration,
+                    "[G]o to [D]eclaration"
+                )
+                lspKeymap(
+                    "n",
+                    "go",
+                    vim.lsp.buf.type_definition,
+                    "[G]o to [o]bject type definition"
+                )
+                lspKeymap(
+                    "n",
+                    "gi",
+                    vim.lsp.buf.implementation,
+                    "[G]o to [i]mplementation"
+                )
                 -- Implemented on telescope, as it has a better UI
-                -- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-                vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-                vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
-                vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
-                vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-                vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
-                vim.keymap.set({ "n", "v" }, "<space>ca", vim.lsp.buf.code_action, opts)
-                vim.keymap.set("n", "<space>f", function()
-                    vim.lsp.buf.format({ async = true })
-                end, opts)
+                -- lspKeymap("n", "gr", vim.lsp.buf.references, opts)
+                lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
+                lspKeymap(
+                    "n",
+                    "<leader>ws",
+                    vim.lsp.buf.workspace_symbol,
+                    "Search for symbol in [w]orkspace"
+                )
+                lspKeymap(
+                    "n",
+                    "<leader>rn",
+                    vim.lsp.buf.rename,
+                    "[R]ename symbol"
+                )
+                lspKeymap(
+                    "i",
+                    "<C-h>",
+                    vim.lsp.buf.signature_help,
+                    "Show [h]elp for function signature"
+                )
+                lspKeymap(
+                    { "n", "v" },
+                    "<space>ca",
+                    vim.lsp.buf.code_action,
+                    "Show [c]ode [a]ctions"
+                )
+                lspKeymap(
+                    "n",
+                    "<space>f",
+                    function() vim.lsp.buf.format({ async = true }) end,
+                    "[F]ormat buffer"
+                )
             end,
         })
 

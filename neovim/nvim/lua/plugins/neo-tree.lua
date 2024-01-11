@@ -31,8 +31,18 @@ return {
         },
     },
     config = function(_, opts)
-        vim.keymap.set("n", "<C-n>", "::Neotree filesystem reveal left<CR>")
-        vim.keymap.set("n", "<SC-n>", ":Neotree toggle<CR>")
+        vim.keymap.set(
+            "n",
+            "<C-n>",
+            "::Neotree filesystem reveal left<CR>",
+            { desc = "Reveal current file in NeoTree ", silent = true }
+        )
+        vim.keymap.set(
+            "n",
+            "<SC-n>",
+            ":Neotree toggle<CR>",
+            { desc = "Toggle NeoTree ", silent = true }
+        )
 
         -- require("neo-tree").setup({
         --     filesystem = {

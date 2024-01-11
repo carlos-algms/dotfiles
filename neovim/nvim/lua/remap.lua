@@ -1,14 +1,34 @@
 vim.g.mapleader = " "
 
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+vim.keymap.set(
+    "n",
+    "<leader>pv",
+    vim.cmd.Ex,
+    { desc = "Open nvim default file explorer" }
+)
 
 -- Allows to move selected line of text up and down
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+vim.keymap.set(
+    "v",
+    "J",
+    ":m '>+1<CR>gv=gv",
+    { desc = "Move selected line down" }
+)
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected line up" })
 
 -- Keeps the cursor on the center of the screen when running Ctrl + D or U
-vim.keymap.set("n", "<C-d>", "<C-d>zz")
-vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set(
+    "n",
+    "<C-d>",
+    "<C-d>zz",
+    { desc = "Scroll down half page and center the cursor on the screen" }
+)
+vim.keymap.set(
+    "n",
+    "<C-u>",
+    "<C-u>zz",
+    { desc = "Scroll up half page and center the cursor on the screen" }
+)
 
 -- Don't lose yank when pasting over a selected content (AKA: replace)
 -- vim.keymap.set("x", "p", [["_dP]])
@@ -20,13 +40,36 @@ vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
 -- replace the selected content without losing the Yanked register
-vim.keymap.set("x", "<leader>p", [["_dP]])
+vim.keymap.set(
+    "x",
+    "<leader>p",
+    [["_dP]],
+    { desc = "Paste replacing selection without losing the Yanked register" }
+)
 
 -- copy to system clipboard
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set(
+    { "n", "v" },
+    "<leader>y",
+    [["+y]],
+    { desc = "Copy to system clipboard" }
+)
+vim.keymap.set(
+    { "n", "v" },
+    "<leader>Y",
+    [["+yy]],
+    { desc = "Copy entire line to system clipboard" }
+)
+
+-- Yank entire line
+vim.keymap.set({ "n", "v" }, "Y", [[yy]], { desc = "Yank entire line" })
 
 vim.keymap.set("n", "Q", "<nop>")
 
 -- replace all occurences of the word under the cursor
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set(
+    "n",
+    "<leader>s",
+    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+    { desc = "Replace all occurences of the word under the cursor" }
+)
