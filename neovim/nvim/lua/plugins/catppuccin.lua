@@ -4,7 +4,7 @@ return {
         lazy = false,
         name = "catppuccin",
         priority = 1000,
-
+        enabled = true,
         config = function()
             vim.opt.termguicolors = true
             vim.o.background = "dark"
@@ -17,6 +17,11 @@ return {
                         -- crust = "#000000",
                     },
                 },
+                custom_highlights = function(colors)
+                    return {
+                        Comment = { fg = colors.overlay0 },
+                    }
+                end,
                 integrations = {
                     telescope = {
                         enabled = true,

@@ -29,6 +29,29 @@ return {
             nesting_rules = {},
             group_empty_dirs = false,
         },
+        -- nesting_rules = {
+        --     ["js"] = {
+        --         pattern = "(.+)%.js$",
+        --         files = { "%1.js.map", "%1.min.js", "%1.d.ts" },
+        --     },
+        --     ["ts"] = {
+        --         pattern = "(.+)%.ts$",
+        --         files = { "%1.*.ts", "%1.*.css" },
+        --     },
+        --     ["tsx"] = {
+        --         pattern = "(.+)%.tsx$",
+        --         files = {
+        --             "%1.*.ts",
+        --             "%1.*.tsx",
+        --             "%1.*.ts",
+        --             "%1.*.ts*",
+        --             "%1.*.css",
+        --             "%1.*.scss",
+        --             "%1.*.mdx",
+        --             "%1.*.mdx",
+        --         },
+        --     },
+        -- },
     },
     config = function(_, opts)
         vim.keymap.set(
