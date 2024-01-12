@@ -1,16 +1,11 @@
 return {
     {
-        "nvim-telescope/telescope-dap.nvim",
-        dependencies = "mfussenegger/nvim-dap",
-    },
-    {
         "nvim-telescope/telescope.nvim",
         tag = "0.1.5",
         -- or                            , branch = '0.1.x',
         dependencies = {
             { "nvim-lua/plenary.nvim" },
             { "nvim-telescope/telescope-ui-select.nvim" },
-            { "nvim-telescope/telescope-dap.nvim" },
         },
         config = function()
             local telescope = require("telescope")
@@ -43,6 +38,10 @@ return {
                     vimgrep_arguments = vimgrep_arguments,
                 },
                 pickers = {
+                    oldfiles = {
+                        -- `cwd` will be the directory where Telescope started.
+                        cwd_only = true,
+                    },
                     find_files = {
                         -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
                         find_command = {
@@ -61,7 +60,6 @@ return {
                 },
             })
 
-            telescope.load_extension("dap")
             telescope.load_extension("ui-select")
 
             local builtin = require("telescope.builtin")
