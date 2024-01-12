@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-scp -r lua/ init.lua loto-go-daddy:~/.config/nvim/
+scp -r nvim/lua/ nvim/init.lua loto-go-daddy:~/.config/nvim/
