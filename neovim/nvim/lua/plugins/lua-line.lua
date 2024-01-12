@@ -7,7 +7,7 @@ return {
     opts = {
         options = {
             icons_enabled = true,
-            theme = "jellybeans",
+            theme = "catppuccin",
         },
         sections = {
             lualine_a = {
