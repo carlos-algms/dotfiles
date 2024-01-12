@@ -3,6 +3,7 @@ return {
         "hrsh7th/nvim-cmp",
         dependencies = {
             { "hrsh7th/cmp-nvim-lsp" },
+            -- TODO: import from VSCode and how can I write my own snippets?
             { "rafamadriz/friendly-snippets" },
             {
                 "L3MON4D3/LuaSnip",
@@ -36,10 +37,22 @@ return {
                     ["<C-y>"] = cmp.mapping.confirm({ select = true }),
                     ["<Cr>"] = cmp.mapping.confirm({ select = true }),
                     ["<C-Space>"] = cmp.mapping.complete(),
-                    ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { "i", "c" }),
-                    ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { "i", "c" }),
-                    ["<PageUp>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { "i", "c" }),
-                    ["<PageDown>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { "i", "c" }),
+                    ["<C-b>"] = cmp.mapping(
+                        cmp.mapping.scroll_docs(-4),
+                        { "i", "c" }
+                    ),
+                    ["<C-f>"] = cmp.mapping(
+                        cmp.mapping.scroll_docs(4),
+                        { "i", "c" }
+                    ),
+                    ["<PageUp>"] = cmp.mapping(
+                        cmp.mapping.scroll_docs(-4),
+                        { "i", "c" }
+                    ),
+                    ["<PageDown>"] = cmp.mapping(
+                        cmp.mapping.scroll_docs(4),
+                        { "i", "c" }
+                    ),
                     -- IF I enable TAB, copilot seems to stop working
                     -- ["<Tab>"] = cmp.mapping(function(fallback)
                     --     if cmp.visible() then
