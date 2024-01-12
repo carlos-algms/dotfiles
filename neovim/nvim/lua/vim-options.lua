@@ -33,3 +33,17 @@ vim.opt.fileencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 
 vim.opt.diffopt = "iwhite"
+
+vim.opt.spelllang = "en_us"
+vim.opt.spell = true
+
+vim.opt.listchars = {
+    tab = "» ",
+    trail = "·",
+    space = ".",
+    extends = "…",
+    precedes = "…",
+    nbsp = "␣",
+    -- eol = "↲",
+}
+vim.opt.list = true
