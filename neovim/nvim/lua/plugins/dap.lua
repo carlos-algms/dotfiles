@@ -35,7 +35,7 @@ return {
         "theHamsta/nvim-dap-virtual-text",
         dependencies = { "mfussenegger/nvim-dap" },
         config = function()
-            require("nvim-dap-virtual-text").setup()
+            require("nvim-dap-virtual-text").setup({})
         end,
     },
     {
@@ -111,7 +111,7 @@ return {
             )
             vim.keymap.set("n", "<leader>da", function()
                 dap.continue({ before = get_args })
-            end)
+            end, { desc = " Debugger Run / Continue with args" })
 
             -- # Sign
             vim.fn.sign_define(
@@ -174,22 +174,29 @@ return {
                 }
             end
 
-            dapui.setup()
+            dap.adapters["php"] = {
+                type = "executable",
+                command = "php-debug-adapter",
+            }
 
-            dap.listeners.after.event_initialized["dapui_config"] = function()
-                dapui.open()
-            end
+            dap.configurations.php = {
+                {
+                    type = "php",
+                    request = "launch",
+                    name = "PHP: Listen for Xdebug",
+                    port = 9003,
+                    stopOnEntry = false,
+                    pathMappings = {
+                        -- TODO: this should be per project or dynamic
+                        ["/var/www/html"] = "${workspaceFolder}/server",
+                        ["/home/abc/public_html"] = "${workspaceFolder}/server",
+                        ["/home/abc/workspace/server"] = "${workspaceFolder}/server",
+                        ["/home/abc/deploys/1"] = "${workspaceFolder}/server",
+                    },
+                },
+            }
 
-            -- I don't want it to auto-close, as I want to check the output
-            -- dap.listeners.before.event_terminated["dapui_config"] = function()
-            --     -- dapui.close()
-            -- end
-
-            -- dap.listeners.before.event_exited["dapui_config"] = function()
-            --     -- dapui.close()
-            -- end
-
-            require("nvim-dap-virtual-text").setup()
+            -- TODO: add adapter for python and chrome
         end,
     },
 }
