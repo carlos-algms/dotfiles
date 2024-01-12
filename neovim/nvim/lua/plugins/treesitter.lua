@@ -35,6 +35,8 @@ return {
             indent = {
                 enable = true,
             },
+            ignore_install = {},
+            modules = {},
         })
     end,
 }
