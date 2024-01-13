@@ -12,6 +12,7 @@ return {
 
         require("formatter").setup({
             -- All formatter configurations are opt-in
+            -- TODO: how to disable this for certain files per project??
             filetype = {
                 javascript = {
                     require("formatter.filetypes.javascript").prettier,
@@ -52,9 +53,10 @@ return {
                 sh = {
                     require("formatter.filetypes.sh").shfmt,
                 },
-                ["*"] = {
-                    require("formatter.filetypes.any").remove_trailing_whitespace,
-                },
+                -- Disable it to rely on .editorconfig
+                -- ["*"] = {
+                --     require("formatter.filetypes.any").remove_trailing_whitespace,
+                -- },
             },
         })
     end,

@@ -57,7 +57,7 @@ return {
         vim.keymap.set(
             "n",
             "<C-n>",
-            "::Neotree filesystem reveal left<CR>",
+            ":Neotree filesystem reveal left<CR>",
             { desc = "Reveal current file in NeoTree ", silent = true }
         )
         vim.keymap.set(

@@ -20,6 +20,13 @@ return {
             { desc = "Show [g]it [b]ranches" }
         )
 
+        vim.keymap.set(
+            "n",
+            "<leader>gd",
+            ":Gvdiffsplit!<CR>",
+            { desc = "Show [g]it [d]iff for current file" }
+        )
+
         vim.api.nvim_create_autocmd("FileType", {
             desc = "Fugitive overrides",
             pattern = { "fugitive" },

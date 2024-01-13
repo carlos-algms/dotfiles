@@ -6,6 +6,7 @@ return {
         { "neovim/nvim-lspconfig" },
         { "hrsh7th/cmp-nvim-lsp" },
         { "WhoIsSethDaniel/mason-tool-installer.nvim" },
+        { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
     },
 
     config = function()
@@ -21,12 +22,14 @@ return {
             vim.diagnostic.open_float,
             { desc = "Open problems in a floating window" }
         )
+
         vim.keymap.set(
             "n",
             "[d",
             vim.diagnostic.goto_prev,
             { desc = "Go to previous problem" }
         )
+
         vim.keymap.set(
             "n",
             "]d",
@@ -56,57 +59,72 @@ return {
                     vim.lsp.buf.definition,
                     "[G]o to [d]efinition"
                 )
+
                 lspKeymap(
                     "n",
                     "gD",
                     vim.lsp.buf.declaration,
                     "[G]o to [D]eclaration"
                 )
+
                 lspKeymap(
                     "n",
                     "go",
                     vim.lsp.buf.type_definition,
                     "[G]o to [o]bject type definition"
                 )
+
                 lspKeymap(
                     "n",
                     "gi",
                     vim.lsp.buf.implementation,
                     "[G]o to [i]mplementation"
                 )
+
                 -- Implemented on telescope, as it has a better UI
                 -- lspKeymap("n", "gr", vim.lsp.buf.references, opts)
+
+                local telescopeBuiltin = require("telescope.builtin")
+                lspKeymap(
+                    "n",
+                    "gr",
+                    telescopeBuiltin.lsp_references,
+                    { desc = "List [r]eferences using Telescope" }
+                )
+
                 lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
+
                 lspKeymap(
                     "n",
                     "<leader>ws",
                     vim.lsp.buf.workspace_symbol,
                     "Search for symbol in [w]orkspace"
                 )
+
                 lspKeymap(
                     "n",
                     "<leader>rn",
                     vim.lsp.buf.rename,
                     "[R]ename symbol"
                 )
+
                 lspKeymap(
                     "i",
                     "<C-h>",
                     vim.lsp.buf.signature_help,
                     "Show [h]elp for function signature"
                 )
+
                 lspKeymap(
                     { "n", "v" },
                     "<space>ca",
                     vim.lsp.buf.code_action,
                     "Show [c]ode [a]ctions"
                 )
-                lspKeymap(
-                    "n",
-                    "<space>f",
-                    function() vim.lsp.buf.format({ async = true }) end,
-                    "[F]ormat buffer"
-                )
+
+                lspKeymap("n", "<space>f", function()
+                    vim.lsp.buf.format({ async = true })
+                end, "[F]ormat buffer")
             end,
         })
 

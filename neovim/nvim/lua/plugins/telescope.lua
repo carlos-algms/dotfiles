@@ -70,24 +70,28 @@ return {
                 builtin.live_grep,
                 { desc = "[P]roject wide [L]ive grep search" }
             )
+
             vim.keymap.set(
                 "n",
                 "<C-p>",
                 builtin.find_files,
                 { desc = "Find files by name in the current folder" }
             )
+
             vim.keymap.set(
                 "n",
                 "<leader>pg",
                 builtin.git_files,
                 { desc = "[P]roject wide [G]it files fuzy finder" }
             )
+
             vim.keymap.set(
                 "n",
                 "<leader>pb",
                 builtin.buffers,
                 { desc = "Find current open buffers" }
             )
+
             vim.keymap.set(
                 "n",
                 "<leader>po",
@@ -113,12 +117,11 @@ return {
                 desc = "[/] Fuzzily search in current buffer on Modal with results",
             })
 
-            -- LSP
             vim.keymap.set(
                 "n",
-                "gr",
-                builtin.lsp_references,
-                { desc = "List [r]eferences using Telescope" }
+                "tk",
+                builtin.keymaps,
+                { desc = "[T]elescope list all [k]eymaps" }
             )
         end,
     },

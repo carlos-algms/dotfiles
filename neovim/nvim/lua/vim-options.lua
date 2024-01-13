@@ -1,4 +1,5 @@
 vim.opt.nu = true
+
 vim.opt.relativenumber = true
 
 vim.opt.tabstop = 2
@@ -15,6 +16,7 @@ vim.opt.backup = false
 
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
+vim.opt.smartcase = true
 
 vim.opt.background = "dark"
 vim.opt.termguicolors = true
@@ -32,7 +34,8 @@ vim.scriptencoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 
-vim.opt.diffopt = "iwhite"
+vim.opt.diffopt = "iwhite,context:9999999"
+vim.opt.foldenable = false
 
 vim.opt.spelllang = "en_us"
 vim.opt.spell = true
@@ -40,7 +43,7 @@ vim.opt.spell = true
 vim.opt.listchars = {
     tab = "» ",
     trail = "·",
-    space = ".",
+    -- space = ".",
     extends = "…",
     precedes = "…",
     nbsp = "␣",
