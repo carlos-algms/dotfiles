@@ -119,7 +119,7 @@ return {
 
             vim.keymap.set(
                 "n",
-                "tk",
+                "<leader>tk",
                 builtin.keymaps,
                 { desc = "[T]elescope list all [k]eymaps" }
             )
