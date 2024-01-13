@@ -76,3 +76,9 @@ vim.keymap.set(
 
 -- window management
 vim.keymap.set("n", "<leader>w", "<C-w>", { desc = "Ctrl + w replacement" })
+
+
+vim.keymap.set({"n", "v", "i", "x"}, "œ", "<Esc>", { desc = "Alt + q - Same as <Esc>" })
+
+
+
