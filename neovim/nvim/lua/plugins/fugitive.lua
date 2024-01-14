@@ -7,6 +7,13 @@ return {
         local fugitiveWinId = nil
         local telescopeBuiltin = require("telescope.builtin")
 
+        vim.keymap.set(
+            "n",
+            "<C-S-p>",
+            ":Git push<CR>",
+            { desc = "[G]it [P]ush" }
+        )
+
         vim.keymap.set("n", "<leader>gs", function()
             vim.cmd("Git")
             fugitiveWinId = vim.api.nvim_get_current_win()
