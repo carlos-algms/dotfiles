@@ -10,7 +10,7 @@ return {
             "n",
             "<leader>gs",
             ":Git<CR>:17wincmd _<CR>",
-            { desc = "Show [g]it [s]tatus" }
+            { desc = "Show [g]it [s]tatus" , silent = true}
         )
 
         vim.keymap.set(
@@ -39,7 +39,7 @@ return {
                     ev.buf,
                     "n",
                     "cc",
-                    ":<C-U> vertical Git commit<CR>",
+                    ":<C-U> tab Git commit<CR>",
                     {}
                 )
             end,
