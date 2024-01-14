@@ -11,10 +11,10 @@ return {
         },
         sections = {
             lualine_a = {
-                -- {
-                --     "filename",
-                --     path = 1,
-                -- },
+                {
+                    "filename",
+                    path = 1,
+                },
             },
         },
     },
