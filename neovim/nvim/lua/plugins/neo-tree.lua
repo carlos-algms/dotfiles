@@ -55,14 +55,14 @@ return {
     },
     config = function(_, opts)
         vim.keymap.set(
-            "n",
+            { "n", "i", "v", "x" },
             "<C-n>",
             ":Neotree filesystem reveal left<CR>",
             { desc = "Reveal current file in NeoTree ", silent = true }
         )
         vim.keymap.set(
-            "n",
-            "<SC-n>",
+            { "n", "i", "v", "x" },
+            "<C-S-n>",
             ":Neotree toggle<CR>",
             { desc = "Toggle NeoTree ", silent = true }
         )
