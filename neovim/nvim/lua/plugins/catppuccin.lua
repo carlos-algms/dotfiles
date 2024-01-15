@@ -20,9 +20,18 @@ return {
                 custom_highlights = function(colors)
                     return {
                         Comment = { fg = colors.overlay0 },
+                        ["@parameter"] = { fg = colors.text },
+                        ["Properties"] = { fg = colors.text },
+                        ["@property"] = { fg = colors.text },
                     }
                 end,
                 integrations = {
+                    cmp = true,
+                    gitsigns = true,
+                    treesitter = true,
+                    notify = false,
+                    dap = true,
+                    dap_ui = true,
                     telescope = {
                         enabled = true,
                     },
