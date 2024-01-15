@@ -5,6 +5,8 @@ return {
         opt = true,
     },
     config = function()
+        local noice = require("noice")
+
         local opts = {
             options = {
                 icons_enabled = true,
@@ -28,8 +30,8 @@ return {
                 },
                 lualine_x = {
                     {
-                        require("noice").api.statusline.mode.get,
-                        cond = require("noice").api.statusline.mode.has,
+                        noice.api.status.mode.get,
+                        cond = noice.api.status.mode.has,
                         color = { fg = "#ff9e64" },
                     },
                     "encoding",
