@@ -24,11 +24,15 @@ return {
                         luasnip.lsp_expand(args.body)
                     end,
                 },
-                sources = {
+                sources = cmp.config.sources({
                     { name = "path" },
-                    { name = "nvim_lsp" },
+                    { name = "nvim_lsp", keyword_length = 1 },
+                    { name = "nvim_lsp_signature_help" },
+                    { name = "luasnip" },
                     { name = "nvim_lua" },
-                },
+                }, {
+                    { name = "buffer" },
+                }),
                 -- TODO how to format? Or do I even need to format here?
                 --    formatting = lsp_zero.cmp_format(),
                 mapping = cmp.mapping.preset.insert({
