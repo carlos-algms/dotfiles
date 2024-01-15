@@ -33,9 +33,65 @@ return {
                     filter = {
                         event = "msg_show",
                         kind = "",
+                        find = "more line",
+                    },
+                    opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
                         find = "written",
                     },
                     opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
+                        find = "fewer line",
+                    },
+                    opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
+                        find = "yanked",
+                    },
+                    opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
+                        find = "; after",
+                    },
+                    opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
+                        find = "; before",
+                    },
+                    opts = { skip = true },
+                },
+                {
+                    filter = {
+                        event = "msg_show",
+                        kind = "",
+                        find = "yanked",
+                    },
+                    opts = { skip = true, stop = true },
+                },
+                {
+                    filter = {
+                        event = "notify.warn",
+                        kind = "",
+                        find = "Config Change Detected",
+                    },
+                    opts = { skip = true, stop = true },
                 },
             },
             -- routes = {
