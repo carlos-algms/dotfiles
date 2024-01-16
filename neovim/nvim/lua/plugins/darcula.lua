@@ -69,6 +69,7 @@ return {
             vim.cmd([[ hi! link @include.scss Keyword ]])
 
             -- Lua
+            vim.cmd([[ hi! link @lsp.mod.global.lua ErrorMsg ]])
             vim.cmd([[ hi! link @function.builtin.lua Keyword ]])
             vim.cmd([[ hi! link @field.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
