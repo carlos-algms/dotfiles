@@ -4,8 +4,9 @@ return {
         lazy = false,
         name = "catppuccin",
         priority = 1000,
-        enabled = true,
+        enabled = false,
         config = function()
+            print("Loading catppuccin")
             vim.opt.termguicolors = true
             vim.o.background = "dark"
 

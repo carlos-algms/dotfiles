@@ -10,7 +10,7 @@ return {
         local opts = {
             options = {
                 icons_enabled = true,
-                theme = "auto",
+                theme = "jellybeans",
             },
             sections = {
                 lualine_a = {
