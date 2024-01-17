@@ -74,6 +74,9 @@ return {
             vim.cmd([[ hi! link @function.builtin.lua Keyword ]])
             vim.cmd([[ hi! link @field.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
+
+            -- bash
+            vim.cmd([[ hi! link @function.builtin.bash Function ]])
         end,
     },
     {
