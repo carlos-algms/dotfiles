@@ -57,9 +57,9 @@ return {
             vim.cmd([[ hi! link @tag.attribute.html NormalFg ]])
 
             -- CSS
-            vim.cmd([[ hi! link @punctuation.delimiter.css Function ]])
-            vim.cmd([[ hi! link @type.css Function ]])
-            vim.cmd([[ hi! link @punctuation.delimiter.css NormaFg ]])
+            vim.cmd([[ hi! link @selector Function ]])
+            vim.cmd([[ hi! link @color Constant ]])
+            vim.cmd([[ hi! link @unit Keyword ]])
 
             -- SCSS
             vim.cmd([[ hi! link @include.scss Keyword ]])
@@ -72,6 +72,9 @@ return {
             vim.cmd([[ hi! link @constructor.lua NormaFg ]])
             vim.cmd([[ hi! link @lsp.mod.global.lua ErrorMsg ]])
             vim.cmd([[ hi! link @function.builtin.lua Keyword ]])
+            vim.cmd([[ hi! link @boolean.lua Keyword ]])
+            vim.cmd([[ hi! link @unit.css Keyword ]])
+            vim.cmd([[ hi! link @type.qualifier.css Keyword ]])
             vim.cmd([[ hi! link @field.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
 
