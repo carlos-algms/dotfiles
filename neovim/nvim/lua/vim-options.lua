@@ -1,5 +1,9 @@
-vim.opt.nu = true
+vim.opt.title = true
+vim.opt.titlelen = 0 -- do not shorten title
+vim.opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+    .. ' %{expand("%:.")}'
 
+vim.opt.nu = true
 vim.opt.relativenumber = true
 
 vim.opt.wrap = false
