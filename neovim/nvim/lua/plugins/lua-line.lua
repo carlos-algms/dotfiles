@@ -5,7 +5,7 @@ return {
         opt = true,
     },
     config = function()
-        local noice = require("noice")
+        -- local noice = require("noice")
 
         local opts = {
             options = {
@@ -29,11 +29,11 @@ return {
                     },
                 },
                 lualine_x = {
-                    {
-                        noice.api.status.mode.get,
-                        cond = noice.api.status.mode.has,
-                        color = { fg = "#ff9e64" },
-                    },
+                    -- {
+                    --     noice.api.status.mode.get,
+                    --     cond = noice.api.status.mode.has,
+                    --     color = { fg = "#ff9e64" },
+                    -- },
                     "encoding",
                     "fileformat",
                     "filetype",

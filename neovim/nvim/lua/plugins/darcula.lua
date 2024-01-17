@@ -1,19 +1,5 @@
 return {
     {
-        "briones-gabriel/darcula-solid.nvim",
-        dependencies = {
-            "rktjmp/lush.nvim",
-        },
-        enabled = false,
-        lazy = false,
-        priority = 1000,
-        -- config = function()
-        --     vim.o.background = "dark"
-        --     vim.cmd.colorscheme("darcula-solid")
-        --     vim.opt.termguicolors = true
-        -- end,
-    },
-    {
         "doums/darcula",
         as = "darcula",
         enabled = true,
@@ -22,9 +8,19 @@ return {
         config = function()
             vim.opt.termguicolors = true
             vim.o.background = "dark"
-
             vim.cmd.colorscheme("darcula")
 
+            -- Misspell on purpose: saci
+
+            vim.defer_fn(function()
+                vim.cmd([[ hi clear SpellBad ]])
+                vim.cmd([[ hi! SpellBad guisp=#CC666E gui=undercurl ]])
+            end, 100)
+
+            -- Fix cursor line overriding other highlights
+            vim.cmd(
+                [[ call darcula#Hi('CursorLine', darcula#palette.null, darcula#palette.cursorLine, 'NONE') ]]
+            )
             vim.cmd([[ call darcula#Hi('Constant', darcula#palette.constant) ]]) -- remove italic from constants
             vim.cmd([[ call darcula#Hi('Type', darcula#palette.number) ]])
             vim.cmd([[ call darcula#Hi('SpellBad', darcula#palette.errorMsg) ]])
@@ -69,11 +65,30 @@ return {
             vim.cmd([[ hi! link @include.scss Keyword ]])
 
             -- Lua
+            vim.cmd(
+                [[ hi! link @lsp.typemod.function.defaultLibrary.lua Keyword ]]
+            )
+            vim.cmd([[ hi! link @punctuation.bracket.lua NormaFg ]])
+            vim.cmd([[ hi! link @constructor.lua NormaFg ]])
             vim.cmd([[ hi! link @lsp.mod.global.lua ErrorMsg ]])
             vim.cmd([[ hi! link @function.builtin.lua Keyword ]])
             vim.cmd([[ hi! link @field.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
         end,
+    },
+    {
+        enabled = false,
+        "briones-gabriel/darcula-solid.nvim",
+        dependencies = {
+            "rktjmp/lush.nvim",
+        },
+        lazy = false,
+        priority = 1000,
+        -- config = function()
+        --         --     vim.o.background = "dark"
+        --                 --     vim.cmd.colorscheme("darcula-solid")
+        --                         --     vim.opt.termguicolors = true
+        --                                 -- end,
     },
 }
 

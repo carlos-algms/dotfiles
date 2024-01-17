@@ -6,7 +6,6 @@ return {
         priority = 1000,
         enabled = false,
         config = function()
-            print("Loading catppuccin")
             vim.opt.termguicolors = true
             vim.o.background = "dark"
 
