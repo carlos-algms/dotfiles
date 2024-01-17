@@ -6,6 +6,7 @@ return {
         dependencies = {
             { "nvim-lua/plenary.nvim" },
             { "nvim-telescope/telescope-ui-select.nvim" },
+            { "princejoogie/dir-telescope.nvim" },
         },
         config = function()
             local telescope = require("telescope")
@@ -29,11 +30,17 @@ return {
 
             telescope.setup({
                 defaults = {
+                    cache_picker = {
+                        num_pickers = 20, -- your preferred number here, values up to 100 should be perfectly fine; likely even much higher
+                    },
                     file_ignore_patterns = {
                         "node_modules",
+                        "vendor",
                         "build",
                         "dist",
                         "yarn.lock",
+                        "package-lock.json",
+                        "pnpm-lock.yaml",
                         ".turbo",
                         ".yarn",
                         ".next",
@@ -68,9 +75,18 @@ return {
 
             local builtin = require("telescope.builtin")
 
+            require("dir-telescope").setup({
+                -- these are the default options set
+                hidden = true,
+                no_ignore = false,
+                show_preview = true,
+            })
+
+            require("telescope").load_extension("dir")
+
             vim.keymap.set(
                 "n",
-                "<leader>pl",
+                "<leader>f",
                 builtin.live_grep,
                 { desc = "[P]roject wide [L]ive grep search" }
             )
@@ -98,7 +114,7 @@ return {
 
             vim.keymap.set(
                 "n",
-                "<leader>po",
+                "<leader>o",
                 builtin.oldfiles,
                 { desc = "Find recently opened files" }
             )
@@ -126,6 +142,27 @@ return {
                 "<leader>tk",
                 builtin.keymaps,
                 { desc = "[T]elescope list all [k]eymaps" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>tp",
+                builtin.pickers,
+                { desc = "[T]elescope list all [p]ickers" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>tr",
+                builtin.resume,
+                { desc = "[T]elescope list all [r]esume" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>fd",
+                "<cmd>GrepInDirectory<CR>",
+                { noremap = true, silent = true }
             )
         end,
     },
