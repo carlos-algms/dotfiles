@@ -22,6 +22,7 @@ return {
                 unpack(telescopeConfig.values.vimgrep_arguments),
             }
 
+            table.insert(vimgrep_arguments, "--smart-case")
             -- I want to search in hidden/dot files.
             table.insert(vimgrep_arguments, "--hidden")
             -- I don't want to search in the `.git` directory.
@@ -61,6 +62,39 @@ return {
                             "--hidden",
                             "--glob",
                             "!**/.git/*",
+                        },
+                    },
+
+                    git_branches = {
+                        mappings = {
+                            i = {
+                                ["<C-a>"] = function(prompt_bufnr)
+                                    local actions = require("telescope.actions")
+                                    local action_state =
+                                        require("telescope.actions.state")
+                                    local utils = require("telescope.utils")
+
+                                    local selection =
+                                        action_state.get_selected_entry()
+
+                                    if selection == nil then
+                                        utils.notify("git_compare_branches", {
+                                            msg = "No branch selected",
+                                            level = "WARN",
+                                        })
+                                        return
+                                    end
+
+                                    actions.close(prompt_bufnr)
+
+                                    vim.cmd(
+                                        string.format(
+                                            "DiffviewOpen %s...HEAD --imply-local",
+                                            selection.value
+                                        )
+                                    )
+                                end,
+                            },
                         },
                     },
                 },

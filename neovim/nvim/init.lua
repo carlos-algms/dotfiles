@@ -16,6 +16,7 @@ vim.opt.rtp:prepend(lazypath)
 require("vim-options")
 require("remap")
 require("commands")
+require("git-commands")
 
 require("lazy").setup("plugins", {
     change_detection = {
