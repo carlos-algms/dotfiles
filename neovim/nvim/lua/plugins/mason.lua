@@ -122,9 +122,9 @@ return {
                     "Show [c]ode [a]ctions"
                 )
 
-                lspKeymap("n", "<space>f", function()
+                lspKeymap("n", "<space>bf", function()
                     vim.lsp.buf.format({ async = true })
-                end, "[F]ormat buffer")
+                end, "[B]uffer [F]ormat")
             end,
         })
 
