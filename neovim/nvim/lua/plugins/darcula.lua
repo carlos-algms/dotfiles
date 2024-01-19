@@ -24,8 +24,16 @@ return {
             vim.cmd([[ call darcula#Hi('Constant', darcula#palette.constant) ]]) -- remove italic from constants
             vim.cmd([[ call darcula#Hi('Type', darcula#palette.number) ]])
             vim.cmd([[ call darcula#Hi('SpellBad', darcula#palette.errorMsg) ]])
-            vim.cmd([[ hi! link @type.tsx NormalFg ]]) -- Fix default imports colored as types
+            vim.cmd([[ hi! link Delimiter NormalFg ]])
+            vim.cmd([[ hi! link @label.json Constant ]]) -- fix JSON properties
+
+            vim.cmd([[ hi! link @identifier.lua NormalFg ]])
+
+            -- TS / TSX
+            vim.cmd([[ hi! link @type.tsx @identifier ]]) -- Fix default imports colored as types
             vim.cmd([[ hi! link @type.typescript Type ]])
+            vim.cmd([[ hi! link @lsp.type.enum.typescriptreact @identifier ]])
+            vim.cmd([[ hi! link @lsp.type.enum.typescript @identifier ]])
             vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
             vim.cmd([[ hi! link @lsp.type.typeParameter.typescript Type ]])
             vim.cmd([[ hi! link @property.tsx Constant]])
@@ -34,12 +42,23 @@ return {
             vim.cmd([[ hi! link @lsp.type.property.typescript Constant]])
             vim.cmd([[ hi! link @constant.builtin.tsx Keyword]])
             vim.cmd([[ hi! link @constant.builtin.typescript Keyword]])
+            vim.cmd([[ hi! link @constant.builtin.javascript Keyword]])
             vim.cmd([[ hi! link @include.tsx Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @include.typescript Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @boolean.typescript Keyword ]])
             vim.cmd([[ hi! link @boolean.tsx Keyword ]])
-            vim.cmd([[ hi! link @label.json Constant ]]) -- fix JSON properties
-            vim.cmd([[ hi! link Delimiter Normal ]]) -- fix TSX properties
+
+            -- Docs Popup
+            vim.cmd([[ hi! link typescriptImport Keyword ]])
+            vim.cmd([[ hi! link typescriptVariable Keyword ]])
+            vim.cmd([[ hi! link typescriptVariableDeclaration @identifier ]])
+            vim.cmd([[ hi! link typescriptTypeReference @type ]])
+            vim.cmd([[ hi! link typescriptArrayMethod @function ]])
+            vim.cmd([[ hi! link typescriptCall @identifier ]])
+            -- vim.cmd([[ hi! link typescriptFuncCallArg @identifier ]])
+            vim.cmd([[ hi! clear typescriptFuncCallArg ]])
+            vim.cmd([[ hi! link typescriptArrowFuncArg @identifier ]])
+            vim.cmd([[ hi! link typescriptIdentifierName Keyword ]])
 
             -- JSX
             vim.cmd([[ hi! link @constructor.tsx Function ]])
@@ -63,6 +82,17 @@ return {
 
             -- SCSS
             vim.cmd([[ hi! link @include.scss Keyword ]])
+
+            -- PHP
+            vim.cmd([[ hi! link @tag.php Error ]])
+            vim.cmd([[ hi! link @type.qualifier.php Keyword ]])
+            vim.cmd([[ hi! link @variable.builtin.php Keyword ]]) -- $this
+            vim.cmd([[ hi! link @constant.builtin.php Keyword ]])
+            vim.cmd([[ hi! link @class.php @variable ]])
+            vim.cmd([[ hi! link @constructor.php @function ]])
+            vim.cmd([[ hi! link @operator.php NormalFg ]])
+            vim.cmd([[ hi! link @property.php Constant ]])
+            vim.cmd([[ hi! link @property.declaration.php Identifier ]])
 
             -- Lua
             vim.cmd(
