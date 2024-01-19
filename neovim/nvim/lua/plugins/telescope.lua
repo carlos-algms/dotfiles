@@ -10,6 +10,9 @@ return {
         },
         config = function()
             local telescope = require("telescope")
+            local actions = require("telescope.actions")
+            local action_state = require("telescope.actions.state")
+            local utils = require("telescope.utils")
 
             -- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
             local telescopeConfig = require("telescope.config")
@@ -48,6 +51,25 @@ return {
                         "out/",
                     },
                     vimgrep_arguments = vimgrep_arguments,
+                    layout_config = {
+                        vertical = {
+                            width = 0.90,
+                        },
+                        horizontal = {
+                            width = 0.90,
+                        },
+                    },
+                    path_display = {
+                        "smart",
+                    },
+                    mappings = {
+                        i = {
+                            -- map actions.which_key to <C-h> (default: <C-/>)
+                            -- actions.which_key shows the mappings for your picker,
+                            -- e.g. git_{create, delete, ...}_branch for the git_branches picker
+                            ["<C-h>"] = actions.which_key,
+                        },
+                    },
                 },
                 pickers = {
                     oldfiles = {
@@ -58,6 +80,12 @@ return {
                         -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
                         find_command = {
                             "rg",
+                            -- "--color=never",
+                            -- "--no-heading",
+                            -- "--with-filename",
+                            -- "--line-number",
+                            -- "--column",
+                            -- "--smart-case",
                             "--files",
                             "--hidden",
                             "--glob",
@@ -68,12 +96,8 @@ return {
                     git_branches = {
                         mappings = {
                             i = {
+                                -- @TODO: change this mapping to a more intuitive one
                                 ["<C-a>"] = function(prompt_bufnr)
-                                    local actions = require("telescope.actions")
-                                    local action_state =
-                                        require("telescope.actions.state")
-                                    local utils = require("telescope.utils")
-
                                     local selection =
                                         action_state.get_selected_entry()
 
@@ -194,7 +218,7 @@ return {
 
             vim.keymap.set(
                 "n",
-                "<leader>fd",
+                "<leader>sd",
                 "<cmd>GrepInDirectory<CR>",
                 { noremap = true, silent = true }
             )
