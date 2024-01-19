@@ -42,7 +42,7 @@ return {
             desc = "LSP actions",
             callback = function(ev)
                 -- Enable completion triggered by <c-x><c-o>
-                vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+                vim.bo[ev.buf].omnifunc = "vim.lsp.omnifunc" --"v:lua.vim.lsp.omnifunc"
 
                 local lspKeymap = function(when, keyCombination, action, desc)
                     local opts = { buffer = ev.buf }
@@ -205,7 +205,19 @@ return {
         })
 
         vim.diagnostic.config({
-            virtual_text = true,
+            virtual_text = false,
         })
+
+        local signs = {
+            Error = "",
+            Warn = "",
+            Hint = "",
+            Info = "",
+        }
+
+        for type, icon in pairs(signs) do
+            local hl = "DiagnosticSign" .. type
+            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = nil })
+        end
     end,
 }
