@@ -25,3 +25,17 @@ Workspace
 frontend
 workspace
 param
+Dotfiles
+dotfiles
+gitconfig
+bashrc
+Customizations
+usr
+env
+Uncomment
+zsh
+untracked
+JQuery
+realpath
+λ
+async
