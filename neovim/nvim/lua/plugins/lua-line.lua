@@ -17,10 +17,13 @@ return {
                     {
                         "vim.fn.fnamemodify(vim.fn.getcwd(), ':t')",
                     },
-                    {
-                        "mode",
-                        upper = true,
-                    },
+                    -- {
+                    --     "mode",
+                    --     upper = true,
+                    -- },
+                },
+                lualine_b = {
+                    "branch",
                 },
                 lualine_c = {
                     {
@@ -34,9 +37,14 @@ return {
                     --     cond = noice.api.status.mode.has,
                     --     color = { fg = "#ff9e64" },
                     -- },
-                    "encoding",
+                    -- "encoding",
                     "fileformat",
+                },
+                lualine_y = {
                     "filetype",
+                },
+                lualine_z = {
+                    "location",
                 },
             },
         }
