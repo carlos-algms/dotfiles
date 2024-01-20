@@ -1,0 +1,4 @@
+;; extends
+
+(paragraph) @paragraph
+

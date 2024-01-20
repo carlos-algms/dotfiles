@@ -14,6 +14,8 @@ return {
                 "html",
                 "vim",
                 "vimdoc",
+                "markdown",
+                "markdown_inline",
             },
 
             -- Install parsers synchronously (only applied to `ensure_installed`)

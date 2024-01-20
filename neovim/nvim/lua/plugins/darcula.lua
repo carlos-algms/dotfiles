@@ -31,7 +31,6 @@ return {
 
             -- TS / TSX
             vim.cmd([[ hi! link @type.tsx @identifier ]]) -- Fix default imports colored as types
-            vim.cmd([[ hi! link @type.typescript Type ]])
             vim.cmd([[ hi! link @lsp.type.enum.typescriptreact @identifier ]])
             vim.cmd([[ hi! link @lsp.type.enum.typescript @identifier ]])
             vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
@@ -94,6 +93,36 @@ return {
             vim.cmd([[ hi! link @property.php Constant ]])
             vim.cmd([[ hi! link @property.declaration.php Identifier ]])
 
+            -- Markdown
+            vim.cmd([[ hi! link @markup.heading.1.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.2.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.3.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.4.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.5.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.6.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.1.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.2.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.3.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.4.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.5.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.heading.6.marker.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.list.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.raw.block.markdown Keyword ]])
+            vim.cmd([[ hi! link @label.markdown @type ]])
+            vim.cmd([[ hi! link @markup.raw.markdown_inline @type ]])
+            vim.cmd(
+                [[ call darcula#Hi('@markup.raw.markdown_inline', darcula#palette.fg, darcula#palette.null, 'bold') ]]
+            )
+            vim.cmd(
+                [[ call darcula#Hi('@markup.italic.markdown_inline', darcula#palette.fg, darcula#palette.null, 'italic,bold') ]]
+            )
+            vim.cmd(
+                [[ hi! link @markup.emphasis.delimiter @markup.italic.markdown_inline ]]
+            )
+            vim.cmd([[ hi! link @markup.strong.markdown_inline Keyword ]])
+            vim.cmd([[ hi! link @delimiter.markdown_inline Keyword ]])
+            vim.cmd([[ hi! link @markup.link.label.markdown_inline String ]])
+
             -- Lua
             vim.cmd(
                 [[ hi! link @lsp.typemod.function.defaultLibrary.lua Keyword ]]
@@ -106,10 +135,14 @@ return {
             vim.cmd([[ hi! link @unit.css Keyword ]])
             vim.cmd([[ hi! link @type.qualifier.css Keyword ]])
             vim.cmd([[ hi! link @field.lua Constant ]])
+            vim.cmd([[ hi! link @variable.member.lua Constant ]])
+            vim.cmd([[ hi! link @function.lua Function ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
 
             -- bash
             vim.cmd([[ hi! link @function.builtin.bash Function ]])
+            vim.cmd([[ hi! link zshFunction Function ]])
+            vim.cmd([[ hi! link zshDeref Constant ]])
         end,
     },
     {
