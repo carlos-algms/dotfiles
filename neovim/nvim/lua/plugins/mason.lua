@@ -4,6 +4,7 @@ return {
     dependencies = {
         { "williamboman/mason-lspconfig.nvim" },
         { "neovim/nvim-lspconfig" },
+        { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
         { "hrsh7th/cmp-nvim-lsp" },
         { "WhoIsSethDaniel/mason-tool-installer.nvim" },
         { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely

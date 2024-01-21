@@ -1,6 +1,13 @@
 return {
     "github/copilot.vim",
-    config = function()
+    event = { "InsertEnter" },
+    -- used init instead of config because copilot was holding Tab anyway
+    init = function()
+        -- I will use CMP mappings to have <Tab> fallback
+        vim.g.copilot_no_tab_map = true
+        vim.g.copilot_assume_mapped = true
+        vim.g.copilot_tab_fallback = ""
+
         vim.g.copilot_filetypes = {
             yml = true,
             yaml = true,
