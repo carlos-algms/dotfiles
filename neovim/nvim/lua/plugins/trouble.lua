@@ -10,21 +10,21 @@ return {
             -- refer to the configuration section below
         })
 
-        vim.keymap.set("n", "<leader>xx", trouble.toggle)
+        vim.keymap.set("n", "<leader>xx", trouble.toggle, { desc = "Trouble toggle", silent = true })
         vim.keymap.set("n", "<leader>xd", function()
-            trouble.toggle("doucment_diagnotics")
-        end)
+            trouble.toggle("document_diagnotics")
+        end, { desc= "Trouble show document diagnostics", silent = true })
 
         vim.keymap.set("n", "<leader>xq", function()
             trouble.toggle("quickfix")
-        end)
+        end, { desc = "Trouble show quickfix", silent = true })
 
         vim.keymap.set("n", "[x", function()
             trouble.previous({ skip_groups = true, jump = true })
-        end)
+        end, { desc = "Trouble previous", silent = true })
 
         vim.keymap.set("n", "]x", function()
             trouble.next({ skip_groups = true, jump = true })
-        end)
+        end, { desc = "Trouble next", silent = true })
     end,
 }
