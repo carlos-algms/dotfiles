@@ -68,6 +68,15 @@ return {
                             -- actions.which_key shows the mappings for your picker,
                             -- e.g. git_{create, delete, ...}_branch for the git_branches picker
                             ["<C-h>"] = actions.which_key,
+                            -- Replace mappings to send to quickfix as Alt doesn't work well on Mac, and Alt + q is already mapped to <Esc>
+                            ["<C-S-q>"] = function(prompt_bufnr)
+                                actions.send_to_qflist(prompt_bufnr)
+                                vim.cmd("Trouble quickfix")
+                            end,
+                            ["<C-q>"] = function(prompt_bufnr)
+                                actions.send_selected_to_qflist(prompt_bufnr)
+                                vim.cmd("Trouble quickfix")
+                            end,
                         },
                     },
                 },
