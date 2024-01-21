@@ -26,6 +26,8 @@ return {
             vim.cmd([[ call darcula#Hi('SpellBad', darcula#palette.errorMsg) ]])
             vim.cmd([[ hi! link Delimiter NormalFg ]])
             vim.cmd([[ hi! link @label.json Constant ]]) -- fix JSON properties
+            vim.cmd([[ hi! link @property.jsonc Constant ]])
+            vim.cmd([[ hi! link @property.json Constant ]])
 
             vim.cmd([[ hi! link @identifier.lua NormalFg ]])
 
@@ -46,6 +48,9 @@ return {
             vim.cmd([[ hi! link @include.typescript Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @boolean.typescript Keyword ]])
             vim.cmd([[ hi! link @boolean.tsx Keyword ]])
+            vim.cmd([[ hi! link @punctuation.special.typescript Keyword ]])
+            vim.cmd([[ hi! link @punctuation.special.tsx Keyword ]])
+            vim.cmd([[ hi! link @punctuation.special.javascript Keyword ]])
 
             -- Docs Popup
             vim.cmd([[ hi! link typescriptImport Keyword ]])
