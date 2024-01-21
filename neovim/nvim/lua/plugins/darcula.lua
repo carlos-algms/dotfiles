@@ -74,6 +74,10 @@ return {
             vim.cmd([[ hi! link @tag.delimiter.html Function ]])
             vim.cmd([[ hi! link @tag.attribute.html NormalFg ]])
 
+            -- YAML
+            vim.cmd([[ hi! link @property.yaml Function ]])
+            vim.cmd([[ hi! link @boolean.yaml Keyword ]])
+
             -- CSS
             vim.cmd([[ hi! link @selector Function ]])
             vim.cmd([[ hi! link @color Constant ]])
