@@ -13,6 +13,7 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
+require("helpers")
 require("vim-options")
 require("remap")
 require("commands")
