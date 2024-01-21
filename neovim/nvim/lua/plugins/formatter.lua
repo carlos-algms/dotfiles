@@ -91,6 +91,9 @@ return {
                 json = {
                     require("formatter.filetypes.json").prettier,
                 },
+                jsonc = {
+                    require("formatter.filetypes.json").prettier,
+                },
                 html = {
                     require("formatter.filetypes.html").prettier,
                 },
