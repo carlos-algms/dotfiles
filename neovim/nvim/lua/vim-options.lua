@@ -27,7 +27,7 @@ vim.opt.background = "dark"
 vim.opt.termguicolors = true
 
 vim.opt.colorcolumn = "80"
-vim.opt.scrolloff = 99
+vim.opt.scrolloff = 10
 vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
 vim.opt.splitright = true
