@@ -10,6 +10,20 @@ return {
         { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
     },
 
+    init = function()
+        vim.filetype.add({
+            extension = {
+                zsh = "sh",
+                sh = "sh", -- force sh-files with zsh-shebang to still get sh as filetype
+            },
+            filename = {
+                [".zshrc"] = "sh",
+                [".zprofile"] = "sh",
+                [".zshenv"] = "sh",
+            },
+        })
+    end,
+
     config = function()
         --
         -- https://github.com/neovim/nvim-lspconfig#suggested-configuration
