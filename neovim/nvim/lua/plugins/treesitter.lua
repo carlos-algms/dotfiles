@@ -7,7 +7,9 @@ return {
             ensure_installed = {
                 "lua",
                 "javascript",
+                "jsdoc",
                 "typescript",
+                "json",
                 "rust",
                 "python",
                 "css",
