@@ -1,6 +1,6 @@
 return {
     "github/copilot.vim",
-    event = { "InsertEnter" },
+    event = { "VeryLazy" },
     -- used init instead of config because copilot was holding Tab anyway
     init = function()
         -- I will use CMP mappings to have <Tab> fallback
