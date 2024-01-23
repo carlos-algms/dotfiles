@@ -5,7 +5,7 @@ return {
         -- or                            , branch = '0.1.x',
         dependencies = {
             { "nvim-lua/plenary.nvim" },
-            { "nvim-telescope/telescope-ui-select.nvim" },
+            -- { "nvim-telescope/telescope-ui-select.nvim" },
             { "princejoogie/dir-telescope.nvim" },
         },
         config = function()
@@ -32,12 +32,24 @@ return {
             table.insert(vimgrep_arguments, "--glob")
             table.insert(vimgrep_arguments, "!**/.git/*")
 
+            local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
+                actions.send_to_qflist(prompt_bufnr)
+                vim.cmd("Trouble quickfix")
+            end
+
+            local function selected_to_quickfix_and_open_trouble(prompt_bufnr)
+                actions.send_selected_to_qflist(prompt_bufnr)
+                vim.cmd("Trouble quickfix")
+            end
+
             telescope.setup({
                 defaults = {
+                    color_devicons = true,
                     cache_picker = {
                         num_pickers = 20, -- your preferred number here, values up to 100 should be perfectly fine; likely even much higher
                     },
                     file_ignore_patterns = {
+                        "\\.git",
                         "node_modules",
                         "vendor",
                         "build",
@@ -51,17 +63,26 @@ return {
                         "out/",
                     },
                     vimgrep_arguments = vimgrep_arguments,
+
                     layout_config = {
                         vertical = {
-                            width = 0.90,
+                            -- width = 0.95,
                         },
                         horizontal = {
-                            width = 0.90,
+                            width = 0.95,
+                            -- preview_width = 0.35,
+                            preview_width = 80,
+                            fname_width = 100,
+                            -- preview_cutoff = 80,
+                        },
+                        center = {
+                            width = 0.70,
                         },
                     },
                     path_display = {
                         "smart",
                     },
+
                     mappings = {
                         i = {
                             -- map actions.which_key to <C-h> (default: <C-/>)
@@ -69,22 +90,29 @@ return {
                             -- e.g. git_{create, delete, ...}_branch for the git_branches picker
                             ["<C-h>"] = actions.which_key,
                             -- Replace mappings to send to quickfix as Alt doesn't work well on Mac, and Alt + q is already mapped to <Esc>
-                            ["<C-S-q>"] = function(prompt_bufnr)
-                                actions.send_to_qflist(prompt_bufnr)
-                                vim.cmd("Trouble quickfix")
-                            end,
-                            ["<C-q>"] = function(prompt_bufnr)
-                                actions.send_selected_to_qflist(prompt_bufnr)
-                                vim.cmd("Trouble quickfix")
-                            end,
+                            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
+                            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
+                        },
+                        n = {
+                            ["<C-h>"] = actions.which_key,
+                            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
+                            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
                         },
                     },
                 },
+
                 pickers = {
                     oldfiles = {
                         -- `cwd` will be the directory where Telescope started.
                         cwd_only = true,
+                        initial_mode = "normal",
                     },
+
+                    lsp_references = {
+                        initial_mode = "normal",
+                        fname_width = 0.70,
+                    },
+
                     find_files = {
                         -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
                         find_command = {
@@ -102,10 +130,13 @@ return {
                         },
                     },
 
+                    git_files = { show_untracked = true },
+
                     git_branches = {
                         mappings = {
                             i = {
                                 -- @TODO: change this mapping to a more intuitive one
+                                -- Maybe <D-c> Mac's command + c as in [c]ompare
                                 ["<C-a>"] = function(prompt_bufnr)
                                     local selection =
                                         action_state.get_selected_entry()
@@ -132,13 +163,14 @@ return {
                     },
                 },
                 extensions = {
-                    ["ui-select"] = {
-                        require("telescope.themes").get_dropdown({}),
-                    },
+                    -- Disabling from now, as I don't want code actions to be on the pickers cache
+                    -- ["ui-select"] = {
+                    --     require("telescope.themes").get_dropdown({}),
+                    -- },
                 },
             })
 
-            telescope.load_extension("ui-select")
+            -- telescope.load_extension("ui-select")
 
             local builtin = require("telescope.builtin")
 
@@ -198,6 +230,9 @@ return {
                     require("telescope.themes").get_dropdown({
                         winblend = 10,
                         previewer = false,
+                        layout_config = {
+                            width = 100,
+                        },
                     })
                 )
             end, {
@@ -209,6 +244,13 @@ return {
                 "<leader>tk",
                 builtin.keymaps,
                 { desc = "[T]elescope list all [k]eymaps" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>th",
+                builtin.help_tags,
+                { desc = "[T]elescope [h]elp tags" }
             )
 
             vim.keymap.set(
@@ -232,5 +274,33 @@ return {
                 { noremap = true, silent = true }
             )
         end,
+
+        vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)
+            -- another option would be use vim.ui.input:
+            -- vim.ui.input({ prompt = "Glob: ", completion = "file", default = "**/*." })
+            -- but it doesn't seem to auto-complete the glob while typing
+
+            require("telescope.builtin").live_grep({
+                vimgrep_arguments = {
+                    "rg",
+                    "--color=never",
+                    "--no-heading",
+                    "--with-filename",
+                    "--line-number",
+                    "--column",
+                    "--smart-case",
+                    "--glob=" .. (ctx.args or ""),
+                    -- @TODO: how to add negative globs? like --glob='!**/node_modules/*'
+                    -- and also multiple globs
+                    -- first test if a file in .git will work,
+                    -- then add a second --glob='!**/.git/*' to check if it works
+                    -- search about RD arguments
+                },
+            })
+        end, {
+            nargs = "+",
+            complete = "file",
+            desc = "Live grep with glob",
+        }),
     },
 }
