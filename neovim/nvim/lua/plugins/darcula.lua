@@ -17,6 +17,10 @@ return {
                 vim.cmd([[ hi! SpellBad guisp=#CC666E gui=undercurl ]])
             end, 100)
 
+            -- making the BG darker, and the FG lighter
+            vim.cmd([[ hi! Normal guibg=#1c1c1c guifg=#bac4cf ]])
+            vim.cmd([[ hi! NormalFg guifg=#bac4cf ]])
+
             -- Fix cursor line overriding other highlights
             vim.cmd(
                 [[ call darcula#Hi('CursorLine', darcula#palette.null, darcula#palette.cursorLine, 'NONE') ]]
@@ -28,8 +32,6 @@ return {
             vim.cmd([[ hi! link @label.json Constant ]]) -- fix JSON properties
             vim.cmd([[ hi! link @property.jsonc Constant ]])
             vim.cmd([[ hi! link @property.json Constant ]])
-
-            vim.cmd([[ hi! link @identifier.lua NormalFg ]])
 
             -- TS / TSX
             vim.cmd([[ hi! link @type.tsx @identifier ]]) -- Fix default imports colored as types
@@ -51,6 +53,9 @@ return {
             vim.cmd([[ hi! link @punctuation.special.typescript Keyword ]])
             vim.cmd([[ hi! link @punctuation.special.tsx Keyword ]])
             vim.cmd([[ hi! link @punctuation.special.javascript Keyword ]])
+            vim.cmd([[ hi! link @type.literal.tsx Type ]])
+            vim.cmd([[ hi! link @type.literal.typescript Type ]])
+            vim.cmd([[ hi! link @comment.documentation.typescript String ]])
 
             -- Docs Popup
             vim.cmd([[ hi! link typescriptImport Keyword ]])
@@ -131,6 +136,7 @@ return {
             vim.cmd([[ hi! link @markup.strong.markdown_inline Keyword ]])
             vim.cmd([[ hi! link @delimiter.markdown_inline Keyword ]])
             vim.cmd([[ hi! link @markup.link.label.markdown_inline String ]])
+            vim.cmd([[ hi! link @markup.list_item.complete.markdown Comment ]])
 
             -- Lua
             vim.cmd(
@@ -148,11 +154,15 @@ return {
             vim.cmd([[ hi! link @function.lua Function ]])
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.keyword.lua Keyword ]])
+            vim.cmd([[ hi! link @identifier.lua NormalFg ]])
 
             -- bash
             vim.cmd([[ hi! link @function.builtin.bash Function ]])
             vim.cmd([[ hi! link zshFunction Function ]])
             vim.cmd([[ hi! link zshDeref Constant ]])
+
+            -- DIFF
+            vim.cmd([[ hi! DiffDelete guibg=#523939]])
         end,
     },
     {
