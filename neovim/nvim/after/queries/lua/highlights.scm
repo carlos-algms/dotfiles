@@ -10,3 +10,9 @@
     value: (function_definition)
     )
   )
+
+ (function_call
+   name: (identifier)
+   @function.call.lua
+   (#set! "priority" 140)
+   )
