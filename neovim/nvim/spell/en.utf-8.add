@@ -58,3 +58,11 @@ formatter
 editorconfig
 whitespace
 lua
+Esc
+cwd
+gitignore
+laggy
+Neovim
+quickfix
+ui
+neo
