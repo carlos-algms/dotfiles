@@ -70,13 +70,6 @@ return {
 
                 lspKeymap(
                     "n",
-                    "gd",
-                    vim.lsp.buf.definition,
-                    "[G]o to [d]efinition"
-                )
-
-                lspKeymap(
-                    "n",
                     "gD",
                     vim.lsp.buf.declaration,
                     "[G]o to [D]eclaration"
@@ -100,6 +93,16 @@ return {
                 -- lspKeymap("n", "gr", vim.lsp.buf.references, opts)
 
                 local telescopeBuiltin = require("telescope.builtin")
+
+                lspKeymap(
+                    "n",
+                    "gd",
+                    -- went with Telescope, as it is better when there are more than 1 result
+                    -- vim.lsp.buf.definition,
+                    telescopeBuiltin.lsp_definitions,
+                    "[G]o to [d]efinition"
+                )
+
                 lspKeymap(
                     "n",
                     "gr",
