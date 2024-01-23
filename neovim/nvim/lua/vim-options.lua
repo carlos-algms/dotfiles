@@ -1,7 +1,7 @@
 vim.opt.title = true
 vim.opt.titlelen = 0 -- do not shorten title
 vim.opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-    .. ' %{expand("%:.")}'
+-- .. ' %{expand("%:.")}'
 
 vim.opt.nu = true
 vim.opt.relativenumber = true
@@ -39,8 +39,9 @@ vim.scriptencoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 
-vim.opt.diffopt = "iwhite,context:9999999"
+vim.opt.diffopt = "iwhite,context:9999999,filler"
 vim.opt.foldenable = false
+vim.opt.fillchars = "diff: "
 
 vim.opt.spelllang = "en_us"
 vim.opt.spell = true
