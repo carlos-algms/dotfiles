@@ -1,6 +1,10 @@
 return {
     "akinsho/toggleterm.nvim",
     version = "*",
+    -- Disabled it as Kitty have the same functionality
+    -- with the benefit of run outside of Neovim, so no drawbacks
+    -- I might enable it again to use on SSH sessions, as it will open on the remote's cwd
+    enabled = false,
     opts = {
         open_mapping = [[<C-`>]],
     },
