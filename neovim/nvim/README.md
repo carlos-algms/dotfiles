@@ -2,10 +2,17 @@
 
 ## Todo
 
+-   [ ] Check if Telescope cache can have ignore, so I can re-enable ui-select
+-   [ ] Check nesting config for Neo Tree
+-   [ ] add a width limit to notify and word-wrap
+-   [ ] Add plugin to auto auto pair brackets
+-   [ ] Review highlights for `.editorconfig`, it is too blue
+-   [ ] `@type.tsx` shows as white in DiffView, should be blue as a normal type
+-   [ ] Enums shows white and blue depending on where they are, TS and TSX
+-   [ ] Create my Own Sheet Sheet of commands and remaps
 -   [ ] review and lazy load plugins
 -   [ ] Change Telescope mapping `<M-q>` to something else, as it is already mapped to `<Esc`>
     -   it is to send only selection to the quickfix list, `<C-q>` sends everything
--   [ ] Create my Own Sheet Sheet of commands and remaps
 -   [ ] Check if I need to use a local TSServer or if it is smart enough to pick up the one from the open project
     -   and I can check https://github.com/pmizio/typescript-tools.nvim
 -   [x] Learn how to use quickfix
