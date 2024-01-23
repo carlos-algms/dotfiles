@@ -4,6 +4,7 @@
 return {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
+    enabled = true,
     dependencies = {
         "nvim-lua/plenary.nvim",
         "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
@@ -20,18 +21,22 @@ return {
     end,
     opts = {
         sources = { "filesystem", "buffers", "git_status", "document_symbols" },
+        enable_git_status = true,
+        enable_diagnostics = false,
+        sort_case_insensitive = true,
+        default_component_config = {
+            group_empty_dirs = true,
+        },
+
         filesystem = {
             filtered_items = {
                 visible = true, -- when true, they will just be displayed differently than normal items
                 hide_dotfiles = false,
                 hide_gitignored = false,
             },
-            nesting_rules = {},
-            group_empty_dirs = false,
         },
 
         event_handlers = {
-
             {
                 event = "file_opened",
                 handler = function(file_path)
@@ -42,7 +47,42 @@ return {
                 end,
             },
         },
+        window = {
+            position = "left",
+            width = 45,
+            mapping_options = {
+                noremap = true,
+                nowait = true,
+            },
+            mappings = {
+                ["a"] = {
+                    "add",
+                    -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
+                    -- some commands may take optional config options, see `:h neo-tree-mappings` for details
+                    config = {
+                        show_path = "relative", -- "none", "relative", "absolute"
+                    },
+                },
+                ["A"] = {
+                    "add_directory",
+                    config = {
+                        show_path = "relative",
+                    },
+                },
+                ["m"] = {
+                    "move",
+                    config = {
+                        show_path = "relative",
+                    },
+                },
+            },
+        },
+
         -- nesting_rules = {
+        --     ["editorconfig"] = {
+        --         pattern = "\\.editorconfig$",
+        --         files = { "\\.stylua.toml" },
+        --     },
         --     ["js"] = {
         --         pattern = "(.+)%.js$",
         --         files = { "%1.js.map", "%1.min.js", "%1.d.ts" },
@@ -80,17 +120,6 @@ return {
             { desc = "Toggle NeoTree ", silent = true }
         )
 
-        -- require("neo-tree").setup({
-        --     filesystem = {
-        --         filtered_items = {
-        --             visible = false, -- when true, they will just be displayed differently than normal items
-        --             hide_dotfiles = false,
-        --             hide_gitignored = false,
-        --         },
-        --         nesting_rules = {},
-        --         group_empty_dirs = false,
-        --     },
-        -- })
         require("neo-tree").setup(opts)
     end,
 }
