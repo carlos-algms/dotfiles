@@ -22,6 +22,13 @@ return {
 
         vim.keymap.set(
             "n",
+            "<leader>gB",
+            ":Git blame<CR>",
+            { desc = "[G]it [B]lame" }
+        )
+
+        vim.keymap.set(
+            "n",
             "<leader>gd",
             ":Gvdiffsplit!<CR>",
             { desc = "Show [g]it [d]iff for current file" }
