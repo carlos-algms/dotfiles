@@ -6,10 +6,19 @@ return {
     },
 
     config = function()
-        -- TODO: save bookmarks per project, `nvim.bookmarks` is a json file saving all bookmarks
-        -- Do I need to create a folder, or it gets created automatically?
+        local project_path =
+            vim.fn.fnamemodify(vim.fn.getcwd(), ":p"):gsub("/", "__")
+
+        local bookmarksPath = os.getenv("HOME")
+            .. "/.cache/nvim/nvim-bookmarks/"
+
+        vim.cmd("silent !mkdir -p " .. bookmarksPath)
+
+        local bookmarksFile = bookmarksPath .. project_path .. ".json"
+
         require("bookmarks").setup({
-            save_file = os.getenv("HOME") .. "/.cache/nvim-bookmarks",
+            -- Save the bookmarks per project
+            save_file = bookmarksFile,
             keywords = {
                 ["@t"] = "☑️ ", -- mark annotation startswith @t ,signs this icon as `Todo`
                 ["@w"] = "⚠️ ", -- mark annotation startswith @w ,signs this icon as `Warn`
