@@ -8,6 +8,18 @@ return {
         { "hrsh7th/cmp-nvim-lsp" },
         { "WhoIsSethDaniel/mason-tool-installer.nvim" },
         { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
+
+        {
+            -- apparently it should be installed before lspconfig
+            "folke/neodev.nvim",
+            -- TODO: enable it only for the nvim folder
+            -- enabled = false,
+            -- add lazy here as wasn't initializing all the time
+            lazy = false,
+            config = function()
+                require("neodev").setup({})
+            end,
+        },
     },
 
     init = function()
