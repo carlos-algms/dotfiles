@@ -63,6 +63,7 @@ return {
                         "out/",
                     },
                     vimgrep_arguments = vimgrep_arguments,
+                    sorting_strategy = "ascending",
 
                     layout_config = {
                         vertical = {
@@ -73,6 +74,7 @@ return {
                             -- preview_width = 0.35,
                             preview_width = 80,
                             fname_width = 100,
+                            prompt_position = "top",
                             -- preview_cutoff = 80,
                         },
                         center = {
