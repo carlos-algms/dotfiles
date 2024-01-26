@@ -50,7 +50,9 @@ return {
                     },
                     file_ignore_patterns = {
                         "\\.git",
-                        "node_modules",
+                        -- disabling it as it was blocking lsp_references,
+                        -- it doesn't seem to affect file_search, it is still being ignored
+                        -- "node_modules",
                         "vendor",
                         "build",
                         "dist",
@@ -96,6 +98,7 @@ return {
                             ["<C-q>"] = selected_to_quickfix_and_open_trouble,
                         },
                         n = {
+                            ["q"] = actions.close,
                             ["<C-h>"] = actions.which_key,
                             ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
                             ["<C-q>"] = selected_to_quickfix_and_open_trouble,
@@ -113,6 +116,10 @@ return {
                     lsp_references = {
                         initial_mode = "normal",
                         fname_width = 0.70,
+                    },
+
+                    lsp_definitions = {
+                        initial_mode = "normal",
                     },
 
                     find_files = {
@@ -229,13 +236,14 @@ return {
             vim.keymap.set("n", "<leader>/", function()
                 -- You can pass additional configuration to telescope to change theme, layout, etc.
                 builtin.current_buffer_fuzzy_find(
-                    require("telescope.themes").get_dropdown({
-                        winblend = 10,
-                        previewer = false,
-                        layout_config = {
-                            width = 100,
-                        },
-                    })
+                    -- require("telescope.themes").get_dropdown({
+                    --     -- winblend = 10,
+                    --     -- previewer = true,
+                    --     -- layout_strategy = "vertical",
+                    --     -- layout_config = {
+                    --     --     width = 80,
+                    --     -- },
+                    -- })
                 )
             end, {
                 desc = "[/] Fuzzily search in current buffer on Modal with results",
