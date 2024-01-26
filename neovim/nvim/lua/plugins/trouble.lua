@@ -10,10 +10,26 @@ return {
             -- refer to the configuration section below
         })
 
-        vim.keymap.set("n", "<leader>xx", trouble.toggle, { desc = "Trouble toggle", silent = true })
+        vim.keymap.set(
+            "n",
+            "<leader>xx",
+            trouble.toggle,
+            { desc = "Trouble toggle", silent = true }
+        )
+
         vim.keymap.set("n", "<leader>xd", function()
-            trouble.toggle("document_diagnotics")
-        end, { desc= "Trouble show document diagnostics", silent = true })
+            trouble.toggle("document_diagnostics")
+        end, {
+            desc = "Trouble show document diagnostics",
+            silent = true,
+        })
+
+        vim.keymap.set("n", "<leader>xw", function()
+            trouble.toggle("workspace_diagnostics")
+        end, {
+            desc = "Trouble show workspace diagnostics",
+            silent = true,
+        })
 
         vim.keymap.set("n", "<leader>xq", function()
             trouble.toggle("quickfix")
