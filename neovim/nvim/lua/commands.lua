@@ -35,6 +35,9 @@ vim.api.nvim_create_user_command("Float", function(ctx)
         row = (ui.height / 2) - (height / 2),
         anchor = "NW",
         style = "minimal",
+        border = "rounded",
+        title = ctx.args,
+        title_pos = "left",
     }
 
     local win = vim.api.nvim_open_win(buf, true, opts)
