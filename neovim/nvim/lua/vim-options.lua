@@ -40,7 +40,9 @@ vim.opt.fileencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 
 vim.opt.diffopt = "iwhite,context:9999999,filler"
-vim.opt.foldenable = false
+vim.opt.foldenable = true
+vim.opt.foldmethod = "indent"
+vim.opt.foldlevel = 99
 vim.opt.fillchars = "diff: "
 
 vim.opt.spelllang = "en_us"

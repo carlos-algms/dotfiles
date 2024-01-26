@@ -20,6 +20,11 @@ return {
             -- making the BG darker, and the FG lighter
             vim.cmd([[ hi! Normal guibg=#1c1c1c guifg=#bac4cf ]])
             vim.cmd([[ hi! NormalFg guifg=#bac4cf ]])
+            -- UI and nVim windows
+            vim.cmd([[ hi! NormalFloat guibg=#2B2B2B guifg=#bac4cf ]])
+            vim.cmd([[ hi! link LazyH2 Function ]])
+            vim.cmd([[ hi! link LazyReasonStart Type ]])
+            vim.cmd([[ hi! link LuaFunctionBlock Function ]])
 
             -- Fix cursor line overriding other highlights
             vim.cmd(
@@ -29,12 +34,18 @@ return {
             vim.cmd([[ call darcula#Hi('Type', darcula#palette.number) ]])
             vim.cmd([[ call darcula#Hi('SpellBad', darcula#palette.errorMsg) ]])
             vim.cmd([[ hi! link Delimiter NormalFg ]])
-            vim.cmd([[ hi! link @label.json Constant ]]) -- fix JSON properties
-            vim.cmd([[ hi! link @property.jsonc Constant ]])
-            vim.cmd([[ hi! link @property.json Constant ]])
+            vim.cmd([[ hi! link @identifier NormalFg ]])
+            vim.cmd([[ hi! link @label Constant ]]) -- fix JSON properties
+            vim.cmd([[ hi! link @property Constant ]]) -- will it fix all properties in all languages?
+            vim.cmd([[ hi! link @string.regexp Constant ]])
+            vim.cmd([[ hi! link @property Constant ]])
+            vim.cmd([[ hi! link @variable.member Constant ]])
+            vim.cmd([[ hi! link @lsp.type.class @identifier ]])
+            vim.cmd([[ hi! link @lsp.type.namespace @identifier ]])
 
             -- TS / TSX
-            vim.cmd([[ hi! link @type.tsx @identifier ]]) -- Fix default imports colored as types
+            -- Review this, in previews, LSP doesn't start, so types are white instead of blue
+            -- vim.cmd([[ hi! link @type.tsx @identifier ]]) -- Fix default imports colored as types
             vim.cmd([[ hi! link @lsp.type.enum.typescriptreact @identifier ]])
             vim.cmd([[ hi! link @lsp.type.enum.typescript @identifier ]])
             vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
@@ -106,6 +117,10 @@ return {
             vim.cmd([[ hi! link @operator.php NormalFg ]])
             vim.cmd([[ hi! link @property.php Constant ]])
             vim.cmd([[ hi! link @property.declaration.php Identifier ]])
+            vim.cmd([[ hi! link @function.builtin.php Keyword ]])
+            vim.cmd([[ hi! link @attribute.phpdoc Keyword ]])
+            vim.cmd([[ hi! link @spell.phpdoc String ]])
+            vim.cmd([[ hi! link @boolean.php Keyword ]])
 
             -- Markdown
             vim.cmd([[ hi! link @markup.heading.1.markdown Keyword ]])
@@ -137,6 +152,10 @@ return {
             vim.cmd([[ hi! link @delimiter.markdown_inline Keyword ]])
             vim.cmd([[ hi! link @markup.link.label.markdown_inline String ]])
             vim.cmd([[ hi! link @markup.list_item.complete.markdown Comment ]])
+            vim.cmd([[ hi! link @lsp.type.class.markdown Comment ]])
+            vim.cmd([[ hi! link @markup.list.checked.markdown Comment ]])
+            vim.cmd([[ hi! link markdownCode Keyword ]])
+            vim.cmd([[ hi! link FloatTitle NormalFg ]])
 
             -- Lua
             vim.cmd(

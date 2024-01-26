@@ -22,6 +22,8 @@ return {
                 "vimdoc",
                 "markdown",
                 "markdown_inline",
+                "php",
+                "phpdoc",
             },
 
             -- Install parsers synchronously (only applied to `ensure_installed`)
