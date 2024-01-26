@@ -60,7 +60,7 @@ return {
                 -- })
 
                 map("n", "<leader>ml", ":Telescope bookmarks list<CR>", {
-                    desc = "Show bookmarks in a quickfix window",
+                    desc = "Show bookmarks with Telescope",
                 })
             end,
         })
