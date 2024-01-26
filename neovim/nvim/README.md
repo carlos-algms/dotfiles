@@ -2,7 +2,18 @@
 
 ## Todo
 
--   [ ] Check if Telescope cache can have ignore, so I can re-enable ui-select
+-   [ ] Correct the sign background color, it is too dark on the numbers column
+-   [x] Add `jk` to send `<Esc>` in all modes, as saw everywhere on the internet
+    -   it is terribly slow, I'm disabling it for now
+-   [ ] `@function.call.tsx` should have higher priority over type
+-   [ ] use `try_node_modules` with the Formatter plugin
+-   [ ] How to Format PHP with prettier?
+-   [ ] adjust diffView ctrl+ b / f to scroll less, it jumps too much
+-   [ ] Use quickfix to show TSC errors
+    -   https://www.reddit.com/r/neovim/comments/ylvoml/typescript_errors_into_vim_quickfix/
+    -   I need to find a way to look for the nearest tsconfig.json and run tsc on it
+-   [x] Check if Telescope cache can have ignore, so I can re-enable ui-select
+    -   It doesn't, I disabled the ui-select plugin for now to avoid issues
 -   [ ] Check nesting config for Neo Tree
 -   [ ] add a width limit to notify and word-wrap
 -   [ ] Add plugin to auto auto pair brackets
@@ -15,6 +26,7 @@
     -   it is to send only selection to the quickfix list, `<C-q>` sends everything
 -   [ ] Check if I need to use a local TSServer or if it is smart enough to pick up the one from the open project
     -   and I can check https://github.com/pmizio/typescript-tools.nvim
+-   [x] Make Kitty's default title only the current directory
 -   [x] Learn how to use quickfix
     -   [x] map `[q` and `]q` to navigate through errors
 -   [x] Compare the plugin vimspector with the DAP plugin [name](https://github.com/puremourning/vimspector)
