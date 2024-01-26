@@ -5,9 +5,9 @@ return {
     --     return require "custom.configs.formatter"
     -- end
     init = function()
-        -- Default to false to be safe on newly opened projects
+        -- Default to true to not have to enable it for every project
         if vim.g.format_on_save == nil then
-            vim.g.format_on_save = false
+            vim.g.format_on_save = true
         end
 
         vim.g.format_on_save_exclude = {
@@ -72,6 +72,7 @@ return {
             end,
         })
 
+        local util = require("formatter.util")
         require("formatter").setup({
             -- All formatter configurations are opt-in
             -- TODO: how to disable this for certain files per project??
@@ -117,6 +118,27 @@ return {
                 },
                 sh = {
                     require("formatter.filetypes.sh").shfmt,
+                },
+                php = {
+                    function(parser)
+                        local opts = {
+                            exe = "prettier",
+                            args = {
+                                "--stdin-filepath",
+                                util.escape_path(
+                                    util.get_current_buffer_file_path()
+                                ),
+                            },
+                            stdin = true,
+                            try_node_modules = true,
+                        }
+
+                        if parser then
+                            opts["--parser"] = parser
+                        end
+
+                        return opts
+                    end,
                 },
                 -- Disable it to rely on .editorconfig
                 -- ["*"] = {
