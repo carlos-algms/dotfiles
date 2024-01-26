@@ -34,6 +34,20 @@ return {
             },
             file_panel = {
                 listing_style = "list",
+                keymaps = {
+                    {
+                        "n",
+                        "<c-b>",
+                        actions.scroll_view(-0.25),
+                        { desc = "Scroll the view up" },
+                    },
+                    {
+                        "n",
+                        "<c-f>",
+                        actions.scroll_view(0.25),
+                        { desc = "Scroll the view down" },
+                    },
+                },
             },
             keymaps = {
                 disable_defaults = false, -- Disable the default keymaps
