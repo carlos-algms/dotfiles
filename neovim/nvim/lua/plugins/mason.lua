@@ -37,7 +37,6 @@ return {
     end,
 
     config = function()
-        --
         -- https://github.com/neovim/nvim-lspconfig#suggested-configuration
         -- https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/you-might-not-need-lsp-zero.md
 
@@ -63,6 +62,32 @@ return {
             vim.diagnostic.goto_next,
             { desc = "Go to next problem" }
         )
+
+        vim.keymap.set("n", "]e", function()
+            vim.diagnostic.goto_next({
+                severity = vim.diagnostic.severity.ERROR,
+            })
+        end, { desc = "Go to next Erro" })
+
+        vim.keymap.set("n", "[e", function()
+            vim.diagnostic.goto_prev({
+                severity = vim.diagnostic.severity.ERROR,
+            })
+        end, { desc = "Go to previous Error" })
+
+        vim.lsp.handlers["textDocument/signatureHelp"] =
+            vim.lsp.with(vim.lsp.handlers.signature_help, {
+                border = "single",
+                title = "signature",
+            })
+
+        vim.lsp.handlers["textDocument/hover"] =
+            vim.lsp.with(vim.lsp.handlers.hover, {
+                -- Use a sharp border with `FloatBorder` highlights
+                border = "single",
+                -- add the title in hover float window
+                title = "hover",
+            })
 
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -236,6 +261,12 @@ return {
 
         vim.diagnostic.config({
             virtual_text = false,
+            float = {
+                -- UI.
+                header = false,
+                border = "rounded",
+                focusable = true,
+            },
         })
 
         local signs = {
@@ -248,6 +279,7 @@ return {
         for type, icon in pairs(signs) do
             local hl = "DiagnosticSign" .. type
             vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = nil })
+            vim.cmd("hi! " .. hl .. " guibg=#313335 guifg=#bac4cf")
         end
     end,
 }
