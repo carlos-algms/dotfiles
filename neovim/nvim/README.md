@@ -2,13 +2,17 @@
 
 ## Todo
 
--   [ ] Correct the sign background color, it is too dark on the numbers column
+-   [-] Fork the Dashboard and change file name to omit the CWD and show only relative path
+    -   here: https://github.com/nvimdev/dashboard-nvim/blob/63df28409d940f9cac0a925df09d3dc369db9841/lua/dashboard/theme/hyper.lua#L190
+    -   I created a PR https://github.com/nvimdev/dashboard-nvim/pull/416, 🤞
+    -   If it gets merged, I'll suggest to start the index with `0`, same as `0
+-   [x] Correct the sign background color, it is too dark on the numbers column
 -   [x] Add `jk` to send `<Esc>` in all modes, as saw everywhere on the internet
     -   it is terribly slow, I'm disabling it for now
--   [ ] `@function.call.tsx` should have higher priority over type
--   [ ] use `try_node_modules` with the Formatter plugin
--   [ ] How to Format PHP with prettier?
--   [ ] adjust diffView ctrl+ b / f to scroll less, it jumps too much
+-   [x] `@function.call.tsx` should have higher priority over type
+-   [x] use `try_node_modules` with the Formatter plugin
+-   [x] How to Format PHP with prettier?
+-   [x] adjust diffView ctrl+ b / f to scroll less, it jumps too much
 -   [ ] Use quickfix to show TSC errors
     -   https://www.reddit.com/r/neovim/comments/ylvoml/typescript_errors_into_vim_quickfix/
     -   I need to find a way to look for the nearest tsconfig.json and run tsc on it
@@ -17,12 +21,12 @@
 -   [ ] Check nesting config for Neo Tree
 -   [ ] add a width limit to notify and word-wrap
 -   [ ] Add plugin to auto auto pair brackets
--   [ ] Review highlights for `.editorconfig`, it is too blue
+-   [x] Review highlights for `.editorconfig`, it is too blue
 -   [ ] `@type.tsx` shows as white in DiffView, should be blue as a normal type
 -   [ ] Enums shows white and blue depending on where they are, TS and TSX
 -   [ ] Create my Own Sheet Sheet of commands and remaps
 -   [ ] review and lazy load plugins
--   [ ] Change Telescope mapping `<M-q>` to something else, as it is already mapped to `<Esc`>
+-   [x] Change Telescope mapping `<M-q>` to something else, as it is already mapped to `<Esc`>
     -   it is to send only selection to the quickfix list, `<C-q>` sends everything
 -   [ ] Check if I need to use a local TSServer or if it is smart enough to pick up the one from the open project
     -   and I can check https://github.com/pmizio/typescript-tools.nvim
@@ -35,8 +39,9 @@
 -   [x] Disable float term
 -   [x] Install toggle terminal plugin (I have the float-term, but I would prefer to have them in a split)
     -   [x] no, it cant: Or maybe Kitty can open a new terminal in the same CWD?
-    -   [x] learn more about the Toggle term functionality
-    -   [ ] check the async tasks plugin https://github.com/skywind3000/asynctasks.vim
+    -   [x] lea https://github.com/skywind3000/asynctasks.vimrn more about the Toggle term functionality
+    -   [x] check the async tasks plugin https://github.com/skywind3000/asynctasks.vim
+        -   seems to much to learn its syntax, I'll skip it for now
 -   [x] make `null` and `true`, and `false` highlight as normal blue types
 -   [ ] Install multi-line plugin
 -   [x] How to auto-complete search command? `/ `
