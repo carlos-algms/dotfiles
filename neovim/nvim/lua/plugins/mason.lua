@@ -49,19 +49,19 @@ return {
             { desc = "Open problems in a floating window" }
         )
 
-        vim.keymap.set(
-            "n",
-            "[d",
-            vim.diagnostic.goto_prev,
-            { desc = "Go to previous problem" }
-        )
+        -- vim.keymap.set(
+        --     "n",
+        --     "[d",
+        --     vim.diagnostic.goto_prev,
+        --     { desc = "Go to previous problem" }
+        -- )
 
-        vim.keymap.set(
-            "n",
-            "]d",
-            vim.diagnostic.goto_next,
-            { desc = "Go to next problem" }
-        )
+        -- vim.keymap.set(
+        --     "n",
+        --     "]d",
+        --     vim.diagnostic.goto_next,
+        --     { desc = "Go to next problem" }
+        -- )
 
         -- disabled to use LSP Saga
         -- vim.keymap.set("n", "]e", function()
@@ -244,20 +244,21 @@ return {
                 end,
 
                 tsserver = function()
-                    lspconfig.tsserver.setup({
-                        capabilities = lsp_capabilities,
-                        init_options = {
-                            preferences = {
-                                disableSuggestions = false,
-                            },
-                        },
-                        commands = {
-                            OrganizeImports = {
-                                organize_imports,
-                                description = "Organize Imports",
-                            },
-                        },
-                    })
+                    -- Disabled to use typescript-tools.nvim
+                    -- lspconfig.tsserver.setup({
+                    --     capabilities = lsp_capabilities,
+                    --     init_options = {
+                    --         preferences = {
+                    --             disableSuggestions = false,
+                    --         },
+                    --     },
+                    --     commands = {
+                    --         OrganizeImports = {
+                    --             organize_imports,
+                    --             description = "Organize Imports",
+                    --         },
+                    --     },
+                    -- })
                 end,
             },
         })

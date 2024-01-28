@@ -77,6 +77,20 @@ return {
             { desc = "LSP Peek type definition", silent = true }
         )
 
+        vim.keymap.set(
+            "n",
+            "]d",
+            ":Lspsaga diagnostic_jump_next<CR>",
+            { desc = "Go to next problem" }
+        )
+
+        vim.keymap.set(
+            "n",
+            "[d",
+            ":Lspsaga diagnostic_jump_prev<CR>",
+            { desc = "Go to previous problem" }
+        )
+
         vim.keymap.set({ "n", "v" }, "]e", function()
             diagnostic:goto_prev({
                 severity = vim.diagnostic.severity.ERROR,
