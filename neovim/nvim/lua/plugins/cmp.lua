@@ -21,26 +21,18 @@ return {
                     { "rafamadriz/friendly-snippets" },
                 },
             },
+            {
+                "onsails/lspkind.nvim",
+            },
         },
         config = function()
             local cmp = require("cmp")
             local luasnip = require("luasnip")
+            local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
             -- https://github.com/L3MON4D3/LuaSnip#add-snippets
             require("luasnip.loaders.from_vscode").lazy_load()
-
-            -- Used for the <Tab>
-            local has_words_before = function()
-                unpack = unpack or table.unpack
-                local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-                return col ~= 0
-                    and vim.api
-                            .nvim_buf_get_lines(0, line - 1, line, true)[1]
-                            :sub(col, col)
-                            :match("%s")
-                        == nil
-            end
 
             cmp.setup({
                 snippet = {
@@ -49,16 +41,28 @@ return {
                     end,
                 },
                 sources = cmp.config.sources({
-                    { name = "path" },
-                    { name = "nvim_lsp", keyword_length = 1 },
-                    { name = "nvim_lsp_signature_help" },
                     { name = "luasnip" },
+                    { name = "nvim_lsp_signature_help" },
+                    { name = "nvim_lsp", keyword_length = 1 },
                     { name = "nvim_lua" },
+                    { name = "path" },
                 }, {
                     { name = "buffer" },
                 }),
-                -- TODO how to format? Or do I even need to format here?
-                --    formatting = lsp_zero.cmp_format(),
+
+                window = {
+                    completion = cmp.config.window.bordered(),
+                    documentation = cmp.config.window.bordered(),
+                },
+
+                formatting = {
+                    format = lspkind.cmp_format({
+                        mode = "symbol_text",
+                        show_labelDetails = true,
+                        preset = "default",
+                    }),
+                },
+
                 mapping = cmp.mapping.preset.insert({
                     ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
                     ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
