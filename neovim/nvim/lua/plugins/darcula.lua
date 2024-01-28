@@ -54,6 +54,7 @@ return {
             vim.cmd([[ hi! link @property.typescript Constant]])
             vim.cmd([[ hi! link @lsp.type.property.typescriptreact Constant]])
             vim.cmd([[ hi! link @lsp.type.property.typescript Constant]])
+            vim.cmd([[ hi! link @tag Function]])
             vim.cmd([[ hi! link @constant.builtin.tsx Keyword]])
             vim.cmd([[ hi! link @constant.builtin.typescript Keyword]])
             vim.cmd([[ hi! link @constant.builtin.javascript Keyword]])
