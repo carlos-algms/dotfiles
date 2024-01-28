@@ -97,3 +97,12 @@ vim.keymap.set(
     ":cprev<CR>",
     { desc = "Previous item in the fix list" }
 )
+
+vim.keymap.set(
+    { "i" },
+    "<C-j>",
+    "<C-o>o",
+    { desc = "Insert a new line bellow" }
+)
+
+vim.keymap.set({ "i" }, "<C-k>", "<C-o>O", { desc = "Insert a new line above" })
