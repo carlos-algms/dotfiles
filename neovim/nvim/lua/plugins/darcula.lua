@@ -182,6 +182,10 @@ return {
 
             -- DIFF
             vim.cmd([[ hi! DiffDelete guibg=#523939]])
+
+            -- editor config
+            vim.cmd([[ hi! link editorconfigProperty Keyword ]])
+            vim.cmd([[ hi! link dosiniHeader @identifier ]])
         end,
     },
     {
