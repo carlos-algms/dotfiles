@@ -1,6 +1,8 @@
 return {
-    "nvimdev/dashboard-nvim",
-    dir = "~/projects/dashboard-nvim",
+    -- "nvimdev/dashboard-nvim",
+    -- dir = "~/projects/dashboard-nvim",
+    "carlos-algms/dashboard-nvim",
+    branch = "relative_paths_on_cwd_only",
     event = "VimEnter",
     dependencies = {
         { "nvim-tree/nvim-web-devicons" },
