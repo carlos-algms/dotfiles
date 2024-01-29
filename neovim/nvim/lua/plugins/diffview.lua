@@ -34,19 +34,9 @@ return {
             },
             file_panel = {
                 listing_style = "list",
-                keymaps = {
-                    {
-                        "n",
-                        "<c-b>",
-                        actions.scroll_view(-0.25),
-                        { desc = "Scroll the view up" },
-                    },
-                    {
-                        "n",
-                        "<c-f>",
-                        actions.scroll_view(0.25),
-                        { desc = "Scroll the view down" },
-                    },
+                win_config = {
+                    position = "bottom",
+                    height = 10,
                 },
             },
             keymaps = {
@@ -60,12 +50,24 @@ return {
                         "<cr>",
                         function()
                             actions.select_entry()
-                            vim.cmd("wincmd 2w")
+                            vim.cmd("wincmd 1w")
                             vim.cmd("norm gg")
-                            vim.cmd("wincmd 3w")
+                            vim.cmd("wincmd 2w")
                             vim.cmd("norm gg]c")
                         end,
                         { desc = "Open the diff for the selected entry" },
+                    },
+                    {
+                        "n",
+                        "<c-b>",
+                        actions.scroll_view(-0.25),
+                        { desc = "Scroll the view up" },
+                    },
+                    {
+                        "n",
+                        "<c-f>",
+                        actions.scroll_view(0.25),
+                        { desc = "Scroll the view down" },
                     },
                 },
                 view = {
