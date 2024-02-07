@@ -106,3 +106,7 @@ vim.keymap.set(
 )
 
 vim.keymap.set({ "i" }, "<C-k>", "<C-o>O", { desc = "Insert a new line above" })
+
+-- better indenting
+vim.keymap.set("v", "<", "<gv")
+vim.keymap.set("v", ">", ">gv")
