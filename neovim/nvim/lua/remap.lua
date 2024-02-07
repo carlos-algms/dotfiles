@@ -110,3 +110,15 @@ vim.keymap.set({ "i" }, "<C-k>", "<C-o>O", { desc = "Insert a new line above" })
 -- better indenting
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
+
+-- adding vanilla auto-close for quotes and brackets
+vim.keymap.set("i", "'", "''<Left>", { desc = "auto close single quotes" })
+vim.keymap.set("i", '"', '""<Left>', { desc = "auto close double quotes" })
+vim.keymap.set("i", "[", "[]<Left>", { desc = "auto close square brackets" })
+vim.keymap.set("i", "{", "{}<Left>", { desc = "auto close curly brackets" })
+vim.keymap.set(
+    "i",
+    "{<CR>",
+    "{<CR>}<ESC>O",
+    { desc = "auto close curly brackets new line" }
+)
