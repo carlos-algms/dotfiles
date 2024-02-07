@@ -1,57 +1,70 @@
-vim.opt.title = true
-vim.opt.titlelen = 0 -- do not shorten title
-vim.opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+local opt = vim.opt
+
+opt.title = true
+opt.titlelen = 0 -- do not shorten title
+opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 -- .. ' %{expand("%:.")}'
 
-vim.opt.nu = true
-vim.opt.relativenumber = true
+opt.nu = true
+opt.relativenumber = true
 
-vim.opt.wrap = false
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-vim.opt.shiftwidth = 2
-vim.opt.expandtab = true
-vim.opt.autoindent = true
-vim.opt.smartindent = true
-vim.opt.cursorline = true
+opt.wrap = false
+opt.tabstop = 2
+opt.softtabstop = 2
+opt.shiftwidth = 2
+opt.expandtab = true
+opt.autoindent = true
+opt.smartindent = true
+opt.cursorline = true
 
-vim.opt.swapfile = false
-vim.opt.backup = false
+opt.swapfile = false
+opt.backup = false
 
-vim.opt.hlsearch = false
-vim.opt.incsearch = true
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+opt.hlsearch = false
+opt.incsearch = true
+opt.ignorecase = true
+opt.smartcase = true
 
-vim.opt.background = "dark"
-vim.opt.termguicolors = true
+opt.background = "dark"
+opt.termguicolors = true
 
-vim.opt.colorcolumn = "80"
-vim.opt.scrolloff = 10
-vim.opt.signcolumn = "yes"
-vim.opt.isfname:append("@-@")
-vim.opt.splitright = true
-vim.opt.splitbelow = true
+opt.colorcolumn = "80"
+opt.scrolloff = 10
+opt.signcolumn = "yes"
+opt.isfname:append("@-@")
+opt.splitright = true
+opt.splitbelow = true
 
-vim.opt.updatetime = 50
+opt.updatetime = 50
 
-vim.scriptencoding = "utf-8"
-vim.opt.fileencoding = "utf-8"
-vim.opt.encoding = "utf-8"
+-- opt.scriptencoding = "utf-8"
+opt.fileencoding = "utf-8"
+opt.encoding = "utf-8"
 
-vim.opt.diffopt = "iwhite,context:9999999,filler"
-vim.opt.foldenable = true
-vim.opt.foldmethod = "indent"
-vim.opt.foldlevel = 99
-vim.opt.fillchars = "diff: "
+opt.diffopt = "iwhite,context:9999999,filler"
+opt.foldenable = true
+opt.foldmethod = "indent"
+opt.foldlevel = 99
+-- opt.fillchars = "diff: "
+opt.fillchars = {
+    foldopen = "",
+    foldclose = "",
+    -- fold = "⸱",
+    fold = " ",
+    foldsep = " ",
+    -- diff = "╱",
+    diff = " ",
+    eob = " ",
+}
 
-vim.opt.spelllang = "en_us"
-vim.opt.spell = true
+opt.spelllang = { "en" }
+opt.spell = true
 
-vim.opt.spelloptions = "camel,noplainbuffer"
-vim.opt.spellcapcheck = "" -- disable first letter capitalization check
+opt.spelloptions = "camel,noplainbuffer"
+opt.spellcapcheck = "" -- disable first letter capitalization check
 
-vim.opt.listchars = {
+opt.list = true
+opt.listchars = {
     tab = "» ",
     trail = "·",
     -- space = ".",
@@ -60,4 +73,8 @@ vim.opt.listchars = {
     nbsp = "␣",
     -- eol = "↲",
 }
-vim.opt.list = true
+
+opt.showmode = false -- Dont show mode since we have a statusline
+
+-- Fix markdown indentation settings
+vim.g.markdown_recommended_style = 0
