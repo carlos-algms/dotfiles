@@ -10,6 +10,7 @@ return {
         ---@diagnostic disable-next-line: missing-fields
         notify.setup({
             max_width = 80,
+            render = "wrapped-compact",
         })
     end,
 }
