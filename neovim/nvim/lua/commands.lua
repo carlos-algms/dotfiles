@@ -42,3 +42,15 @@ vim.api.nvim_create_user_command("Float", function(ctx)
 
     local win = vim.api.nvim_open_win(buf, true, opts)
 end, { nargs = "+", complete = "command" })
+
+vim.api.nvim_create_user_command("CopyRelativePath", function()
+    local path = vim.fn.expand("%:.")
+    vim.fn.setreg("+", path)
+    vim.notify('Copied "' .. path .. '" to the clipboard!')
+end, {})
+
+vim.api.nvim_create_user_command("CopyFullPath", function()
+    local path = vim.fn.expand("%:p")
+    vim.fn.setreg("+", path)
+    vim.notify('Copied "' .. path .. '" to the clipboard!')
+end, {})
