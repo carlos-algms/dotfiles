@@ -1,5 +1,6 @@
 return {
     "nvim-treesitter/nvim-treesitter",
+    -- tag = "v0.9.1",
     dependencies = {
         "nvim-treesitter/nvim-treesitter-context",
         "nvim-treesitter/nvim-treesitter-textobjects",
@@ -13,7 +14,9 @@ return {
                 "javascript",
                 "jsdoc",
                 "typescript",
+                "tsx",
                 "json",
+                "jsonc",
                 "rust",
                 "python",
                 "css",
