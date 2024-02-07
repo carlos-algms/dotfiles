@@ -18,6 +18,7 @@ require("vim-options")
 require("remap")
 require("commands")
 require("git-commands")
+require("autocmds")
 
 require("lazy").setup("plugins", {
     change_detection = {
