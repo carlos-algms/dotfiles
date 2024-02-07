@@ -77,3 +77,6 @@ tsconfig
 json
 tsc
 Enums
+Makefile
+charset
+utf
