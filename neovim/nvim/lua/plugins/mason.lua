@@ -153,9 +153,16 @@ return {
 
                 lspKeymap(
                     "n",
-                    "<leader>ws",
-                    vim.lsp.buf.workspace_symbol,
+                    "<leader>rw",
+                    telescopeBuiltin.lsp_workspace_symbols,
                     "Search for symbol in [w]orkspace"
+                )
+
+                lspKeymap(
+                    "n",
+                    "<leader>rd",
+                    telescopeBuiltin.lsp_document_symbols,
+                    "Search for symbol in [d]ocument"
                 )
 
                 -- lspKeymap(
@@ -172,13 +179,12 @@ return {
                     "Show [h]elp for function signature"
                 )
 
-                -- disabled to test LSP Saga
-                -- lspKeymap(
-                --     { "n", "v" },
-                --     "<space>ca",
-                --     vim.lsp.buf.code_action,
-                --     "Show [c]ode [a]ctions"
-                -- )
+                lspKeymap(
+                    { "n", "v" },
+                    "<space>ca",
+                    vim.lsp.buf.code_action,
+                    "Show [c]ode [a]ctions"
+                )
 
                 lspKeymap("n", "<space>bf", function()
                     vim.lsp.buf.format({ async = true })

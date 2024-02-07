@@ -4,6 +4,7 @@ return {
     dependencies = {
         "nvim-treesitter/nvim-treesitter",
         "nvim-tree/nvim-web-devicons",
+        "pmizio/typescript-tools.nvim", -- added as dependency to check if refactoring will show on code-actions
     },
     config = function()
         require("lspsaga").setup({
@@ -31,6 +32,9 @@ return {
                     quit = "<esc>",
                 },
             },
+            outline = {
+                layout = "float",
+            },
         })
 
         local diagnostic = require("lspsaga.diagnostic")
@@ -56,11 +60,19 @@ return {
             { desc = "LSP [r]ename", silent = true }
         )
 
+        -- Disabling as it wasn't showing all the refactor options
+        -- vim.keymap.set(
+        --     { "n", "v" },
+        --     "<space>ca",
+        --     ":Lspsaga code_action<CR>",
+        --     { desc = "LSP [c]ode [a]ction", silent = true }
+        -- )
+
         vim.keymap.set(
             { "n", "v" },
-            "<space>ca",
-            ":Lspsaga code_action<CR>",
-            { desc = "LSP [c]ode [a]ction", silent = true }
+            "<space>ro",
+            ":Lspsaga outline<CR>",
+            { desc = "LSP Outline", silent = true }
         )
 
         vim.keymap.set(
