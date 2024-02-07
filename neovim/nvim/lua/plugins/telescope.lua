@@ -7,12 +7,17 @@ return {
             { "nvim-lua/plenary.nvim" },
             -- { "nvim-telescope/telescope-ui-select.nvim" },
             { "princejoogie/dir-telescope.nvim" },
+            {
+                "nvim-telescope/telescope-live-grep-args.nvim",
+                version = "^1.0.0",
+            },
         },
         config = function()
             local telescope = require("telescope")
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
             local utils = require("telescope.utils")
+            local lga_actions = require("telescope-live-grep-args.actions")
 
             -- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
             local telescopeConfig = require("telescope.config")
@@ -176,10 +181,29 @@ return {
                     -- ["ui-select"] = {
                     --     require("telescope.themes").get_dropdown({}),
                     -- },
+
+                    live_grep_args = {
+                        auto_quoting = true, -- enable/disable auto-quoting
+                        -- define mappings, e.g.
+                        mappings = { -- extend mappings
+                            i = {
+                                ["<C-k>"] = lga_actions.quote_prompt(),
+                                ["<C-i>"] = lga_actions.quote_prompt({
+                                    postfix = " --iglob ",
+                                }),
+                            },
+                        },
+                        -- ... also accepts theme settings, for example:
+                        -- theme = "dropdown", -- use dropdown theme
+                        -- theme = { }, -- use own theme spec
+                        -- layout_config = { mirror=true }, -- mirror preview pane
+                    },
                 },
             })
 
             -- telescope.load_extension("ui-select")
+            telescope.load_extension("live_grep_args")
+            telescope.load_extension("dir")
 
             local builtin = require("telescope.builtin")
 
@@ -190,13 +214,19 @@ return {
                 show_preview = true,
             })
 
-            require("telescope").load_extension("dir")
-
             vim.keymap.set(
                 "n",
                 "<leader>f",
-                builtin.live_grep,
-                { desc = "[P]roject wide [L]ive grep search" }
+                -- builtin.live_grep, -- disable to allow adding args
+                telescope.extensions.live_grep_args.live_grep_args,
+                { desc = "Live Grep all files" }
+            )
+
+            vim.keymap.set(
+                "v",
+                "<leader>f",
+                require("telescope-live-grep-args.shortcuts").grep_visual_selection,
+                { desc = "Live Grep current selection on all files" }
             )
 
             vim.keymap.set(
@@ -215,9 +245,9 @@ return {
 
             vim.keymap.set(
                 "n",
-                "<leader>pb",
+                "<leader>bo",
                 builtin.buffers,
-                { desc = "Find current open buffers" }
+                { desc = "List buffers open" }
             )
 
             vim.keymap.set(
@@ -283,34 +313,40 @@ return {
                 "<cmd>GrepInDirectory<CR>",
                 { noremap = true, silent = true }
             )
-        end,
 
-        vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)
-            -- another option would be use vim.ui.input:
-            -- vim.ui.input({ prompt = "Glob: ", completion = "file", default = "**/*." })
-            -- but it doesn't seem to auto-complete the glob while typing
+            vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)
+                -- another option would be use vim.ui.input:
+                -- vim.ui.input({ prompt = "Glob: ", completion = "file", default = "**/*." })
+                -- but it doesn't seem to auto-complete the glob while typing
 
-            require("telescope.builtin").live_grep({
-                vimgrep_arguments = {
-                    "rg",
-                    "--color=never",
-                    "--no-heading",
-                    "--with-filename",
-                    "--line-number",
-                    "--column",
-                    "--smart-case",
-                    "--glob=" .. (ctx.args or ""),
-                    -- @TODO: how to add negative globs? like --glob='!**/node_modules/*'
-                    -- and also multiple globs
-                    -- first test if a file in .git will work,
-                    -- then add a second --glob='!**/.git/*' to check if it works
-                    -- search about RD arguments
-                },
+                vim.ui.input({
+                    prompt = "Glob: ",
+                    completion = "file",
+                    default = "**/*",
+                }, function(glob)
+                    builtin.live_grep({
+                        vimgrep_arguments = {
+                            "rg",
+                            "--color=never",
+                            "--no-heading",
+                            "--with-filename",
+                            "--line-number",
+                            "--column",
+                            "--smart-case",
+                            "--glob=" .. (glob or ""),
+                            -- @TODO: how to add negative globs? like --glob='!**/node_modules/*'
+                            -- and also multiple globs
+                            -- first test if a file in .git will work,
+                            -- then add a second --glob='!**/.git/*' to check if it works
+                            -- search about RD arguments
+                        },
+                    })
+                end)
+            end, {
+                -- nargs = "+",
+                -- complete = "file",
+                desc = "Live grep with glob",
             })
-        end, {
-            nargs = "+",
-            complete = "file",
-            desc = "Live grep with glob",
-        }),
+        end,
     },
 }
