@@ -59,6 +59,13 @@ return {
                         desc = "prev change hunk",
                         expr = true,
                     })
+
+                    map(
+                        "n",
+                        "<leader>gv",
+                        ":Gitsigns preview_hunk<CR>",
+                        { desc = "Show hunk preview", silent = true }
+                    )
                 end,
             })
         end,
@@ -141,6 +148,18 @@ return {
                             "s",
                             actions.toggle_stage_entry,
                             { desc = "Stage / unstage the selected entry" },
+                        },
+                        {
+                            { "n", "v" },
+                            "=",
+                            ":Gitsigns stage_hunk<CR>",
+                            { desc = "Stage selected hunk" },
+                        },
+                        {
+                            { "n", "v" },
+                            "-",
+                            ":Gitsigns reset_hunk<CR>",
+                            { desc = "Reset selected hunk" },
                         },
                     },
                 },
