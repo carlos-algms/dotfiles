@@ -16,7 +16,8 @@ return {
             definition = {
                 keys = {
                     edit = "o",
-                    vsplit = "s",
+                    vsplit = "v",
+                    split = "s",
                 },
             },
             finder = {
@@ -34,6 +35,9 @@ return {
             },
             outline = {
                 layout = "float",
+            },
+            symbol_in_winbar = {
+                enable = false,
             },
         })
 
@@ -104,13 +108,13 @@ return {
         )
 
         vim.keymap.set({ "n", "v" }, "]e", function()
-            diagnostic:goto_prev({
+            diagnostic:goto_next({
                 severity = vim.diagnostic.severity.ERROR,
             })
         end, { desc = "Go to next Error" })
 
         vim.keymap.set({ "n", "v" }, "[e", function()
-            diagnostic:goto_next({
+            diagnostic:goto_prev({
                 severity = vim.diagnostic.severity.ERROR,
             })
         end, { desc = "Go to previous Error" })
