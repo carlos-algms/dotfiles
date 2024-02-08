@@ -196,6 +196,10 @@ return {
             -- editor config
             vim.cmd([[ hi! link editorconfigProperty Keyword ]])
             vim.cmd([[ hi! link dosiniHeader @identifier ]])
+
+            -- Telescope
+            vim.cmd([[ hi! link TelescopeTitle Function ]])
+            vim.cmd([[ hi! link TelescopeMatching IncSearch ]])
         end,
     },
     {
