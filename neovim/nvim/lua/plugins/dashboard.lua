@@ -17,19 +17,19 @@ return {
                 },
                 shortcut = {
                     {
-                        desc = "󰊳 Update",
+                        desc = "󰚰 Update",
                         group = "Function",
                         action = "Lazy update",
                         key = "U",
                     },
                     {
-                        desc = "󰊵 New file",
+                        desc = " New file",
                         group = "Type",
                         action = "enew",
                         key = "n",
                     },
                     {
-                        desc = "󰊻 Quit",
+                        desc = "󰩈 Quit",
                         group = "Keyword",
                         action = "q",
                         key = "q",
