@@ -71,6 +71,7 @@ return {
                     },
                     vimgrep_arguments = vimgrep_arguments,
                     sorting_strategy = "ascending",
+                    wrap_results = true,
 
                     layout_config = {
                         vertical = {
@@ -88,9 +89,10 @@ return {
                             width = 0.70,
                         },
                     },
-                    path_display = {
-                        "smart",
-                    },
+
+                    -- path_display = {
+                    --     "smart",
+                    -- },
 
                     mappings = {
                         i = {
