@@ -113,21 +113,21 @@ return {
                     "[G]o to [D]eclaration"
                 )
 
+                local telescopeBuiltin = require("telescope.builtin")
+
                 lspKeymap(
                     "n",
                     "go",
-                    vim.lsp.buf.type_definition,
+                    telescopeBuiltin.lsp_type_definitions,
                     "[G]o to [o]bject type definition"
                 )
 
                 lspKeymap(
                     "n",
                     "gi",
-                    vim.lsp.buf.implementation,
+                    telescopeBuiltin.lsp_implementations,
                     "[G]o to [i]mplementation"
                 )
-
-                local telescopeBuiltin = require("telescope.builtin")
 
                 lspKeymap(
                     "n",
