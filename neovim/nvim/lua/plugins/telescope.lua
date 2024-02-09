@@ -259,10 +259,10 @@ return {
                 { desc = "Find recently opened files" }
             )
 
-            vim.keymap.set("n", "<leader>ps", function()
+            vim.keymap.set("n", "<leader>sg", function()
                 builtin.grep_string({ search = vim.fn.input("Grep > ") })
             end, {
-                desc = "[ps] Grep string in the current folder and open results in a Modal",
+                desc = "Input a string to Grep",
             })
 
             vim.keymap.set("n", "<leader>/", function()
