@@ -1,4 +1,6 @@
-vim.api.nvim_create_user_command("Redir", function(ctx)
+local createUserCommand = vim.api.nvim_create_user_command
+
+createUserCommand("Redir", function(ctx)
     local ouput = vim.api.nvim_exec(ctx.args, true)
     local lines = vim.split(ouput, "\n", { plain = true })
     vim.cmd("vnew")
@@ -6,7 +8,7 @@ vim.api.nvim_create_user_command("Redir", function(ctx)
     vim.opt_local.modified = false
 end, { nargs = "+", complete = "command" })
 
-vim.api.nvim_create_user_command("Float", function(ctx)
+createUserCommand("Float", function(ctx)
     local width = 130
     local height = 25
 
@@ -43,14 +45,23 @@ vim.api.nvim_create_user_command("Float", function(ctx)
     local win = vim.api.nvim_open_win(buf, true, opts)
 end, { nargs = "+", complete = "command" })
 
-vim.api.nvim_create_user_command("CopyRelativePath", function()
+createUserCommand("CopyRelativePath", function()
     local path = vim.fn.expand("%:.")
     vim.fn.setreg("+", path)
     vim.notify('Copied "' .. path .. '" to the clipboard!')
 end, {})
 
-vim.api.nvim_create_user_command("CopyFullPath", function()
+createUserCommand("CopyFullPath", function()
     local path = vim.fn.expand("%:p")
     vim.fn.setreg("+", path)
     vim.notify('Copied "' .. path .. '" to the clipboard!')
+end, {})
+
+createUserCommand("CloseAllOtherBuffers", function()
+    local current = vim.fn.bufnr()
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if buf ~= current then
+            vim.api.nvim_buf_delete(buf, { force = false })
+        end
+    end
 end, {})
