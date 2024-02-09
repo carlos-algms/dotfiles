@@ -11,6 +11,16 @@ return {
             options = {
                 icons_enabled = true,
                 theme = "jellybeans",
+                disabled_filetypes = {
+                    statusline = {
+                        "dapui_scopes",
+                        "dapui_breakpoints",
+                        "dapui_stacks",
+                        "dapui_watches",
+                        "dap-repl",
+                        "dapui_console",
+                    },
+                },
             },
             sections = {
                 lualine_a = {
