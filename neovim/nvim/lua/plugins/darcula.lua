@@ -41,6 +41,7 @@ return {
             vim.cmd([[ hi! link @property Constant ]]) -- will it fix all properties in all languages?
             vim.cmd([[ hi! link @string.regexp Constant ]])
             vim.cmd([[ hi! link @string.escape Constant ]])
+            vim.cmd([[ hi! link Boolean Keyword ]])
             vim.cmd([[ hi! link @boolean Keyword ]])
             vim.cmd([[ hi! link @constructor @identifier ]])
             vim.cmd([[ hi! link @variable @identifier ]])
