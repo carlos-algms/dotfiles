@@ -11,6 +11,16 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+-- resize splits if window got resized
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+    group = augroup("resize_splits"),
+    callback = function()
+        local current_tab = vim.fn.tabpagenr()
+        vim.cmd("tabdo wincmd =")
+        vim.cmd("tabnext " .. current_tab)
+    end,
+})
+
 -- vim.defer_fn(function()
 --     vim.cmd(
 --         [[ au TextYankPost * silent! lua vim.highlight.on_yank({ higroup="DiffText", timeout=350 }) ]]
@@ -36,6 +46,7 @@ vim.api.nvim_create_autocmd("FileType", {
         "neotest-summary",
         "neotest-output-panel",
         "copilot.lua",
+        "dap-float",
     },
     callback = function(event)
         vim.bo[event.buf].buflisted = false

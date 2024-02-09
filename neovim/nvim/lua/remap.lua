@@ -123,3 +123,28 @@ vim.keymap.set("v", ">", ">gv")
 --     "{<CR>}<ESC>O",
 --     { desc = "auto close curly brackets new line" }
 -- )
+
+vim.keymap.set(
+    "n",
+    "<C-S-Up>",
+    "<cmd>resize +2<cr>",
+    { desc = "Increase window height" }
+)
+vim.keymap.set(
+    "n",
+    "<C-S-Down>",
+    "<cmd>resize -2<cr>",
+    { desc = "Decrease window height" }
+)
+vim.keymap.set(
+    "n",
+    "<C-S-Left>",
+    "<cmd>vertical resize -2<cr>",
+    { desc = "Decrease window width" }
+)
+vim.keymap.set(
+    "n",
+    "<C-S-Right>",
+    "<cmd>vertical resize +2<cr>",
+    { desc = "Increase window width" }
+)
