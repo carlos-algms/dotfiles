@@ -39,12 +39,48 @@ return {
         end,
     },
     {
+        "LiadOz/nvim-dap-repl-highlights",
+        dependencies = { "mfussenegger/nvim-dap" },
+        config = function()
+            require("nvim-dap-repl-highlights").setup()
+        end,
+    },
+    -- Disabled because it's not working
+    -- {
+    --     "mxsdev/nvim-dap-vscode-js",
+    --     dependencies = { "mfussenegger/nvim-dap" },
+    --     config = function()
+    --         require("dap-vscode-js").setup({
+    --             -- node_path = "node", -- Path of node executable. Defaults to $NODE_PATH, and then "node"
+    --             -- debugger_path = "(runtimedir)/site/pack/packer/opt/vscode-js-debug", -- Path to vscode-js-debug installation.
+    --             debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
+    --             adapters = {
+    --                 "pwa-node",
+    --                 "pwa-chrome",
+    --                 "pwa-msedge",
+    --                 "node-terminal",
+    --                 "pwa-extensionHost",
+    --             }, -- which adapters to register in nvim-dap
+    --             -- log_file_path = "(stdpath cache)/dap_vscode_js.log" -- Path for file logging
+    --             -- log_file_level = false -- Logging level for output to file. Set to false to disable file logging.
+    --             -- log_console_level = vim.log.levels.ERROR -- Logging level for output to console. Set to false to disable console output.
+    --         })
+    --     end,
+    -- },
+    {
         "mfussenegger/nvim-dap",
         dependencies = {
             {
                 "nvim-telescope/telescope-dap.nvim",
                 dependencies = {
                     "nvim-telescope/telescope.nvim",
+                },
+                keys = {
+                    {
+                        "<leader>dl",
+                        ":Telescope dap list_breakpoints<CR>",
+                        desc = "List breakpoint",
+                    },
                 },
                 config = function()
                     require("telescope").load_extension("dap")
@@ -137,13 +173,14 @@ return {
 
             -- http://www.lazyvim.org/extras/dap/core#nvim-dap
             -- # Sign
-            local dapSigns = {
-                Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
-                Breakpoint = " ",
-                BreakpointCondition = " ",
-                BreakpointRejected = { " ", "DiagnosticError" },
-                LogPoint = "󰯑 ",
-            }
+            local dapSigns =
+                { -- TODO: change highlight for Diagnostic** to have background color
+                    Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+                    Breakpoint = " ",
+                    BreakpointCondition = " ",
+                    BreakpointRejected = { " ", "DiagnosticError" },
+                    LogPoint = "󰯑 ",
+                }
 
             for name, sign in pairs(dapSigns) do
                 sign = type(sign) == "table" and sign or { sign }
@@ -188,6 +225,25 @@ return {
                     command = "js-debug-adapter",
                     args = { "${port}" },
                 },
+                skipFiles = {
+                    "<node_internals>/**",
+                    "**/node_modules/**/*",
+                },
+            }
+
+            dap.adapters["pwa-chrome"] = {
+                type = "pwa-chrome",
+                request = "launch",
+                name = "Chrome Debug",
+                url = "http://localhost:3000", -- TODO: how to get url from the project?
+                webRoot = "${workspaceFolder}",
+                sourceMaps = true,
+                skipFiles = {
+                    "<node_internals>/**",
+                    "**/node_modules/**/*",
+                    "chrome-extention:",
+                    "extentions::*",
+                },
             }
 
             for _, language in ipairs({
@@ -200,7 +256,7 @@ return {
                     {
                         type = "pwa-node",
                         request = "launch",
-                        name = "Launch file",
+                        name = "Launch file " .. language,
                         program = "${file}",
                         cwd = "${workspaceFolder}",
                         runtimeExecutable = "ts-node",
@@ -216,7 +272,7 @@ return {
                     {
                         type = "pwa-node",
                         request = "attach",
-                        name = "Attach",
+                        name = "Attach to Process " .. language,
                         processId = dapUtils.pick_process,
                         cwd = "${workspaceFolder}",
                         sourceMaps = true,
