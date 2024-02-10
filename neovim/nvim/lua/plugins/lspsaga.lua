@@ -26,6 +26,7 @@ return {
                 layout = "float",
             },
             lightbulb = {
+                enable = false,
                 virtual_text = false, -- otherwise it shows twice, on the line number and on eol
             },
             rename = {
@@ -119,5 +120,17 @@ return {
                 severity = vim.diagnostic.severity.ERROR,
             })
         end, { desc = "Go to previous Error" })
+
+        vim.keymap.set({ "n", "v" }, "]s", function()
+            diagnostic:goto_next({
+                severity = vim.diagnostic.severity.HINT,
+            })
+        end, { desc = "Go to next Spell/Hint" })
+
+        vim.keymap.set({ "n", "v" }, "[s", function()
+            diagnostic:goto_prev({
+                severity = vim.diagnostic.severity.HINT,
+            })
+        end, { desc = "Go to previous Spell/Hint" })
     end,
 }

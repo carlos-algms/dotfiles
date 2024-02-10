@@ -58,7 +58,7 @@ opt.fillchars = {
 }
 
 opt.spelllang = { "en" }
-opt.spell = true
+opt.spell = false
 
 opt.spelloptions = "camel,noplainbuffer"
 opt.spellcapcheck = "" -- disable first letter capitalization check

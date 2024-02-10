@@ -201,6 +201,16 @@ return {
             -- Telescope
             vim.cmd([[ hi! link TelescopeTitle Function ]])
             vim.cmd([[ hi! link TelescopeMatching IncSearch ]])
+
+            -- Diagnostics - make undercurl instead of underline
+            vim.cmd(
+                [[ hi DiagnosticUnderlineInfo gui=undercurl guisp=LightBlue ]]
+            )
+            vim.cmd(
+                [[ hi DiagnosticUnderlineHint gui=undercurl guisp=LightGrey ]]
+            )
+            vim.cmd([[ hi DiagnosticUnderlineError gui=undercurl guisp=Red ]])
+            vim.cmd([[ hi DiagnosticUnderlineWarn gui=undercurl guisp=Orange ]])
         end,
     },
     {
