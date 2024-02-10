@@ -19,5 +19,22 @@ return {
         leap.add_default_mappings(true)
         vim.keymap.del({ "x", "o" }, "x")
         vim.keymap.del({ "x", "o" }, "X")
+
+        -- Hack to hide cursor on auto jump
+        vim.api.nvim_create_autocmd("User", {
+            callback = function()
+                vim.cmd.hi("Cursor", "blend=100")
+                vim.opt.guicursor:append({ "a:Cursor/lCursor" })
+            end,
+            pattern = "LeapEnter",
+        })
+
+        vim.api.nvim_create_autocmd("User", {
+            callback = function()
+                vim.cmd.hi("Cursor", "blend=0")
+                vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
+            end,
+            pattern = "LeapLeave",
+        })
     end,
 }
