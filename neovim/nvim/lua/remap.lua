@@ -130,21 +130,31 @@ vim.keymap.set(
     "<cmd>resize +2<cr>",
     { desc = "Increase window height" }
 )
+
 vim.keymap.set(
     "n",
     "<C-S-Down>",
     "<cmd>resize -2<cr>",
     { desc = "Decrease window height" }
 )
+
 vim.keymap.set(
     "n",
     "<C-S-Left>",
     "<cmd>vertical resize -2<cr>",
     { desc = "Decrease window width" }
 )
+
 vim.keymap.set(
-    "n",
+    { "n", "i" },
     "<C-S-Right>",
     "<cmd>vertical resize +2<cr>",
     { desc = "Increase window width" }
+)
+
+vim.keymap.set(
+    { "n", "i" },
+    "<D-s>",
+    "<esc><cmd>w<cr>",
+    { desc = "Save current buffer" }
 )
