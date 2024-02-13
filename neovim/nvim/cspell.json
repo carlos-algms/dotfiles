@@ -4,9 +4,14 @@
   "version": "0.2",
   "words": [
     "builtins",
+    "darcula",
+    "dont",
     "gitsigns",
     "keymap",
+    "lockdown",
     "nvim",
-    "nvimtools"
+    "nvimtools",
+    "supabase",
+    "veedstudio"
   ]
 }
