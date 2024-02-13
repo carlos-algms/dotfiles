@@ -57,6 +57,16 @@ return {
     {
         -- Installed Conform as it is used by LazyVim
         "stevearc/conform.nvim",
+        event = { "BufWritePre" },
+        cmd = { "ConformInfo" },
+        keys = {
+            {
+                "<leader>bf",
+                ":FormatCurrentBuffer<CR>",
+                mode = { "n", "v" },
+                desc = "Format Current Buffer",
+            },
+        },
         opts = {
             formatters_by_ft = {
                 lua = { "stylua" },
@@ -94,6 +104,48 @@ return {
                     end
                     conform.format({ bufnr = args.buf })
                 end,
+            })
+
+            vim.api.nvim_create_user_command(
+                "FormatCurrentBuffer",
+                function(args)
+                    local range = nil
+                    if args.count ~= -1 then
+                        local end_line = vim.api.nvim_buf_get_lines(
+                            0,
+                            args.line2 - 1,
+                            args.line2,
+                            true
+                        )[1]
+                        range = {
+                            start = { args.line1, 0 },
+                            ["end"] = { args.line2, end_line:len() },
+                        }
+                    end
+
+                    conform.format({
+                        async = true,
+                        lsp_fallback = true,
+                        range = range,
+                    })
+                end,
+                { range = true }
+            )
+
+            vim.api.nvim_create_user_command(
+                "FormatOnSaveDisable",
+                function(args)
+                    vim.g.format_on_save = false
+                end,
+                {
+                    desc = "Disable autoformat-on-save",
+                }
+            )
+
+            vim.api.nvim_create_user_command("FormatOnSaveEnable", function()
+                vim.g.format_on_save = true
+            end, {
+                desc = "Enable autoformat-on-save",
             })
         end,
     },

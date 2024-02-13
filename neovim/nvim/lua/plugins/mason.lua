@@ -186,9 +186,10 @@ return {
                     "Show [c]ode [a]ctions"
                 )
 
-                lspKeymap("n", "<space>bf", function()
-                    vim.lsp.buf.format({ async = true })
-                end, "[B]uffer [F]ormat")
+                -- Disabled to use Conform
+                -- lspKeymap("n", "<space>bf", function()
+                --     vim.lsp.buf.format({ async = true })
+                -- end, "[B]uffer [F]ormat")
             end,
         })
 
