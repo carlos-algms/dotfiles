@@ -41,7 +41,7 @@ vim.keymap.set("n", "N", "Nzzzv")
 
 -- replace the selected content without losing the Yanked register
 vim.keymap.set(
-    "x",
+    "v",
     "<leader>p",
     [["_dP]],
     { desc = "Paste replacing selection without losing the Yanked register" }

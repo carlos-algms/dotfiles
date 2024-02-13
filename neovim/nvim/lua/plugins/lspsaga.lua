@@ -82,14 +82,14 @@ return {
         )
 
         vim.keymap.set(
-            { "n", "v" },
+            { "n" },
             "<space>pd",
             ":Lspsaga peek_definition<CR>",
             { desc = "LSP Peek Definition", silent = true }
         )
 
         vim.keymap.set(
-            { "n", "v" },
+            { "n" },
             "<space>pt",
             ":Lspsaga peek_type_definition<CR>",
             { desc = "LSP Peek type definition", silent = true }
