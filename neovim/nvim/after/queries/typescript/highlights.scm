@@ -3,7 +3,7 @@
 ;; fix true, false, null, and undefined when used as types
 (
  (literal_type) @type.literal (#set! "priority" 140)
-)
+ )
 
 (
  (literal_type
@@ -21,6 +21,14 @@
     )
   )
 
+(import_clause
+  (identifier) @import.identifier
+  )
+
+(namespace_import
+  (identifier) @import.identifier
+  )
+
 (lexical_declaration
   (variable_declarator
     value: (new_expression
@@ -29,6 +37,6 @@
     )
   )
 
-(namespace_import
-  (identifier) @import.identifier
+(variable_declarator
+  name: (identifier) @variable.declaration (#set! "priority" 120)
   )

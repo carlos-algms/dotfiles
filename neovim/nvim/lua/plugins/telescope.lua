@@ -94,6 +94,10 @@ return {
                     --     "smart",
                     -- },
 
+                    preview = {
+                        treesitter = true,
+                    },
+
                     mappings = {
                         i = {
                             -- map actions.which_key to <C-h> (default: <C-/>)

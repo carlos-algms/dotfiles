@@ -26,7 +26,15 @@ return {
             vim.cmd([[ hi! link LazyReasonStart Type ]])
             vim.cmd([[ hi! link LuaFunctionBlock Function ]])
             vim.cmd([[ hi! link LazyCommitType Constant ]])
+
+            -- GIT / fugitive
             vim.cmd([[ hi! link @string.special.url.gitcommit NormalFg ]])
+            vim.cmd([[ hi! link diffAdded DiffviewDiffAdd ]])
+            vim.cmd([[ hi! link diffRemoved DiffviewDiffDelete ]])
+            vim.cmd([[ hi! link gitHash Constant ]])
+            vim.cmd([[ hi! link gitEmail String ]])
+            vim.cmd([[ hi! link @diff.plus.diff DiffviewDiffAdd ]])
+            vim.cmd([[ hi! link @diff.minus.diff DiffviewDiffDelete ]])
 
             -- Fix cursor line overriding other highlights
             vim.cmd(
@@ -51,6 +59,7 @@ return {
             vim.cmd([[ hi! link @lsp.typemod.class.declaration @identifier ]])
             vim.cmd([[ hi! link @new.identifier @identifier ]])
             vim.cmd([[ hi! link @lsp.type.typeParameter PreProc ]])
+            vim.cmd([[ hi! link @constant.builtin Keyword ]])
 
             -- TS / TSX
             -- Review this, in previews, LSP doesn't start, so types are white instead of blue
@@ -68,9 +77,6 @@ return {
             vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
             vim.cmd([[ hi! link @lsp.type.property Constant]])
             vim.cmd([[ hi! link @tag Function]])
-            vim.cmd([[ hi! link @constant.builtin.tsx Keyword]])
-            vim.cmd([[ hi! link @constant.builtin.typescript Keyword]])
-            vim.cmd([[ hi! link @constant.builtin.javascript Keyword]])
             vim.cmd([[ hi! link @include.tsx Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @include.typescript Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @punctuation.special.typescript Keyword ]])
@@ -80,6 +86,9 @@ return {
             vim.cmd([[ hi! link @type.literal.string String ]])
             vim.cmd([[ hi! link @comment.documentation.typescript String ]])
             vim.cmd([[ hi! link @import.identifier @identifier ]])
+            vim.cmd([[ hi! link @constant.tsx @identifier ]])
+            vim.cmd([[ hi! link @constant.typescript @identifier ]])
+            vim.cmd([[ hi! link @variable.declaration @identifier ]])
 
             -- Docs Popup
             vim.cmd([[ hi! link typescriptImport Keyword ]])
@@ -92,6 +101,8 @@ return {
             vim.cmd([[ hi! clear typescriptFuncCallArg ]])
             vim.cmd([[ hi! link typescriptArrowFuncArg @identifier ]])
             vim.cmd([[ hi! link typescriptIdentifierName Keyword ]])
+            vim.cmd([[ hi! link typescriptFuncType Function ]])
+            vim.cmd([[ hi! link typescriptOptionalMark Keyword ]])
 
             -- JSX
             vim.cmd([[ hi! link @constructor.tsx Function ]])
@@ -105,10 +116,11 @@ return {
             vim.cmd([[ hi! link htmlSpecialChar Constant ]])
             vim.cmd([[ hi! link @text.title.html @text ]])
             vim.cmd([[ hi! link @tag.html Function ]])
-            vim.cmd([[ hi! link @operator.html Function ]])
             vim.cmd([[ hi! link @constant.html Function ]])
             vim.cmd([[ hi! link @tag.delimiter.html Function ]])
             vim.cmd([[ hi! link @tag.attribute.html NormalFg ]])
+            vim.cmd([[ hi! link @operator.html NormalFg ]])
+            vim.cmd([[ hi! link @string.special.url.html String ]])
 
             -- YAML
             vim.cmd([[ hi! link @property.yaml Function ]])
@@ -125,7 +137,6 @@ return {
             vim.cmd([[ hi! link @tag.php Error ]])
             vim.cmd([[ hi! link @type.qualifier.php Keyword ]])
             vim.cmd([[ hi! link @variable.builtin.php Keyword ]]) -- $this
-            vim.cmd([[ hi! link @constant.builtin.php Keyword ]])
             vim.cmd([[ hi! link @class.php @variable ]])
             vim.cmd([[ hi! link @constructor.php @function ]])
             vim.cmd([[ hi! link @operator.php NormalFg ]])
@@ -159,7 +170,8 @@ return {
             vim.cmd([[ hi! link @markup.heading.5.marker.markdown Keyword ]])
             vim.cmd([[ hi! link @markup.heading.6.marker.markdown Keyword ]])
             vim.cmd([[ hi! link @markup.list.markdown Keyword ]])
-            vim.cmd([[ hi! link @markup.raw.block.markdown Keyword ]])
+            vim.cmd([[ hi! link @markup.raw.block.markdown NormalFg ]])
+            vim.cmd([[ hi! link @markup.raw.delimiter.markdown Keyword ]])
             vim.cmd([[ hi! link @label.markdown @type ]])
             vim.cmd([[ hi! link @markup.raw.markdown_inline @type ]])
             vim.cmd(
@@ -179,6 +191,9 @@ return {
             vim.cmd([[ hi! link @markup.list.checked.markdown Comment ]])
             vim.cmd([[ hi! link markdownCode Keyword ]])
             vim.cmd([[ hi! link FloatTitle NormalFg ]])
+            vim.cmd([[ hi! link markdownLinkText String ]])
+            vim.cmd([[ hi link markdownLinkTextDelimiter NormalFg ]])
+            vim.cmd([[ hi! link markdownListMarker Keyword ]])
 
             -- Lua
             vim.cmd(
@@ -196,6 +211,8 @@ return {
             vim.cmd([[ hi! link @lsp.type.property.lua Constant ]])
             vim.cmd([[ hi! link @lsp.type.keyword.lua Keyword ]])
             vim.cmd([[ hi! link @identifier.lua NormalFg ]])
+            vim.cmd([[ hi! link @lsp.type.macro.lua Type ]])
+            vim.cmd([[ hi! link @lsp.type.string.lua String ]])
 
             -- bash
             vim.cmd([[ hi! link @function.builtin.bash Function ]])
@@ -213,15 +230,22 @@ return {
             vim.cmd([[ hi! link TelescopeTitle Function ]])
             vim.cmd([[ hi! link TelescopeMatching IncSearch ]])
 
+            -- Octo
+            vim.cmd([[ hi! link OctoIssueTitle NormalFg ]])
+            vim.cmd([[ hi! link OctoStateDraftFloat Type ]])
+            vim.cmd([[ hi! link OctoDetailsLabel DiagnosticOk ]])
+
             -- Diagnostics - make undercurl instead of underline
             vim.cmd(
-                [[ hi DiagnosticUnderlineInfo gui=undercurl guisp=LightBlue ]]
+                [[ hi! DiagnosticUnderlineInfo gui=undercurl guisp=LightBlue ]]
             )
             vim.cmd(
-                [[ hi DiagnosticUnderlineHint gui=undercurl guisp=LightGrey ]]
+                [[ hi! DiagnosticUnderlineHint gui=undercurl guisp=LightGrey ]]
             )
-            vim.cmd([[ hi DiagnosticUnderlineError gui=undercurl guisp=Red ]])
-            vim.cmd([[ hi DiagnosticUnderlineWarn gui=undercurl guisp=Orange ]])
+            vim.cmd([[ hi! DiagnosticUnderlineError gui=undercurl guisp=Red ]])
+            vim.cmd(
+                [[ hi! DiagnosticUnderlineWarn gui=undercurl guisp=Orange ]]
+            )
         end,
     },
     {
