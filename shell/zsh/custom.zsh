@@ -9,11 +9,14 @@ DEFAULT_USER=`whoami`
 
 
 ## set VSCode as default editor if it is in the path
-if [[ -x "$(command -v code)" ]]; then
-  export EDITOR='code --wait'
-else
-  export EDITOR='vim'
-fi
+# if [[ -x "$(command -v code)" ]]; then
+#   export EDITOR='code --wait'
+# else
+#   export EDITOR='vim'
+# fi
+
+# set NeoVim as default editor
+export EDITOR='nvim'
 
 # disable shared history between ZSH instances
 unsetopt inc_append_history
