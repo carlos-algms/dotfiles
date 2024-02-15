@@ -232,17 +232,12 @@ return {
             }
 
             dap.adapters["pwa-chrome"] = {
-                type = "pwa-chrome",
-                request = "launch",
-                name = "Chrome Debug",
-                url = "http://localhost:3000", -- TODO: how to get url from the project?
-                webRoot = "${workspaceFolder}",
-                sourceMaps = true,
-                skipFiles = {
-                    "<node_internals>/**",
-                    "**/node_modules/**/*",
-                    "chrome-extention:",
-                    "extentions::*",
+                type = "server",
+                host = "localhost",
+                port = "${port}",
+                executable = {
+                    command = "js-debug-adapter",
+                    args = { "${port}" },
                 },
             }
 
@@ -269,12 +264,44 @@ return {
                             "!**/node_modules/**",
                         },
                     },
+
                     {
                         type = "pwa-node",
                         request = "attach",
                         name = "Attach to Process " .. language,
                         processId = dapUtils.pick_process,
                         cwd = "${workspaceFolder}",
+                        sourceMaps = true,
+                    },
+
+                    {
+                        type = "pwa-chrome",
+                        name = "Debug in Chrome",
+                        request = "launch",
+                        -- only the 3 first properties are required and need to be strings
+                        -- the rest are optional and can be numbers, strings, or functions
+                        -- see :h dap-configuration
+                        url = function()
+                            return coroutine.create(function(dap_run_co)
+                                vim.ui.input({
+                                    prompt = "Enter URL: ",
+                                    default = "http://localhost:3000",
+                                }, function(url)
+                                    if url == nil or url == "" then
+                                        url = "http://localhost:3000"
+                                    end
+
+                                    coroutine.resume(dap_run_co, url)
+                                end)
+                            end)
+                        end,
+                        -- TODO: find the nearest package.json and use it as cwd, or use current cwd
+                        webRoot = "${workspaceFolder}",
+                        -- sourceMapPathOverrides = {
+                        --     ["webpack:///src/*"] = "${webRoot}/*",
+                        --     ["/app/src/*"] = "${webRoot}/*",
+                        -- },
+                        userDataDir = false,
                         sourceMaps = true,
                     },
                 }
@@ -302,7 +329,7 @@ return {
                 },
             }
 
-            -- TODO: add adapter for python and chrome
+            -- TODO: add adapter for python
         end,
     },
 }
