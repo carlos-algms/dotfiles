@@ -1,5 +1,6 @@
 return {
     {
+        dir = "/Users/carlos/projects/octo.nvim",
         "pwntester/octo.nvim",
         -- TODO: Enable it only locally, not for SSH sessions
         enabled = true,
@@ -269,5 +270,14 @@ return {
     },
     {
         "knsh14/vim-github-link",
+        cmd = { "GetCommitLink" },
+        init = function()
+            vim.keymap.set(
+                { "n", "v" },
+                "<leader>gC",
+                ":GetCommitLink<CR>",
+                { desc = "Copy git remote URL to clipboard" }
+            )
+        end,
     },
 }
