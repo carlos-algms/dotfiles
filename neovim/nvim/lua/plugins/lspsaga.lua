@@ -123,9 +123,9 @@ return {
 
         vim.keymap.set({ "n", "v" }, "]s", function()
             diagnostic:goto_next({
-                severity = vim.diagnostic.severity.HINT,
+                severity = vim.diagnostic.severity.INFO,
             })
-        end, { desc = "Go to next Spell/Hint" })
+        end, { desc = "Go to next Spell/Info" })
 
         vim.keymap.set({ "n", "v" }, "[s", function()
             diagnostic:goto_prev({

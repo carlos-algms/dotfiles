@@ -42,7 +42,7 @@ return {
         }
 
         nullLs.setup({
-            fallback_severity = vim.diagnostic.severity.HINT,
+            fallback_severity = vim.diagnostic.severity.INFO,
             sources = {
                 -- disabled, as I'm not using from the code actions
                 -- codeActions.gitsigns,
