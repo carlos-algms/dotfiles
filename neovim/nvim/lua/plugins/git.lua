@@ -1,7 +1,7 @@
 return {
     {
-        dir = "/Users/carlos/projects/octo.nvim",
         "pwntester/octo.nvim",
+        -- dir = "/Users/carlos/projects/octo.nvim",
         -- TODO: Enable it only locally, not for SSH sessions
         enabled = true,
         event = "VeryLazy",
