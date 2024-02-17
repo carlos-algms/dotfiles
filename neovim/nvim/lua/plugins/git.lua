@@ -18,6 +18,7 @@ return {
                 enable_builtin = true,
                 default_remote = { "origin", "upstream" },
                 picker = "telescope",
+                comment_icon = "󰆈 ",
             })
         end,
     },
