@@ -1,17 +1,22 @@
 {
-  "flagWords": [],
-  "language": "en",
-  "version": "0.2",
-  "words": [
-    "builtins",
-    "darcula",
-    "dont",
-    "gitsigns",
-    "keymap",
-    "lockdown",
-    "nvim",
-    "nvimtools",
-    "supabase",
-    "veedstudio"
-  ]
+    "flagWords": [],
+    "language": "en,pt_BR",
+    "version": "0.2",
+    "words": [
+        "builtins",
+        "darcula",
+        "dont",
+        "gitsigns",
+        "keymap",
+        "lockdown",
+        "nvim",
+        "nvimtools",
+        "octo",
+        "supabase",
+        "testid",
+        "veed",
+        "veedstudio"
+    ],
+    "ignorePaths": ["node_modules/**"],
+    "import": ["@cspell/dict-pt-br/cspell-ext.json"]
 }

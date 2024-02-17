@@ -1,7 +1,10 @@
 return {
     "nvimtools/none-ls.nvim",
     dependencies = {
-        "davidmh/cspell.nvim",
+        {
+            "davidmh/cspell.nvim",
+            build = "cd ~/.local/share/nvim/mason/packages/cspell && npm i -g @cspell/dict-pt-br",
+        },
     },
     config = function()
         local nullLs = require("null-ls")
