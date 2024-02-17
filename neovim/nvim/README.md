@@ -5,13 +5,17 @@
 -   [ ] Create my Own Sheet Sheet of commands and remaps
 -   [ ] review and lazy load plugins
 -   [ ] Enable some plugins only locally not on SSH connections
--   [ ] Try to use cspell with a plugin instead of native nvim spell
+-   [x] Try to use cspell with a plugin instead of native nvim spell
 -   [ ] Install multi-line plugin
 -   [ ] Clean up unused plugins
--   [ ] Setup debugger for Chrome
+-   [x] Setup debugger for Chrome
 -   [ ] Setup debugger for node-terminal
 -   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc
     -   this might need an attach function to the markdown file-type only
+-   [ ] Enums shows white and blue depending on where they are, TS and TSX
+-   [ ] Check nesting config for Neo Tree
+-   [x] setup lua formatter with sane defaults to projects without a RC file
+    -   apparently the CLI doesn't accept format arguments
 -   [x] Fork the Dashboard and change file name to omit the CWD and show only relative path
     -   here: https://github.com/nvimdev/dashboard-nvim/blob/63df28409d940f9cac0a925df09d3dc369db9841/lua/dashboard/theme/hyper.lua#L190
     -   I created a PR https://github.com/nvimdev/dashboard-nvim/pull/416, 🤞
@@ -23,17 +27,15 @@
 -   [x] use `try_node_modules` with the Formatter plugin
 -   [x] How to Format PHP with prettier?
 -   [x] adjust diffView ctrl+ b / f to scroll less, it jumps too much
--   [ ] Use quickfix to show TSC errors
+-   [x] Use quickfix to show TSC errors
     -   https://www.reddit.com/r/neovim/comments/ylvoml/typescript_errors_into_vim_quickfix/
     -   I need to find a way to look for the nearest tsconfig.json and run tsc on it
 -   [x] Check if Telescope cache can have ignore, so I can re-enable ui-select
     -   It doesn't, I disabled the ui-select plugin for now to avoid issues
--   [ ] Check nesting config for Neo Tree
 -   [x] add a width limit to notify and word-wrap
--   [ ] Add plugin to auto pair brackets
+-   [x] Add plugin to auto pair brackets
 -   [x] Review highlights for `.editorconfig`, it is too blue
--   [ ] `@type.tsx` shows as white in DiffView, should be blue as a normal type
--   [ ] Enums shows white and blue depending on where they are, TS and TSX
+-   [x] `@type.tsx` shows as white in DiffView, should be blue as a normal type
 -   [x] Change Telescope mapping `<M-q>` to something else, as it is already mapped to `<Esc`>
     -   it is to send only selection to the quickfix list, `<C-q>` sends everything
 -   [x] Check if I need to use a local TSServer or if it is smart enough to pick up the one from the open project
