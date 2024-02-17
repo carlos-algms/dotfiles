@@ -126,7 +126,7 @@ return {
 
                     lsp_references = {
                         initial_mode = "normal",
-                        fname_width = 0.70,
+                        -- fname_width = 0.70,
                     },
 
                     lsp_definitions = {
