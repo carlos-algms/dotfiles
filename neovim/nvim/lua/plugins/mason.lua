@@ -149,7 +149,7 @@ return {
                 --     { desc = "List [r]eferences using Telescope" }
                 -- )
 
-                lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
+                -- lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
 
                 lspKeymap(
                     "n",

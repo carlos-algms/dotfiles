@@ -45,12 +45,12 @@ return {
         local diagnostic = require("lspsaga.diagnostic")
 
         -- disabled as it was constantly freezing and telling another request as in progress
-        -- vim.keymap.set(
-        --     { "n" },
-        --     "K",
-        --     ":Lspsaga hover_doc<CR>",
-        --     { desc = "LSP [h]over [d]oc", silent = true }
-        -- )
+        vim.keymap.set(
+            { "n" },
+            "K",
+            ":Lspsaga hover_doc<CR>",
+            { desc = "LSP [h]over [d]oc", silent = true }
+        )
 
         vim.keymap.set(
             { "n", "v" },
