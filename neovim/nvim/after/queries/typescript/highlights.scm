@@ -40,3 +40,9 @@
 (variable_declarator
   name: (identifier) @variable.declaration (#set! "priority" 120)
   )
+
+; (
+;  (identifier) @variable
+;  (#match? @variable "^[A-Z]")
+;  (#set! "priority" 120)
+;  )

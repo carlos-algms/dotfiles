@@ -60,6 +60,9 @@ return {
             vim.cmd([[ hi! link @new.identifier @identifier ]])
             vim.cmd([[ hi! link @lsp.type.typeParameter PreProc ]])
             vim.cmd([[ hi! link @constant.builtin Keyword ]])
+            vim.cmd([[ hi! link @tag Function]])
+            vim.cmd([[ hi! link @function.builtin Function]])
+            vim.cmd([[ hi! link @comment.documentation String ]])
 
             -- TS / TSX
             -- Review this, in previews, LSP doesn't start, so types are white instead of blue
@@ -76,7 +79,7 @@ return {
             vim.cmd([[ hi! link @lsp.type.enum @identifier ]])
             vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
             vim.cmd([[ hi! link @lsp.type.property Constant]])
-            vim.cmd([[ hi! link @tag Function]])
+            vim.cmd([[ hi! link @tag.tsx Function]])
             vim.cmd([[ hi! link @include.tsx Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @include.typescript Keyword ]]) -- Fix import colors
             vim.cmd([[ hi! link @punctuation.special.typescript Keyword ]])
@@ -84,7 +87,6 @@ return {
             vim.cmd([[ hi! link @punctuation.special.javascript Keyword ]])
             vim.cmd([[ hi! link @type.literal Type ]])
             vim.cmd([[ hi! link @type.literal.string String ]])
-            vim.cmd([[ hi! link @comment.documentation.typescript String ]])
             vim.cmd([[ hi! link @import.identifier @identifier ]])
             vim.cmd([[ hi! link @constant.tsx @identifier ]])
             vim.cmd([[ hi! link @constant.typescript @identifier ]])
@@ -105,11 +107,10 @@ return {
             vim.cmd([[ hi! link typescriptOptionalMark Keyword ]])
 
             -- JSX
-            vim.cmd([[ hi! link @constructor.tsx Function ]])
-            vim.cmd([[ hi! link @tag.tsx Function ]])
-            vim.cmd([[ hi! link @constructor.tsx Function ]])
-            vim.cmd([[ hi! link @tag.delimiter.tsx Function ]])
-            vim.cmd([[ hi! link @tag.attribute.tsx NormalFg ]])
+            vim.cmd([[ hi! link @constructor.jsx Function ]])
+            vim.cmd([[ hi! link @tag.jsx Function ]])
+            vim.cmd([[ hi! link @constructor.jsx Function ]])
+            vim.cmd([[ hi! link @tag.delimiter.jsx Function ]])
 
             -- HTML
             vim.cmd([[ hi! link htmlString String ]])
@@ -139,12 +140,11 @@ return {
             vim.cmd([[ hi! link @variable.builtin.php Keyword ]]) -- $this
             vim.cmd([[ hi! link @class.php @variable ]])
             vim.cmd([[ hi! link @constructor.php @function ]])
-            vim.cmd([[ hi! link @operator.php NormalFg ]])
-            -- vim.cmd([[ hi! link @property.php Constant ]])
             vim.cmd([[ hi! link @property.declaration.php Identifier ]])
             vim.cmd([[ hi! link @function.builtin.php Keyword ]])
             vim.cmd([[ hi! link @attribute.phpdoc Keyword ]])
-            vim.cmd([[ hi! link @spell.phpdoc String ]])
+            vim.cmd([[ hi! link phpStorageClass Keyword ]])
+            vim.cmd([[ hi! link phpDefine Keyword ]])
 
             -- Markdown
             vim.cmd([[ hi! link markdownH1 Keyword ]])

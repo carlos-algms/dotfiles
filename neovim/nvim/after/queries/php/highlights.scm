@@ -4,6 +4,10 @@
   "?>"
   ] @tag
 
+(
+ (comment) @comment.documentation
+ (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$")
+ )
 
 (class_declaration
   name: (name) @class
@@ -15,3 +19,9 @@
   )
 
 
+; Normalize $ as part of the constant name
+((variable_name) @constant
+  (#lua-match? @constant "^\[$]_?[A-Z][A-Z%d_]*$"))
+
+((variable_name) @constant.builtin
+  (#lua-match? @constant.builtin "^\[$]__[A-Z][A-Z%d_]+__$"))
