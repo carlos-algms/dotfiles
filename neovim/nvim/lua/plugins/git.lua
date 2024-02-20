@@ -68,6 +68,13 @@ return {
                         ":Gitsigns preview_hunk<CR>",
                         { desc = "Show hunk preview", silent = true }
                     )
+
+                    map(
+                        {"n", "v"},
+                        "<leader>g-",
+                        ":Gitsigns reset_hunk<CR>",
+                        { desc = "Show hunk preview", silent = true }
+                    )
                 end,
             })
         end,
