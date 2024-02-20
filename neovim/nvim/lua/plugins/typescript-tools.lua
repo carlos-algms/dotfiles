@@ -2,6 +2,17 @@ return {
     {
         "pmizio/typescript-tools.nvim",
         dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+        config = function(_, opts)
+            local api = require("typescript-tools.api")
+
+            opts.handlers = {
+                ["textDocument/publishDiagnostics"] = api.filter_diagnostics({
+                    80001, -- Ignore this might be converted to a ES export
+                }),
+            }
+
+            require("typescript-tools").setup(opts)
+        end,
         opts = {
             expose_as_code_action = "all",
             complete_function_calls = { "all" },
