@@ -40,6 +40,9 @@ return {
                         luasnip.lsp_expand(args.body)
                     end,
                 },
+                -- completion = {
+                --     completeopt = "menu,menuone,noinsert",
+                -- },
                 sources = cmp.config.sources({
                     { name = "nvim_lsp_signature_help" },
                     { name = "nvim_lsp" },
