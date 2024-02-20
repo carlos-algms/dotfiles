@@ -9,6 +9,8 @@ return {
 
         local opts = {
             options = {
+                -- show only 1 line at the bottom, so it never trucates the content
+                globalstatus = true,
                 icons_enabled = true,
                 theme = "jellybeans",
                 disabled_filetypes = {
@@ -23,6 +25,24 @@ return {
                     },
                 },
             },
+
+            -- Winbar is one per window/split, and is only visible int he focused window
+            -- so, depnding to the width, the content will be truncated
+            -- winbar = {}
+
+            -- Tab line is one per Tab pane, at the top, no matter how many windows/splits are in it
+            -- tabline = {
+            --     lualine_a = {
+            --         {
+            --             "vim.fn.fnamemodify(vim.fn.getcwd(), ':t')",
+            --         },
+            --     },
+
+            --     lualine_b = {
+            --         "branch",
+            --     },
+            -- },
+
             sections = {
                 lualine_a = {
                     {
