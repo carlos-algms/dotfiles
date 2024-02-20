@@ -21,6 +21,16 @@
     )
   )
 
+(import_statement
+  (import_clause
+    (named_imports
+      (import_specifier
+        alias: (identifier) @import.alias
+        )
+      )
+    )
+  )
+
 (import_clause
   (identifier) @import.identifier
   )

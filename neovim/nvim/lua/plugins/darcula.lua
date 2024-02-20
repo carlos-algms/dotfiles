@@ -88,6 +88,7 @@ return {
             vim.cmd([[ hi! link @type.literal Type ]])
             vim.cmd([[ hi! link @type.literal.string String ]])
             vim.cmd([[ hi! link @import.identifier @identifier ]])
+            vim.cmd([[ hi! link @import.alias @identifier ]])
             vim.cmd([[ hi! link @constant.tsx @identifier ]])
             vim.cmd([[ hi! link @constant.typescript @identifier ]])
             vim.cmd([[ hi! link @variable.declaration @identifier ]])
@@ -119,7 +120,7 @@ return {
             vim.cmd([[ hi! link @tag.html Function ]])
             vim.cmd([[ hi! link @constant.html Function ]])
             vim.cmd([[ hi! link @tag.delimiter.html Function ]])
-            vim.cmd([[ hi! link @tag.attribute.html NormalFg ]])
+            vim.cmd([[ hi! link @tag.attribute NormalFg ]])
             vim.cmd([[ hi! link @operator.html NormalFg ]])
             vim.cmd([[ hi! link @string.special.url.html String ]])
 
