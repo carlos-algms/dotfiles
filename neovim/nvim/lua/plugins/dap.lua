@@ -241,6 +241,19 @@ return {
                 },
             }
 
+            -- pwa-chrome isn't working fully
+            -- https://stackoverflow.com/a/73427518/5930949
+            dap.adapters["chrome"] = {
+                type = "executable",
+                command = "chrome-debug-adapter",
+                -- host = "localhost",
+                -- port = "${port}",
+                -- executable = {
+                --     command = "chrome-debug-adapter",
+                --     -- args = { "${port}" },
+                -- },
+            }
+
             for _, language in ipairs({
                 "typescript",
                 "typescriptreact",
