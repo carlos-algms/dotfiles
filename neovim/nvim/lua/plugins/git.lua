@@ -100,6 +100,20 @@ return {
                 { desc = "Commit staged files" },
             }
 
+            local nextItemKeymap = {
+                "n",
+                "]q",
+                actions.select_next_entry,
+                { desc = "Open the diff for the next file" },
+            }
+
+            local prevItemKeymap = {
+                "n",
+                "[q",
+                actions.select_prev_entry,
+                { desc = "Open the diff for the previous file" },
+            }
+
             require("diffview").setup({
                 default_args = {
                     DiffviewOpen = { "--imply-local" },
@@ -116,6 +130,8 @@ return {
                     file_panel = {
                         quitDiffViewKeymap,
                         commitKeyMap,
+                        nextItemKeymap,
+                        prevItemKeymap,
 
                         {
                             "n",
@@ -145,6 +161,9 @@ return {
                     view = {
                         quitDiffViewKeymap,
                         commitKeyMap,
+                        nextItemKeymap,
+                        prevItemKeymap,
+
                         {
                             "n",
                             "s",
