@@ -76,19 +76,19 @@ return {
         --     })
         -- end, { desc = "Go to previous Error" })
 
-        -- vim.lsp.handlers["textDocument/signatureHelp"] =
-        --     vim.lsp.with(vim.lsp.handlers.signature_help, {
-        --         border = "single",
-        --         title = "signature",
-        --     })
+        vim.lsp.handlers["textDocument/signatureHelp"] =
+            vim.lsp.with(vim.lsp.handlers.signature_help, {
+                border = "single",
+                title = "signature",
+            })
 
-        -- vim.lsp.handlers["textDocument/hover"] =
-        --     vim.lsp.with(vim.lsp.handlers.hover, {
-        --         -- Use a sharp border with `FloatBorder` highlights
-        --         border = "single",
-        --         -- add the title in hover float window
-        --         title = "hover",
-        --     })
+        vim.lsp.handlers["textDocument/hover"] =
+            vim.lsp.with(vim.lsp.handlers.hover, {
+                -- Use a sharp border with `FloatBorder` highlights
+                border = "single",
+                -- add the title in hover float window
+                title = "hover",
+            })
 
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -149,7 +149,7 @@ return {
                 --     { desc = "List [r]eferences using Telescope" }
                 -- )
 
-                -- lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
+                lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
 
                 lspKeymap(
                     "n",
