@@ -1,4 +1,8 @@
 return {
     "stevearc/dressing.nvim",
-    opts = {},
+    opts = {
+        input = {
+            relative = "editor",
+        },
+    },
 }
