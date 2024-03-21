@@ -125,21 +125,21 @@ vim.keymap.set("v", ">", ">gv")
 -- )
 
 vim.keymap.set(
-    "n",
+    { "n", "i" },
     "<C-S-Up>",
     "<cmd>resize +2<cr>",
     { desc = "Increase window height" }
 )
 
 vim.keymap.set(
-    "n",
+    { "n", "i" },
     "<C-S-Down>",
     "<cmd>resize -2<cr>",
     { desc = "Decrease window height" }
 )
 
 vim.keymap.set(
-    "n",
+    { "n", "i" },
     "<C-S-Left>",
     "<cmd>vertical resize -2<cr>",
     { desc = "Decrease window width" }
