@@ -8,15 +8,14 @@ export LC_ALL="en_US.UTF-8"
 DEFAULT_USER=`whoami`
 
 
-## set VSCode as default editor if it is in the path
-# if [[ -x "$(command -v code)" ]]; then
-#   export EDITOR='code --wait'
-# else
-#   export EDITOR='vim'
-# fi
-
-# set NeoVim as default editor
-export EDITOR='nvim'
+## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
+if [[ -x "$(command -v code)" ]] && [[ "$TERM_PROGRAM" == "vscode" ]]; then
+  export EDITOR='code --wait'
+elif [[ -x "$(command -v nvim)" ]]; then
+  export EDITOR='nvim'
+elif [[ -x "$(command -v vim)" ]]; then
+  export EDITOR='vim'
+fi
 
 # disable shared history between ZSH instances
 unsetopt inc_append_history
