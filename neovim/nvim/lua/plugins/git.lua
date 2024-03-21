@@ -70,10 +70,10 @@ return {
                     )
 
                     map(
-                        {"n", "v"},
+                        { "n", "v" },
                         "<leader>g-",
                         ":Gitsigns reset_hunk<CR>",
-                        { desc = "Show hunk preview", silent = true }
+                        { desc = "Reset hunk", silent = true }
                     )
                 end,
             })
@@ -295,14 +295,29 @@ return {
             -- })
         end,
     },
+    -- {
+    --     "knsh14/vim-github-link",
+    --     -- cmd = { "GetCommitLink" },
+    --     init = function()
+    --         vim.keymap.set(
+    --             { "n", "v" },
+    --             "<leader>gC",
+    --             ":GetCommitLink<CR>",
+    --             { desc = "Copy git remote URL to clipboard" }
+    --         )
+    --     end,
+    -- },
     {
-        "knsh14/vim-github-link",
-        cmd = { "GetCommitLink" },
-        init = function()
+        "linrongbin16/gitlinker.nvim",
+        config = function()
+            require("gitlinker").setup({
+                message = false,
+            })
+
             vim.keymap.set(
                 { "n", "v" },
-                "<leader>gC",
-                ":GetCommitLink<CR>",
+                "<leader>gy",
+                "<cmd>GitLink<CR>",
                 { desc = "Copy git remote URL to clipboard" }
             )
         end,
