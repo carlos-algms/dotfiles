@@ -54,8 +54,10 @@ return {
             vim.cmd([[ hi! link @constructor @identifier ]])
             vim.cmd([[ hi! link @variable @identifier ]])
             vim.cmd([[ hi! link @variable.member Constant ]])
-            -- vim.cmd([[ hi! link @lsp.type.class @identifier ]])
-            vim.cmd([[ hi! link @lsp.type.namespace @identifier ]])
+            vim.cmd([[ hi! link @type.predefined Type ]])
+            vim.cmd([[ hi! link @character.special Keyword ]])
+            -- vim.cmd([[ hi! link @lsp.type.class Type ]])
+            -- vim.cmd([[ hi! link @lsp.type.namespace @identifier ]])
             vim.cmd([[ hi! link @lsp.typemod.class.declaration @identifier ]])
             vim.cmd([[ hi! link @new.identifier @identifier ]])
             vim.cmd([[ hi! link @lsp.type.typeParameter PreProc ]])
@@ -63,6 +65,8 @@ return {
             vim.cmd([[ hi! link @tag Function]])
             vim.cmd([[ hi! link @function.builtin Function]])
             vim.cmd([[ hi! link @comment.documentation String ]])
+            vim.cmd([[ hi! link @lsp.type.class @identifier ]])
+            vim.cmd([[ hi! link @type.builtin @identifier ]])
 
             -- TS / TSX
             -- Review this, in previews, LSP doesn't start, so types are white instead of blue
@@ -77,7 +81,7 @@ return {
             vim.cmd([[ hi! link typescriptObjectLabel @property ]])
             vim.cmd([[ hi! link typescriptObjectLiteral @type ]])
             vim.cmd([[ hi! link @lsp.type.enum @identifier ]])
-            vim.cmd([[ hi! link @lsp.type.type.typescript Type ]])
+            vim.cmd([[ hi! link @lsp.type.typescript Type ]])
             vim.cmd([[ hi! link @lsp.type.property Constant]])
             vim.cmd([[ hi! link @tag.tsx Function]])
             vim.cmd([[ hi! link @include.tsx Keyword ]]) -- Fix import colors
@@ -91,7 +95,9 @@ return {
             vim.cmd([[ hi! link @import.alias @identifier ]])
             vim.cmd([[ hi! link @constant.tsx @identifier ]])
             vim.cmd([[ hi! link @constant.typescript @identifier ]])
-            vim.cmd([[ hi! link @variable.declaration @identifier ]])
+            vim.cmd([[ hi! link @class.identifier @identifier ]])
+            -- TODO: check if something isn't hightlited as @identifier or Function
+            -- vim.cmd([[ hi! link @variable.declaration @identifier ]])
 
             -- Docs Popup
             vim.cmd([[ hi! link typescriptImport Keyword ]])

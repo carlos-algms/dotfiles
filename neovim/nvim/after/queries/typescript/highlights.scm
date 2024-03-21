@@ -11,6 +11,35 @@
    )
 )
 
+(variable_declarator
+  name: (identifier) @function (#set! "priority" 150)
+  value: [(function_expression) (arrow_function)]
+  )
+
+(class_declaration
+  name: (type_identifier) @class.identifier
+  )
+
+(property_signature
+  type: (type_annotation
+          (type_identifier) @type.identifier (#set! "priority" 150)
+          )
+
+  )
+
+
+; (type_annotation
+;   (generic_type
+;     name: (type_identifier) @type.identifier (#set! "priority" 150)
+;     )
+;   )
+
+(generic_type
+  name: (type_identifier) @type.identifier (#set! "priority" 150)
+  )
+
+(predefined_type) @type.predefined
+
 (import_statement
   (import_clause
     (named_imports
@@ -47,9 +76,6 @@
     )
   )
 
-(variable_declarator
-  name: (identifier) @variable.declaration (#set! "priority" 120)
-  )
 
 ; (
 ;  (identifier) @variable
