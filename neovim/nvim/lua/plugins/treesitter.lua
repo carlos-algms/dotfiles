@@ -107,7 +107,10 @@ return {
             },
         })
 
-        require("treesitter-context").setup({})
+        -- https://github.com/nvim-treesitter/nvim-treesitter-context?tab=readme-ov-file#configuration
+        require("treesitter-context").setup({
+              multiline_threshold = 3, -- Maximum number of lines to show for a single context
+        })
         require("nvim-ts-autotag").setup()
     end,
 }
