@@ -57,8 +57,9 @@ return {
     {
         -- Installed Conform as it is used by LazyVim
         "stevearc/conform.nvim",
-        event = { "BufWritePre" },
-        cmd = { "ConformInfo" },
+        -- event = { "BufWritePre" },
+        -- cmd = { "ConformInfo" },
+        lazy = false,
         keys = {
             {
                 "<leader>bf",
@@ -91,7 +92,13 @@ return {
                 "yaml",
                 "php",
             }) do
-                formatters_by_ft[language] = { { "prettierd", "prettier" } }
+                formatters_by_ft[language] = {
+                    {
+                        -- Not using it because it can leave zombie processes on failure
+                        -- "prettierd",
+                        "prettier",
+                    },
+                }
             end
 
             conform.setup(opts)
