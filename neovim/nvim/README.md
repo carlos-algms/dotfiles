@@ -2,6 +2,8 @@
 
 ## Todo
 
+-   [ ] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
+-   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
 -   [ ] Create my Own Sheet Sheet of commands and remaps
 -   [ ] review and lazy load plugins
 -   [ ] Enable some plugins only locally not on SSH connections
