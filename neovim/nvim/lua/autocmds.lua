@@ -47,6 +47,8 @@ vim.api.nvim_create_autocmd("FileType", {
         "neotest-output-panel",
         "copilot.lua",
         "dap-float",
+        "fugitiveblame",
+        "harpoon",
     },
     callback = function(event)
         vim.bo[event.buf].buflisted = false
