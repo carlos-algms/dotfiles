@@ -96,6 +96,7 @@ return {
             vim.cmd([[ hi! link @constant.tsx @identifier ]])
             vim.cmd([[ hi! link @constant.typescript @identifier ]])
             vim.cmd([[ hi! link @class.identifier @identifier ]])
+            vim.cmd([[ hi! link @variable.builtin.this Keyword ]])
             -- TODO: check if something isn't hightlited as @identifier or Function
             -- vim.cmd([[ hi! link @variable.declaration @identifier ]])
 
