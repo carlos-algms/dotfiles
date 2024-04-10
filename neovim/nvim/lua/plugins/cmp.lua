@@ -18,7 +18,7 @@ return {
                 -- install jsregexp (optional!:).
                 build = "make install_jsregexp",
                 dependencies = {
-                    { "rafamadriz/friendly-snippets" },
+                    -- { "rafamadriz/friendly-snippets" },
                 },
             },
             {
@@ -31,8 +31,13 @@ return {
             local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
-            -- https://github.com/L3MON4D3/LuaSnip#add-snippets
-            require("luasnip.loaders.from_vscode").lazy_load()
+            -- this one is for the friendly-snippets, but I'm not using it.
+            -- require("luasnip.loaders.from_vscode").lazy_load()
+
+            -- https://github.com/L3MON4D3/LuaSnip/blob/master/DOC.md#vs-code
+            require("luasnip.loaders.from_vscode").lazy_load({
+                paths = "./snippets",
+            })
 
             cmp.setup({
                 snippet = {

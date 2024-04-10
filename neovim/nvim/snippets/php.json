@@ -1,0 +1,12 @@
+{
+    "function": {
+        "prefix": "pf",
+        "body": ["public function $1($2) {", "  $0", "}"],
+        "description": "Public Function"
+    },
+    "protected function": {
+        "prefix": "prf",
+        "body": ["protected function $1($2) {", "  $0", "}"],
+        "description": "Protected Function"
+    }
+}

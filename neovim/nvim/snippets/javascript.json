@@ -1,0 +1,76 @@
+{
+    "console.log": {
+        "prefix": "cl",
+        "body": ["console.log($1);$0"],
+        "description": "Console Log"
+    },
+    "console.info": {
+        "prefix": "ci",
+        "body": ["console.info($1);$0"],
+        "description": "Console Info"
+    },
+    "console.warn": {
+        "prefix": "cw",
+        "body": ["console.warn($1);$0"],
+        "description": "Console Warn"
+    },
+    "console.error": {
+        "prefix": "ce",
+        "body": ["console.error($1);$0"],
+        "description": "Console Error"
+    },
+    "() => {}": {
+        "prefix": "()",
+        "body": ["($1) => $0"],
+        "description": "Arrow Function"
+    },
+    "(() => {})()": {
+        "prefix": "sa",
+        "body": ["(() => {", "$0", "})()"],
+        "description": "IIFE Arrow Function"
+    },
+    "(async () => {})()": {
+        "prefix": "saa",
+        "body": ["(async () => {", "$0", "})()"],
+        "description": "IIFE Async Arrow Function"
+    },
+    "function": {
+        "prefix": "fnc",
+        "body": ["function $1($2) {", "  $0", "}"],
+        "description": "normal Function"
+    },
+    "export default function": {
+        "prefix": "edf",
+        "body": [
+            "export default function ${1:${TM_FILENAME_BASE/[\\s-.]/_/g}}($2) {",
+            "  $0",
+            "}"
+        ],
+        "description": "Export default Function"
+    },
+    "Async function": {
+        "prefix": "afnc",
+        "body": ["async function $1($2) {", "  $0", "}"],
+        "description": "Insert async named function"
+    },
+    "Export default": {
+        "prefix": "ed",
+        "body": ["export default $0"],
+        "description": "Insert export default statement"
+    },
+    "Export const": {
+        "prefix": "ec",
+        "body": ["export const $0"],
+        "description": "Insert export const statement"
+    },
+    "Export function": {
+        "prefix": "ef",
+        "body": ["export function $0() {", "", "};"],
+        "description": "Insert export function"
+    },
+    "fc": {
+        "prefix": "fc",
+        "body": ["const ${1:${TM_FILENAME_BASE/[\\s-.]/_/g}} = () => $0"],
+        "description": "function component"
+    }
+}

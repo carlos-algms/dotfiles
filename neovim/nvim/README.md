@@ -2,14 +2,15 @@
 
 ## Todo
 
--   [ ] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
--   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
--   [ ] Create my Own Sheet Sheet of commands and remaps
+-   [x] Add my most used snippets from VSCode, like `cl` for console.log
 -   [ ] review and lazy load plugins
 -   [ ] Enable some plugins only locally not on SSH connections
--   [x] Try to use cspell with a plugin instead of native nvim spell
 -   [ ] Install multi-line plugin
 -   [ ] Clean up unused plugins
+-   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
+-   [ ] Create my Own Sheet Sheet of commands and remaps
+-   [x] Try to use cspell with a plugin instead of native nvim spell
+-   [x] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
 -   [x] Setup debugger for Chrome
 -   [ ] Setup debugger for node-terminal
 -   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc

@@ -1,0 +1,7 @@
+{
+    "Interface Definition": {
+        "prefix": "iface",
+        "body": ["interface ${1:name} {", "\t$0", "}"],
+        "description": "Interface Definition"
+    }
+}
