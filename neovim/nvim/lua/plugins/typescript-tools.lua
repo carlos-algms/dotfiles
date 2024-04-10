@@ -23,21 +23,21 @@ return {
             on_attach = function(config, bufNr)
                 vim.keymap.set(
                     { "n", "v" },
-                    "<space>io",
+                    "<leader>io",
                     ":TSToolsOrganizeImports<CR>",
                     { desc = "Imports Organize", silent = true, buffer = bufNr }
                 )
 
                 vim.keymap.set(
                     { "n", "v" },
-                    "<space>is",
+                    "<leader>is",
                     ":TSToolsSortImports<CR>",
                     { desc = "Imports Sort", silent = true, buffer = bufNr }
                 )
 
                 vim.keymap.set(
                     { "n", "v" },
-                    "<space>ir",
+                    "<leader>ir",
                     ":TSToolsRemoveUnusedImports<CR>",
                     {
                         desc = "Imports remove unused",
@@ -48,7 +48,7 @@ return {
 
                 vim.keymap.set(
                     { "n", "v" },
-                    "<space>ia",
+                    "<leader>ia",
                     ":TSToolsAddMissingImports<CR>",
                     {
                         desc = "Imports Add All missing",
@@ -59,7 +59,7 @@ return {
 
                 vim.keymap.set(
                     { "n", "v" },
-                    "<space>rf",
+                    "<leader>rf",
                     ":TSToolsRenameFile<CR>",
                     { desc = "Rename File", silent = true, buffer = bufNr }
                 )
@@ -70,7 +70,10 @@ return {
     {
         "dmmulroy/tsc.nvim",
         opts = {
-            auto_open_qflist = false,
+            auto_open_qflist = true,
+            auto_close_qflist = true,
+            auto_focus_qflist = true,
+            use_trouble_qflist = true,
         },
     },
 }

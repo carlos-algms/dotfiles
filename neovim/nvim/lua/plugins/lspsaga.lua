@@ -30,6 +30,7 @@ return {
                 virtual_text = false, -- otherwise it shows twice, on the line number and on eol
             },
             rename = {
+                in_select = false,
                 keys = {
                     quit = "<esc>",
                 },
@@ -61,7 +62,7 @@ return {
 
         vim.keymap.set(
             { "n", "v" },
-            "<space>rn",
+            "<leader>rn",
             ":Lspsaga rename<CR>",
             { desc = "LSP [r]ename", silent = true }
         )
@@ -69,28 +70,28 @@ return {
         -- Disabling as it wasn't showing all the refactor options
         -- vim.keymap.set(
         --     { "n", "v" },
-        --     "<space>ca",
+        --     "<leader>ca",
         --     ":Lspsaga code_action<CR>",
         --     { desc = "LSP [c]ode [a]ction", silent = true }
         -- )
 
         vim.keymap.set(
             { "n", "v" },
-            "<space>ro",
+            "<leader>ro",
             ":Lspsaga outline<CR>",
             { desc = "LSP Outline", silent = true }
         )
 
         vim.keymap.set(
             { "n" },
-            "<space>pd",
+            "<leader>pd",
             ":Lspsaga peek_definition<CR>",
             { desc = "LSP Peek Definition", silent = true }
         )
 
         vim.keymap.set(
             { "n" },
-            "<space>pt",
+            "<leader>pt",
             ":Lspsaga peek_type_definition<CR>",
             { desc = "LSP Peek type definition", silent = true }
         )

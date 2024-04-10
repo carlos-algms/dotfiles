@@ -181,13 +181,13 @@ return {
 
                 lspKeymap(
                     { "n", "v" },
-                    "<space>ca",
+                    "<leader>ca",
                     vim.lsp.buf.code_action,
                     "Show [c]ode [a]ctions"
                 )
 
                 -- Disabled to use Conform
-                -- lspKeymap("n", "<space>bf", function()
+                -- lspKeymap("n", "<leader>bf", function()
                 --     vim.lsp.buf.format({ async = true })
                 -- end, "[B]uffer [F]ormat")
             end,
