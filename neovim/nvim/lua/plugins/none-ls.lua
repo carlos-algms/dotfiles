@@ -3,7 +3,8 @@ return {
     dependencies = {
         {
             "davidmh/cspell.nvim",
-            build = "cd ~/.local/share/nvim/mason/packages/cspell && npm i -g @cspell/dict-pt-br",
+            -- build = "cd ~/.local/share/nvim/mason/packages/cspell && npm i @cspell/dict-pt-br",
+            build = "mkdir -p dictionaries && cd $_ && echo '{}' > package.json && npm i @cspell/dict-pt-br",
         },
     },
     config = function()
