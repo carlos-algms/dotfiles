@@ -19,6 +19,9 @@ return {
                 default_remote = { "origin", "upstream" },
                 picker = "telescope",
                 comment_icon = "󰆈 ",
+                suppress_missing_scope = {
+                    projects_v2 = true,
+                },
             })
         end,
     },
