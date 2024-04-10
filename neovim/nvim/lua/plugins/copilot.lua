@@ -33,6 +33,7 @@ return {
             yaml = true,
             markdown = true,
             gitcommit = true,
+            sagarename = false,
         }
     end,
 }
