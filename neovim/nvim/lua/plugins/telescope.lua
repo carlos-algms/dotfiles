@@ -130,11 +130,13 @@ return {
 
                     lsp_references = {
                         initial_mode = "normal",
-                        -- fname_width = 0.70,
+                        fname_width = 0.70,
+                        wrap_results = true,
                     },
 
                     lsp_definitions = {
                         initial_mode = "normal",
+                        wrap_results = true,
                     },
 
                     find_files = {
