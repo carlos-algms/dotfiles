@@ -155,7 +155,7 @@ vim.keymap.set(
 vim.keymap.set(
     { "n", "i" },
     "<D-s>",
-    "<esc><cmd>w<cr>",
+    "<esc><cmd>update<cr>",
     { desc = "Save current buffer" }
 )
 
