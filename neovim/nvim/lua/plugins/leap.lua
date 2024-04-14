@@ -1,6 +1,7 @@
 return {
     "ggandor/leap.nvim",
     enabled = true,
+    event = "VeryLazy",
     -- config = function()
     --     local leap = require("leap")
     --     leap.create_default_mappings()
@@ -16,9 +17,12 @@ return {
         for k, v in pairs(opts) do
             leap.opts[k] = v
         end
-        leap.add_default_mappings(true)
-        vim.keymap.del({ "x", "o" }, "x")
-        vim.keymap.del({ "x", "o" }, "X")
+
+        -- it shows an error at the startup but it fixes the conflict with surround.nvim
+        leap.create_default_mappings(true)
+        -- leap.add_default_mappings(true)
+        -- vim.keymap.del({ "x", "o" }, "x")
+        -- vim.keymap.del({ "x", "o" }, "X")
 
         -- Hack to hide cursor on auto jump
         vim.api.nvim_create_autocmd("User", {
