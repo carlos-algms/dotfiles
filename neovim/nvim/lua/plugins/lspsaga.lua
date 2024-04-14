@@ -14,6 +14,8 @@ return {
                 -- extend_gitsigns = true,
             },
             definition = {
+                width = 0.7,
+                height = 0.6,
                 keys = {
                     edit = "o",
                     vsplit = "v",
