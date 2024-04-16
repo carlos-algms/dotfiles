@@ -8,7 +8,3 @@
  ; (#eq? @variable.builtin.this "this")
  )
 
-(public_field_definition
-  name: (property_identifier) @function.method
-  value: (arrow_function)
-  )

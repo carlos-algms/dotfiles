@@ -27,12 +27,19 @@
 
   )
 
+;; this is different from JavaScript
+;; public_field_definition, there it is just a field_definition
+(public_field_definition
+  name: [
+         (property_identifier)
+         (private_property_identifier)
+         ] @function.method
+  value: [
+          (function_expression)
+          (arrow_function)
+          ]
+  )
 
-; (type_annotation
-;   (generic_type
-;     name: (type_identifier) @type.identifier (#set! "priority" 150)
-;     )
-;   )
 
 (generic_type
   name: (type_identifier) @type.identifier (#set! "priority" 150)
