@@ -74,7 +74,8 @@ opt.listchars = {
     -- eol = "↲",
 }
 
-opt.showmode = false -- Dont show mode since we have a statusline
+-- commented to show mode, as I removed it from the statusline
+-- opt.showmode = false -- Dont show mode since we have a statusline
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
