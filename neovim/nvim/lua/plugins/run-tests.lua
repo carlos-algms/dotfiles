@@ -12,49 +12,49 @@ return {
         enabled = true,
         keys = {
             {
-                "<leader><leader>td",
+                "<leader>Td",
                 function()
                     require("neotest").run.run({ strategy = "dap" })
                 end,
                 desc = "Debug nearest Test",
             },
             {
-                "<leader><leader>tt",
+                "<leader>Tf",
                 function()
                     require("neotest").run.run(vim.fn.expand("%"))
                 end,
                 desc = "Run File",
             },
             {
-                "<leader><leader>tT",
+                "<leader>TT",
                 function()
                     require("neotest").run.run(vim.loop.cwd())
                 end,
                 desc = "Run All Test Files",
             },
             {
-                "<leader><leader>tr",
+                "<leader>Tn",
                 function()
                     require("neotest").run.run()
                 end,
                 desc = "Run Nearest",
             },
             {
-                "<leader><leader>tl",
+                "<leader>Tl",
                 function()
                     require("neotest").run.run_last()
                 end,
                 desc = "Run Last",
             },
             {
-                "<leader><leader>ts",
+                "<leader>Ts",
                 function()
                     require("neotest").summary.toggle()
                 end,
                 desc = "Toggle Summary",
             },
             {
-                "<leader><leader>to",
+                "<leader>To",
                 function()
                     require("neotest").output.open({
                         enter = true,
@@ -64,14 +64,14 @@ return {
                 desc = "Show Output",
             },
             {
-                "<leader><leader>tO",
+                "<leader>TO",
                 function()
                     require("neotest").output_panel.toggle()
                 end,
                 desc = "Toggle Output Panel",
             },
             {
-                "<leader><leader>tS",
+                "<leader>TS",
                 function()
                     require("neotest").run.stop()
                 end,
@@ -144,7 +144,7 @@ return {
 
             -- vim.keymap.set(
             --     "n",
-            --     "<leader><leader>tw",
+            --     "<leader>Tw",
             --     "<cmd>lua require('neotest').run.run({ jestCommand = 'jest --watch ' })<cr>",
             --     { desc = "Run [t]est [w]atch mode" }
             -- )
