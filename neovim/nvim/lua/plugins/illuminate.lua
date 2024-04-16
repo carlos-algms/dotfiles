@@ -20,18 +20,14 @@ return {
         vim.cmd([[ hi! link IlluminatedWordRead IlluminatedWordText ]])
         vim.cmd([[ hi! link IlluminatedWordWrite IlluminatedWordText ]])
 
-        vim.keymap.set(
-            "n",
-            "]r",
-            illuminate.goto_next_reference,
-            { desc = "Go to next reference" }
-        )
+        vim.keymap.set("n", "]r", function(ev)
+            illuminate.goto_next_reference(ev)
+            vim.cmd("normal! zz")
+        end, { desc = "Go to next reference" })
 
-        vim.keymap.set(
-            "n",
-            "[r",
-            illuminate.goto_prev_reference,
-            { desc = "Go to previous reference" }
-        )
+        vim.keymap.set("n", "[r", function(ev)
+            illuminate.goto_prev_reference(ev)
+            vim.cmd("normal! zz")
+        end, { desc = "Go to previous reference" })
     end,
 }
