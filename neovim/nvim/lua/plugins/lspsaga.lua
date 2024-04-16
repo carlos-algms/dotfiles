@@ -99,6 +99,13 @@ return {
         )
 
         vim.keymap.set(
+            { "n" },
+            "<leader>pc",
+            ":Lspsaga incoming_calls<CR>",
+            { desc = "LSP Pick incoming calls", silent = true }
+        )
+
+        vim.keymap.set(
             "n",
             "]d",
             ":Lspsaga diagnostic_jump_next<CR>",
