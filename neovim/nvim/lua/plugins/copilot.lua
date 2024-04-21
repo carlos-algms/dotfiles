@@ -34,6 +34,9 @@ return {
             markdown = true,
             gitcommit = true,
             sagarename = false,
+            spectre_panel = false,
+            DressingInput = false,
+            oil = false,
         }
     end,
 }
