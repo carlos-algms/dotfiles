@@ -1,5 +1,6 @@
 return {
     "nvim-pack/nvim-spectre",
+    lazy = true,
     denpendencies = {
         "nvim-lua/plenary.nvim",
     },

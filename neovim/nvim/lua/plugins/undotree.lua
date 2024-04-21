@@ -1,5 +1,6 @@
 return {
     "mbbill/undotree",
+    event = "VeryLazy",
     init = function()
         -- set it to a permananet folder so I can undo across sessions
         vim.opt.undodir = os.getenv("HOME") .. "/.cache/undodir"

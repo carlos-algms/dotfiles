@@ -1,6 +1,7 @@
 return {
     "RRethy/vim-illuminate",
     enabled = true,
+    event = "VeryLazy",
     config = function()
         local illuminate = require("illuminate")
 

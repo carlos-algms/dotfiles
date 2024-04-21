@@ -91,6 +91,7 @@ return {
                 "markdown",
                 "yaml",
                 "php",
+                "svg",
             }) do
                 formatters_by_ft[language] = {
                     {

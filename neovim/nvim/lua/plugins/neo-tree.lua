@@ -11,14 +11,14 @@ return {
         "MunifTanjim/nui.nvim",
         -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     },
-    init = function()
-        if vim.fn.argc(-1) == 1 then
-            local stat = vim.loop.fs_stat(vim.fn.argv(0))
-            if stat and stat.type == "directory" then
-                require("neo-tree")
-            end
-        end
-    end,
+    -- init = function()
+    --     if vim.fn.argc(-1) == 1 then
+    --         local stat = vim.loop.fs_stat(vim.fn.argv(0))
+    --         if stat and stat.type == "directory" then
+    --             require("neo-tree")
+    --         end
+    --     end
+    -- end,
     opts = {
         sources = { "filesystem", "buffers", "git_status", "document_symbols" },
         enable_git_status = true,

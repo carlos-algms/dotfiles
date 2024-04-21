@@ -1,6 +1,7 @@
 return {
     {
         "rcarriga/nvim-dap-ui",
+        lazy = true,
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
@@ -36,16 +37,10 @@ return {
     },
     {
         "theHamsta/nvim-dap-virtual-text",
+        lazy = true,
         dependencies = { "mfussenegger/nvim-dap" },
         config = function()
             require("nvim-dap-virtual-text").setup({})
-        end,
-    },
-    {
-        "LiadOz/nvim-dap-repl-highlights",
-        dependencies = { "mfussenegger/nvim-dap" },
-        config = function()
-            require("nvim-dap-repl-highlights").setup()
         end,
     },
     -- Disabled because it's not working
@@ -72,6 +67,7 @@ return {
     -- },
     {
         "mfussenegger/nvim-dap",
+        lazy = true,
         dependencies = {
             {
                 "nvim-telescope/telescope-dap.nvim",
@@ -87,6 +83,13 @@ return {
                 },
                 config = function()
                     require("telescope").load_extension("dap")
+                end,
+            },
+            {
+                "LiadOz/nvim-dap-repl-highlights",
+                -- dependencies = { "mfussenegger/nvim-dap" },
+                config = function()
+                    require("nvim-dap-repl-highlights").setup()
                 end,
             },
         },

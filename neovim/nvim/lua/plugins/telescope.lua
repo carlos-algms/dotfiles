@@ -1,7 +1,7 @@
 return {
     {
         "nvim-telescope/telescope.nvim",
-        tag = "0.1.5",
+        tag = "0.1.6",
         -- or                            , branch = '0.1.x',
         dependencies = {
             { "nvim-lua/plenary.nvim" },
@@ -58,20 +58,21 @@ return {
                         -- disabling it as it was blocking lsp_references,
                         -- it doesn't seem to affect file_search, it is still being ignored
                         -- "node_modules",
-                        "vendor",
-                        "build",
-                        "dist",
-                        "yarn.lock",
-                        "package-lock.json",
-                        "pnpm-lock.yaml",
+                        ".next",
+                        ".playwright-state",
                         ".turbo",
                         ".yarn",
-                        ".next",
+                        "build",
+                        "dist",
                         "out/",
+                        "package-lock.json",
                         "playwright-report",
-                        ".playwright-state",
+                        "pnpm-lock.yaml",
+                        "storybook-static",
                         "test-results",
+                        "vendor",
                         "y4m",
+                        "yarn.lock",
                     },
                     vimgrep_arguments = vimgrep_arguments,
                     sorting_strategy = "ascending",
@@ -319,11 +320,17 @@ return {
                 { desc = "[T]elescope list all [r]esume" }
             )
 
+            vim.keymap.set("n", "<leader>sd", "<cmd>GrepInDirectory<CR>", {
+                noremap = true,
+                silent = true,
+                desc = "Grep Search in directory",
+            })
+
             vim.keymap.set(
                 "n",
-                "<leader>sd",
-                "<cmd>GrepInDirectory<CR>",
-                { noremap = true, silent = true }
+                "<leader>cm",
+                "<cmd>Telescope filetypes<CR>",
+                { noremap = true, silent = true, desc = "Change file type" }
             )
 
             vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)

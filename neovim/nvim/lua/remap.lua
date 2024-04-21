@@ -75,7 +75,8 @@ vim.keymap.set("n", "Q", "<nop>")
 -- )
 
 -- window management
-vim.keymap.set("n", "<leader>w", "<C-w>", { desc = "Ctrl + w replacement" })
+-- disabled to force using <C-w>, to check the ergonomics
+-- vim.keymap.set("n", "<leader>w", "<C-w>", { desc = "Ctrl + w replacement" })
 
 vim.keymap.set(
     { "n", "v", "i", "x", "s", "c" },

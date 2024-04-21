@@ -112,7 +112,7 @@ return {
 
             local nextItemKeymap = {
                 "n",
-                "]q",
+                "]q", -- TODO: do the same as select entry to focus on the first hunk
                 actions.select_next_entry,
                 { desc = "Open the diff for the next file" },
             }
@@ -195,6 +195,17 @@ return {
                             { desc = "Reset selected hunk" },
                         },
                     },
+                    file_history_panel = {
+                        quitDiffViewKeymap,
+                        nextItemKeymap,
+                        prevItemKeymap,
+                        {
+                            "n",
+                            "<cr>",
+                            actions.select_entry,
+                            { desc = "Open the diff for the selected entry" },
+                        },
+                    },
                 },
             })
         end,
@@ -208,6 +219,12 @@ return {
         config = function()
             local telescopeBuiltin = require("telescope.builtin")
 
+            vim.api.nvim_create_user_command(
+                "UndoLastCommit",
+                "Git reset HEAD~",
+                {}
+            )
+
             vim.keymap.set(
                 "n",
                 "<C-S-p>",
@@ -220,6 +237,20 @@ return {
                 "<leader>gb",
                 telescopeBuiltin.git_branches,
                 { desc = "Show [g]it [b]ranches" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>gl",
+                telescopeBuiltin.git_status,
+                { desc = "Show [g]it [s]tatus as a list" }
+            )
+
+            vim.keymap.set(
+                "n",
+                "<leader>gh",
+                "<cmd>DiffviewFileHistory % <CR>",
+                { desc = "Show [G]it [H]istory for the current file" }
             )
 
             vim.keymap.set(
@@ -314,6 +345,7 @@ return {
     -- },
     {
         "linrongbin16/gitlinker.nvim",
+        event = "VeryLazy",
         config = function()
             require("gitlinker").setup({
                 message = false,

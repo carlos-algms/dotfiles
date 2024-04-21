@@ -2,6 +2,7 @@
 
 ## Todo
 
+-   [ ] Check which_key and add descriptions to keys that have `+prefix`
 -   [x] Add oil.nvim to test if it is better than neo-tree
     -   it is good to use in the current folder, but navigating seems daunting
 -   [ ] review and lazy load plugins
@@ -9,7 +10,7 @@
 -   [ ] Install multi-line plugin
 -   [ ] Clean up unused plugins
 -   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
--   [ ] Create my Own Sheet Sheet of commands and remaps
+-   [ ] Create my Own Cheat Sheet of commands and remaps
 -   [x] Add my most used snippets from VSCode, like `cl` for console.log
 -   [x] Try to use cspell with a plugin instead of native nvim spell
 -   [x] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
