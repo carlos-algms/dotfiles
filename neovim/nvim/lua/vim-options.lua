@@ -74,6 +74,9 @@ opt.listchars = {
     -- eol = "↲",
 }
 
+-- Allow to use grep and lgrep
+opt.grepprg = "rg --vimgrep --no-heading --smart-case"
+
 -- commented to show mode, as I removed it from the statusline
 -- opt.showmode = false -- Dont show mode since we have a statusline
 
