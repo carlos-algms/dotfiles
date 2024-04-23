@@ -20,10 +20,10 @@ return {
             -- Save the bookmarks per project
             save_file = bookmarksFile,
             keywords = {
-                ["@t"] = "☑️ ", -- mark annotation startswith @t ,signs this icon as `Todo`
-                ["@w"] = "⚠️ ", -- mark annotation startswith @w ,signs this icon as `Warn`
+                ["@t"] = " ", -- mark annotation startswith @t ,signs this icon as `Todo`
+                ["@w"] = " ", -- mark annotation startswith @w ,signs this icon as `Warn`
                 ["@f"] = "⛏ ", -- mark annotation startswith @f ,signs this icon as `Fix`
-                ["@n"] = "󰷉", -- mark annotation startswith @n ,signs this icon as `Note`
+                ["@n"] = "󰷉 ", -- mark annotation startswith @n ,signs this icon as `Note`
             },
             on_attach = function(bufnr)
                 local bm = require("bookmarks")
@@ -64,6 +64,18 @@ return {
                 })
             end,
         })
+
         require("telescope").load_extension("bookmarks")
+
+        -- TODO: link the highlight groups to match SignColumn
+        -- https://github.com/tomasky/bookmarks.nvim/blob/main/lua/bookmarks/config.lua
+        local groups = {
+            "BookMarksAdd",
+            "BookMarksAnn",
+        }
+
+        for _, group in ipairs(groups) do
+            vim.cmd("hi! link " .. group .. " SignColumn")
+        end
     end,
 }
