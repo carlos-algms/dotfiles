@@ -5,23 +5,31 @@ return {
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
+            "theHamsta/nvim-dap-virtual-text",
+        },
+        keys = {
+            {
+                "<leader>du",
+                function()
+                    require("dapui").toggle()
+                end,
+                desc = "Toggle [D]ebugger [U]i - Dap UI",
+            },
+            {
+                "<leader>dh",
+                function()
+                    require("dap.ui.widgets").hover()
+                end,
+                desc = "Show [D]ebugger [H]over",
+            },
         },
         config = function()
             local dapui = require("dapui")
             local dap = require("dap")
-            local widgets = require("dap.ui.widgets")
-
-            vim.keymap.set("n", "<leader>du", function()
-                dapui.toggle()
-            end, { desc = "Toggle [D]ebugger [U]i - Dap UI" })
 
             dap.listeners.after.event_initialized["dapui_config"] = function()
                 dapui.open()
             end
-
-            vim.keymap.set({ "n", "v" }, "<Leader>dh", function()
-                widgets.hover()
-            end, { desc = "Show [D]ebugger [H]over" })
 
             -- I don't want it to auto-close, as I want to check the output
             -- dap.listeners.before.event_terminated["dapui_config"] = function()
@@ -40,7 +48,9 @@ return {
         lazy = true,
         dependencies = { "mfussenegger/nvim-dap" },
         config = function()
-            require("nvim-dap-virtual-text").setup({})
+            require("nvim-dap-virtual-text").setup({
+                clear_on_continue = true,
+            })
         end,
     },
     -- Disabled because it's not working
