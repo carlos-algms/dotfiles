@@ -126,17 +126,17 @@ return {
                     oldfiles = {
                         -- `cwd` will be the directory where Telescope started.
                         cwd_only = true,
-                        initial_mode = "normal",
+                        -- initial_mode = "normal",
                     },
 
                     lsp_references = {
-                        initial_mode = "normal",
+                        -- initial_mode = "normal",
                         fname_width = 0.70,
                         wrap_results = true,
                     },
 
                     lsp_definitions = {
-                        initial_mode = "normal",
+                        -- initial_mode = "normal",
                         wrap_results = true,
                     },
 
