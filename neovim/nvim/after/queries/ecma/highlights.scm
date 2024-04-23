@@ -8,3 +8,7 @@
  ; (#eq? @variable.builtin.this "this")
  )
 
+
+(member_expression
+   (identifier) @variable.identifier (#set! "priority" 150)
+    )

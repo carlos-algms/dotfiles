@@ -20,12 +20,10 @@
   name: (type_identifier) @class.identifier
   )
 
-(property_signature
-  type: (type_annotation
-          (type_identifier) @type.identifier (#set! "priority" 150)
-          )
-
+(type_annotation
+  (type_identifier) @type.identifier (#set! "priority" 150)
   )
+
 
 ;; this is different from JavaScript
 ;; public_field_definition, there it is just a field_definition
