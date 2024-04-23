@@ -35,6 +35,10 @@ return {
             trouble.toggle("quickfix")
         end, { desc = "Trouble show quickfix", silent = true })
 
+        vim.keymap.set("n", "<leader>xl", function()
+            trouble.toggle("loclist")
+        end, { desc = "Trouble show loclist", silent = true })
+
         vim.keymap.set("n", "[x", function()
             trouble.previous({ skip_groups = true, jump = true })
         end, { desc = "Trouble previous", silent = true })
