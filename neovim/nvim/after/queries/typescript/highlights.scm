@@ -12,7 +12,7 @@
 )
 
 (variable_declarator
-  name: (identifier) @function (#set! "priority" 150)
+  name: (identifier) @function.declaration (#set! "priority" 150)
   value: [(function_expression) (arrow_function)]
   )
 
@@ -81,7 +81,12 @@
     )
   )
 
-
+ (variable_declarator
+   name: (identifier) @function.definition (#set! "priority" 150)
+   value: (call_expression
+            function: (identifier) @_name (#match? @_name "forwardRef|createContext")
+            )
+   )
 ; (
 ;  (identifier) @variable
 ;  (#match? @variable "^[A-Z]")

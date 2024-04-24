@@ -35,6 +35,7 @@ return {
             vim.cmd([[ hi! link gitEmail String ]])
             vim.cmd([[ hi! link @diff.plus.diff DiffviewDiffAdd ]])
             vim.cmd([[ hi! link @diff.minus.diff DiffviewDiffDelete ]])
+            vim.cmd([[ hi! link @type.git_config @identifier ]])
 
             -- Fix cursor line overriding other highlights
             vim.cmd(

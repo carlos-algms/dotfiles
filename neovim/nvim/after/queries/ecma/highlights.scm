@@ -1,5 +1,10 @@
 ;; extends
 
+(
+ (string_fragment) @keyword.directive
+ (#eq? @keyword.directive "use client")
+ )
+
 (new_expression
   constructor: (identifier) @constructor (#set! "priority" 150)
   )
