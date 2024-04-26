@@ -30,11 +30,6 @@ vim.keymap.set(
     { desc = "Scroll up half page and center the cursor on the screen" }
 )
 
--- Don't lose yank when pasting over a selected content (AKA: replace)
--- vim.keymap.set("x", "p", [["_dP]])
--- Don't lose yank when deleting selected content
--- vim.keymap.set("v", "d", [["_d]])
-
 -- Keeps the cursor on the center when moving to next/prev search results
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
@@ -45,6 +40,34 @@ vim.keymap.set(
     "<leader>p",
     [["_dP]],
     { desc = "Paste replacing selection without losing the Yanked register" }
+)
+
+vim.keymap.set(
+    "n",
+    "d",
+    [["_d]],
+    { desc = "delete without losing yanked register" }
+)
+
+vim.keymap.set(
+    "n",
+    "D",
+    [["_D]],
+    { desc = "delete without losing yanked register" }
+)
+
+vim.keymap.set(
+    "v",
+    "d",
+    [["_d]],
+    { desc = "Delete selection without losing Yanked register" }
+)
+
+vim.keymap.set(
+    "v",
+    "D",
+    [["_D]],
+    { desc = "Delete selection without losing Yanked register" }
 )
 
 -- copy to system clipboard
