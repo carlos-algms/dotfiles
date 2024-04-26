@@ -29,10 +29,10 @@ return {
         "lewis6991/gitsigns.nvim",
         event = "VeryLazy",
         config = function()
-            require("gitsigns").setup({
-                on_attach = function(bufnr)
-                    local gs = package.loaded.gitsigns
+            local gitsigns = require("gitsigns")
 
+            gitsigns.setup({
+                on_attach = function(bufnr)
                     local function map(mode, l, r, opts)
                         opts = opts or {}
                         opts.buffer = bufnr
@@ -41,28 +41,22 @@ return {
 
                     map("n", "]c", function()
                         if vim.wo.diff then
-                            return "]c"
+                            vim.cmd.normal({ "]c", bang = true })
+                        else
+                            gitsigns.nav_hunk("next")
                         end
-                        vim.schedule(function()
-                            gs.next_hunk()
-                        end)
-                        return "<Ignore>"
                     end, {
                         desc = "next change hunk",
-                        expr = true,
                     })
 
                     map("n", "[c", function()
                         if vim.wo.diff then
-                            return "[c"
+                            vim.cmd.normal({ "[c", bang = true })
+                        else
+                            gitsigns.nav_hunk("prev")
                         end
-                        vim.schedule(function()
-                            gs.prev_hunk()
-                        end)
-                        return "<Ignore>"
                     end, {
                         desc = "prev change hunk",
-                        expr = true,
                     })
 
                     map(
@@ -78,6 +72,13 @@ return {
                         ":Gitsigns reset_hunk<CR>",
                         { desc = "Reset hunk", silent = true }
                     )
+
+                    map(
+                        { "n", "v" },
+                        "<leader>g=",
+                        "<cmd>Gitsigns stage_hunk<CR>",
+                        { desc = "Stage hunk", silent = true }
+                    )
                 end,
             })
         end,
@@ -88,6 +89,19 @@ return {
         event = "VeryLazy",
         config = function()
             local actions = require("diffview.actions")
+
+            vim.api.nvim_create_user_command(
+                "CompareToMaster",
+                "DiffviewOpen origin/HEAD...HEAD --imply-local",
+                { desc = "Compare current branch to master" }
+            )
+
+            vim.keymap.set(
+                { "n" },
+                "<leader>gcm",
+                ":CompareToMaster<CR>",
+                { silent = true, desc = "[C]ompare current branch to [m]aster" }
+            )
 
             vim.keymap.set(
                 "n",
@@ -228,7 +242,7 @@ return {
             vim.keymap.set(
                 "n",
                 "<C-S-p>",
-                ":Git push<CR>",
+                "<cmd>Git push -u <CR>",
                 { desc = "[G]it [P]ush" }
             )
 
