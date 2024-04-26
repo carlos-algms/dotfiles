@@ -141,13 +141,13 @@ return {
                 -- Implemented on telescope, as it has a better UI
                 -- lspKeymap("n", "gr", vim.lsp.buf.references, opts)
 
-                -- disabled to use LSP Saga
-                -- lspKeymap(
-                --     "n",
-                --     "gr",
-                --     telescopeBuiltin.lsp_references,
-                --     { desc = "List [r]eferences using Telescope" }
-                -- )
+                -- enabled again, instead of lspsaga, as I can resume it after closing
+                lspKeymap(
+                    "n",
+                    "gr",
+                    telescopeBuiltin.lsp_references,
+                    "List [r]eferences using Telescope"
+                )
 
                 lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
 
@@ -223,7 +223,7 @@ return {
 
         masonLspconfig.setup({
             ensure_installed = {
-                "tsserver",
+                -- "tsserver",
                 "bashls",
                 "html",
                 "cssls",

@@ -55,12 +55,13 @@ return {
         --     { desc = "LSP [h]over [d]oc", silent = true }
         -- )
 
-        vim.keymap.set(
-            { "n", "v" },
-            "gr",
-            ":Lspsaga finder ref<CR>",
-            { desc = "LSP [r]eferences" }
-        )
+        -- Disabled to test Telescope, as this one can't be resumed after closed
+        -- vim.keymap.set(
+        --     { "n", "v" },
+        --     "gr",
+        --     ":Lspsaga finder ref<CR>",
+        --     { desc = "LSP [r]eferences" }
+        -- )
 
         vim.keymap.set(
             { "n", "v" },
