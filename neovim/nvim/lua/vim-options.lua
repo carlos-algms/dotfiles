@@ -31,7 +31,7 @@ opt.termguicolors = true
 opt.colorcolumn = "80"
 opt.scrolloff = 8 -- usually I use 10, I'm trying with 8 to have more lines visible
 opt.signcolumn = "yes"
-opt.isfname:append("@-@")
+-- opt.isfname:append("@-@")
 opt.splitright = true
 opt.splitbelow = true
 
@@ -82,3 +82,6 @@ opt.grepprg = "rg --vimgrep --no-heading --smart-case"
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
+
+-- set interactive sheel for commands run with `:! ....` inside Neovim
+vim.opt.shellcmdflag = "-ic"
