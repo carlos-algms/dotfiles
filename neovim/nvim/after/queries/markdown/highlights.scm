@@ -8,3 +8,5 @@
      (inline) @markup.list_item.complete
      )
    )
+
+(fenced_code_block_delimiter) @fenced_code_block

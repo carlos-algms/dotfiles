@@ -179,8 +179,8 @@ return {
             vim.cmd([[ hi! link @markup.heading.5.marker.markdown Keyword ]])
             vim.cmd([[ hi! link @markup.heading.6.marker.markdown Keyword ]])
             vim.cmd([[ hi! link @markup.list.markdown Keyword ]])
-            vim.cmd([[ hi! link @markup.raw.block.markdown NormalFg ]])
             vim.cmd([[ hi! link @markup.raw.delimiter.markdown Keyword ]])
+            vim.cmd([[ hi! link @fenced_code_block Keyword ]])
             vim.cmd([[ hi! link @label.markdown @type ]])
             vim.cmd([[ hi! link @markup.raw.markdown_inline @type ]])
             vim.cmd(
@@ -225,6 +225,7 @@ return {
 
             -- bash
             vim.cmd([[ hi! link @function.builtin.bash Function ]])
+            vim.cmd([[ hi! link @punctuation.special.bash Keyword ]])
             vim.cmd([[ hi! link zshFunction Function ]])
             vim.cmd([[ hi! link zshDeref Constant ]])
 

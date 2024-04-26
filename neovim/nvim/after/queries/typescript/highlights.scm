@@ -84,7 +84,7 @@
  (variable_declarator
    name: (identifier) @function.definition (#set! "priority" 150)
    value: (call_expression
-            function: (identifier) @_name (#match? @_name "forwardRef|createContext")
+            function: (identifier) @_name (#match? @_name "forwardRef|createContext|lazy")
             )
    )
 ; (
