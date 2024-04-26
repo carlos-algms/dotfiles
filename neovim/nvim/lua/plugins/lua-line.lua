@@ -9,18 +9,18 @@ return {
 
         local opts = {
             options = {
-                -- show only 1 line at the bottom, so it never trucates the content
+                -- show only 1 line at the bottom, so it never truncates the content
                 globalstatus = true,
                 icons_enabled = true,
                 theme = "jellybeans",
                 disabled_filetypes = {
                     statusline = {
-                        "dapui_scopes",
-                        "dapui_breakpoints",
-                        "dapui_stacks",
-                        "dapui_watches",
-                        "dap-repl",
-                        "dapui_console",
+                        -- "dapui_scopes",
+                        -- "dapui_breakpoints",
+                        -- "dapui_stacks",
+                        -- "dapui_watches",
+                        -- "dap-repl",
+                        -- "dapui_console",
                         "neo-tree",
                     },
                 },
