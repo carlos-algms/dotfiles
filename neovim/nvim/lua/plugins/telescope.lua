@@ -1,8 +1,9 @@
 return {
     {
         "nvim-telescope/telescope.nvim",
-        tag = "0.1.6",
-        -- or                            , branch = '0.1.x',
+        -- tag = "0.1.6",
+        -- or
+        branch = "0.1.x",
         dependencies = {
             { "nvim-lua/plenary.nvim" },
             -- { "nvim-telescope/telescope-ui-select.nvim" },
@@ -11,6 +12,10 @@ return {
                 "nvim-telescope/telescope-live-grep-args.nvim",
                 version = "^1.0.0",
             },
+            {
+                "nvim-telescope/telescope-fzf-native.nvim",
+                build = "make",
+            },
         },
         config = function()
             local telescope = require("telescope")
@@ -18,6 +23,9 @@ return {
             local action_state = require("telescope.actions.state")
             local utils = require("telescope.utils")
             local lga_actions = require("telescope-live-grep-args.actions")
+
+            -- enable line numbers on telescope previewer pane
+            vim.cmd("autocmd User TelescopePreviewerLoaded setlocal number")
 
             -- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
             local telescopeConfig = require("telescope.config")
@@ -195,6 +203,15 @@ return {
                     --     require("telescope.themes").get_dropdown({}),
                     -- },
 
+                    -- https://github.com/nvim-telescope/telescope-fzf-native.nvim?tab=readme-ov-file#telescope-setup-and-configuration
+                    fzf = {
+                        fuzzy = true, -- false will only do exact matching
+                        override_generic_sorter = true, -- override the generic sorter
+                        override_file_sorter = true, -- override the file sorter
+                        case_mode = "smart_case", -- or "ignore_case" or "respect_case"
+                        -- the default case_mode is "smart_case"
+                    },
+
                     live_grep_args = {
                         auto_quoting = true, -- enable/disable auto-quoting
                         -- define mappings, e.g.
@@ -317,7 +334,7 @@ return {
                 "n",
                 "<leader>tr",
                 builtin.resume,
-                { desc = "[T]elescope list all [r]esume" }
+                { desc = "[T]elescope [r]esume last picker" }
             )
 
             vim.keymap.set("n", "<leader>sd", "<cmd>GrepInDirectory<CR>", {
@@ -352,7 +369,7 @@ return {
                             "--line-number",
                             "--column",
                             "--smart-case",
-                            "--glob=" .. (glob or ""),
+                            "--iglob=" .. (glob or ""),
                             -- @TODO: how to add negative globs? like --glob='!**/node_modules/*'
                             -- and also multiple globs
                             -- first test if a file in .git will work,
