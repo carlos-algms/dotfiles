@@ -1,7 +1,8 @@
 return {
     {
         "rcarriga/nvim-dap-ui",
-        lazy = true,
+        -- lazy = true,
+        event = "VeryLazy",
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
@@ -27,16 +28,22 @@ return {
             local dapui = require("dapui")
             local dap = require("dap")
 
-            dap.listeners.after.event_initialized["dapui_config"] = function()
+            dap.listeners.before.attach.dapui_config = function()
+                vim.notify("before attach")
+                dapui.open()
+            end
+
+            dap.listeners.before.launch.dapui_config = function()
+                vim.notify("before launch")
                 dapui.open()
             end
 
             -- I don't want it to auto-close, as I want to check the output
-            -- dap.listeners.before.event_terminated["dapui_config"] = function()
+            -- dap.listeners.before.event_terminated.dapui_config = function()
             --     -- dapui.close()
             -- end
 
-            -- dap.listeners.before.event_exited["dapui_config"] = function()
+            -- dap.listeners.before.event_exited.dapui_config = function()
             --     -- dapui.close()
             -- end
 
@@ -77,7 +84,8 @@ return {
     -- },
     {
         "mfussenegger/nvim-dap",
-        lazy = true,
+        -- lazy = true,
+        event = "VeryLazy",
         dependencies = {
             {
                 "nvim-telescope/telescope-dap.nvim",
@@ -126,6 +134,14 @@ return {
             end, {
                 desc = "Toggle [D]ebugger [b]reakpoint condition",
             })
+
+            vim.keymap.set("n", "<Leader>dL", function()
+                vim.ui.input({
+                    prompt = "Log point message: ",
+                }, function(message)
+                    dap.set_breakpoint(nil, nil, message)
+                end)
+            end)
 
             vim.keymap.set(
                 "n",
@@ -339,6 +355,7 @@ return {
             dap.adapters["php"] = {
                 type = "executable",
                 command = "php-debug-adapter",
+                -- port = "${port}",
             }
 
             dap.configurations.php = {
@@ -351,6 +368,7 @@ return {
                     pathMappings = {
                         -- TODO: this should be per project or dynamic
                         ["/var/www/html"] = "${workspaceFolder}/server",
+                        -- ["/home/abc/public_html"] = "${workspaceFolder}/wordpress",
                         ["/home/abc/public_html"] = "${workspaceFolder}/server",
                         ["/home/abc/workspace/server"] = "${workspaceFolder}/server",
                         ["/home/abc/deploys/1"] = "${workspaceFolder}/server",
