@@ -1,8 +1,8 @@
 return {
     enabled = false,
-    -- "nvimdev/dashboard-nvim",
-    "carlos-algms/dashboard-nvim",
-    dir = "~/projects/dashboard-nvim",
+    "nvimdev/dashboard-nvim",
+    -- "carlos-algms/dashboard-nvim",
+    -- dir = "~/projects/dashboard-nvim",
     -- branch = "relative_paths_on_cwd_only",
     event = "VimEnter",
     dependencies = {
