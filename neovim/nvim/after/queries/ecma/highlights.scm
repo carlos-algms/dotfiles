@@ -23,3 +23,9 @@
   function: (identifier) @function.call (#set! "priority" 150)
   )
 
+(call_expression
+  function: (member_expression
+              property: (property_identifier) @function.call (#set! "priority" 150)
+              )
+  )
+

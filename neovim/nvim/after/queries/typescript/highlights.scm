@@ -87,6 +87,28 @@
             function: (identifier) @_name (#match? @_name "forwardRef|createContext|lazy")
             )
    )
+
+(variable_declarator
+  name: (identifier) @function.definition (#set! "priority" 150)
+  value: (call_expression
+           function: (member_expression
+                       object: (identifier) @_name (#match? @_name "styled"
+                                                    )
+                       )
+           )
+  )
+
+(variable_declarator
+  name: (identifier) @function.definition (#set! "priority" 150)
+  value: (call_expression
+           function: (call_expression
+                       function: (identifier) @_name (#match? @_name "styled")
+                       )
+           )
+  )
+
+
+
 ; (
 ;  (identifier) @variable
 ;  (#match? @variable "^[A-Z]")
