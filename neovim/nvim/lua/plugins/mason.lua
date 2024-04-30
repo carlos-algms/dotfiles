@@ -165,12 +165,13 @@ return {
                     "Search for symbol in [d]ocument"
                 )
 
-                -- lspKeymap(
-                --     "n",
-                --     "<leader>rn",
-                --     vim.lsp.buf.rename,
-                --     "[R]ename symbol"
-                -- )
+                -- Enabled this because the floating input accepts all motions, LSP Saga doesn't
+                lspKeymap(
+                    "n",
+                    "<leader>rn",
+                    vim.lsp.buf.rename,
+                    "[R]ename symbol with native NVim lsp"
+                )
 
                 lspKeymap(
                     "i",

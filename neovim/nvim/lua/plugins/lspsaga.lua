@@ -63,12 +63,13 @@ return {
         --     { desc = "LSP [r]eferences" }
         -- )
 
-        vim.keymap.set(
-            { "n", "v" },
-            "<leader>rn",
-            ":Lspsaga rename<CR>",
-            { desc = "LSP [r]ename", silent = true }
-        )
+        -- Disabled because the floating input doesn't allow <ESC> to enter normal mode
+        -- vim.keymap.set(
+        --     { "n", "v" },
+        --     "<leader>rn",
+        --     ":Lspsaga rename<CR>",
+        --     { desc = "LSP [r]ename", silent = true }
+        -- )
 
         -- Disabling as it wasn't showing all the refactor options
         -- vim.keymap.set(
