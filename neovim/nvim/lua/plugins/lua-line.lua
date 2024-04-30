@@ -75,7 +75,7 @@ return {
                     "filetype",
                 },
                 lualine_z = {
-                    "location",
+                    -- "location",
                 },
             },
         }
