@@ -99,29 +99,36 @@ return {
             vim.keymap.set(
                 { "n" },
                 "<leader>gcm",
-                ":CompareToMaster<CR>",
+                "<cmd>CompareToMaster<CR>",
                 { silent = true, desc = "[C]ompare current branch to [m]aster" }
             )
 
             vim.keymap.set(
                 "n",
                 "<leader>gs",
-                ":DiffviewOpen<cr>",
+                "<cmd>DiffviewOpen<cr>",
                 { silent = true }
             )
 
             local quitDiffViewKeymap = {
                 "n",
                 "gq",
-                ":tabclose<cr>",
+                "<cmd>tabclose<cr>",
                 { desc = "Close the Diffview" },
             }
 
             local commitKeyMap = {
                 "n",
                 "cc",
-                ":tab G commit<cr>",
+                "<cmd>tab G commit<cr>",
                 { desc = "Commit staged files" },
+            }
+
+            local commitNoVerifyKeyMap = {
+                "n",
+                "cC",
+                "<cmd>tab G commit --no-verify<cr>",
+                { desc = "Commit staged files with --no-verify" },
             }
 
             local nextItemKeymap = {
@@ -156,6 +163,7 @@ return {
                     file_panel = {
                         quitDiffViewKeymap,
                         commitKeyMap,
+                        commitNoVerifyKeyMap,
                         nextItemKeymap,
                         prevItemKeymap,
 
@@ -187,6 +195,7 @@ return {
                     view = {
                         quitDiffViewKeymap,
                         commitKeyMap,
+                        commitNoVerifyKeyMap,
                         nextItemKeymap,
                         prevItemKeymap,
 
