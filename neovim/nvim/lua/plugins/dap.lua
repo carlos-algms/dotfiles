@@ -16,25 +16,16 @@ return {
                 end,
                 desc = "Toggle [D]ebugger [U]i - Dap UI",
             },
-            {
-                "<leader>dh",
-                function()
-                    require("dap.ui.widgets").hover()
-                end,
-                desc = "Show [D]ebugger [H]over",
-            },
         },
         config = function()
             local dapui = require("dapui")
             local dap = require("dap")
 
             dap.listeners.before.attach.dapui_config = function()
-                vim.notify("before attach")
                 dapui.open()
             end
 
             dap.listeners.before.launch.dapui_config = function()
-                vim.notify("before launch")
                 dapui.open()
             end
 
@@ -96,7 +87,7 @@ return {
                     {
                         "<leader>dl",
                         ":Telescope dap list_breakpoints<CR>",
-                        desc = "List breakpoint",
+                        desc = " List breakpoint",
                     },
                 },
                 config = function()
@@ -114,25 +105,47 @@ return {
         config = function()
             local dap = require("dap")
             local dapUtils = require("dap.utils")
+            local widgets = require("dap.ui.widgets")
 
-            -- Highlight the line where the debugger is stopped
-            vim.api.nvim_set_hl(
-                0,
-                "DapStoppedLine",
-                { default = true, link = "Visual" }
-            )
+            vim.keymap.set({ "n", "v" }, "<Leader>dh", function()
+                widgets.hover()
+            end, {
+                desc = "󰟶 [D]ebugger [h]over",
+            })
+
+            vim.keymap.set({ "n", "v" }, "<Leader>dp", function()
+                widgets.preview()
+            end, {
+                desc = " [D]ebugger [p]review",
+            })
+
+            vim.keymap.set("n", "<Leader>df", function()
+                widgets.centered_float(widgets.frames)
+            end, {
+                desc = " [D]ebugger [f]rames",
+            })
+
+            vim.keymap.set("n", "<Leader>ds", function()
+                widgets.centered_float(widgets.scopes)
+            end, {
+                desc = "󰋃 [D]ebugger [s]copes",
+            })
 
             vim.keymap.set(
                 "n",
                 "<leader>db",
                 "<cmd> DapToggleBreakpoint <CR>",
-                { desc = "Toggle [D]ebugger [b]reakpoint" }
+                { desc = " Toggle [D]ebugger [b]reakpoint" }
             )
 
             vim.keymap.set("n", "<leader>dB", function()
-                dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+                vim.ui.input({
+                    prompt = "Breakpoint condition: ",
+                }, function(condition)
+                    dap.set_breakpoint(nil, condition)
+                end)
             end, {
-                desc = "Toggle [D]ebugger [b]reakpoint condition",
+                desc = " Toggle [D]ebugger [b]reakpoint condition",
             })
 
             vim.keymap.set("n", "<Leader>dL", function()
@@ -141,13 +154,15 @@ return {
                 }, function(message)
                     dap.set_breakpoint(nil, nil, message)
                 end)
-            end)
+            end, {
+                desc = "󰯑 Toggle [D]ebugger [L]og point",
+            })
 
             vim.keymap.set(
                 "n",
                 "<f9>",
                 "<cmd> DapToggleBreakpoint <CR>",
-                { desc = "Toggle Debugger breakpoint" }
+                { desc = " Toggle Debugger breakpoint" }
             )
 
             vim.keymap.set(
@@ -161,21 +176,21 @@ return {
                 "n",
                 "<leader>dt",
                 "<cmd> DapTerminate <CR>",
-                { desc = " Debugger terminate" }
+                { desc = "󱎘 Debugger terminate" }
             )
 
             vim.keymap.set(
                 "n",
                 "<s-f5>",
                 "<cmd> DapTerminate <CR>",
-                { desc = " Debugger terminate" }
+                { desc = "󱎘 Debugger terminate" }
             )
 
             vim.keymap.set(
                 "n",
                 "<f5>",
                 "<cmd> DapContinue <CR>",
-                { desc = " Debugger Run / Continue" }
+                { desc = "󰐊 Debugger Run / Continue" }
             )
 
             vim.keymap.set(
@@ -201,21 +216,27 @@ return {
 
             vim.keymap.set("n", "<leader>da", function()
                 dap.continue({ before = get_args })
-            end, { desc = " Debugger Run / Continue with args" })
+            end, { desc = "󰐊 Debugger Run / Continue with args" })
+
+            -- Highlight the line where the debugger is stopped
+            vim.api.nvim_set_hl(
+                0,
+                "DapStoppedLine",
+                { default = true, link = "Visual" }
+            )
 
             -- http://www.lazyvim.org/extras/dap/core#nvim-dap
             -- # Sign
             local dapSigns =
                 { -- TODO: change highlight for Diagnostic** to have background color
                     Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
-                    Breakpoint = " ",
-                    BreakpointCondition = " ",
+                    Breakpoint = { " " },
+                    BreakpointCondition = { " " },
                     BreakpointRejected = { " ", "DiagnosticError" },
-                    LogPoint = "󰯑 ",
+                    LogPoint = { "󰯑 " },
                 }
 
             for name, sign in pairs(dapSigns) do
-                sign = type(sign) == "table" and sign or { sign }
                 vim.fn.sign_define("Dap" .. name, {
                     text = sign[1],
                     texthl = sign[2] or "DiagnosticInfo",
@@ -368,8 +389,8 @@ return {
                     pathMappings = {
                         -- TODO: this should be per project or dynamic
                         ["/var/www/html"] = "${workspaceFolder}/server",
-                        -- ["/home/abc/public_html"] = "${workspaceFolder}/wordpress",
-                        ["/home/abc/public_html"] = "${workspaceFolder}/server",
+                        ["/home/abc/public_html"] = "${workspaceFolder}/wordpress",
+                        -- ["/home/abc/public_html"] = "${workspaceFolder}/server",
                         ["/home/abc/workspace/server"] = "${workspaceFolder}/server",
                         ["/home/abc/deploys/1"] = "${workspaceFolder}/server",
                     },
