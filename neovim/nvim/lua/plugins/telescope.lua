@@ -61,26 +61,28 @@ return {
                     cache_picker = {
                         num_pickers = 20, -- your preferred number here, values up to 100 should be perfectly fine; likely even much higher
                     },
+                    -- this has to be a valid lua regex:
+                    -- https://github.com/nvim-telescope/telescope.nvim/blob/35f94f0ef32d70e3664a703cefbe71bd1456d899/doc/telescope.txt#L643
                     file_ignore_patterns = {
-                        "\\.git",
+                        "%.git",
                         -- disabling it as it was blocking lsp_references,
                         -- it doesn't seem to affect file_search, it is still being ignored
                         -- "node_modules",
-                        ".next",
-                        ".playwright-state",
-                        ".turbo",
-                        ".yarn",
+                        "%.next",
+                        "%.playwright-state",
+                        "%.turbo",
+                        "%.yarn",
                         "build",
                         "dist",
                         "out/",
-                        "package-lock.json",
-                        "playwright-report",
-                        "pnpm-lock.yaml",
-                        "storybook-static",
-                        "test-results",
+                        "package%-lock.json",
+                        "playwright%-report",
+                        "pnpm%-lock.yaml",
+                        "storybook%-static",
+                        "test%-results",
                         "vendor",
                         "y4m",
-                        "yarn.lock",
+                        "yarn%.lock",
                     },
                     vimgrep_arguments = vimgrep_arguments,
                     sorting_strategy = "ascending",
@@ -287,12 +289,6 @@ return {
                 { desc = "Find recently opened files" }
             )
 
-            vim.keymap.set("n", "<leader>sg", function()
-                builtin.grep_string({ search = vim.fn.input("Grep > ") })
-            end, {
-                desc = "Input a string to Grep",
-            })
-
             vim.keymap.set("n", "<leader>/", function()
                 -- You can pass additional configuration to telescope to change theme, layout, etc.
                 builtin.current_buffer_fuzzy_find(
@@ -350,38 +346,44 @@ return {
                 { noremap = true, silent = true, desc = "Change file type" }
             )
 
-            vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)
-                -- another option would be use vim.ui.input:
-                -- vim.ui.input({ prompt = "Glob: ", completion = "file", default = "**/*." })
-                -- but it doesn't seem to auto-complete the glob while typing
+            local liveGrepWithGlob = function(glob)
+                -- live_grep_args doesn't accept multiple globs
+                -- https://github.com/BurntSushi/ripgrep/issues/875
+                telescope.extensions.live_grep_args.live_grep_args({
+                    -- prompt_title = 'Live Grep with glob "' .. glob .. '"',
+                    -- adding glob as text, so it can be edited
+                    default_text = "--iglob " .. glob .. " ",
+                })
+            end
 
-                vim.ui.input({
-                    prompt = "Glob: ",
-                    completion = "file",
-                    default = "**/*",
-                }, function(glob)
-                    builtin.live_grep({
-                        vimgrep_arguments = {
-                            "rg",
-                            "--color=never",
-                            "--no-heading",
-                            "--with-filename",
-                            "--line-number",
-                            "--column",
-                            "--smart-case",
-                            "--iglob=" .. (glob or ""),
-                            -- @TODO: how to add negative globs? like --glob='!**/node_modules/*'
-                            -- and also multiple globs
-                            -- first test if a file in .git will work,
-                            -- then add a second --glob='!**/.git/*' to check if it works
-                            -- search about RD arguments
-                        },
-                    })
-                end)
+            local lastGlob = "**/*"
+
+            -- Asks for a glob and then opens a live grep that searches only on files matching the glob
+            vim.api.nvim_create_user_command("LiveGrepWithGlob", function(ctx)
+                if string.len(ctx.args) > 0 then
+                    lastGlob = ctx.args
+                    liveGrepWithGlob(ctx.args)
+                else
+                    vim.ui.input({
+                        prompt = "Glob: ",
+                        completion = "file",
+                        default = lastGlob,
+                    }, function(glob)
+                        if not glob or glob == "" then
+                            return
+                        end
+                        lastGlob = glob
+                        liveGrepWithGlob(glob)
+                    end)
+                end
             end, {
-                -- nargs = "+",
-                -- complete = "file",
+                nargs = "*",
+                complete = "file",
                 desc = "Live grep with glob",
+            })
+
+            vim.keymap.set("n", "<leader>sg", "<cmd>LiveGrepWithGlob<CR>", {
+                desc = "Live Grep with file glob",
             })
         end,
     },
