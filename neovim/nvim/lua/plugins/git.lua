@@ -11,7 +11,16 @@ return {
             "nvim-tree/nvim-web-devicons",
         },
         keys = {
-            { "<leader>gp", ":Octo pr list<CR>", desc = "List pull-requests" },
+            {
+                "<leader>gp",
+                "<cmd>Octo pr list<CR>",
+                desc = "List pull-requests with Octo",
+            },
+            {
+                "<leader>gP",
+                "<cmd>Octo pr create<CR>",
+                desc = "Create a pull-request using Octo",
+            },
         },
         config = function()
             require("octo").setup({
@@ -107,7 +116,7 @@ return {
                 "n",
                 "<leader>gs",
                 "<cmd>DiffviewOpen<cr>",
-                { silent = true }
+                { desc = "Git status DiffView", silent = true }
             )
 
             local quitDiffViewKeymap = {
