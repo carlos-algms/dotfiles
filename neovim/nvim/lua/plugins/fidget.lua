@@ -1,7 +1,7 @@
 return {
     "j-hui/fidget.nvim",
     enabled = true,
-    lazy = true,
+    -- lazy = true,
     config = function()
         require("fidget").setup({
             progress = {
