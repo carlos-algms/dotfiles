@@ -64,7 +64,7 @@ return {
                     -- this has to be a valid lua regex:
                     -- https://github.com/nvim-telescope/telescope.nvim/blob/35f94f0ef32d70e3664a703cefbe71bd1456d899/doc/telescope.txt#L643
                     file_ignore_patterns = {
-                        "%.git",
+                        "%.git/",
                         -- disabling it as it was blocking lsp_references,
                         -- it doesn't seem to affect file_search, it is still being ignored
                         -- "node_modules",
@@ -105,9 +105,9 @@ return {
                         },
                     },
 
-                    -- path_display = {
-                    --     "smart",
-                    -- },
+                    path_display = {
+                        "filename_first",
+                    },
 
                     preview = {
                         treesitter = true,
@@ -141,12 +141,19 @@ return {
 
                     lsp_references = {
                         -- initial_mode = "normal",
-                        fname_width = 0.70,
+                        fname_width = 0.99,
+                        path_display = {
+                            "smart",
+                        },
                         wrap_results = true,
                     },
 
                     lsp_definitions = {
                         -- initial_mode = "normal",
+                        fname_width = 0.99,
+                        path_display = {
+                            "smart",
+                        },
                         wrap_results = true,
                     },
 
@@ -333,11 +340,12 @@ return {
                 { desc = "[T]elescope [r]esume last picker" }
             )
 
-            vim.keymap.set("n", "<leader>sd", "<cmd>GrepInDirectory<CR>", {
-                noremap = true,
-                silent = true,
-                desc = "Grep Search in directory",
-            })
+            -- disabled in favor my custom one with args below
+            -- vim.keymap.set("n", "<leader>sd", "<cmd>GrepInDirectory<CR>", {
+            --     noremap = true,
+            --     silent = true,
+            --     desc = "Grep Search in directory",
+            -- })
 
             vim.keymap.set(
                 "n",
@@ -346,11 +354,25 @@ return {
                 { noremap = true, silent = true, desc = "Change file type" }
             )
 
+            local get_dirs = require("dir-telescope.util").get_dirs
+            local dirTelescopeSettings = require("dir-telescope.settings")
+
+            vim.keymap.set("n", "<leader>sd", function()
+                get_dirs(dirTelescopeSettings, function(opts)
+                    opts.prompt_title = "Live Grep (Args) - "
+                        .. table.concat(opts.search_dirs, ", ")
+
+                    telescope.extensions.live_grep_args.live_grep_args(opts)
+                end)
+            end, {
+                desc = "Search in directory with Args",
+            })
+
             local liveGrepWithGlob = function(glob)
                 -- live_grep_args doesn't accept multiple globs
                 -- https://github.com/BurntSushi/ripgrep/issues/875
                 telescope.extensions.live_grep_args.live_grep_args({
-                    -- prompt_title = 'Live Grep with glob "' .. glob .. '"',
+                    prompt_title = 'Live Grep (Args) - glob "' .. glob .. '"',
                     -- adding glob as text, so it can be edited
                     default_text = "--iglob " .. glob .. " ",
                 })
