@@ -16,5 +16,14 @@ return {
                 vim.bo[ev.buf].commentstring = "# %s"
             end,
         })
+
+        vim.api.nvim_create_autocmd("FileType", {
+            group = commentaryGroup,
+            desc = "Set Prisma comment string",
+            pattern = "prisma",
+            callback = function(ev)
+                vim.bo[ev.buf].commentstring = "// %s"
+            end,
+        })
     end,
 }
