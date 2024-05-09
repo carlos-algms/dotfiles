@@ -1,8 +1,57 @@
 return {
     "tomasky/bookmarks.nvim",
-    event = "VeryLazy",
+
     dependencies = {
         "nvim-telescope/telescope.nvim",
+    },
+
+    keys = {
+        {
+            "<leader>mt",
+            function()
+                require("bookmarks").bookmark_toggle()
+            end,
+            desc = "Bookmark toggle in current line",
+            silent = true,
+        },
+
+        {
+            "<leader>mi",
+            function()
+                require("bookmarks").bookmark_ann()
+            end,
+            desc = "Add or Edit bookmark annotation",
+        },
+
+        {
+            "<leader>mc",
+            function()
+                require("bookmarks").bookmark_clean()
+            end,
+            desc = "Clean ALL bookmarks in current buffer",
+        },
+
+        {
+            "<leader>mn",
+            function()
+                require("bookmarks").bookmark_next()
+            end,
+            desc = "Jump to next bookmark in current buffer",
+        },
+
+        {
+            "<leader>mp",
+            function()
+                require("bookmarks").bookmark_prev()
+            end,
+            desc = "Jump to previous bookmark in current buffer",
+        },
+
+        {
+            "<leader>ml",
+            "<cmd>Telescope bookmarks list<CR>",
+            desc = "Show bookmarks with Telescope",
+        },
     },
 
     config = function()
@@ -25,44 +74,9 @@ return {
                 ["@f"] = "⛏ ", -- mark annotation startswith @f ,signs this icon as `Fix`
                 ["@n"] = "󰷉 ", -- mark annotation startswith @n ,signs this icon as `Note`
             },
-            on_attach = function(bufnr)
-                local bm = require("bookmarks")
-                local map = vim.keymap.set
-
-                map(
-                    "n",
-                    "<leader>mt",
-                    bm.bookmark_toggle,
-                    { desc = "Bookmark toogle in current line" }
-                )
-
-                map(
-                    "n",
-                    "<leader>mi",
-                    bm.bookmark_ann,
-                    { desc = "Add or Edit bookmark annotation" }
-                )
-
-                map("n", "<leader>mc", bm.bookmark_clean, {
-                    desc = "Clean ALL bookmarks in current buffer",
-                })
-
-                map("n", "<leader>mn", bm.bookmark_next, {
-                    desc = "Jump to next bookmark in current buffer",
-                })
-
-                map("n", "<leader>mp", bm.bookmark_prev, {
-                    desc = "Jump to previous bookmark in the current buffer",
-                })
-
-                -- map("n", "<leader>ml", bm.bookmark_list, {
-                --     desc = "Show bookmarks in a quickfix window",
-                -- })
-
-                map("n", "<leader>ml", ":Telescope bookmarks list<CR>", {
-                    desc = "Show bookmarks with Telescope",
-                })
-            end,
+            -- on_attach = function(bufnr)
+            --     local bm = require("bookmarks")
+            -- end,
         })
 
         require("telescope").load_extension("bookmarks")
