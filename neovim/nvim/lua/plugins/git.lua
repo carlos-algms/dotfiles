@@ -156,7 +156,7 @@ return {
 
             require("diffview").setup({
                 -- enabled because it wasn't diffing generated files
-                diff_binaries = true,
+                diff_binaries = false,
                 default_args = {
                     DiffviewOpen = { "--imply-local" },
                 },
