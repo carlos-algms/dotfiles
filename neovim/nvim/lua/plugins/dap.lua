@@ -2,7 +2,7 @@ return {
     {
         "rcarriga/nvim-dap-ui",
         -- lazy = true,
-        event = "VeryLazy",
+        -- event = "VeryLazy",
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-neotest/nvim-nio",
@@ -41,16 +41,7 @@ return {
             dapui.setup()
         end,
     },
-    {
-        "theHamsta/nvim-dap-virtual-text",
-        lazy = true,
-        dependencies = { "mfussenegger/nvim-dap" },
-        config = function()
-            require("nvim-dap-virtual-text").setup({
-                clear_on_continue = true,
-            })
-        end,
-    },
+
     -- Disabled because it's not working
     -- {
     --     "mxsdev/nvim-dap-vscode-js",
@@ -73,10 +64,11 @@ return {
     --         })
     --     end,
     -- },
+
     {
         "mfussenegger/nvim-dap",
-        -- lazy = true,
-        event = "VeryLazy",
+        lazy = true,
+        -- event = "VeryLazy",
         dependencies = {
             {
                 "nvim-telescope/telescope-dap.nvim",
@@ -101,122 +93,152 @@ return {
                     require("nvim-dap-repl-highlights").setup()
                 end,
             },
+            {
+                "theHamsta/nvim-dap-virtual-text",
+            },
+        },
+        keys = {
+            {
+                "<leader>dh",
+                function()
+                    require("dap.ui.widgets").hover()
+                end,
+                mode = { "n", "v" },
+                desc = "󰟶 [D]ebugger [h]over",
+            },
+
+            {
+                "<leader>dp",
+                function()
+                    require("dap.ui.widgets").preview()
+                end,
+                mode = { "n", "v" },
+                desc = " [D]ebugger [p]review",
+            },
+
+            {
+                "<leader>df",
+                function()
+                    require("dap.ui.widgets").centered_float(
+                        require("dap.ui.widgets").frames
+                    )
+                end,
+                mode = { "n", "v" },
+                desc = " [D]ebugger [f]rames",
+            },
+
+            {
+                "<leader>ds",
+                function()
+                    require("dap.ui.widgets").centered_float(
+                        require("dap.ui.widgets").scopes
+                    )
+                end,
+                mode = { "n", "v" },
+                desc = "󰋃 [D]ebugger [s]copes",
+            },
+
+            {
+                "<leader>db",
+                "<cmd>DapToggleBreakpoint<CR>",
+                mode = "n",
+                desc = " Toggle [D]ebugger [b]reakpoint",
+            },
+
+            {
+                "<f9>",
+                "<cmd>DapToggleBreakpoint<CR>",
+                mode = "n",
+                desc = " Toggle Debugger breakpoint",
+            },
+
+            {
+                "<leader>dB",
+                function()
+                    vim.ui.input({
+                        prompt = "Breakpoint condition: ",
+                    }, function(condition)
+                        require("dap").set_breakpoint(nil, condition)
+                    end)
+                end,
+                mode = "n",
+                desc = " Toggle [D]ebugger [B]reakpoint condition",
+            },
+
+            {
+                "<leader>dL",
+                function()
+                    vim.ui.input({
+                        prompt = "Log point message: ",
+                    }, function(message)
+                        require("dap").set_breakpoint(nil, nil, message)
+                    end)
+                end,
+                mode = "n",
+                desc = "󰯑 Toggle [D]ebugger [L]og point",
+            },
+
+            {
+                "<leader>dr",
+                "<cmd> DapContinue <CR>",
+                mode = "n",
+                desc = " [D]ebugger [R]un / Continue",
+            },
+
+            {
+                "<leader>dt",
+                "<cmd> DapTerminate <CR>",
+                mode = "n",
+                desc = "󱎘 Debugger terminate",
+            },
+
+            {
+                "<s-f5>",
+                "<cmd> DapTerminate <CR>",
+                mode = "n",
+                desc = "󱎘 Debugger terminate",
+            },
+
+            {
+                "<f5>",
+                "<cmd> DapContinue <CR>",
+                mode = "n",
+                desc = "󰐊 Debugger Run / Continue",
+            },
+
+            {
+                "<f10>",
+                "<cmd> DapStepOver <CR>",
+                mode = "n",
+                desc = " Debugger Step Over",
+            },
+
+            {
+                "<f11>",
+                "<cmd> DapStepInto <CR>",
+                mode = "n",
+                desc = " Debugger Step Into",
+            },
+
+            {
+                "<s-f11>",
+                "<cmd> DapStepOut <CR>",
+                mode = "n",
+                desc = " Debugger Step Out",
+            },
+
+            {
+                "<leader>da",
+                function()
+                    require("dap").continue({ before = get_args })
+                end,
+                mode = "n",
+                desc = "󰐊 Debugger Run / Continue with args",
+            },
         },
         config = function()
             local dap = require("dap")
             local dapUtils = require("dap.utils")
-            local widgets = require("dap.ui.widgets")
-
-            vim.keymap.set({ "n", "v" }, "<Leader>dh", function()
-                widgets.hover()
-            end, {
-                desc = "󰟶 [D]ebugger [h]over",
-            })
-
-            vim.keymap.set({ "n", "v" }, "<Leader>dp", function()
-                widgets.preview()
-            end, {
-                desc = " [D]ebugger [p]review",
-            })
-
-            vim.keymap.set("n", "<Leader>df", function()
-                widgets.centered_float(widgets.frames)
-            end, {
-                desc = " [D]ebugger [f]rames",
-            })
-
-            vim.keymap.set("n", "<Leader>ds", function()
-                widgets.centered_float(widgets.scopes)
-            end, {
-                desc = "󰋃 [D]ebugger [s]copes",
-            })
-
-            vim.keymap.set(
-                "n",
-                "<leader>db",
-                "<cmd> DapToggleBreakpoint <CR>",
-                { desc = " Toggle [D]ebugger [b]reakpoint" }
-            )
-
-            vim.keymap.set("n", "<leader>dB", function()
-                vim.ui.input({
-                    prompt = "Breakpoint condition: ",
-                }, function(condition)
-                    dap.set_breakpoint(nil, condition)
-                end)
-            end, {
-                desc = " Toggle [D]ebugger [b]reakpoint condition",
-            })
-
-            vim.keymap.set("n", "<Leader>dL", function()
-                vim.ui.input({
-                    prompt = "Log point message: ",
-                }, function(message)
-                    dap.set_breakpoint(nil, nil, message)
-                end)
-            end, {
-                desc = "󰯑 Toggle [D]ebugger [L]og point",
-            })
-
-            vim.keymap.set(
-                "n",
-                "<f9>",
-                "<cmd> DapToggleBreakpoint <CR>",
-                { desc = " Toggle Debugger breakpoint" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>dr",
-                "<cmd> DapContinue <CR>",
-                { desc = " [D]ebugger [R]un / Continue" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>dt",
-                "<cmd> DapTerminate <CR>",
-                { desc = "󱎘 Debugger terminate" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<s-f5>",
-                "<cmd> DapTerminate <CR>",
-                { desc = "󱎘 Debugger terminate" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<f5>",
-                "<cmd> DapContinue <CR>",
-                { desc = "󰐊 Debugger Run / Continue" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<f10>",
-                "<cmd> DapStepOver <CR>",
-                { desc = " Debugger Step Over" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<f11>",
-                "<cmd> DapStepInto <CR>",
-                { desc = " Debugger Step Into" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<s-f11>",
-                "<cmd> DapStepOut <CR>",
-                { desc = " Debugger Step Out" }
-            )
-
-            vim.keymap.set("n", "<leader>da", function()
-                dap.continue({ before = get_args })
-            end, { desc = "󰐊 Debugger Run / Continue with args" })
 
             -- Highlight the line where the debugger is stopped
             vim.api.nvim_set_hl(
@@ -398,6 +420,10 @@ return {
             }
 
             -- TODO: add adapter for python
+
+            require("nvim-dap-virtual-text").setup({
+                clear_on_continue = true,
+            })
         end,
     },
 }

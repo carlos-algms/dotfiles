@@ -19,6 +19,17 @@ return {
     --         end
     --     end
     -- end,
+    cmd = { "Neotree" },
+
+    keys = {
+        {
+            "<C-S-n>",
+            "<cmd>Neotree filesystem reveal left<CR>",
+            mode = { "n", "v", "x" },
+            desc = "Reveal current file in NeoTree ",
+            silent = true,
+        },
+    },
     opts = {
         sources = { "filesystem", "buffers", "git_status", "document_symbols" },
         enable_git_status = true,
@@ -107,20 +118,6 @@ return {
         -- },
     },
     config = function(_, opts)
-        vim.keymap.set(
-            { "n", "v", "x" },
-            "<C-S-n>",
-            ":Neotree filesystem reveal left<CR>",
-            { desc = "Reveal current file in NeoTree ", silent = true }
-        )
-
-        -- vim.keymap.set(
-        --     { "n", "v", "x" },
-        --     "<C-S-n>",
-        --     ":Neotree toggle<CR>",
-        --     { desc = "Toggle NeoTree ", silent = true }
-        -- )
-
         require("neo-tree").setup(opts)
     end,
 }

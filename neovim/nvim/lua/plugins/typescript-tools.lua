@@ -2,6 +2,14 @@ return {
     {
         "pmizio/typescript-tools.nvim",
         dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+
+        ft = {
+            "typescript",
+            "typescriptreact",
+            "javascript",
+            "javascriptreact",
+        },
+
         config = function(_, opts)
             local api = require("typescript-tools.api")
 
@@ -69,6 +77,9 @@ return {
 
     {
         "dmmulroy/tsc.nvim",
+
+        cmd = { "TSC" },
+
         opts = {
             auto_open_qflist = true,
             auto_close_qflist = true,

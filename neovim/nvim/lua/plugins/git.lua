@@ -4,12 +4,13 @@ return {
         -- dir = "/Users/carlos/projects/octo.nvim",
         -- TODO: Enable it only locally, not for SSH sessions
         enabled = true,
-        event = "VeryLazy",
+        -- event = "VeryLazy",
         dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-telescope/telescope.nvim",
             "nvim-tree/nvim-web-devicons",
         },
+        cmd = { "Octo" },
         keys = {
             {
                 "<leader>gp",
@@ -95,30 +96,46 @@ return {
     {
         "sindrets/diffview.nvim",
         enabled = true,
-        event = "VeryLazy",
-        config = function()
-            local actions = require("diffview.actions")
 
+        cmd = {
+            "DiffviewOpen",
+            "DiffviewFileHistory",
+        },
+
+        keys = {
+            {
+                "<leader>gcm",
+                "<cmd>CompareToMaster<CR>",
+                mode = { "n" },
+                desc = "[C]ompare current branch to [m]aster",
+                silent = true,
+            },
+
+            {
+                "<leader>gs",
+                "<cmd>DiffviewOpen<cr>",
+                mode = "n",
+                desc = "Git status DiffView",
+                silent = true,
+            },
+            {
+                "<leader>gh",
+                "<cmd>DiffviewFileHistory % <CR>",
+                mode = "n",
+                desc = "Show [G]it [H]istory for the current file",
+            },
+        },
+
+        init = function()
             vim.api.nvim_create_user_command(
                 "CompareToMaster",
                 "DiffviewOpen origin/HEAD...HEAD --imply-local",
                 { desc = "Compare current branch to master" }
             )
+        end,
 
-            vim.keymap.set(
-                { "n" },
-                "<leader>gcm",
-                "<cmd>CompareToMaster<CR>",
-                { silent = true, desc = "[C]ompare current branch to [m]aster" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gs",
-                "<cmd>DiffviewOpen<cr>",
-                { desc = "Git status DiffView", silent = true }
-            )
-
+        config = function()
+            local actions = require("diffview.actions")
             local quitDiffViewKeymap = {
                 "n",
                 "gq",
@@ -129,14 +146,14 @@ return {
             local commitKeyMap = {
                 "n",
                 "cc",
-                "<cmd>tab G commit<cr>",
+                "<cmd>tab Git commit<cr>",
                 { desc = "Commit staged files" },
             }
 
             local commitNoVerifyKeyMap = {
                 "n",
                 "cC",
-                "<cmd>tab G commit --no-verify<cr>",
+                "<cmd>tab Git commit --no-verify<cr>",
                 { desc = "Commit staged files with --no-verify" },
             }
 
@@ -244,59 +261,58 @@ return {
     },
     {
         "tpope/vim-fugitive",
-        event = "VeryLazy",
         dependencies = {
             "nvim-telescope/telescope.nvim",
         },
-        config = function()
-            local telescopeBuiltin = require("telescope.builtin")
+        cmd = {
+            "Git",
+            "G",
+        },
 
+        keys = {
+            {
+                "<C-S-p>",
+                "<cmd>Git push -u <CR>",
+                mode = "n",
+                desc = "[G]it [P]ush",
+            },
+
+            {
+                "<leader>gb",
+                function()
+                    require("telescope.builtin").git_branches()
+                end,
+                mode = "n",
+                desc = "Show [g]it [b]ranches",
+            },
+
+            {
+                "<leader>gl",
+                function()
+                    require("telescope.builtin").git_status()
+                end,
+                mode = "n",
+                desc = "Show [g]it [s]tatus as a list",
+            },
+            {
+                "<leader>gd",
+                "<cmd>Gvdiffsplit!<CR>",
+                mode = "n",
+                desc = "Show [g]it [d]iff for current file",
+            },
+            {
+                "<leader>gB",
+                ":Git blame<CR>",
+                mode = "n",
+                desc = "[G]it [B]lame",
+            },
+        },
+
+        config = function()
             vim.api.nvim_create_user_command(
                 "UndoLastCommit",
                 "Git reset HEAD~",
                 {}
-            )
-
-            vim.keymap.set(
-                "n",
-                "<C-S-p>",
-                "<cmd>Git push -u <CR>",
-                { desc = "[G]it [P]ush" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gb",
-                telescopeBuiltin.git_branches,
-                { desc = "Show [g]it [b]ranches" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gl",
-                telescopeBuiltin.git_status,
-                { desc = "Show [g]it [s]tatus as a list" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gh",
-                "<cmd>DiffviewFileHistory % <CR>",
-                { desc = "Show [G]it [H]istory for the current file" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gB",
-                ":Git blame<CR>",
-                { desc = "[G]it [B]lame" }
-            )
-
-            vim.keymap.set(
-                "n",
-                "<leader>gd",
-                ":Gvdiffsplit!<CR>",
-                { desc = "Show [g]it [d]iff for current file" }
             )
 
             -- Disabling to use Diffview as default
@@ -377,18 +393,22 @@ return {
     -- },
     {
         "linrongbin16/gitlinker.nvim",
-        event = "VeryLazy",
+
+        cmd = { "GitLink" },
+
+        keys = {
+            {
+                "<leader>gy",
+                "<cmd>GitLink<CR>",
+                mode = { "n", "v" },
+                desc = "Copy git remote URL to clipboard",
+            },
+        },
+
         config = function()
             require("gitlinker").setup({
                 message = false,
             })
-
-            vim.keymap.set(
-                { "n", "v" },
-                "<leader>gy",
-                "<cmd>GitLink<CR>",
-                { desc = "Copy git remote URL to clipboard" }
-            )
         end,
     },
 }

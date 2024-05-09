@@ -1,5 +1,6 @@
 return {
     "tpope/vim-commentary",
+    event = "VeryLazy",
     config = function()
         -- https://github.com/tpope/vim-commentary?tab=readme-ov-file#faq
         -- autocmd FileType apache setlocal commentstring=#\ %s

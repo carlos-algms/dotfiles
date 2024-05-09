@@ -2,10 +2,6 @@ return {
     "ggandor/leap.nvim",
     enabled = true,
     event = "VeryLazy",
-    -- config = function()
-    --     local leap = require("leap")
-    --     leap.create_default_mappings()
-    -- end,
     -- copy from https://www.lazyvim.org/extras/editor/leap
     keys = {
         { "s", mode = { "n" }, desc = "Leap forward to" },

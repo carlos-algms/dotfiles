@@ -1,34 +1,56 @@
 return {
     "ThePrimeagen/harpoon",
-    event = "VeryLazy",
-    config = function()
-        local mark = require("harpoon.mark")
-        local ui = require("harpoon.ui")
-        local term = require("harpoon.term")
-
-        vim.keymap.set(
-            "n",
+    -- event = "VeryLazy",
+    keys = {
+        {
             "<leader>a",
-            mark.add_file,
-            { desc = "[A]dd current file to Harpoon" }
-        )
-        vim.keymap.set(
-            "n",
+            function()
+                require("harpoon.mark").add_file()
+            end,
+            mode = "n",
+            desc = "Add current file to Harpoon",
+        },
+
+        {
             "<C-e>",
-            ui.toggle_quick_menu,
-            { desc = "Toggle Harpoon [E]xplorer" }
-        )
-        vim.keymap.set("n", "<leader>1", function()
-            ui.nav_file(1)
-        end, { desc = "Go To to 1st file on Harpoon" })
-        vim.keymap.set("n", "<leader>2", function()
-            ui.nav_file(2)
-        end, { desc = "Go To to 2nd file on Harpoon" })
-        vim.keymap.set("n", "<leader>3", function()
-            ui.nav_file(3)
-        end, { desc = "Go To to 3rd file on Harpoon" })
-        vim.keymap.set("n", "<leader>4", function()
-            term.gotoTerminal(1)
-        end, { desc = "Go to 1st terminal on Harpoon" })
-    end,
+            function()
+                require("harpoon.ui").toggle_quick_menu()
+            end,
+            mode = "n",
+            desc = "Toggle Harpoon [E]xplorer",
+        },
+
+        {
+            "<leader>1",
+            function()
+                require("harpoon.ui").nav_file(1)
+            end,
+            mode = "n",
+            desc = "Go To the 1st file on Harpoon",
+        },
+        {
+            "<leader>2",
+            function()
+                require("harpoon.ui").nav_file(2)
+            end,
+            mode = "n",
+            desc = "Go To the 2nd file on Harpoon",
+        },
+        {
+            "<leader>3",
+            function()
+                require("harpoon.ui").nav_file(3)
+            end,
+            mode = "n",
+            desc = "Go To the 3rd file on Harpoon",
+        },
+        {
+            "<leader>4",
+            function()
+                require("harpoon.ui").nav_file(4)
+            end,
+            mode = "n",
+            desc = "Go to the 4th file on Harpoon",
+        },
+    },
 }

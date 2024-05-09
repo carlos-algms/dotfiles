@@ -7,6 +7,9 @@ return {
             build = "mkdir -p dictionaries && cd $_ && echo '{}' > package.json && npm i @cspell/dict-pt-br",
         },
     },
+
+    event = "VeryLazy",
+
     config = function()
         local nullLs = require("null-ls")
         local cspell = require("cspell")

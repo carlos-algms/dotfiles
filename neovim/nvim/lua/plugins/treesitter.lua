@@ -1,12 +1,17 @@
 return {
     "nvim-treesitter/nvim-treesitter",
     -- tag = "v0.9.1",
+
     dependencies = {
         "nvim-treesitter/nvim-treesitter-context",
         "nvim-treesitter/nvim-treesitter-textobjects",
         "windwp/nvim-ts-autotag",
     },
+
     build = ":TSUpdate",
+
+    event = "VeryLazy",
+
     config = function()
         require("nvim-treesitter.configs").setup({
             -- A list of parser names, or "all" (the five listed parsers should always be installed)
