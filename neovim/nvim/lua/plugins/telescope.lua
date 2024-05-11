@@ -45,6 +45,35 @@ return {
             table.insert(vimgrep_arguments, "--glob")
             table.insert(vimgrep_arguments, "!**/.git/*")
 
+            local fileIgnorePatterns = {
+                "%.git/",
+                -- disabling it as it was blocking lsp_references,
+                -- it doesn't seem to affect file_search, it is still being ignored
+                -- "node_modules",
+                "%.next",
+                "%.playwright-state",
+                "%.turbo",
+                "%.yarn",
+                "build",
+                "dist",
+                "out/",
+                "package%-lock.json",
+                "playwright%-report",
+                "pnpm%-lock.yaml",
+                "storybook%-static",
+                "test%-results",
+                "vendor",
+                "y4m",
+                "yarn%.lock",
+            }
+
+            -- forcing node_modules to be ignored for normal grep search
+            local fileIgnorePatternsWithNodeModules = {
+                unpack(fileIgnorePatterns),
+            }
+
+            table.insert(fileIgnorePatternsWithNodeModules, "node_modules/")
+
             local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
                 actions.send_to_qflist(prompt_bufnr)
                 vim.cmd("Trouble quickfix")
@@ -63,27 +92,7 @@ return {
                     },
                     -- this has to be a valid lua regex:
                     -- https://github.com/nvim-telescope/telescope.nvim/blob/35f94f0ef32d70e3664a703cefbe71bd1456d899/doc/telescope.txt#L643
-                    file_ignore_patterns = {
-                        "%.git/",
-                        -- disabling it as it was blocking lsp_references,
-                        -- it doesn't seem to affect file_search, it is still being ignored
-                        -- "node_modules",
-                        "%.next",
-                        "%.playwright-state",
-                        "%.turbo",
-                        "%.yarn",
-                        "build",
-                        "dist",
-                        "out/",
-                        "package%-lock.json",
-                        "playwright%-report",
-                        "pnpm%-lock.yaml",
-                        "storybook%-static",
-                        "test%-results",
-                        "vendor",
-                        "y4m",
-                        "yarn%.lock",
-                    },
+                    file_ignore_patterns = fileIgnorePatterns,
                     vimgrep_arguments = vimgrep_arguments,
                     sorting_strategy = "ascending",
                     wrap_results = true,
@@ -222,6 +231,7 @@ return {
                     },
 
                     live_grep_args = {
+                        file_ignore_patterns = fileIgnorePatternsWithNodeModules,
                         auto_quoting = true, -- enable/disable auto-quoting
                         -- define mappings, e.g.
                         mappings = { -- extend mappings
