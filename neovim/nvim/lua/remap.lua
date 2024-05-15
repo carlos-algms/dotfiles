@@ -35,14 +35,14 @@ vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
 -- replace the selected content without losing the Yanked register
--- Disabled, as I'm too used to `dd` and `D` to cut
--- vim.keymap.set(
---     "v",
---     "<leader>p",
---     [["_dP]],
---     { desc = "Paste replacing selection without losing the Yanked register" }
--- )
+vim.keymap.set(
+    "v",
+    "<leader>p",
+    [["_dP]],
+    { desc = "Paste replacing selection without losing the Yanked register" }
+)
 
+-- Disabled, as I'm too used to `dd` and `D` to cut
 -- vim.keymap.set(
 --     "n",
 --     "d",
@@ -178,7 +178,7 @@ vim.keymap.set(
 )
 
 vim.keymap.set(
-    { "n", "i" },
+    { "n", "i", "v" },
     "<D-s>",
     "<esc><cmd>update<cr>",
     { desc = "Save current buffer" }
