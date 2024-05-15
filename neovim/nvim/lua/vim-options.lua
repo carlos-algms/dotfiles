@@ -84,4 +84,5 @@ opt.grepprg = "rg --vimgrep --no-heading --smart-case"
 vim.g.markdown_recommended_style = 0
 
 -- set interactive sheel for commands run with `:! ....` inside Neovim
-vim.opt.shellcmdflag = "-ic"
+-- DISABLED as it was extremely slow in SSH sessions, and I don't use :! that much
+-- vim.opt.shellcmdflag = "-ic"
