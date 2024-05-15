@@ -134,6 +134,7 @@ return {
 
             -- YAML
             vim.cmd([[ hi! link @property.yaml Function ]])
+            vim.cmd([[ hi! link @string.special.url.comment Comment ]])
 
             -- CSS
             vim.cmd([[ hi! link @selector Function ]])
