@@ -39,9 +39,13 @@ return {
             },
             outline = {
                 layout = "float",
+                auto_preview = false,
             },
             symbol_in_winbar = {
                 enable = false,
+            },
+            diagnostic = {
+                auto_preview = false,
             },
         })
 
