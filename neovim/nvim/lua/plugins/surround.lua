@@ -3,6 +3,7 @@ return {
     event = "VeryLazy",
     dependencies = {
         -- add as dependency to try to avoid keymaps conflicts
-        "ggandor/leap.nvim",
+        -- "ggandor/leap.nvim",
+        "smoka7/hop.nvim",
     },
 }
