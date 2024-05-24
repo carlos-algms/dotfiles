@@ -15,6 +15,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("helpers")
 require("vim-options")
+require("my-darcula-theme")
 require("remap")
 require("commands")
 require("autocmds")

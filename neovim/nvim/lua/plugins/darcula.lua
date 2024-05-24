@@ -1,13 +1,27 @@
+vim.opt.termguicolors = true
+vim.o.background = "dark"
+
 return {
+    {
+        lazy = false,
+        priority = 1000,
+        enabled = false,
+        -- "carlos-algms/darcluar.nvim",
+        dir = "~/projects/darcluar.nvim",
+        dependencies = {
+            { "nvim-tree/nvim-web-devicons" },
+        },
+        config = function()
+            vim.cmd.colorscheme("darcluar")
+        end,
+    },
     {
         "doums/darcula",
         name = "darcula",
-        enabled = true,
+        enabled = false,
         lazy = false,
         priority = 1000,
         config = function()
-            vim.opt.termguicolors = true
-            vim.o.background = "dark"
             vim.cmd.colorscheme("darcula")
 
             -- Misspell on purpose: saci
@@ -183,7 +197,6 @@ return {
             vim.cmd([[ hi! link @markup.raw.delimiter.markdown Keyword ]])
             vim.cmd([[ hi! link @fenced_code_block Keyword ]])
             vim.cmd([[ hi! link @label.markdown @type ]])
-            vim.cmd([[ hi! link @markup.raw.markdown_inline @type ]])
             vim.cmd(
                 [[ call darcula#Hi('@markup.raw.markdown_inline', darcula#palette.fg, darcula#palette.null, 'bold') ]]
             )
@@ -236,6 +249,7 @@ return {
             -- editor config
             vim.cmd([[ hi! link editorconfigProperty Keyword ]])
             vim.cmd([[ hi! link dosiniHeader @identifier ]])
+            vim.cmd([[ hi! link dosiniLabel @keyword ]])
 
             -- Telescope
             vim.cmd([[ hi! link TelescopeTitle Function ]])
