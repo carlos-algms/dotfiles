@@ -17,6 +17,14 @@ if [ -z "$(command -v nvim)" ]; then
     fi
 fi
 
+
+config_dir="${HOME}/.config"
+
+# I have to create the directory, new installations don't have it
+if [ ! -d "$config_dir" ]; then
+    mkdir -p "$config_dir"
+fi
+
 target="${HOME}/.config/nvim"
 
 if [ -d "$target" ] || [ -L "$target" ]; then
