@@ -23,3 +23,8 @@ elif [ ! -z "$(command -v vim)" ]; then
 elif [ ! -z "$(command -v vi)" ]; then
     alias v="vi "
 fi
+
+
+if [ ! -z "$(command -v kitten)" ]; then
+    alias s="kitten ssh "
+fi
