@@ -3,9 +3,10 @@ return {
         "nvim-telescope/telescope.nvim",
         -- tag = "0.1.6",
         -- or
-        branch = "0.1.x",
+        -- branch = "0.1.x",
         dependencies = {
             { "nvim-lua/plenary.nvim" },
+            { "nvim-tree/nvim-web-devicons" },
             -- { "nvim-telescope/telescope-ui-select.nvim" },
             { "princejoogie/dir-telescope.nvim" },
             {
@@ -151,18 +152,18 @@ return {
                     lsp_references = {
                         -- initial_mode = "normal",
                         fname_width = 0.99,
-                        path_display = {
-                            "smart",
-                        },
+                        -- path_display = {
+                        --     "smart",
+                        -- },
                         wrap_results = true,
                     },
 
                     lsp_definitions = {
                         -- initial_mode = "normal",
                         fname_width = 0.99,
-                        path_display = {
-                            "smart",
-                        },
+                        -- path_display = {
+                        --     "smart",
+                        -- },
                         wrap_results = true,
                     },
 
