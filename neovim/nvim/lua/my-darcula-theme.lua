@@ -67,6 +67,7 @@ M.theme = {
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
         ["@markup.strong"] = { fg = M.pallet.keyword, bold = true },
+        Pmenu = { bg = M.pallet.gutter },
     },
 
     -- TODO the CMP menu is with black background
