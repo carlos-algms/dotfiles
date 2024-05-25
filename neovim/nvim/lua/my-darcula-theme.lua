@@ -167,12 +167,20 @@ M.setup = function()
     vim.o.background = "dark"
 
     for group, highlight in pairs(M.theme.highlights) do
-        highlight.force = true
+        if vim.g.is_nvim_0_10 then
+            highlight.force = true
+        end
+
         vim.api.nvim_set_hl(0, group, highlight)
     end
 
     for group, link in pairs(M.theme.links) do
-        vim.api.nvim_set_hl(0, group, { link = link, force = true })
+        local hiLink = { link = link }
+        if vim.g.is_nvim_0_10 then
+            hiLink.force = true
+        end
+
+        vim.api.nvim_set_hl(0, group, hiLink)
     end
 end
 
