@@ -3,6 +3,7 @@ return {
         "rest-nvim/rest.nvim",
         ft = "http",
         dependencies = {
+            "nvim-neotest/nvim-nio",
             {
                 "vhyrro/luarocks.nvim",
                 priority = 1000,
