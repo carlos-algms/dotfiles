@@ -40,6 +40,7 @@ M.theme = {
         Conceal = { fg = M.pallet.muted },
         Constant = { fg = M.pallet.constant },
         Cursor = { fg = M.pallet.cursor },
+        CursorLine = { bg = M.pallet.gutter },
         DiagnosticUnderlineError = { undercurl = true, sp = "Red" },
         DiagnosticUnderlineHint = { undercurl = true, sp = "LightGrey" },
         DiagnosticUnderlineInfo = { undercurl = true, sp = "LightBlue" },
@@ -159,9 +160,12 @@ M.theme = {
 }
 
 M.setup = function()
-    -- I won't reset as it fix the sign column background color
-    -- vim.cmd("hi clear")
-    -- vim.cmd("syntax reset")
+    -- Clearing the colors make the sign column lose the background color
+    -- but otherwise, it doesn't work on nvim 0.9.x
+    if not vim.g.is_nvim_0_10 then
+        vim.cmd("hi clear")
+        vim.cmd("syntax reset")
+    end
 
     vim.opt.termguicolors = true
     vim.o.background = "dark"
