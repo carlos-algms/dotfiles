@@ -26,7 +26,7 @@ return {
                             .. " && echo '{}' > package.json && npm i @cspell/dict-pt-br"
                     )
 
-                    if status ~= 0 then
+                    if err ~= 0 then
                         vim.notify(
                             "Failed to install cspell dictionary " .. err,
                             vim.log.levels.ERROR
