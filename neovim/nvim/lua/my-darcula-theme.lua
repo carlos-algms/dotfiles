@@ -1,5 +1,3 @@
----@alias Highlight vim.api.keyset.highlight
-
 local M = {}
 
 ---@class Palette
@@ -21,7 +19,7 @@ M.pallet = {
     muted = "#606060",
     cursor = "#BBBBBB",
     cursorLineNr = "#A4A3A3",
-    selection = "#214283",
+    selection = "#273557",
     diffAddBg = "#294436",
     diffTextBg = "#385570",
     diffDeleteBg = "#523939",
@@ -32,7 +30,7 @@ M.pallet = {
 }
 
 ---@class Theme
----@field highlights table<string, Highlight>
+---@field highlights table<string, vim.api.keyset.highlight>
 ---@field links table<string, string>
 M.theme = {
     highlights = {
@@ -59,15 +57,15 @@ M.theme = {
         MoreMsg = { fg = M.pallet.stdOutput },
         NonText = { fg = M.pallet.muted },
         Normal = { bg = M.pallet.bg },
+        Pmenu = { bg = M.pallet.gutter },
         PreProc = { fg = M.pallet.preProc },
         String = { fg = M.pallet.string },
         TabLine = { fg = M.pallet.muted, bg = M.pallet.uiBgInactive }, -- the not current tab
-        TabLineSel = { fg = M.pallet.fg, bg = M.pallet.uiBgActive }, -- the current tab
         TabLineFill = { bg = M.pallet.bg }, -- the entire tabline behind tabs
+        TabLineSel = { fg = M.pallet.fg, bg = M.pallet.uiBgActive }, -- the current tab
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
         ["@markup.strong"] = { fg = M.pallet.keyword, bold = true },
-        Pmenu = { bg = M.pallet.gutter },
     },
 
     -- TODO the CMP menu is with black background
@@ -86,6 +84,7 @@ M.theme = {
         dosiniLabel = "Keyword",
         editorconfigProperty = "Keyword",
         EndOfBuffer = "NonText",
+        FloatTitle = "NormalFloat",
         FugitiveblameNotCommittedYet = "Type",
         FugitiveblameTime = "Comment",
         fugitiveStagedHeading = "markdownH1",
@@ -98,6 +97,7 @@ M.theme = {
         Number = "Type",
         Question = "MoreMsg",
         Removed = "DiffDelete",
+        SagaTitle = "FloatTitle",
         SignColumn = "LineNr",
         Special = "Keyword",
         Statement = "Keyword",
@@ -105,26 +105,21 @@ M.theme = {
         Tag = "Function",
         TelescopeMatching = "Search",
         Variable = "Identifier",
-        FloatTitle = "NormalFloat",
-        SagaTitle = "FloatTitle",
-        ["@constructor"] = "@function",
-        ["@type.literal"] = "@type",
-        ["@type.literal.string"] = "@string",
-        ["@comment.documentation"] = "@string",
         ["@attribute.css"] = "@identifier",
+        ["@attribute.diff"] = "Comment",
         ["@character.special"] = "Keyword",
+        ["@comment.documentation"] = "@string",
         ["@constant.builtin"] = "Keyword",
         ["@constant.html"] = "Function",
+        ["@constructor"] = "@function",
         ["@constructor.lua"] = "Identifier",
         ["@delimiter.markdown_inline"] = "@keyword",
         ["@function.builtin"] = "@function",
         ["@identifier"] = "Identifier",
         ["@import.identifier"] = "@identifier",
         ["@label.diff"] = "@keyword",
-        ["@string.special.vimdoc"] = "@function",
-        ["@label.vimdoc"] = "@string",
-        ["@variable.parameter.vimdoc"] = "@type",
         ["@label.markdown"] = "@type",
+        ["@label.vimdoc"] = "@string",
         ["@lsp.type.class"] = "@identifier",
         ["@lsp.type.keyword"] = "@keyword",
         ["@lsp.type.macro.lua"] = "Type",
@@ -135,26 +130,31 @@ M.theme = {
         ["@markup.raw.block.markdown"] = "Keyword",
         ["@markup.raw.delimiter.markdown"] = "Keyword",
         ["@markup.raw.markdown_inline"] = "Bold",
+        ["@module.builtin.lua"] = "@identifier",
         ["@property"] = "Constant",
+        ["@property.yaml"] = "@function",
         ["@punctuation"] = "Identifier",
         ["@punctuation.bracket.lua"] = "Identifier",
+        ["@punctuation.special"] = "@keyword",
         ["@punctuation.special.diff"] = "Identifier",
         ["@selector"] = "@function",
         ["@string.regexp.ssh_config"] = "String",
         ["@string.special.path.diff"] = "@identifier",
         ["@string.special.url.gitcommit"] = "@identifier",
+        ["@string.special.vimdoc"] = "@function",
         ["@tag"] = "@function",
-        ["@tag.builtin"] = "@tag",
         ["@tag.attribute"] = "@identifier",
+        ["@tag.builtin"] = "@tag",
         ["@type.css"] = "@function",
+        ["@type.literal"] = "@type",
+        ["@type.literal.string"] = "@string",
         ["@unit"] = "@keyword",
         ["@variable"] = "Identifier",
         ["@variable.builtin"] = "Identifier",
         ["@variable.builtin.php"] = "Keyword",
         ["@variable.builtin.this"] = "Keyword",
         ["@variable.member"] = "Constant",
-        ["@punctuation.special"] = "@keyword",
-        ["@property.yaml"] = "@function",
+        ["@variable.parameter.vimdoc"] = "@type",
     },
 }
 

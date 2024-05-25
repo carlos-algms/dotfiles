@@ -17,7 +17,7 @@ return {
         vim.cmd([[ hi! clear IlluminatedWordWrite ]])
         vim.cmd([[ hi! clear IlluminatedWordRead ]])
 
-        vim.cmd([[ hi! IlluminatedWordText guibg=#393b4e ]])
+        vim.cmd([[ hi! IlluminatedWordText guibg=#494949 ]])
         vim.cmd([[ hi! link IlluminatedWordRead IlluminatedWordText ]])
         vim.cmd([[ hi! link IlluminatedWordWrite IlluminatedWordText ]])
 
