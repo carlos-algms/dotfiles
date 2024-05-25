@@ -34,7 +34,7 @@ M.pallet = {
 ---@field links table<string, string>
 M.theme = {
     highlights = {
-        Bold = { fg = M.pallet.fg, bold = true },
+        Bold = { bold = true },
         Boolean = { fg = M.pallet.keyword },
         Comment = { fg = M.pallet.comment },
         Conceal = { fg = M.pallet.muted },
@@ -64,6 +64,7 @@ M.theme = {
         TabLine = { fg = M.pallet.muted, bg = M.pallet.uiBgInactive }, -- the not current tab
         TabLineFill = { bg = M.pallet.bg }, -- the entire tabline behind tabs
         TabLineSel = { fg = M.pallet.fg, bg = M.pallet.uiBgActive }, -- the current tab
+        Title = { fg = M.pallet.keyword, bold = true },
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
         ["@markup.strong"] = { fg = M.pallet.keyword, bold = true },
@@ -114,6 +115,8 @@ M.theme = {
         ["@constant.html"] = "Function",
         ["@constructor"] = "@function",
         ["@constructor.lua"] = "Identifier",
+        ["@markup.list.checked"] = "@comment",
+        ["@markup.list_item.complete.markdown"] = "@comment",
         ["@delimiter.markdown_inline"] = "@keyword",
         ["@function.builtin"] = "@function",
         ["@identifier"] = "Identifier",
