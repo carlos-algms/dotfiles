@@ -1,6 +1,7 @@
 return {
     "tpope/vim-commentary",
     event = "VeryLazy",
+    enabled = not vim.g.is_nvim_0_10,
     config = function()
         -- https://github.com/tpope/vim-commentary?tab=readme-ov-file#faq
         -- autocmd FileType apache setlocal commentstring=#\ %s

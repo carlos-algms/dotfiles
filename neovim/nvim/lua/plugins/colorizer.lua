@@ -3,6 +3,13 @@ return {
     enabled = true,
     event = "VeryLazy",
     config = function()
-        require("colorizer").setup()
+        require("colorizer").setup({
+            "*",
+            "!telescope",
+            "!dashboard",
+            "!NvimTree",
+            "!lazy",
+            "!git",
+        })
     end,
 }

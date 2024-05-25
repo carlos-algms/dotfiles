@@ -13,6 +13,7 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
+require("00_version_and_env")
 require("helpers")
 require("vim-options")
 require("my-darcula-theme")

@@ -4,7 +4,9 @@ return {
     dependencies = {
         "nvim-treesitter/nvim-treesitter",
         "nvim-tree/nvim-web-devicons",
-        "pmizio/typescript-tools.nvim", -- added as dependency to check if refactoring will show on code-actions
+        -- added as dependency to check if refactoring will show on code-actions
+        -- it didn't
+        --"pmizio/typescript-tools.nvim",
     },
     config = function()
         require("lspsaga").setup({

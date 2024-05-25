@@ -1,20 +1,4 @@
-vim.opt.termguicolors = true
-vim.o.background = "dark"
-
 return {
-    {
-        lazy = false,
-        priority = 1000,
-        enabled = false,
-        -- "carlos-algms/darcluar.nvim",
-        dir = "~/projects/darcluar.nvim",
-        dependencies = {
-            { "nvim-tree/nvim-web-devicons" },
-        },
-        config = function()
-            vim.cmd.colorscheme("darcluar")
-        end,
-    },
     {
         "doums/darcula",
         name = "darcula",

@@ -196,17 +196,40 @@ return {
 
         require("mason").setup()
 
-        require("mason-tool-installer").setup({
+        local ensureToolsInstalled = {
+            "shfmt",
+            "stylua",
+            "black",
+        }
 
+        local ensureLspInstalled = {
+            "bashls",
+            "lua_ls",
+        }
+
+        if vim.g.has_node then
+            table.insert(ensureToolsInstalled, "prettier")
+            ensureLspInstalled =
+                table.shallowMerge(ensureLspInstalled, { "jsonls" })
+        end
+
+        if not vim.g.is_ssh then
+            if vim.g.has_node then
+                table.insert(ensureToolsInstalled, "js-debug-adapter")
+                ensureLspInstalled = table.shallowMerge(ensureLspInstalled, {
+                    -- not installing tsserver because of ts-tools plugin
+                    -- "tsserver",
+                    "html",
+                    "cssls",
+                    "intelephense",
+                })
+            end
+        end
+
+        require("mason-tool-installer").setup({
             -- a list of all tools you want to ensure are installed upon
             -- start
-            ensure_installed = {
-                "prettier",
-                "shfmt",
-                "stylua",
-                "js-debug-adapter",
-                "black",
-            },
+            ensure_installed = ensureToolsInstalled,
         })
 
         local masonLspconfig = require("mason-lspconfig")
@@ -223,14 +246,7 @@ return {
         end
 
         masonLspconfig.setup({
-            ensure_installed = {
-                -- "tsserver",
-                "bashls",
-                "html",
-                "cssls",
-                "lua_ls",
-                "intelephense",
-            },
+            ensure_installed = ensureLspInstalled,
             handlers = {
                 function(server_name)
                     lspconfig[server_name].setup({

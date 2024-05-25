@@ -1,9 +1,9 @@
+-- TODO: add a command to create a new branch
 return {
     {
         "pwntester/octo.nvim",
         -- dir = "/Users/carlos/projects/octo.nvim",
-        -- TODO: Enable it only locally, not for SSH sessions
-        enabled = true,
+        enabled = not vim.g.is_ssh,
         -- event = "VeryLazy",
         dependencies = {
             "nvim-lua/plenary.nvim",

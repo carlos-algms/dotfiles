@@ -3,6 +3,8 @@ return {
         "pmizio/typescript-tools.nvim",
         dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 
+        enabled = vim.g.has_node,
+
         ft = {
             "typescript",
             "typescriptreact",

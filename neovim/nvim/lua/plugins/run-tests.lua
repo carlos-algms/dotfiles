@@ -2,14 +2,24 @@ return {
     {
         "nvim-neotest/neotest",
         -- event = "VeryLazy",
-        event = "LspAttach",
+        enabled = vim.g.has_node and not vim.g.is_ssh,
+        -- event = "LspAttach",
+
+        -- Remember to add more file types if I start testing other languages
+        ft = {
+            "javascript",
+            "typescript",
+            "javascriptreact",
+            "typescriptreact",
+        },
+
         dependencies = {
             "nvim-lua/plenary.nvim",
+            "nvim-neotest/nvim-nio",
             "antoinemadec/FixCursorHold.nvim",
             "nvim-treesitter/nvim-treesitter",
             "nvim-neotest/neotest-jest",
         },
-        enabled = true,
         keys = {
             {
                 "<leader>Td",
