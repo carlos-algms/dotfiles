@@ -19,7 +19,7 @@ M.pallet = {
     muted = "#606060",
     cursor = "#BBBBBB",
     cursorLineNr = "#A4A3A3",
-    selection = "#273557",
+    selection = "#214283",
     diffAddBg = "#294436",
     diffTextBg = "#385570",
     diffDeleteBg = "#523939",
@@ -159,6 +159,13 @@ M.theme = {
         ["@variable.builtin.this"] = "Keyword",
         ["@variable.member"] = "Constant",
         ["@variable.parameter.vimdoc"] = "@type",
+        CmpItemKindFunction = "Function",
+        CmpItemKindMethod = "Function",
+        CmpItemKindProperty = "Constant",
+        CmpItemKindConstant = "Constant",
+        CmpItemKindKeyword = "Keyword",
+        CmpItemKindSnippet = "String",
+        CmpItemKindModule = "Type",
     },
 }
 

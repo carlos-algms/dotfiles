@@ -67,8 +67,12 @@ return {
                 }),
 
                 window = {
-                    completion = cmp.config.window.bordered(),
-                    documentation = cmp.config.window.bordered(),
+                    completion = cmp.config.window.bordered({
+                        winhighlight = "Normal:Pmenu,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+                    }),
+                    documentation = cmp.config.window.bordered({
+                        winhighlight = "Normal:Pmenu",
+                    }),
                 },
 
                 formatting = {
