@@ -16,6 +16,7 @@ M.pallet = {
     errorMsg = "#BC3F3C",
     lineNumber = "#606366",
     gutter = "#313335",
+    menu = "#262626",
     muted = "#606060",
     cursor = "#BBBBBB",
     cursorLineNr = "#A4A3A3",
@@ -58,7 +59,8 @@ M.theme = {
         MoreMsg = { fg = M.pallet.stdOutput },
         NonText = { fg = M.pallet.muted },
         Normal = { bg = M.pallet.bg },
-        Pmenu = { bg = M.pallet.gutter },
+        Operator = { fg = M.pallet.keyword },
+        Pmenu = { bg = M.pallet.menu },
         PreProc = { fg = M.pallet.preProc },
         String = { fg = M.pallet.string },
         TabLine = { fg = M.pallet.muted, bg = M.pallet.uiBgInactive }, -- the not current tab
@@ -67,10 +69,10 @@ M.theme = {
         Title = { fg = M.pallet.keyword, bold = true },
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
+        WinSeparator = { fg = M.pallet.muted },
         ["@markup.strong"] = { fg = M.pallet.keyword, bold = true },
     },
 
-    -- TODO the CMP menu is with black background
     links = {
         Added = "DiffAdd",
         Changed = "DiffChange",
@@ -159,6 +161,12 @@ M.theme = {
         ["@variable.builtin.this"] = "Keyword",
         ["@variable.member"] = "Constant",
         ["@variable.parameter.vimdoc"] = "@type",
+        diffLine = "Comment",
+        diffSubname = "Comment",
+        diffOldFile = "DiffDelete",
+        diffNewFile = "DiffAdd",
+        diffFile = "String",
+        diffIndexLine = "Keyword",
         CmpItemKindFunction = "Function",
         CmpItemKindMethod = "Function",
         CmpItemKindProperty = "Constant",
