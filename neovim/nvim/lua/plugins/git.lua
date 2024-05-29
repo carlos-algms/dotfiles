@@ -306,6 +306,29 @@ return {
                 mode = "n",
                 desc = "[G]it [B]lame",
             },
+            {
+                "<leader>gC",
+                function()
+                    local defaultName = "cgomes/"
+                    vim.ui.input({
+                        prompt = "Branch name: ",
+                        default = defaultName,
+                    }, function(newBranchName)
+                        if
+                            not newBranchName
+                            or newBranchName == ""
+                            or newBranchName == defaultName
+                        then
+                            vim.notify("Not creating a branch", "info")
+                            return
+                        end
+
+                        vim.cmd("Git checkout -b " .. newBranchName)
+                    end)
+                end,
+                mode = { "n", "v" },
+                desc = "[G]it [C]reate Branch",
+            },
         },
 
         config = function()
