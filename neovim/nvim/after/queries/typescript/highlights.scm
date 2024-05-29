@@ -20,6 +20,12 @@
   name: (type_identifier) @class.identifier
   )
 
+; Added to fix .d.ts functions
+(function_signature
+  (identifier) @function.declaration
+  )
+
+
 (type_annotation
   (type_identifier) @type.identifier (#set! "priority" 150)
   )
