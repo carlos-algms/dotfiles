@@ -174,6 +174,11 @@ M.theme = {
         CmpItemKindKeyword = "Keyword",
         CmpItemKindSnippet = "String",
         CmpItemKindModule = "Type",
+        ngxDirectiveImportant = "Keyword",
+        ngxDirective = "Keyword",
+        ngxIPaddr = "Type",
+        ngxGzipOn = "Keyword",
+        ngxDirectiveThirdParty = "Identifier",
     },
 }
 
