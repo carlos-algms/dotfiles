@@ -42,6 +42,10 @@ return {
             local gitsigns = require("gitsigns")
 
             gitsigns.setup({
+                diff_opts = {
+                    ignore_whitespace = true,
+                    ignore_whitespace_change = true,
+                },
                 on_attach = function(bufnr)
                     local function map(mode, l, r, opts)
                         opts = opts or {}
