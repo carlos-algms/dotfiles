@@ -34,3 +34,21 @@ export DOTFILES_SHELL_PATH="$(dirname $(dirname `readlink -f ${0:a}`))"
 export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
 . $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
+
+
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]; then
+    git clone https://github.com/jeffreytse/zsh-vi-mode \
+      $ZSH_CUSTOM/plugins/zsh-vi-mode
+fi
+
+# TODO: automate install of pnpm-shell-completion
+# https://github.com/g-plane/pnpm-shell-completion?tab=readme-ov-file#oh-my-zsh
+
+# eval "$(starship init zsh)"
+
+
+
+if command -v oh-my-posh >/dev/null 2>&1; then
+  eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
+fi
+
