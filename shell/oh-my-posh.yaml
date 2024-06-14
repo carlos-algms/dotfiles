@@ -6,12 +6,18 @@ blocks:
     alignment: left
     newline: true
     segments:
+      - type: session
+        style: plain
+        background: transparent
+        template: "{{ if .SSHSession }}<b>{{ .UserName }}@{{ .HostName }} </b>{{ end }}"
+        "foreground_templates":
+          - "{{if .Root }}#f1184c{{end}}"
+          - green
+
       - type: path
         style: plain
         background: transparent
-        foreground_templates:
-          - "{{if .Root }}red{{end}}"
-          - blue
+        foreground: blue
         template: "<b>{{ .PWD }}</b>"
         properties:
           style: folder
