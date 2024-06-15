@@ -18,17 +18,24 @@ elif [[ -x "$(command -v vim)" ]]; then
 fi
 
 # disable shared history between ZSH instances
+HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -)"
+HISTSIZE=5000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
 unsetopt inc_append_history
 unsetopt share_history
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
 
 
 # https://github.com/docker/cli/commit/b10fb430481574b34997e4b0e00b703cfcd6669e#diff-474a9d942d53cc2279d5641e4a9dcfb18958e412ad53940b53423a38033857d6
 # https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/docker/README.md#settings
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
-
-
-HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -)"
 
 export DOTFILES_SHELL_PATH="$(dirname $(dirname `readlink -f ${0:a}`))"
 export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
@@ -47,7 +54,8 @@ fi
 # eval "$(starship init zsh)"
 
 
-
+# TODO: automate install of oh-my-posh
+# Linux and Mac
 if command -v oh-my-posh >/dev/null 2>&1; then
   eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
 fi
