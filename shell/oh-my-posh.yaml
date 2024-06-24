@@ -75,8 +75,9 @@ secondary_prompt:
   foreground: darkGray
   background: transparent
   template: "❯ "
-
-transient_prompt:
-  background: transparent
-  foreground: darkGray
-  template: "λ "
+#
+# I didn't like it too much, as it hides the folder the previous commands where executed.
+# transient_prompt:
+#   background: transparent
+#   foreground: darkGray
+#   template: '{{"\n"}}λ '
