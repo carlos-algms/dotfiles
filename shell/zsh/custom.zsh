@@ -18,7 +18,7 @@ elif [[ -x "$(command -v vim)" ]]; then
 fi
 
 # disable shared history between ZSH instances
-HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -)"
+HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
 HISTSIZE=5000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
