@@ -3,54 +3,41 @@ return {
 
     dependencies = { "nvim-tree/nvim-web-devicons" },
 
-    cmd = {
-        "Trouble",
-        "TroubleToggle",
-        "TroubleClose",
-        "TroubleRefresh",
-    },
+    cmd = { "Trouble" },
 
     keys = {
         {
             "<leader>xx",
-            "<cmd>TroubleToggle<cr>",
-            desc = "Trouble toggle",
+            "<cmd>Trouble diagnostics toggle<cr>",
+            desc = "Diagnostics (Trouble)",
             silent = true,
         },
 
         {
             "<leader>xd",
-            function()
-                require("trouble").toggle("document_diagnostics")
-            end,
-            desc = "Trouble document diagnostics",
+            "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+            desc = "Buffer Diagnostics (Trouble)",
             silent = true,
         },
 
         {
             "<leader>xw",
-            function()
-                require("trouble").toggle("workspace_diagnostics")
-            end,
-            desc = "Trouble workspace diagnostics",
+            "<cmd>Trouble diagnostics toggle<cr>",
+            desc = "Workspace Diagnostics (Trouble)",
             silent = true,
         },
 
         {
             "<leader>xq",
-            function()
-                require("trouble").toggle("quickfix")
-            end,
-            desc = "Trouble quickfix",
+            "<cmd>Trouble qflist toggle<cr>",
+            desc = "Quickfix List (Trouble)",
             silent = true,
         },
 
         {
             "<leader>xl",
-            function()
-                require("trouble").toggle("loclist")
-            end,
-            desc = "Trouble loclist",
+            "<cmd>Trouble loclist toggle<cr>",
+            desc = "Location List (Trouble)",
             silent = true,
         },
 
@@ -73,12 +60,5 @@ return {
         },
     },
 
-    config = function()
-        local trouble = require("trouble")
-        trouble.setup({
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
-        })
-    end,
+    opts = {},
 }
