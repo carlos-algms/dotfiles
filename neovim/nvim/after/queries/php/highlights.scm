@@ -4,6 +4,10 @@
   "?>"
   ] @tag
 
+[
+  "->"
+  ] @punctuation.delimiter
+
 (
  (comment) @comment.documentation
  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$")
