@@ -1,6 +1,8 @@
 return {
     {
         "rest-nvim/rest.nvim",
+        -- Disabling as it fails to install deps on remote machines
+        enabled = not vim.g.is_ssh,
         ft = "http",
         dependencies = {
             "nvim-neotest/nvim-nio",
