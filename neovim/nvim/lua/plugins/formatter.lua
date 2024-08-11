@@ -70,8 +70,8 @@ return {
         },
         opts = {
             formatters_by_ft = {
-                lua = { "stylua" },
-                python = { "black" },
+                lua = { stop_after_first = true, "stylua" },
+                python = { stop_after_first = true, "black" },
             },
         },
         config = function(_, opts)
@@ -94,11 +94,10 @@ return {
                 "svg",
             }) do
                 formatters_by_ft[language] = {
-                    {
-                        -- Not using it because it can leave zombie processes on failure
-                        -- "prettierd",
-                        "prettier",
-                    },
+                    stop_after_first = true,
+                    -- Not using it because it can leave zombie processes on failure
+                    -- "prettierd",
+                    "prettier",
                 }
             end
 
