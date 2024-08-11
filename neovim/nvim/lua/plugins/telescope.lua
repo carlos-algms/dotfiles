@@ -55,8 +55,6 @@ return {
                 "%.playwright-state",
                 "%.turbo/",
                 "%.yarn/",
-                "/build/",
-                "/dist/",
                 "/out/",
                 "package%-lock.json",
                 "playwright%-report",
@@ -74,15 +72,17 @@ return {
             }
 
             table.insert(fileIgnorePatternsWithNodeModules, "node_modules/")
+            table.insert(fileIgnorePatternsWithNodeModules, "/build/")
+            table.insert(fileIgnorePatternsWithNodeModules, "/dist/")
 
             local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
                 actions.send_to_qflist(prompt_bufnr)
-                vim.cmd("Trouble quickfix")
+                vim.cmd("Trouble quickfix open")
             end
 
             local function selected_to_quickfix_and_open_trouble(prompt_bufnr)
                 actions.send_selected_to_qflist(prompt_bufnr)
-                vim.cmd("Trouble quickfix")
+                vim.cmd("Trouble quickfix open")
             end
 
             telescope.setup({
@@ -147,6 +147,7 @@ return {
                         -- `cwd` will be the directory where Telescope started.
                         cwd_only = true,
                         -- initial_mode = "normal",
+                        file_ignore_patterns = fileIgnorePatternsWithNodeModules,
                     },
 
                     lsp_references = {
