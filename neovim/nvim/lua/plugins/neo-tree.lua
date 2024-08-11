@@ -88,34 +88,37 @@ return {
                 },
             },
         },
-
-        -- nesting_rules = {
-        --     ["editorconfig"] = {
-        --         pattern = "\\.editorconfig$",
-        --         files = { "\\.stylua.toml" },
-        --     },
-        --     ["js"] = {
-        --         pattern = "(.+)%.js$",
-        --         files = { "%1.js.map", "%1.min.js", "%1.d.ts" },
-        --     },
-        --     ["ts"] = {
-        --         pattern = "(.+)%.ts$",
-        --         files = { "%1.*.ts", "%1.*.css" },
-        --     },
-        --     ["tsx"] = {
-        --         pattern = "(.+)%.tsx$",
-        --         files = {
-        --             "%1.*.ts",
-        --             "%1.*.tsx",
-        --             "%1.*.ts",
-        --             "%1.*.ts*",
-        --             "%1.*.css",
-        --             "%1.*.scss",
-        --             "%1.*.mdx",
-        --             "%1.*.mdx",
-        --         },
-        --     },
-        -- },
+        nesting_rules = {
+            ["package.json"] = {
+                pattern = "^package%.json$", -- <-- Lua pattern
+                files = { "package-lock.json", "yarn*", "pnpm-*.yaml" }, -- <-- glob pattern
+            },
+            ["tsx"] = {
+                pattern = "(.+)%.tsx$",
+                files = {
+                    "%1.*.ts",
+                    "%1.*.tsx",
+                    "%1.*.css",
+                    "%1.*.scss",
+                    "%1.*.mdx",
+                },
+            },
+            ["ts"] = {
+                pattern = "(.+)%.ts$",
+                files = {
+                    "%1.*.ts",
+                    "%1.*.tsx",
+                    "%1.*.css",
+                    "%1.*.scss",
+                    "%1.*.mdx",
+                },
+            },
+            ["docker"] = {
+                pattern = "^dockerfile$",
+                ignore_case = true,
+                files = { ".dockerignore", "docker-compose.*", "dockerfile*" },
+            },
+        },
     },
     config = function(_, opts)
         require("neo-tree").setup(opts)
