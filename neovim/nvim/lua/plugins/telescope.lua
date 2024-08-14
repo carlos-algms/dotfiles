@@ -56,14 +56,11 @@ return {
                 "%.turbo/",
                 "%.yarn/",
                 "/out/",
-                "package%-lock.json",
                 "playwright%-report",
-                "pnpm%-lock.yaml",
                 "/storybook%-static",
                 "test%-results",
                 "/vendor/",
                 "y4m",
-                "yarn%.lock",
             }
 
             -- forcing node_modules to be ignored for normal grep search
@@ -74,6 +71,12 @@ return {
             table.insert(fileIgnorePatternsWithNodeModules, "node_modules/")
             table.insert(fileIgnorePatternsWithNodeModules, "/build/")
             table.insert(fileIgnorePatternsWithNodeModules, "/dist/")
+            table.insert(
+                fileIgnorePatternsWithNodeModules,
+                "package%-lock.json"
+            )
+            table.insert(fileIgnorePatternsWithNodeModules, "pnpm%-lock.yaml")
+            table.insert(fileIgnorePatternsWithNodeModules, "yarn%.lock")
 
             local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
                 actions.send_to_qflist(prompt_bufnr)
