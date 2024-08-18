@@ -29,7 +29,9 @@ return {
         config = function()
             -- Setup is required, even if you don't pass any options
             local kulala = require("kulala")
-            kulala.setup()
+            kulala.setup({
+                additional_curl_options = { "--insecure", "-L" },
+            })
 
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("kulala", { clear = true }),
