@@ -87,25 +87,6 @@ return {
                     ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
                     ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
                     ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-                    ["<Cr>"] = cmp.mapping.confirm({ select = true }),
-                    -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#safely-select-entries-with-cr
-                    -- ["<CR>"] = cmp.mapping({
-                    --     i = function(fallback)
-                    --         if cmp.visible() then
-                    --             cmp.confirm({
-                    --                 behavior = cmp.ConfirmBehavior.Replace,
-                    --                 select = true,
-                    --             })
-                    --         else
-                    --             fallback()
-                    --         end
-                    --     end,
-                    --     s = cmp.mapping.confirm({ select = true }),
-                    --     c = cmp.mapping.confirm({
-                    --         behavior = cmp.ConfirmBehavior.Replace,
-                    --         select = true,
-                    --     }),
-                    -- }),
                     ["<C-Space>"] = cmp.mapping.complete(),
                     ["<C-b>"] = cmp.mapping(
                         cmp.mapping.scroll_docs(-4),
@@ -124,16 +105,21 @@ return {
                         { "i", "c" }
                     ),
 
-                    -- I want to use <Tab> only for jumps on the snippets sections,
-                    -- otherwise fallback to Copilot
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         local copilot_keys = vim.fn["copilot#Accept"]()
 
-                        if
+                        -- VScode prioritizes auto-completion first, then Copilot
+                        if cmp.visible() then
+                            cmp.confirm({
+                                select = true,
+                            })
+                        elseif
                             copilot_keys ~= ""
                             and type(copilot_keys) == "string"
                         then
                             vim.api.nvim_feedkeys(copilot_keys, "i", true)
+                        elseif luasnip.expandable() then
+                            luasnip.expand()
                         elseif luasnip.locally_jumpable(1) then
                             luasnip.jump(1)
                         else
