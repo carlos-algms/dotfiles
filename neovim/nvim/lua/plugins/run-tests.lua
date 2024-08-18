@@ -102,14 +102,43 @@ return {
                 adapters = {
                     require("neotest-jest")({
                         jest_test_discovery = true,
-                        -- jestCommand = "pnpm exec jest ",
                         jestCommand = function(testFilePath)
-                            local cmd = neoTestJestUtils.getJestCommand(
-                                -- vim.fn.expand("%:p")
-                                vim.fn.fnamemodify(testFilePath, ":p")
-                            )
+                            local file = vim.fn.fnamemodify(testFilePath, ":p")
 
-                            vim.notify("cmd: " .. cmd)
+                            for p in
+                                vim.fs.parents(vim.fs.normalize(file) .. "/")
+                            do
+                                local path = p .. "/package.json"
+                                if vim.fn.filereadable(path) == 1 then
+                                    local f = assert(io.open(path, "r"))
+                                    local content = f:read("*a")
+                                    f:close()
+                                    local package = vim.json.decode(content)
+                                    local cmd = nil
+
+                                    if package.scripts then
+                                        if package.scripts["test:unit"] then
+                                            cmd = "pnpm run --silent test:unit"
+                                        elseif package.scripts.test then
+                                            cmd = "pnpm run --silent test"
+                                        end
+                                    end
+
+                                    if cmd then
+                                        vim.notify(
+                                            "jest cmd from package.json: "
+                                                .. cmd
+                                        )
+                                        return cmd
+                                    end
+
+                                    break
+                                end
+                            end
+
+                            local cmd = neoTestJestUtils.getJestCommand(file)
+
+                            vim.notify("jest cmd: " .. cmd)
 
                             return cmd
                         end,
