@@ -1,5 +1,8 @@
 vim.g.mapleader = " "
 
+vim.keymap.set("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
+vim.keymap.set("v", [[a']], [[2i']], { desc = "Select single quoted text" })
+
 vim.keymap.set(
     "n",
     "<leader>pv",
