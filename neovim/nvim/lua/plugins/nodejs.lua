@@ -12,7 +12,10 @@ return {
 
         config = function()
             local packageInfo = require("package-info")
-            packageInfo.setup({})
+
+            packageInfo.setup({
+                autostart = false,
+            })
 
             vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
                 desc = "Set package.json keybindings",
