@@ -1,5 +1,20 @@
 {
+    "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
     "caseSensitive": false,
+    "dictionaries": [
+        "en_us",
+        "pt-br",
+        "softwareTerms",
+        "typescript",
+        "node",
+        "php",
+        "html",
+        "css",
+        "bash",
+        "fonts",
+        "filetypes",
+        "npm"
+    ],
     "flagWords": [],
     "ignorePaths": ["node_modules/**"],
     "import": [
@@ -8,6 +23,7 @@
     "language": "en,pt_BR",
     "version": "0.2",
     "words": [
+        "Formik",
         "builtins",
         "darcula",
         "dont",
@@ -24,6 +40,7 @@
         "testid",
         "veed",
         "veedstudio",
-        "wordpress"
+        "wordpress",
+        "zustand"
     ]
 }
