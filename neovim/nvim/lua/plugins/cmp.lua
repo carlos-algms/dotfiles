@@ -81,6 +81,8 @@ return {
                         show_labelDetails = true,
                         preset = "default",
                     }),
+                    expandable_indicator = true,
+                    fields = { "abbr", "kind", "menu" },
                 },
 
                 mapping = cmp.mapping.preset.insert({
@@ -88,6 +90,13 @@ return {
                     ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
                     ["<C-y>"] = cmp.mapping.confirm({ select = true }),
                     ["<C-Space>"] = cmp.mapping.complete(),
+                    ["<C-e>"] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.abort()
+                        else
+                            fallback()
+                        end
+                    end),
                     ["<C-b>"] = cmp.mapping(
                         cmp.mapping.scroll_docs(-4),
                         { "i", "c" }
@@ -104,6 +113,17 @@ return {
                         cmp.mapping.scroll_docs(4),
                         { "i", "c" }
                     ),
+
+                    ["<CR>"] = cmp.mapping(function(fallback)
+                        local entry = cmp.get_selected_entry()
+                        if cmp.visible() and entry then
+                            cmp.confirm({
+                                select = true,
+                            })
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
 
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         local copilot_keys = vim.fn["copilot#Accept"]()
