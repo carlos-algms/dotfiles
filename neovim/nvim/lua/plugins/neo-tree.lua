@@ -5,6 +5,7 @@ return {
     {
         "vhyrro/luarocks.nvim",
         priority = 1001, -- this plugin needs to run before anything else
+        enabled = not vim.g.is_ssh,
         opts = {
             rocks = { "magick" },
         },
@@ -12,6 +13,7 @@ return {
 
     {
         "3rd/image.nvim",
+        enabled = not vim.g.is_ssh,
         dependencies = {
             "luarocks.nvim",
         },
