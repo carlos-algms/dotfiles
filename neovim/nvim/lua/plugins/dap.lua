@@ -202,7 +202,21 @@ return {
             },
 
             {
+                "<leader>di",
+                "<cmd> DapStepInto <CR>",
+                mode = "n",
+                desc = " Debugger Step Into",
+            },
+
+            {
                 "<s-f11>",
+                "<cmd> DapStepOut <CR>",
+                mode = "n",
+                desc = " Debugger Step Out",
+            },
+
+            {
+                "<leader>do",
                 "<cmd> DapStepOut <CR>",
                 mode = "n",
                 desc = " Debugger Step Out",
@@ -232,46 +246,25 @@ return {
             -- # Sign
             local dapSigns =
                 { -- TODO: change highlight for Diagnostic** to have background color
-                    Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+                    Stopped = {
+                        "󰁕 ",
+                        "DiagnosticSignWarn",
+                        "DapStoppedLine",
+                    },
                     Breakpoint = { " " },
                     BreakpointCondition = { " " },
-                    BreakpointRejected = { " ", "DiagnosticError" },
+                    BreakpointRejected = { " ", "DiagnosticSignError" },
                     LogPoint = { "󰯑 " },
                 }
 
             for name, sign in pairs(dapSigns) do
                 vim.fn.sign_define("Dap" .. name, {
                     text = sign[1],
-                    texthl = sign[2] or "DiagnosticInfo",
+                    texthl = sign[2] or "DiagnosticSignInfo",
                     linehl = sign[3],
                     numhl = sign[3],
                 })
             end
-
-            -- vim.fn.sign_define(
-            --     "DapBreakpoint",
-            --     { text = "🔴", texthl = "", linehl = "", numhl = "" }
-            -- )
-
-            -- vim.fn.sign_define(
-            --     "DapBreakpointCondition",
-            --     { text = "🉑", texthl = "", linehl = "", numhl = "" }
-            -- )
-
-            -- vim.fn.sign_define(
-            --     "DapLogPoint",
-            --     { text = "ℹ️", texthl = "", linehl = "", numhl = "" }
-            -- )
-
-            -- vim.fn.sign_define(
-            --     "DapStopped",
-            --     { text = "➡️", texthl = "", linehl = "", numhl = "" }
-            -- )
-
-            -- vim.fn.sign_define(
-            --     "DapBreakpointRejected",
-            --     { text = "⚪️", texthl = "", linehl = "", numhl = "" }
-            -- )
 
             dap.adapters["pwa-node"] = {
                 type = "server",

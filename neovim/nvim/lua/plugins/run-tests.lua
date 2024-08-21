@@ -94,7 +94,7 @@ return {
 
             ---@diagnostic disable-next-line: missing-fields
             neotest.setup({
-                status = { virtual_text = true },
+                status = { virtual_text = false },
                 output = { open_on_run = true },
                 discovery = {
                     enabled = false,
@@ -105,6 +105,11 @@ return {
                         jestCommand = function(testFilePath)
                             local file = vim.fn.fnamemodify(testFilePath, ":p")
 
+                            -- TODO: try to use find()
+                            --         local projects_dir = vim.fs.find("projects", {
+                            --              upwards = true,
+                            --              stop = vim.loop.os_homedir()
+                            --         })
                             for p in
                                 vim.fs.parents(vim.fs.normalize(file) .. "/")
                             do
@@ -180,6 +185,13 @@ return {
                     }),
                 },
             })
+
+            vim.cmd([[
+                hi! NeotestPassed guibg=#313335
+                hi! NeotestFailed guibg=#313335
+                hi! NeotestRunning guibg=#313335
+                hi! NeotestSkipped guibg=#313335
+            ]])
 
             -- vim.keymap.set(
             --     "n",

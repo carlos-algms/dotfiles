@@ -286,6 +286,7 @@ return {
                     --         },
                     --     },
                     -- })
+                    return false
                 end,
             },
         })
@@ -294,7 +295,7 @@ return {
             virtual_text = false,
             float = {
                 -- UI.
-                header = false,
+                header = nil,
                 border = "rounded",
                 focusable = true,
             },
@@ -310,7 +311,6 @@ return {
         for type, icon in pairs(signs) do
             local hl = "DiagnosticSign" .. type
             vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = nil })
-            vim.cmd("hi! " .. hl .. " guibg=#313335 guifg=#bac4cf")
         end
     end,
 }
