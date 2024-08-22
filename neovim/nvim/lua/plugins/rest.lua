@@ -4,9 +4,8 @@ return {
         -- and luarocks was failing to install in the remote machines
         "mistweaverco/kulala.nvim",
 
-        -- TODO: check if it works on remote machines
-        enabled = not vim.g.is_ssh,
         ft = "http",
+
         keys = {
             {
                 "<leader>rc",
@@ -31,6 +30,7 @@ return {
             local kulala = require("kulala")
             kulala.setup({
                 additional_curl_options = { "--insecure", "-L" },
+                default_view = "headers_body",
             })
 
             vim.api.nvim_create_autocmd("FileType", {
