@@ -55,7 +55,7 @@ return {
                     hop.hint_char1({
                         direction = HintDirection.BEFORE_CURSOR,
                         current_line_only = true,
-                        hint_offset = -1,
+                        hint_offset = 1,
                     })
                 end,
                 desc = "Go to before char backwards",
