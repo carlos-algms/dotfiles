@@ -2,7 +2,7 @@ return {
     {
         "cbochs/grapple.nvim",
         opts = {
-            scope = "git_branch",
+            scope = "cwd", -- "git_branch",
         },
         event = { "BufReadPost", "BufNewFile" },
         cmd = "Grapple",
