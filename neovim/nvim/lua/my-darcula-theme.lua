@@ -81,6 +81,7 @@ M.theme = {
     links = {
         Added = "DiffAdd",
         Changed = "DiffChange",
+        CmpItemMenu = "Comment",
         CmpItemKindConstant = "Constant",
         CmpItemKindFunction = "Function",
         CmpItemKindKeyword = "Keyword",
