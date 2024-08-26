@@ -17,7 +17,7 @@ return {
                 autostart = false,
             })
 
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+            vim.api.nvim_create_autocmd({ "BufRead", "BufNew", "BufNewFile" }, {
                 desc = "Set package.json keybindings",
                 pattern = { "package.json" },
                 callback = function(ev)
