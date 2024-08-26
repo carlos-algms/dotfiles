@@ -101,7 +101,7 @@ return {
                 },
                 adapters = {
                     require("neotest-jest")({
-                        jest_test_discovery = true,
+                        jest_test_discovery = false,
                         jestCommand = function(testFilePath)
                             local file = vim.fn.fnamemodify(testFilePath, ":p")
 
