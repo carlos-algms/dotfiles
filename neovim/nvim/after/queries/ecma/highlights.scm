@@ -29,3 +29,6 @@
               )
   )
 
+(call_expression
+  function: (super) @function.call (#set! "priority" 150)
+  )
