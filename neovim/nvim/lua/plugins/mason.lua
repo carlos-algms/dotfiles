@@ -94,11 +94,23 @@ return {
             })
 
         vim.api.nvim_create_autocmd("LspAttach", {
-            group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+            group = vim.api.nvim_create_augroup(
+                "UserLspConfig",
+                { clear = true }
+            ),
             desc = "LSP actions",
             callback = function(ev)
-                -- Enable completion triggered by <c-x><c-o>
-                vim.bo[ev.buf].omnifunc = "vim.lsp.omnifunc" --"v:lua.vim.lsp.omnifunc"
+                -- https://neovim.io/doc/user/lsp.html#lsp-events
+                local client = vim.lsp.get_client_by_id(ev.data.client_id)
+                if client then
+                    local bufNr = ev.buf
+                    if client.supports_method("textDocument/completion") then
+                        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
+                    end
+                    if client.supports_method("textDocument/definition") then
+                        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+                    end
+                end
 
                 local lspKeymap = function(when, keyCombination, action, desc)
                     local opts = { buffer = ev.buf }
