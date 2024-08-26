@@ -29,6 +29,14 @@ return {
         event = { "VeryLazy" },
         keys = {
             {
+                "<C-l>",
+                [[ copilot#Accept("\\<CR>") ]],
+                mode = "i",
+                desc = "Copilot accept suggestion",
+                expr = true,
+                replace_keycodes = false,
+            },
+            {
                 "<C-.>",
                 "<Plug>(copilot-accept-word)",
                 mode = "i",
