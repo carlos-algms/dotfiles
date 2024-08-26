@@ -62,10 +62,27 @@ return {
                         buffer = ev.buf,
                     })
 
+                    vim.keymap.set("n", "<leader>ry", function()
+                        kulala.copy()
+                    end, {
+                        desc = "Copy current request as curl command",
+                        silent = true,
+                        buffer = ev.buf,
+                    })
+
                     vim.keymap.set("n", "R", function()
                         kulala.run()
                     end, {
                         desc = "Run request",
+                        silent = true,
+                        buffer = ev.buf,
+                    })
+
+                    -- I've tried with "K", but the LSP bind is taking precedence
+                    vim.keymap.set("n", "<leader>ri", function()
+                        kulala.inspect()
+                    end, {
+                        desc = "Inspect current request",
                         silent = true,
                         buffer = ev.buf,
                     })
