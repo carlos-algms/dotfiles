@@ -65,7 +65,7 @@
   (import_clause
     (named_imports
       (import_specifier
-        alias: (identifier) @import.alias
+        alias: (identifier) @import.alias (#set! "priority" 150)
         )
       )
     )
