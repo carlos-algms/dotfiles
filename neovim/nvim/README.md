@@ -3,10 +3,13 @@
 ## Todo
 
 -   [ ] Check which_key and add descriptions to keys that have `+prefix`
+-   [ ] git - list only local branches, it's listing all branches including not mine ones
+-   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
+        like: bookmarksPath .. project_path .. "-permanent-list" .. ".json", or bookmarksPath .. project_path .. "-ticket-XX-yyy-" .. ".json"
 -   [x] Add oil.nvim to test if it is better than neo-tree
     -   it is good to use in the current folder, but navigating seems daunting
--   [ ] review and lazy load plugins
--   [ ] Enable some plugins only locally not on SSH connections
+-   [x] review and lazy load plugins
+-   [x] Enable some plugins only locally not on SSH connections
 -   [ ] Install multi-line plugin
 -   [ ] Clean up unused plugins
 -   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
@@ -15,11 +18,11 @@
 -   [x] Try to use cspell with a plugin instead of native nvim spell
 -   [x] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
 -   [x] Setup debugger for Chrome
--   [ ] Setup debugger for node-terminal
+-   [x] Setup debugger for node-terminal
 -   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc
     -   this might need an attach function to the markdown file-type only
 -   [ ] Enums shows white and blue depending on where they are, TS and TSX
--   [ ] Check nesting config for Neo Tree
+-   [x] Check nesting config for Neo Tree
 -   [x] setup lua formatter with sane defaults to projects without a RC file
     -   apparently the CLI doesn't accept format arguments
 -   [x] Fork the Dashboard and change file name to omit the CWD and show only relative path
