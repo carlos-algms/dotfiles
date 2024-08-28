@@ -158,7 +158,7 @@ M.theme = {
         ["@function.builtin"] = "@function",
         ["@function.builtin.php"] = "@keyword",
         ["@identifier"] = "Identifier",
-        ["@import.identifier"] = "@identifier",
+        ["@import"] = "@identifier",
         ["@label.diff"] = "@keyword",
         ["@label.markdown"] = "@type",
         ["@label.vimdoc"] = "@string",
@@ -166,6 +166,7 @@ M.theme = {
         ["@lsp.type.keyword"] = "@keyword",
         ["@lsp.type.macro.lua"] = "Type",
         ["@lsp.type.property"] = "Constant",
+        ["@markup.link.label"] = "@none",
         ["@markup.heading"] = "Keyword",
         -- commented out as it's making php code all white
         -- ["@markup.heading.1.html"] = "Identifier",
