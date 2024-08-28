@@ -102,13 +102,26 @@ return {
             callback = function(ev)
                 -- https://neovim.io/doc/user/lsp.html#lsp-events
                 local client = vim.lsp.get_client_by_id(ev.data.client_id)
-                if client then
-                    local bufNr = ev.buf
-                    if client.supports_method("textDocument/completion") then
-                        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
-                    end
-                    if client.supports_method("textDocument/definition") then
-                        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+                if client == nil then
+                    return
+                end
+
+                local bufNr = ev.buf
+                if client.supports_method("textDocument/completion") then
+                    vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
+                end
+                if client.supports_method("textDocument/definition") then
+                    vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+                end
+
+                local noKeymapLspClients = {
+                    "null-ls",
+                    "GitHub Copilot",
+                }
+
+                for _, clientName in ipairs(noKeymapLspClients) do
+                    if client.name == clientName then
+                        return
                     end
                 end
 
@@ -163,8 +176,6 @@ return {
                     telescopeBuiltin.lsp_references,
                     "List [r]eferences using Telescope"
                 )
-
-                lspKeymap("n", "K", vim.lsp.buf.hover, "Show Hover information")
 
                 lspKeymap(
                     "n",
