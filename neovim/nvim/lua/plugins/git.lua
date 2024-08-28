@@ -1,4 +1,3 @@
--- TODO: add a command to create a new branch
 return {
     {
         "pwntester/octo.nvim",
