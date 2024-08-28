@@ -41,51 +41,58 @@ return {
 
     config = function()
         local nullLs = require("null-ls")
-        local cspell = require("cspell")
+        local sources = {}
 
-        -- local codeActions = nullLs.builtins.code_actions
+        local isCSpellInstalled = vim.fn.executable("cspell")
 
-        local cSpellOpts = {
-            find_json = function(_cwd)
-                return vim.fn.expand("~/.config/nvim/cspell.json")
-            end,
+        if isCSpellInstalled then
+            local cspell = require("cspell")
 
-            ---@param payload AddToJSONSuccess
-            on_add_to_json = function(payload)
-                -- For example, you can format the cspell config file after you add a word
-                os.execute(
-                    string.format(
-                        "jq -S '.words |= sort' %s > %s.tmp && mv %s.tmp %s",
-                        payload.cspell_config_path,
-                        payload.cspell_config_path,
-                        payload.cspell_config_path,
-                        payload.cspell_config_path
+            local cSpellOpts = {
+                find_json = function(_cwd)
+                    return vim.fn.stdpath("config") .. "/cspell.json"
+                end,
+
+                ---@param payload AddToJSONSuccess
+                on_add_to_json = function(payload)
+                    -- For example, you can format the cspell config file after you add a word
+                    os.execute(
+                        string.format(
+                            "jq -S '.words |= sort' %s > %s.tmp && mv %s.tmp %s",
+                            payload.cspell_config_path,
+                            payload.cspell_config_path,
+                            payload.cspell_config_path,
+                            payload.cspell_config_path
+                        )
                     )
-                )
-            end,
+                end,
 
-            ---@param payload AddToDictionarySuccess
-            on_add_to_dictionary = function(payload)
-                -- For example, you can sort the dictionary after adding a word
-                os.execute(
-                    string.format(
-                        "sort %s -o %s",
-                        payload.dictionary_path,
-                        payload.dictionary_path
+                --- @param payload AddToDictionarySuccess
+                on_add_to_dictionary = function(payload)
+                    -- For example, you can sort the dictionary after adding a word
+                    os.execute(
+                        string.format(
+                            "sort %s -o %s",
+                            payload.dictionary_path,
+                            payload.dictionary_path
+                        )
                     )
-                )
-            end,
-        }
+                end,
+            }
+
+            table.insert(
+                sources,
+                cspell.diagnostics.with({ config = cSpellOpts })
+            )
+            table.insert(
+                sources,
+                cspell.code_actions.with({ config = cSpellOpts })
+            )
+        end
 
         nullLs.setup({
             fallback_severity = vim.diagnostic.severity.INFO,
-            sources = {
-                -- disabled, as I'm not using from the code actions
-                -- codeActions.gitsigns,
-
-                cspell.diagnostics.with({ config = cSpellOpts }),
-                cspell.code_actions.with({ config = cSpellOpts }),
-            },
+            sources = sources,
         })
     end,
 }
