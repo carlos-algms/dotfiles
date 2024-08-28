@@ -242,7 +242,8 @@ return {
                         mappings = { -- extend mappings
                             i = {
                                 ["<C-k>"] = lga_actions.quote_prompt(),
-                                ["<C-i>"] = lga_actions.quote_prompt({
+                                -- <C-i> is the same as `<Tab>` for historical reasons https://github.com/neovim/neovim/issues/5916
+                                ["<C-l>"] = lga_actions.quote_prompt({
                                     postfix = " --iglob ",
                                 }),
                             },
@@ -266,12 +267,12 @@ return {
                 hidden = true,
                 no_ignore = false,
                 show_preview = true,
+                live_grep = telescope.extensions.live_grep_args.live_grep_args,
             })
 
             vim.keymap.set(
                 "n",
                 "<leader>f",
-                -- builtin.live_grep, -- disable to allow adding args
                 telescope.extensions.live_grep_args.live_grep_args,
                 { desc = "Live Grep all files" }
             )
@@ -369,19 +370,16 @@ return {
                 { noremap = true, silent = true, desc = "Change file type" }
             )
 
-            local get_dirs = require("dir-telescope.util").get_dirs
-            local dirTelescopeSettings = require("dir-telescope.settings")
-
-            vim.keymap.set("n", "<leader>sd", function()
-                get_dirs(dirTelescopeSettings, function(opts)
-                    opts.prompt_title = "Live Grep (Args) - "
-                        .. table.concat(opts.search_dirs, ", ")
-
-                    telescope.extensions.live_grep_args.live_grep_args(opts)
-                end)
-            end, {
-                desc = "Search in directory with Args",
-            })
+            vim.keymap.set(
+                "n",
+                "<leader>sd",
+                "<CMD>Telescope dir live_grep<CR>",
+                {
+                    noremap = true,
+                    silent = true,
+                    desc = "Search in directory with Args",
+                }
+            )
 
             local liveGrepWithGlob = function(glob)
                 -- live_grep_args doesn't accept multiple globs
