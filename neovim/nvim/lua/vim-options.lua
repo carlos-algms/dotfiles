@@ -18,7 +18,11 @@ opt.smartindent = true
 opt.cursorline = true
 
 opt.swapfile = false
+-- Make a backup before writing and leave it around after the file has been written
+-- https://neovim.io/doc/user/options.html#'backup'
+-- Disabled it, as it saves all files in the same folder, and they can collide
 opt.backup = false
+opt.backupdir = vim.fn.stdpath("state") .. "/backup"
 
 opt.hlsearch = false
 opt.incsearch = true
