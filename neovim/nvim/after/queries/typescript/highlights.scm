@@ -17,7 +17,7 @@
   )
 
 (class_declaration
-  name: (type_identifier) @class.identifier
+  name: (type_identifier) @class.identifier (#set! "priority" 150)
   )
 
 ; Added to fix .d.ts functions
