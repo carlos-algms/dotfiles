@@ -137,6 +137,7 @@ return {
                             ["<C-q>"] = selected_to_quickfix_and_open_trouble,
                         },
                         n = {
+                            ["<C-c>"] = actions.close, -- I don't know why this is not the default
                             ["q"] = actions.close,
                             ["<C-h>"] = actions.which_key,
                             ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
