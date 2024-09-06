@@ -27,18 +27,19 @@
   )
 
 ; prisma $queryRaw
-(call_expression
-  function: (await_expression
-              (member_expression
-                object: (identifier)
-                property: (property_identifier) @function.identifier (#eq? @function.identifier "$queryRaw")
-                )
-              )
-  arguments: (template_string) @injection.content
-  (#offset! @injection.content 0 1 0 -1)
-  (#set! injection.include-children)
-  (#set! injection.language "sql")
-  )
+;;;; Disabled as it stopped working
+; (call_expression
+;   function: (await_expression
+;               (member_expression
+;                 object: (identifier)
+;                 property: (property_identifier) @function.identifier (#eq? @function.identifier "$queryRaw")
+;                 )
+;               )
+;   arguments: (template_string) @injection.content
+;   (#offset! @injection.content 0 1 0 -1)
+;   (#set! injection.include-children)
+;   (#set! injection.language "sql")
+;   )
 
 
 
