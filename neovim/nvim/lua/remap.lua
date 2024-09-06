@@ -1,5 +1,19 @@
 vim.g.mapleader = " "
 
+vim.keymap.set(
+    { "n", "v" },
+    "<leader>vi",
+    "<CMD>Inspect<CR>",
+    { desc = "Inspect current highlight" }
+)
+
+vim.keymap.set(
+    { "n", "v" },
+    "<leader>vI",
+    "<CMD>InspectTree<CR>",
+    { desc = "Show Inspect Tree" }
+)
+
 vim.keymap.set("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
 vim.keymap.set("v", [[a']], [[2i']], { desc = "Select single quoted text" })
 
