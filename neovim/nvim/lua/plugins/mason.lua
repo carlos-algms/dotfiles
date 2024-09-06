@@ -258,7 +258,7 @@ return {
             ensure_installed = ensureToolsInstalled,
         })
 
-        local masonLspconfig = require("mason-lspconfig")
+        local masonLspConfig = require("mason-lspconfig")
 
         local lspconfig = require("lspconfig")
         local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -271,7 +271,7 @@ return {
             vim.lsp.buf.execute_command(params)
         end
 
-        masonLspconfig.setup({
+        masonLspConfig.setup({
             ensure_installed = ensureLspInstalled,
             handlers = {
                 function(server_name)
@@ -285,12 +285,27 @@ return {
                         capabilities = lsp_capabilities,
                         settings = {
                             Lua = {
+                                runtime = {
+                                    version = "LuaJIT",
+                                },
                                 diagnostics = {
                                     globals = { "vim", "get_args" },
+                                },
+                                workspace = {
+                                    library = {
+                                        vim.env.VIMRUNTIME,
+                                    },
                                 },
                             },
                         },
                     })
+                end,
+
+                ts_ls = function()
+                    -- tsserver was renamed to ts_ls
+                    -- https://github.com/neovim/nvim-lspconfig/pull/3232#issuecomment-2331025714
+                    -- I'm not using the ts_ls, as I'm using typescript-tools.nvim
+                    return false
                 end,
 
                 tsserver = function()
