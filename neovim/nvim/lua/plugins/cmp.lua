@@ -8,6 +8,7 @@ return {
             { "hrsh7th/cmp-path" },
             { "hrsh7th/cmp-cmdline" },
             { "hrsh7th/cmp-nvim-lua" },
+            { "hrsh7th/cmp-nvim-lsp-signature-help" },
             { "saadparwaiz1/cmp_luasnip" },
             -- TODO: import from VSCode and how can I write my own snippets?
             -- https://github.com/L3MON4D3/LuaSnip/blob/master/DOC.md#vs-code
