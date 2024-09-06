@@ -123,6 +123,10 @@ return {
             multiline_threshold = 2, -- Maximum number of lines to show for a single context
         })
 
-        -- require("nvim-ts-autotag").setup()
+        require("nvim-ts-autotag").setup({
+            opts = {
+                enable_close_on_slash = true,
+            },
+        })
     end,
 }
