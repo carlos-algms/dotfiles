@@ -260,29 +260,30 @@ return {
 
         local masonLspConfig = require("mason-lspconfig")
 
-        local lspconfig = require("lspconfig")
-        local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-        local function organize_imports()
-            local params = {
-                command = "_typescript.organizeImports",
-                arguments = { vim.api.nvim_buf_get_name(0) },
-            }
-            vim.lsp.buf.execute_command(params)
-        end
+        local lspConfig = require("lspconfig")
+        local all_lsp_capabilities = vim.tbl_deep_extend(
+            "force",
+            vim.lsp.protocol.make_client_capabilities(),
+            require("cmp_nvim_lsp").default_capabilities()
+        )
 
         masonLspConfig.setup({
             ensure_installed = ensureLspInstalled,
             handlers = {
                 function(server_name)
-                    lspconfig[server_name].setup({
-                        capabilities = lsp_capabilities,
+                    -- just make sure they are disabled, as I'm using typescript-tools.nvim
+                    if server_name == "ts_ls" or server_name == "tsserver" then
+                        return false
+                    end
+
+                    lspConfig[server_name].setup({
+                        capabilities = all_lsp_capabilities,
                     })
                 end,
 
                 lua_ls = function()
-                    lspconfig.lua_ls.setup({
-                        capabilities = lsp_capabilities,
+                    lspConfig.lua_ls.setup({
+                        capabilities = all_lsp_capabilities,
                         settings = {
                             Lua = {
                                 runtime = {
@@ -301,31 +302,39 @@ return {
                     })
                 end,
 
-                ts_ls = function()
-                    -- tsserver was renamed to ts_ls
-                    -- https://github.com/neovim/nvim-lspconfig/pull/3232#issuecomment-2331025714
-                    -- I'm not using the ts_ls, as I'm using typescript-tools.nvim
-                    return false
-                end,
+                -- Disabled to use typescript-tools.nvim
+                -- ts_ls = function()
+                --     -- tsserver was renamed to ts_ls
+                --     -- https://github.com/neovim/nvim-lspconfig/pull/3232#issuecomment-2331025714
+                --     -- I'm not using the ts_ls, as I'm using typescript-tools.nvim
+                --     return false
+                -- end,
+                --
+                -- tsserver = function()
+                --     local function organize_imports()
+                --         local params = {
+                --             command = "_typescript.organizeImports",
+                --             arguments = { vim.api.nvim_buf_get_name(0) },
+                --         }
+                --         vim.lsp.buf.execute_command(params)
+                --     end
 
-                tsserver = function()
-                    -- Disabled to use typescript-tools.nvim
-                    -- lspconfig.tsserver.setup({
-                    --     capabilities = lsp_capabilities,
-                    --     init_options = {
-                    --         preferences = {
-                    --             disableSuggestions = false,
-                    --         },
-                    --     },
-                    --     commands = {
-                    --         OrganizeImports = {
-                    --             organize_imports,
-                    --             description = "Organize Imports",
-                    --         },
-                    --     },
-                    -- })
-                    return false
-                end,
+                --     lspconfig.tsserver.setup({
+                --         capabilities = lsp_capabilities,
+                --         init_options = {
+                --             preferences = {
+                --                 disableSuggestions = false,
+                --             },
+                --         },
+                --         commands = {
+                --             OrganizeImports = {
+                --                 organize_imports,
+                --                 description = "Organize Imports",
+                --             },
+                --         },
+                --     })
+                --     return false
+                -- end,
             },
         })
 
