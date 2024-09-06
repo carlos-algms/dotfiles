@@ -212,7 +212,7 @@ return {
 
                                     vim.cmd(
                                         string.format(
-                                            "DiffviewOpen %s...HEAD --imply-local",
+                                            "DiffviewOpen origin/HEAD...%s --imply-local",
                                             selection.value
                                         )
                                     )
