@@ -9,6 +9,9 @@ return {
         { "WhoIsSethDaniel/mason-tool-installer.nvim" },
         { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
 
+        -- Disabled to keep using typescript-tools.nvim
+        -- { "yioneko/nvim-vtsls" },
+
         {
             "folke/lazydev.nvim",
             ft = "lua", -- only load on lua files
@@ -245,6 +248,7 @@ return {
                 ensureLspInstalled = table.shallowMerge(ensureLspInstalled, {
                     -- not installing tsserver because of ts-tools plugin
                     -- "tsserver",
+                    -- "ts_ls",
                     "html",
                     "cssls",
                     "intelephense",
@@ -261,6 +265,9 @@ return {
         local masonLspConfig = require("mason-lspconfig")
 
         local lspConfig = require("lspconfig")
+
+        -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig
+
         local all_lsp_capabilities = vim.tbl_deep_extend(
             "force",
             vim.lsp.protocol.make_client_capabilities(),
