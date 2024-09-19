@@ -2,14 +2,17 @@ return {
     {
         "cbochs/grapple.nvim",
         opts = {
-            scope = "cwd", -- "git_branch",
+            -- cwd - current working directory, mutable
+            -- git_branch - git branch, mutable
+            -- static - initial working directory, should not change
+            scope = "static", -- "git_branch",
         },
         event = { "BufReadPost", "BufNewFile" },
         cmd = "Grapple",
         keys = {
             {
                 "<leader>a",
-                "<cmd>Grapple toggle<cr>",
+                "<cmd>Grapple tag<cr>", -- "<cmd>Grapple toggle<cr>", toggle was removing the file when added multiple times
                 desc = "Grapple toggle tag",
             },
             {
