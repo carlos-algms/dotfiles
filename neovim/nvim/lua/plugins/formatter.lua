@@ -14,7 +14,7 @@ vim.g.format_on_save_exclude = {
     "**/packer_plugins/**",
     "**/autoload/**",
     "**/tmp/**",
-    "**/temp/**",
+    -- "**/temp/**", -- too generic, I have projects in temp folder
 }
 
 -- Individually disable format on save by file type
@@ -73,6 +73,7 @@ return {
                 lua = { stop_after_first = true, "stylua" },
                 python = { stop_after_first = true, "black" },
             },
+            -- log_level = vim.log.levels.DEBUG,
         },
         config = function(_, opts)
             local conform = require("conform")
