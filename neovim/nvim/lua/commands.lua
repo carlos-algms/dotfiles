@@ -57,6 +57,16 @@ createUserCommand("CopyFullPath", function()
     vim.notify('Copied "' .. path .. '" to the clipboard!')
 end, {})
 
+vim.keymap.set({ "n" }, "<leader>yr", "<cmd>CopyRelativePath<CR>", {
+    desc = "Copy relative path",
+    silent = true,
+})
+
+vim.keymap.set({ "n" }, "<leader>yF", "<cmd>CopyFullPath<CR>", {
+    desc = "Copy full path",
+    silent = true,
+})
+
 createUserCommand("CloseAllOtherBuffers", function()
     local current = vim.fn.bufnr()
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
