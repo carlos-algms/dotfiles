@@ -115,7 +115,12 @@ return {
             nesting_rules = {
                 ["package.json"] = {
                     pattern = "^package%.json$", -- <-- Lua pattern
-                    files = { "package-lock.json", "yarn*", "pnpm-*.yaml" }, -- <-- glob pattern
+                    files = {
+                        "package-lock.json",
+                        "yarn*",
+                        "pnpm-*.yaml",
+                        ".npmrc",
+                    }, -- <-- accept glob patterns
                 },
                 ["tsx"] = {
                     pattern = "(.+)%.tsx$",
