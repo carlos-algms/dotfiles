@@ -4,7 +4,7 @@ return {
 
     dependencies = {
         "nvim-treesitter/nvim-treesitter-context",
-        -- "nvim-treesitter/nvim-treesitter-textobjects",
+        "nvim-treesitter/nvim-treesitter-textobjects",
         "windwp/nvim-ts-autotag",
     },
 
@@ -58,62 +58,61 @@ return {
             },
             ignore_install = {},
             modules = {},
-            -- textobjects = {
-            --     select = {
-            --         enable = true,
+            textobjects = {
+                select = {
+                    enable = true,
 
-            --         -- Automatically jump forward to textobj, similar to targets.vim
-            --         lookahead = true,
+                    -- Automatically jump forward to textobj, similar to targets.vim
+                    lookahead = true,
 
-            --         keymaps = {
-            --             -- You can use the capture groups defined in textobjects.scm
-            --             ["af"] = "@function.outer",
-            --             ["if"] = "@function.inner",
-            --             ["ac"] = "@class.outer",
-            --             -- You can optionally set descriptions to the mappings (used in the desc parameter of
-            --             -- nvim_buf_set_keymap) which plugins like which-key display
-            --             ["ic"] = {
-            --                 query = "@class.inner",
-            --                 desc = "Select inner part of a class region",
-            --             },
-            --             -- You can also use captures from other query groups like `locals.scm`
-            --             ["as"] = {
-            --                 query = "@scope",
-            --                 query_group = "locals",
-            --                 desc = "Select language scope",
-            --             },
-            --             ["ab"] = "@block.outer",
-            --         },
-            --     },
-            --     move = {
-            --         enable = true,
-            --         set_jumps = true, -- whether to set jumps in the jumplist
-            --         goto_next_start = {
-            --             ["]m"] = "@function.outer",
-            --             ["]b"] = {
-            --                 query = "@fold",
-            --                 query_group = "folds",
-            --                 desc = "Next fold",
-            --             },
-            --         },
-            --         goto_next_end = {
-            --             ["]M"] = "@function.outer",
-            --         },
-            --         goto_previous_start = {
-            --             ["[m"] = "@function.outer",
-            --             ["[b"] = {
-            --                 query = "@fold",
-            --                 query_group = "folds",
-            --                 desc = "Previous fold",
-            --             },
-            --         },
-            --         goto_previous_end = {
-            --             ["[M"] = "@function.outer",
-            --         },
-            --     },
-            -- },
-            autotag = {
-                enable = true,
+                    include_surrounding_whitespace = false,
+
+                    keymaps = {
+                        -- You can use the capture groups defined in textobjects.scm
+                        ["af"] = "@function.outer",
+                        ["if"] = "@function.inner",
+                        ["ac"] = "@class.outer",
+                        -- You can optionally set descriptions to the mappings (used in the desc parameter of
+                        -- nvim_buf_set_keymap) which plugins like which-key display
+                        ["ic"] = {
+                            query = "@class.inner",
+                            desc = "Select inner part of a class region",
+                        },
+                        -- You can also use captures from other query groups like `locals.scm`
+                        ["as"] = {
+                            query = "@scope",
+                            query_group = "locals",
+                            desc = "Select language scope",
+                        },
+                        ["ab"] = "@block.outer",
+                    },
+                },
+                move = {
+                    enable = true,
+                    set_jumps = true, -- whether to set jumps in the jumplist
+                    goto_next_start = {
+                        ["]m"] = "@function.outer",
+                        ["]b"] = {
+                            query = "@fold",
+                            query_group = "folds",
+                            desc = "Next fold",
+                        },
+                    },
+                    goto_next_end = {
+                        ["]M"] = "@function.outer",
+                    },
+                    goto_previous_start = {
+                        ["[m"] = "@function.outer",
+                        ["[b"] = {
+                            query = "@fold",
+                            query_group = "folds",
+                            desc = "Previous fold",
+                        },
+                    },
+                    goto_previous_end = {
+                        ["[M"] = "@function.outer",
+                    },
+                },
             },
         })
 
