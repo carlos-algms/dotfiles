@@ -2,15 +2,20 @@
 
 ## Todo
 
+-   [ ] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
+-   [ ] Idea: local history plugin: there is one, but it uses python, it should be pure lua
 -   [ ] Check which_key and add descriptions to keys that have `+prefix`
+    -   [ ] It's possible to fix WhichKey prefixes whithout descriptions by setting a keybind with empty right-hand side
 -   [ ] git - list only local branches, it's listing all branches including not mine ones
 -   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
+        Grapple calls it "scopes"
         like: bookmarksPath .. project_path .. "-permanent-list" .. ".json", or bookmarksPath .. project_path .. "-ticket-XX-yyy-" .. ".json"
 -   [x] Add oil.nvim to test if it is better than neo-tree
     -   it is good to use in the current folder, but navigating seems daunting
 -   [x] review and lazy load plugins
 -   [x] Enable some plugins only locally not on SSH connections
 -   [ ] Install multi-line plugin
+        https://github.com/mg979/vim-visual-multi
 -   [ ] Clean up unused plugins
 -   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
 -   [ ] Create my Own Cheat Sheet of commands and remaps
