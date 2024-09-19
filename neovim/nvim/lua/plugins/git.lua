@@ -44,6 +44,11 @@ return {
                 diff_opts = {
                     ignore_whitespace = true,
                     ignore_whitespace_change = true,
+                    ignore_whitespace_change_at_eol = true,
+                    ignore_blank_lines = false,
+                },
+                current_line_blame_opts = {
+                    ignore_whitespace = true,
                 },
                 on_attach = function(bufnr)
                     local function map(mode, l, r, opts)
