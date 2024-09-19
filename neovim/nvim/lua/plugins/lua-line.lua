@@ -21,7 +21,7 @@ return {
                         -- "dapui_watches",
                         -- "dap-repl",
                         -- "dapui_console",
-                        "neo-tree",
+                        -- "neo-tree",
                     },
                 },
             },
