@@ -5,7 +5,10 @@ alias path-show='echo $PATH | tr ":" "\n"'
 # Using which because it might change in Windows
 alias ff='`which -p find` . ! -path "**node_modules/**" ! -path "**.vscode/**" ! -path "**vendor/**" -type f -name '
 
-alias search='ack --context=2 --ignore-dir={.vscode,node_modules,vendor} '
+alias ack='ack --context=2 \
+    --ignore-dir={.vscode,node_modules,vendor,.next,build,dist,coverage,storybook-static,.turbo} \
+    --ignore-file=ext:{tsbuildinfo} \
+    --ignore-file=match:"/test|spec/" '
 
 alias yf="yarn --frozen-lockfile "
 alias yff="yf --force "
@@ -27,4 +30,14 @@ fi
 
 if [ ! -z "$(command -v kitten)" ]; then
     alias s="kitten ssh "
+fi
+
+if [ ! -z "$(command -v bat)" ]; then
+    alias cat="bat "
+fi
+
+if [ ! -z "$(command -v eza)" ]; then
+    alias ls="eza --group-directories-first --color=auto --icons --almost-all --classify --time-style=long-iso "
+    # https://askubuntu.com/a/466203 - colors explanation
+    export EZA_COLORS="da=0;37:ex=0;32:di=0;34"
 fi
