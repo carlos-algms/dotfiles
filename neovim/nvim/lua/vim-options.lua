@@ -32,7 +32,7 @@ opt.smartcase = true
 opt.background = "dark"
 opt.termguicolors = true
 
-opt.colorcolumn = "80"
+-- opt.colorcolumn = "80"
 opt.scrolloff = 8 -- usually I use 10, I'm trying with 8 to have more lines visible
 opt.signcolumn = "yes"
 -- opt.isfname:append("@-@")
