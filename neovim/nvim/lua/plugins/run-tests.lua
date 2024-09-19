@@ -87,6 +87,34 @@ return {
                 end,
                 desc = "Stop",
             },
+            {
+                "]t",
+                function()
+                    require("neotest").jump.next()
+                end,
+                desc = "Next test",
+            },
+            {
+                "[t",
+                function()
+                    require("neotest").jump.prev()
+                end,
+                desc = "Previous test",
+            },
+            {
+                "]T",
+                function()
+                    require("neotest").jump.next({ status = "failed" })
+                end,
+                desc = "Next failed test",
+            },
+            {
+                "[T",
+                function()
+                    require("neotest").jump.prev({ status = "failed" })
+                end,
+                desc = "Previous failed test",
+            },
         },
         config = function()
             local neotest = require("neotest")
