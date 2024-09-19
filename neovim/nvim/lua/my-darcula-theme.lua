@@ -213,6 +213,7 @@ M.theme = {
         ["@punctuation.special.diff"] = "Identifier",
         ["@selector"] = "@function",
         ["@string.regexp"] = "Constant",
+        ["@string.escape"] = "Constant",
         ["@string.regexp.ssh_config"] = "String",
         ["@string.special.path.diff"] = "@identifier",
         ["@string.special.path.gitcommit"] = "@identifier",
