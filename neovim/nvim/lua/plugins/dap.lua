@@ -316,11 +316,14 @@ return {
                         name = "Launch file " .. language,
                         program = "${file}",
                         cwd = "${workspaceFolder}",
-                        runtimeExecutable = "ts-node",
+                        runtimeExecutable = "tsx",
                         -- runtimeArgs = {},
                         sourceMaps = true,
                         protocol = "inspector",
-                        skipFiles = { "<node_internals>/**", "node_modules/**" },
+                        skipFiles = {
+                            "<node_internals>/**",
+                            "node_modules/**",
+                        },
                         resolveSourceMapLocations = {
                             "${workspaceFolder}/**",
                             "!**/node_modules/**",
