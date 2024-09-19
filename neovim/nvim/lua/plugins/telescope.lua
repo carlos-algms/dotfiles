@@ -61,6 +61,7 @@ return {
                 "test%-results",
                 "/vendor/",
                 "y4m",
+                "%.veedio",
             }
 
             -- forcing node_modules to be ignored for normal grep search
