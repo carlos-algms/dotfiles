@@ -42,7 +42,48 @@ return {
             --     -- dapui.close()
             -- end
 
-            dapui.setup()
+            ---@diagnostic disable-next-line: missing-fields
+            dapui.setup({
+                layouts = {
+                    {
+                        elements = {
+                            {
+                                id = "scopes",
+                                size = 0.25,
+                            },
+                            {
+                                id = "breakpoints",
+                                size = 0.25,
+                            },
+                            {
+                                id = "stacks",
+                                size = 0.25,
+                            },
+                            {
+                                id = "watches",
+                                size = 0.25,
+                            },
+                        },
+                        position = "left",
+                        size = 40,
+                    },
+                    {
+                        elements = {
+                            {
+                                id = "repl",
+                                size = 1,
+                            },
+                            -- Disabled, as for JavaScript it doesn't show any messages
+                            -- {
+                            --     id = "console",
+                            --     size = 0.5,
+                            -- },
+                        },
+                        position = "bottom",
+                        size = 10,
+                    },
+                },
+            })
         end,
     },
 
