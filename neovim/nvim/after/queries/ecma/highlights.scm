@@ -15,8 +15,9 @@
 
 
 (member_expression
-   (identifier) @variable.identifier (#set! "priority" 150)
-    )
+  (identifier) @variable.identifier (#set! "priority" 150)
+  (property_identifier) @variable.member (#set! "priority" 150)
+  )
 
 ; I had to increase the priority, as LSP was overriding and setting to @identifier
 (call_expression

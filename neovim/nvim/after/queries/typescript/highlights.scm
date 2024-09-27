@@ -11,6 +11,13 @@
    )
 )
 
+(
+ (nested_type_identifier
+   module: (identifier) @type.module (#set! "priority" 150)
+   name: (type_identifier) @type.member (#set! "priority" 150)
+   )
+ )
+
 (variable_declarator
   name: (identifier) @function.declaration (#set! "priority" 150)
   value: [(function_expression) (arrow_function)]
