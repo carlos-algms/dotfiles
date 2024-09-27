@@ -286,7 +286,7 @@ return {
             },
 
             {
-                "<leader>gb",
+                "<leader>gB",
                 function()
                     require("telescope.builtin").git_branches()
                 end,
@@ -309,7 +309,7 @@ return {
                 desc = "Show [g]it [d]iff for current file",
             },
             {
-                "<leader>gB",
+                "<leader>gb",
                 ":Git blame<CR>",
                 mode = "n",
                 desc = "[G]it [B]lame",
