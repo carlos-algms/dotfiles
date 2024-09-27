@@ -293,6 +293,7 @@ return {
                         capabilities = all_lsp_capabilities,
                         settings = {
                             Lua = {
+                                telemetry = { enable = false },
                                 runtime = {
                                     version = "LuaJIT",
                                 },
