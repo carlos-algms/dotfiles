@@ -3,95 +3,92 @@
 
 return {
     {
-        "rcarriga/nvim-dap-ui",
-
-        enabled = not vim.g.is_ssh,
-
-        dependencies = {
-            "mfussenegger/nvim-dap",
-            "nvim-neotest/nvim-nio",
-            "theHamsta/nvim-dap-virtual-text",
-        },
-        keys = {
-            {
-                "<leader>du",
-                function()
-                    require("dapui").toggle()
-                end,
-                desc = "Toggle [D]ebugger [U]i - Dap UI",
-            },
-        },
-        config = function()
-            local dapui = require("dapui")
-            local dap = require("dap")
-
-            dap.listeners.before.attach.dapui_config = function()
-                dapui.open()
-            end
-
-            dap.listeners.before.launch.dapui_config = function()
-                dapui.open()
-            end
-
-            -- I don't want it to auto-close, as I want to check the output
-            -- dap.listeners.before.event_terminated.dapui_config = function()
-            --     -- dapui.close()
-            -- end
-
-            -- dap.listeners.before.event_exited.dapui_config = function()
-            --     -- dapui.close()
-            -- end
-
-            ---@diagnostic disable-next-line: missing-fields
-            dapui.setup({
-                layouts = {
-                    {
-                        elements = {
-                            {
-                                id = "scopes",
-                                size = 0.25,
-                            },
-                            {
-                                id = "breakpoints",
-                                size = 0.25,
-                            },
-                            {
-                                id = "stacks",
-                                size = 0.25,
-                            },
-                            {
-                                id = "watches",
-                                size = 0.25,
-                            },
-                        },
-                        position = "left",
-                        size = 40,
-                    },
-                    {
-                        elements = {
-                            {
-                                id = "repl",
-                                size = 1,
-                            },
-                            -- Disabled, as for JavaScript it doesn't show any messages
-                            -- {
-                            --     id = "console",
-                            --     size = 0.5,
-                            -- },
-                        },
-                        position = "bottom",
-                        size = 10,
-                    },
-                },
-            })
-        end,
-    },
-
-    {
         "mfussenegger/nvim-dap",
         lazy = true,
         enabled = not vim.g.is_ssh,
         dependencies = {
+            {
+                "rcarriga/nvim-dap-ui",
+                dependencies = {
+                    "nvim-neotest/nvim-nio",
+                },
+                keys = {
+                    {
+                        "<leader>du",
+                        function()
+                            require("dapui").toggle()
+                        end,
+                        desc = "Toggle [D]ebugger [U]i - Dap UI",
+                    },
+                },
+                config = function()
+                    local dapui = require("dapui")
+                    local dap = require("dap")
+
+                    dap.listeners.before.attach.dapui_config = function()
+                        -- dapui.open()
+                        dap.repl.open()
+                    end
+
+                    dap.listeners.before.launch.dapui_config = function()
+                        -- dapui.open()
+                        dap.repl.open()
+                    end
+
+                    -- I don't want it to auto-close, as I want to check the output
+                    -- dap.listeners.before.event_terminated.dapui_config = function()
+                    --     -- dapui.close()
+                    -- end
+
+                    -- dap.listeners.before.event_exited.dapui_config = function()
+                    --     -- dapui.close()
+                    -- end
+
+                    ---@diagnostic disable-next-line: missing-fields
+                    dapui.setup({
+                        layouts = {
+                            {
+                                elements = {
+                                    {
+                                        id = "scopes",
+                                        size = 0.25,
+                                    },
+                                    {
+                                        id = "breakpoints",
+                                        size = 0.25,
+                                    },
+                                    {
+                                        id = "stacks",
+                                        size = 0.25,
+                                    },
+                                    {
+                                        id = "watches",
+                                        size = 0.25,
+                                    },
+                                },
+                                position = "left",
+                                size = 40,
+                            },
+                            {
+                                elements = {
+                                    -- Disabled to use Dap's repl, I usually don't use the sidebar widgets
+                                    -- {
+                                    --     id = "repl",
+                                    --     size = 1,
+                                    -- },
+                                    -- Disabled, as for JavaScript it doesn't show any messages
+                                    -- {
+                                    --     id = "console",
+                                    --     size = 0.5,
+                                    -- },
+                                },
+                                position = "bottom",
+                                size = 10,
+                            },
+                        },
+                    })
+                end,
+            },
             {
                 "nvim-telescope/telescope-dap.nvim",
                 dependencies = {
@@ -120,6 +117,14 @@ return {
             },
         },
         keys = {
+            {
+                "<leader>dc",
+                function()
+                    require("dap").repl.toggle()
+                end,
+                mode = { "n", "v" },
+                desc = "󰟶 [D]ebugger [h]over",
+            },
             {
                 "<leader>dh",
                 function()
