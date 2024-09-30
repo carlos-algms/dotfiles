@@ -8,6 +8,7 @@ return {
         { "hrsh7th/cmp-nvim-lsp" },
         { "WhoIsSethDaniel/mason-tool-installer.nvim" },
         { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
+        { "b0o/schemastore.nvim" },
 
         -- Disabled to keep using typescript-tools.nvim
         -- { "yioneko/nvim-vtsls" },
@@ -285,6 +286,31 @@ return {
 
                     lspConfig[server_name].setup({
                         capabilities = all_lsp_capabilities,
+                    })
+                end,
+
+                jsonls = function()
+                    lspConfig.jsonls.setup({
+                        settings = {
+                            json = {
+                                schemas = require("schemastore").json.schemas(),
+                                validate = { enable = true },
+                            },
+                        },
+                    })
+                end,
+
+                yamlls = function()
+                    lspConfig.yamlls.setup({
+                        settings = {
+                            yaml = {
+                                schemaStore = {
+                                    enable = false,
+                                    url = "",
+                                },
+                                schemas = require("schemastore").yaml.schemas(),
+                            },
+                        },
                     })
                 end,
 
