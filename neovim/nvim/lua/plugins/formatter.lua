@@ -96,7 +96,8 @@ return {
             }) do
                 formatters_by_ft[language] = {
                     stop_after_first = true,
-                    -- Not using it because it can leave zombie processes on failure
+                    -- I tested a second time and it is still leaving zombies processes after closing nvim 2024-09-27
+                    -- https://github.com/fsouza/prettierd/issues/645
                     -- "prettierd",
                     "prettier",
                 }
