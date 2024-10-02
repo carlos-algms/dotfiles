@@ -60,3 +60,10 @@ if command -v oh-my-posh >/dev/null 2>&1; then
   eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
 fi
 
+
+# it doesn't seem to work, vim plugin is overriding it when it loads
+# TODO: send a PR to https://github.com/jeffreytse/zsh-vi-mode to fix these
+# https://github.com/jeffreytse/zsh-vi-mode/blob/cd730cd347dcc0d8ce1697f67714a90f07da26ed/zsh-vi-mode.zsh#L3475
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
+
