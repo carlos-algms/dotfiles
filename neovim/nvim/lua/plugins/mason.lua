@@ -41,6 +41,13 @@ return {
                 [".zshenv"] = "sh",
             },
         })
+
+        vim.keymap.set(
+            { "n" },
+            "<leader>vm",
+            "<CMD>Mason<CR>",
+            { desc = "Open Mason modal" }
+        )
     end,
 
     config = function()
