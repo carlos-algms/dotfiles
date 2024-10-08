@@ -2,10 +2,12 @@
 
 ## Todo
 
+-   [x] hide the dapui_console window
+-   [x] update the `ff` command to ignore more folders, it's too slow now
 -   [ ] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
 -   [ ] Idea: local history plugin: there is one, but it uses python, it should be pure lua
 -   [ ] Check which_key and add descriptions to keys that have `+prefix`
-    -   [ ] It's possible to fix WhichKey prefixes whithout descriptions by setting a keybind with empty right-hand side
+    -   [ ] It's possible to fix WhichKey prefixes without descriptions by setting a keybind with empty right-hand side
 -   [ ] git - list only local branches, it's listing all branches including not mine ones
 -   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
         Grapple calls it "scopes"
