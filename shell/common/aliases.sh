@@ -43,3 +43,9 @@ if [ ! -z "$(command -v eza)" ]; then
     # https://askubuntu.com/a/466203 - colors explanation
     export EZA_COLORS="da=0;37:ex=0;32:di=0;34"
 fi
+
+# Disabled as tab doesn't auto complete fuzzily like original cd does
+# if [ ! -z "$(command -v zoxide)" ]; then
+#     eval "$(zoxide init zsh)"
+#     alias cd="z "
+# fi
