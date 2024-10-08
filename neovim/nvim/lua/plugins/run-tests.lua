@@ -19,12 +19,20 @@ return {
             "antoinemadec/FixCursorHold.nvim",
             "nvim-treesitter/nvim-treesitter",
             "nvim-neotest/neotest-jest",
+            "mfussenegger/nvim-dap",
         },
         keys = {
             {
                 "<leader>Td",
                 function()
-                    require("neotest").run.run({ strategy = "dap" })
+                    require("neotest").run.run({
+                        suite = false,
+                        strategy = "dap",
+                        env = {
+                            NODE_ENV = "test",
+                            DEBUG_PRINT_LIMIT = "1000000",
+                        },
+                    })
                 end,
                 desc = "Debug nearest Test",
             },
