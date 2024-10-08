@@ -127,5 +127,8 @@ return {
                 enable_close_on_slash = true,
             },
         })
+
+        vim.opt.foldmethod = "expr"
+        vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
     end,
 }
