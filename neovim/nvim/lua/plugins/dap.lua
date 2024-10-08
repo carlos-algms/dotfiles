@@ -7,6 +7,7 @@ return {
         lazy = true,
         enabled = not vim.g.is_ssh,
         dependencies = {
+            "nvim-telescope/telescope.nvim", -- added to list breakpoints
             {
                 "rcarriga/nvim-dap-ui",
                 dependencies = {
@@ -18,21 +19,23 @@ return {
                         function()
                             require("dapui").toggle()
                         end,
-                        desc = "Toggle [D]ebugger [U]i - Dap UI",
+                        desc = "Toggle Debugger Ui - Dap UI",
                     },
                 },
                 config = function()
-                    local dapui = require("dapui")
+                    local dapUi = require("dapui")
                     local dap = require("dap")
 
                     dap.listeners.before.attach.dapui_config = function()
+                        -- Leaving disabled as I mostly don't use it
                         -- dapui.open()
-                        dap.repl.open()
+                        -- Dap Repl resizes to 50% every time anything changes, disabling as it is inconvenient, use <leader>dc to open it
+                        -- dap.repl.open()
                     end
 
                     dap.listeners.before.launch.dapui_config = function()
                         -- dapui.open()
-                        dap.repl.open()
+                        -- dap.repl.open()
                     end
 
                     -- I don't want it to auto-close, as I want to check the output
@@ -45,7 +48,7 @@ return {
                     -- end
 
                     ---@diagnostic disable-next-line: missing-fields
-                    dapui.setup({
+                    dapUi.setup({
                         layouts = {
                             {
                                 elements = {
@@ -71,11 +74,10 @@ return {
                             },
                             {
                                 elements = {
-                                    -- Disabled to use Dap's repl, I usually don't use the sidebar widgets
-                                    -- {
-                                    --     id = "repl",
-                                    --     size = 1,
-                                    -- },
+                                    {
+                                        id = "repl",
+                                        size = 1,
+                                    },
                                     -- Disabled, as for JavaScript it doesn't show any messages
                                     -- {
                                     --     id = "console",
@@ -89,22 +91,23 @@ return {
                     })
                 end,
             },
-            {
-                "nvim-telescope/telescope-dap.nvim",
-                dependencies = {
-                    "nvim-telescope/telescope.nvim",
-                },
-                keys = {
-                    {
-                        "<leader>dl",
-                        ":Telescope dap list_breakpoints<CR>",
-                        desc = " List breakpoint",
-                    },
-                },
-                config = function()
-                    require("telescope").load_extension("dap")
-                end,
-            },
+            -- Disabled as attaching to a running process was crashing
+            -- {
+            --     "nvim-telescope/telescope-dap.nvim",
+            --     dependencies = {
+            --         "nvim-telescope/telescope.nvim",
+            --     },
+            --     keys = {
+            --         {
+            --             "<leader>dl",
+            --             ":Telescope dap list_breakpoints<CR>",
+            --             desc = " List breakpoint",
+            --         },
+            --     },
+            --     config = function()
+            --         require("telescope").load_extension("dap")
+            --     end,
+            -- },
             {
                 "LiadOz/nvim-dap-repl-highlights",
                 -- dependencies = { "mfussenegger/nvim-dap" },
@@ -118,12 +121,22 @@ return {
         },
         keys = {
             {
+                "<leader>dl",
+                function()
+                    require("dap").list_breakpoints(false)
+                    require("telescope.builtin").quickfix({
+                        prompt_title = "Dap Breakpoints",
+                    })
+                end,
+                desc = " Debugger list breakpoints",
+            },
+            {
                 "<leader>dc",
                 function()
                     require("dap").repl.toggle()
                 end,
                 mode = { "n", "v" },
-                desc = "󰟶 [D]ebugger [h]over",
+                desc = "󰟶 Debugger show Repl console",
             },
             {
                 "<leader>dh",
@@ -131,7 +144,7 @@ return {
                     require("dap.ui.widgets").hover()
                 end,
                 mode = { "n", "v" },
-                desc = "󰟶 [D]ebugger [h]over",
+                desc = "󰟶 Debugger hover",
             },
 
             {
@@ -140,7 +153,7 @@ return {
                     require("dap.ui.widgets").preview()
                 end,
                 mode = { "n", "v" },
-                desc = " [D]ebugger [p]review",
+                desc = " Debugger preview",
             },
 
             {
@@ -151,7 +164,7 @@ return {
                     )
                 end,
                 mode = { "n", "v" },
-                desc = " [D]ebugger [f]rames",
+                desc = " Debugger frames",
             },
 
             {
@@ -162,14 +175,14 @@ return {
                     )
                 end,
                 mode = { "n", "v" },
-                desc = "󰋃 [D]ebugger [s]copes",
+                desc = "󰋃 Debugger scopes",
             },
 
             {
                 "<leader>db",
                 "<cmd>DapToggleBreakpoint<CR>",
                 mode = "n",
-                desc = " Toggle [D]ebugger [b]reakpoint",
+                desc = " Toggle Debugger breakpoint",
             },
 
             {
@@ -189,7 +202,7 @@ return {
                     end)
                 end,
                 mode = "n",
-                desc = " Toggle [D]ebugger [B]reakpoint condition",
+                desc = " Toggle Debugger Breakpoint condition",
             },
 
             {
@@ -202,14 +215,14 @@ return {
                     end)
                 end,
                 mode = "n",
-                desc = "󰯑 Toggle [D]ebugger [L]og point",
+                desc = "󰯑 Toggle Debugger Log point",
             },
 
             {
                 "<leader>dr",
                 "<cmd> DapContinue <CR>",
                 mode = "n",
-                desc = " [D]ebugger [R]un / Continue",
+                desc = " Debugger Run / Continue",
             },
 
             {
@@ -285,7 +298,7 @@ return {
             vim.api.nvim_set_hl(
                 0,
                 "DapStoppedLine",
-                { default = true, link = "Visual" }
+                { default = true, link = "DiffChange" } -- using DiffChange so Visual select isn’t same color
             )
 
             -- http://www.lazyvim.org/extras/dap/core#nvim-dap
