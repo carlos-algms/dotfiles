@@ -69,7 +69,7 @@ return {
                                         size = 0.25,
                                     },
                                 },
-                                position = "left",
+                                position = "right",
                                 size = 40,
                             },
                             {
@@ -115,9 +115,13 @@ return {
                     require("nvim-dap-repl-highlights").setup()
                 end,
             },
-            {
-                "theHamsta/nvim-dap-virtual-text",
-            },
+            -- Disabled because the virtual text was not being cleared
+            -- {
+            --     "theHamsta/nvim-dap-virtual-text",
+            --     opts = {
+            --       clear_on_continue = true,
+            --     }
+            -- },
         },
         keys = {
             {
@@ -140,6 +144,14 @@ return {
             },
             {
                 "<leader>dh",
+                function()
+                    require("dap.ui.widgets").hover()
+                end,
+                mode = { "n", "v" },
+                desc = "󰟶 Debugger hover",
+            },
+            {
+                "˙", -- ALT + h
                 function()
                     require("dap.ui.widgets").hover()
                 end,
@@ -399,7 +411,8 @@ return {
                     },
 
                     {
-                        type = "pwa-chrome",
+                        -- Not using pwa-chrome as it doesn't work
+                        type = "chrome",
                         name = "Debug in Chrome",
                         request = "launch",
                         -- only the 3 first properties are required and need to be strings
@@ -420,8 +433,38 @@ return {
                                 end)
                             end)
                         end,
-                        -- TODO: find the nearest package.json and use it as cwd, or use current cwd
-                        webRoot = "${workspaceFolder}",
+                        -- mainly to cover monorepos where the root is not the same as the workspace
+                        cwd = function()
+                            local rootDirs = vim.fs.find(function(name, path)
+                                print(name, path)
+                                return vim.fn.filereadable(
+                                    path .. "/" .. name .. "/package.json"
+                                ) == 1
+                            end, {
+                                upward = true,
+                                type = "directory",
+                                stop = vim.env.HOME,
+                                path = vim.fn.expand("%:p:h"),
+                            })
+
+                            if #rootDirs == 0 then
+                                vim.notify(
+                                    "Couldn't find package.json in the current directory or any parent directory",
+                                    vim.log.levels.ERROR
+                                )
+
+                                print(vim.inspect(rootDirs))
+                                return "${workspaceFolder}"
+                            end
+
+                            vim.notify(
+                                "Found package.json at "
+                                    .. rootDirs[1]
+                                    .. " using as cwd for Dap"
+                            )
+
+                            return rootDirs[1]
+                        end,
                         -- sourceMapPathOverrides = {
                         --     ["webpack:///src/*"] = "${webRoot}/*",
                         --     ["/app/src/*"] = "${webRoot}/*",
@@ -457,10 +500,6 @@ return {
             }
 
             -- TODO: add adapter for python
-
-            require("nvim-dap-virtual-text").setup({
-                clear_on_continue = true,
-            })
         end,
     },
 }
