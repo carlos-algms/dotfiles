@@ -9,19 +9,8 @@ return {
             { "hrsh7th/cmp-cmdline" },
             { "hrsh7th/cmp-nvim-lua" },
             { "hrsh7th/cmp-nvim-lsp-signature-help" },
+            "L3MON4D3/LuaSnip",
             { "saadparwaiz1/cmp_luasnip" },
-            -- TODO: import from VSCode and how can I write my own snippets?
-            -- https://github.com/L3MON4D3/LuaSnip/blob/master/DOC.md#vs-code
-            {
-                "L3MON4D3/LuaSnip",
-                -- follow latest release.
-                version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-                -- install jsregexp (optional!:).
-                build = "make install_jsregexp",
-                dependencies = {
-                    -- { "rafamadriz/friendly-snippets" },
-                },
-            },
             {
                 "onsails/lspkind.nvim",
             },
@@ -31,14 +20,6 @@ return {
             local luasnip = require("luasnip")
             local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-            -- this one is for the friendly-snippets, but I'm not using it.
-            -- require("luasnip.loaders.from_vscode").lazy_load()
-
-            -- https://github.com/L3MON4D3/LuaSnip/blob/master/DOC.md#vs-code
-            require("luasnip.loaders.from_vscode").lazy_load({
-                paths = "./snippets",
-            })
 
             cmp.setup({
                 snippet = {
