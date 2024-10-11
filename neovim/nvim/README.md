@@ -2,8 +2,13 @@
 
 ## Todo
 
--   [x] hide the dapui_console window
--   [x] update the `ff` command to ignore more folders, it's too slow now
+-   [ ] Monitor Kulala ls and fmt to see if it is worth to use it
+    -   https://www.reddit.com/r/neovim/comments/1fy979o/kulala_language_server_v1_released/
+-   [ ] Monitor nvrh - vscode like remote access
+-   [ ] Monitor magazine.nvim - nvim-cmp fork - as cmp seems to be slow on development
+    -   https://www.reddit.com/r/neovim/comments/1fxkknj/nvrh_aims_to_be_similar_to_vscode_remote_but_for/
+-   [ ] Try to auto fold JS/TS imports
+    -   https://www.reddit.com/r/neovim/comments/seq0q1/comment/hulbcew/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 -   [ ] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
 -   [ ] Idea: local history plugin: there is one, but it uses python, it should be pure lua
 -   [ ] Check which_key and add descriptions to keys that have `+prefix`
@@ -12,23 +17,29 @@
 -   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
         Grapple calls it "scopes"
         like: bookmarksPath .. project_path .. "-permanent-list" .. ".json", or bookmarksPath .. project_path .. "-ticket-XX-yyy-" .. ".json"
--   [x] Add oil.nvim to test if it is better than neo-tree
-    -   it is good to use in the current folder, but navigating seems daunting
--   [x] review and lazy load plugins
--   [x] Enable some plugins only locally not on SSH connections
 -   [ ] Install multi-line plugin
         https://github.com/mg979/vim-visual-multi
 -   [ ] Clean up unused plugins
 -   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
 -   [ ] Create my Own Cheat Sheet of commands and remaps
+-   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc
+    -   this might need an attach function to the markdown file-type only
+-   [ ] Keep an eye on UFO - to better fold code
+    -   https://github.com/kevinhwang91/nvim-ufo
+-   [x] Enums shows white and blue depending on where they are, TS and TSX
+-   [x] Add oil.nvim to test if it is better than neo-tree
+    -   it is good to use in the current folder, but navigating seems daunting
+-   [x] review and lazy load plugins
+-   [x] Enable some plugins only locally not on SSH connections
 -   [x] Add my most used snippets from VSCode, like `cl` for console.log
 -   [x] Try to use cspell with a plugin instead of native nvim spell
 -   [x] `this` in TS is not highlighted as a keyword, how PHP is handling it using treesitter?
 -   [x] Setup debugger for Chrome
 -   [x] Setup debugger for node-terminal
--   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc
-    -   this might need an attach function to the markdown file-type only
--   [ ] Enums shows white and blue depending on where they are, TS and TSX
+-   [x] hide the dapui_console window
+-   [x] update the `ff` command to ignore more folders, it's too slow now
+-   [x] Add custom code to preview images in Telescope
+    -   https://github.com/3rd/image.nvim/issues/183#issuecomment-2284979815
 -   [x] Check nesting config for Neo Tree
 -   [x] setup lua formatter with sane defaults to projects without a RC file
     -   apparently the CLI doesn't accept format arguments
