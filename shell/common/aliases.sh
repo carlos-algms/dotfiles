@@ -7,6 +7,8 @@ alias ff='`which -p find` . ! -path "**node_modules/**" ! -path "**.vscode/**" !
 # consider using `fd -t d -H` instead
 alias fdir='find . \( -path "**/node_modules" -o -path "**/.git" \) -prune -o -type d -print'
 
+alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
+
 alias ack='ack --context=2 \
     --ignore-dir={.vscode,node_modules,vendor,.next,build,dist,coverage,storybook-static,.turbo} \
     --ignore-file=ext:{tsbuildinfo} \
