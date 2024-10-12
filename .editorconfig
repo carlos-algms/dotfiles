@@ -17,5 +17,5 @@ end_of_line = crlf
 [nodejs/bin/*]
 indent_size = 2
 
-[*.{yaml,yml}]
+[*.{yaml,yml,lua}]
 indent_size = 2
