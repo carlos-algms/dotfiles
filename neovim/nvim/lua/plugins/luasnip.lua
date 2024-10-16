@@ -16,26 +16,26 @@ return {
             -- borrowed from
             -- https://github.com/garcia5/dotfiles/blob/92621b3fc552744253f90c285caa5ba0790c6bb8/files/nvim/lua/ag/plugins/luasnip.lua
             ls.setup({
-                keep_roots = false,
-                link_roots = false,
-                link_children = false,
+                -- keep_roots = false,
+                -- link_roots = false,
+                -- link_children = false,
                 -- Update snippet text in _real time_
                 updateevents = { "TextChanged", "TextChangedI" },
                 enable_autosnippets = true,
                 delete_check_events = { "InsertLeave" },
                 -- Show virtual text hints for node types
-                ext_opts = {
-                    [types.insertNode] = {
-                        active = {
-                            virt_text = { { "●", "Operator" } },
-                        },
-                    },
-                    [types.choiceNode] = {
-                        active = {
-                            virt_text = { { "●", "Constant" } },
-                        },
-                    },
-                },
+                -- ext_opts = {
+                --     [types.insertNode] = {
+                --         active = {
+                --             virt_text = { { "●", "Operator" } },
+                --         },
+                --     },
+                --     [types.choiceNode] = {
+                --         active = {
+                --             virt_text = { { "●", "Constant" } },
+                --         },
+                --     },
+                -- },
             })
 
             -- this one is for the friendly-snippets, but I'm not using it.
