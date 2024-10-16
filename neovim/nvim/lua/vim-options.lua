@@ -24,10 +24,12 @@ opt.swapfile = false
 opt.backup = false
 opt.backupdir = vim.fn.stdpath("state") .. "/backup"
 
-opt.hlsearch = false
+opt.hlsearch = true
 opt.incsearch = true
 opt.ignorecase = true
 opt.smartcase = true
+-- Shows the preview of a command in a split window
+-- opt.inccommand = "split"
 
 opt.background = "dark"
 opt.termguicolors = true

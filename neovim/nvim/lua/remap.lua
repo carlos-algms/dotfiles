@@ -215,3 +215,13 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
 
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+vim.keymap.set("n", "<Esc>", function()
+    ---@diagnostic disable-next-line: undefined-field
+    if vim.opt.hlsearch then
+        vim.cmd.nohl()
+        return ""
+    else
+        return vim.keycode("<Esc>")
+    end
+end, { desc = "Clear search highlights or normal <Esc>", expr = true })
