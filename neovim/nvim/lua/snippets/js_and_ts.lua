@@ -29,6 +29,14 @@ end
 
 return {
     s(
+        { trig = "//f", snippetType = "autosnippet" },
+        fmt([[// FIXIT: {comment}]], {
+            comment = isn(0, {
+                i(1),
+            }, "$PARENT_INDENT *"),
+        })
+    ),
+    s(
         { trig = "/**", snippetType = "autosnippet" },
         fmt(
             [[
