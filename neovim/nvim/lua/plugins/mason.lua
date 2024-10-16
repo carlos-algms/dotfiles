@@ -40,6 +40,9 @@ return {
                 [".zprofile"] = "sh",
                 [".zshenv"] = "sh",
             },
+            pattern = {
+                ["%.vscode/.*%.json"] = "jsonc",
+            },
         })
 
         vim.keymap.set(
