@@ -15,6 +15,9 @@ return {
                 "onsails/lspkind.nvim",
             },
         },
+        init = function()
+            vim.opt.completeopt = "menu,menuone,noinsert,preview"
+        end,
         config = function()
             local cmp = require("cmp")
             local luasnip = require("luasnip")
@@ -22,14 +25,15 @@ return {
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
             cmp.setup({
+                preselect = cmp.PreselectMode.Item,
+                completion = {
+                    completeopt = "menu,menuone,fuzzy,noinsert,preview",
+                },
                 snippet = {
                     expand = function(args)
                         luasnip.lsp_expand(args.body)
                     end,
                 },
-                -- completion = {
-                --     completeopt = "menu,menuone,noinsert",
-                -- },
                 sources = cmp.config.sources({
                     -- { name = "nvim_lsp_signature_help" },
                     { name = "nvim_lsp" },
@@ -140,6 +144,9 @@ return {
             })
 
             cmp.setup.cmdline({ "/", "?" }, {
+                completion = {
+                    completeopt = "menu,menuone,noselect,preview,fuzzy",
+                },
                 mapping = cmp.mapping.preset.cmdline(),
                 sources = {
                     { name = "buffer" },
@@ -148,11 +155,16 @@ return {
 
             cmp.setup.cmdline(":", {
                 mapping = cmp.mapping.preset.cmdline(),
+                completion = {
+                    completeopt = "menu,menuone,noselect,preview,fuzzy",
+                },
                 sources = cmp.config.sources({
                     { name = "path" },
                 }, {
                     { name = "cmdline" },
                 }),
+                ---@diagnostic disable-next-line: missing-fields
+                matching = { disallow_symbol_nonprefix_matching = false },
             })
         end,
     },
