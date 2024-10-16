@@ -16,11 +16,21 @@ return {
             packageInfo.setup({
                 autostart = false,
             })
+        end,
 
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNew", "BufNewFile" }, {
+        init = function()
+            vim.api.nvim_create_autocmd({ "BufNew" }, {
                 desc = "Set package.json keybindings",
                 pattern = { "package.json" },
+
+                --- @param ev AutoCmdCallbackEvent
                 callback = function(ev)
+                    local packageInfo = require("package-info")
+
+                    vim.notify(
+                        "Setting package.json keybindings: " .. ev.event,
+                        "info"
+                    )
                     -- Show dependency versions
                     vim.keymap.set({ "n" }, "<leader>ns", packageInfo.show, {
                         silent = true,
