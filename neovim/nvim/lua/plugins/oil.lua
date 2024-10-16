@@ -22,6 +22,12 @@ return {
     ---@type oil.SetupOpts
     opts = {
         default_file_explorer = true,
+        columns = {
+            "icon",
+            -- "permissions",
+            -- "size",
+            -- "mtime",
+        },
         -- https://github.com/stevearc/oil.nvim?tab=readme-ov-file#options
         view_options = {
             show_hidden = true,
