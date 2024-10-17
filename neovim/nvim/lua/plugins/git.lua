@@ -42,6 +42,10 @@ return {
 
             gitsigns.setup({
                 diff_opts = {
+                    -- https://github.com/lewis6991/gitsigns.nvim/blob/main/doc/gitsigns.txt
+                    internal = true,
+                    -- algorithm = "minimal",
+                    -- indent_heuristic = true,
                     ignore_whitespace = true,
                     ignore_whitespace_change = true,
                     ignore_whitespace_change_at_eol = true,
