@@ -2,6 +2,11 @@
 
 ## Todo
 
+-   [ ] Lua line git branch - show current cwd instead of current file
+    -   this is causing branch to not be visible when editing special files
+-   [ ] Check it worth using img-clip.nvim: copy/paste/drag images
+    -   https://github.com/HakonHarnes/img-clip.nvim
+    -   It was added as Dep from Avante, monitor if I use it
 -   [ ] Monitor Kulala ls and fmt to see if it is worth to use it
     -   https://www.reddit.com/r/neovim/comments/1fy979o/kulala_language_server_v1_released/
 -   [ ] Monitor nvrh - vscode like remote access
@@ -9,7 +14,6 @@
     -   https://www.reddit.com/r/neovim/comments/1fxkknj/nvrh_aims_to_be_similar_to_vscode_remote_but_for/
 -   [ ] Try to auto fold JS/TS imports
     -   https://www.reddit.com/r/neovim/comments/seq0q1/comment/hulbcew/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
--   [ ] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
 -   [ ] Idea: local history plugin: there is one, but it uses python, it should be pure lua
 -   [ ] Check which_key and add descriptions to keys that have `+prefix`
     -   [ ] It's possible to fix WhichKey prefixes without descriptions by setting a keybind with empty right-hand side
@@ -26,6 +30,7 @@
     -   this might need an attach function to the markdown file-type only
 -   [ ] Keep an eye on UFO - to better fold code
     -   https://github.com/kevinhwang91/nvim-ufo
+-   [x] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
 -   [x] Enums shows white and blue depending on where they are, TS and TSX
 -   [x] Add oil.nvim to test if it is better than neo-tree
     -   it is good to use in the current folder, but navigating seems daunting
