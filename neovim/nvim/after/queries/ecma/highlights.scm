@@ -16,6 +16,8 @@
 
 (member_expression
   (identifier) @variable.identifier (#set! "priority" 150)
+  ; If reenable this, add a reason, it broke the jsx syntax <Parent.Tag />
+  ; I'll need to re-enable it, it breaks simple property access like `this.foo`
   (property_identifier) @variable.member (#set! "priority" 150)
   )
 

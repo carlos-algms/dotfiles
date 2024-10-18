@@ -7,6 +7,7 @@
 (jsx_opening_element
   name: (member_expression
           object: (identifier) @tag.opening (#set! "priority" 160)
+          ; property: (property_identifier) @tag (#set! "priority" 160)
           )
   )
 

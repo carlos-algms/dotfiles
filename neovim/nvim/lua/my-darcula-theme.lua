@@ -231,6 +231,7 @@ M.theme = {
         ["@type.literal"] = "@type",
         ["@type.literal.string"] = "@string",
         ["@type.qualifier.php"] = "@keyword",
+        ["@type.typescript"] = "@none", -- Same as Constants, the color switches after lsp kicks in
         ["@unit"] = "@keyword",
         ["@variable"] = "@identifier",
         ["@variable.builtin"] = "Identifier",
