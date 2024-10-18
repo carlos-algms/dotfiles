@@ -5,6 +5,8 @@ alias path-show='echo $PATH | tr ":" "\n"'
 # Using which because it might change in Windows
 alias ff='`which -p find` . ! -path "**node_modules/**" ! -path "**.vscode/**" ! -path "**vendor/**" -type f -name '
 # consider using `fd -t d -H` instead
+# it also respects .gitignore and seems to be faster
+# I must add some sane excludes in case the cwd isn't a git repo and it cant find a ignore file
 alias fdir='find . \( -path "**/node_modules" -o -path "**/.git" \) -prune -o -type d -print'
 
 alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
@@ -30,7 +32,6 @@ elif [ ! -z "$(command -v vim)" ]; then
 elif [ ! -z "$(command -v vi)" ]; then
     alias v="vi "
 fi
-
 
 if [ ! -z "$(command -v kitten)" ]; then
     alias s="kitten ssh "
