@@ -11,9 +11,8 @@ return {
             -- { "hrsh7th/cmp-nvim-lsp-signature-help" }, -- disabled it as it was disrupting the flow
             { "L3MON4D3/LuaSnip" },
             { "saadparwaiz1/cmp_luasnip" },
-            {
-                "onsails/lspkind.nvim",
-            },
+            { "onsails/lspkind.nvim" },
+            { "zbirenbaum/copilot.lua" },
         },
         init = function()
             vim.opt.completeopt = "menu,menuone,noinsert,preview"
@@ -23,6 +22,7 @@ return {
             local luasnip = require("luasnip")
             local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
+            local copilotSuggestions = require("copilot.suggestion")
 
             cmp.setup({
                 preselect = cmp.PreselectMode.Item,
@@ -36,6 +36,7 @@ return {
                 },
                 sources = cmp.config.sources({
                     -- { name = "nvim_lsp_signature_help" },
+                    -- { name = "copilot" },
                     {
                         name = "luasnip",
                         -- keyword_length = 2,
@@ -112,18 +113,20 @@ return {
                     end, { "i", "s" }),
 
                     ["<Tab>"] = cmp.mapping(function(fallback)
-                        local copilot_keys = vim.fn["copilot#Accept"]()
+                        -- local copilot_keys = vim.fn["copilot#Accept"]()
 
                         -- VScode prioritizes auto-completion first, then Copilot
                         if cmp.visible() then
                             cmp.confirm({
                                 select = true,
                             })
-                        elseif
-                            copilot_keys ~= ""
-                            and type(copilot_keys) == "string"
-                        then
-                            vim.api.nvim_feedkeys(copilot_keys, "i", true)
+                        elseif copilotSuggestions.is_visible() then
+                            copilotSuggestions.accept()
+                            -- elseif
+                            --     copilot_keys ~= ""
+                            --     and type(copilot_keys) == "string"
+                            -- then
+                            -- vim.api.nvim_feedkeys(copilot_keys, "i", true)
                         elseif luasnip.expandable() then
                             luasnip.expand()
                         elseif luasnip.locally_jumpable(1) then
