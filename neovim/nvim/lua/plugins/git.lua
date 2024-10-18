@@ -40,6 +40,26 @@ return {
         config = function()
             local gitsigns = require("gitsigns")
 
+            vim.keymap.set("n", ")", function()
+                if vim.opt.diff:get() then
+                    vim.cmd([[normal! ]c]])
+                else
+                    vim.cmd("normal! )")
+                end
+            end, {
+                desc = "next change hunk",
+            })
+
+            vim.keymap.set("n", "(", function()
+                if vim.opt.diff:get() then
+                    vim.cmd([[normal! [c]])
+                else
+                    vim.cmd("normal! (")
+                end
+            end, {
+                desc = "prev change hunk",
+            })
+
             gitsigns.setup({
                 diff_opts = {
                     -- https://github.com/lewis6991/gitsigns.nvim/blob/main/doc/gitsigns.txt
