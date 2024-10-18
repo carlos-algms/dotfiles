@@ -220,8 +220,7 @@ vim.keymap.set("n", "<Esc>", function()
     ---@diagnostic disable-next-line: undefined-field
     if vim.opt.hlsearch then
         vim.cmd.nohl()
-        return ""
     else
-        return vim.keycode("<Esc>")
+        vim.cmd("normal! <Esc>")
     end
-end, { desc = "Clear search highlights or normal <Esc>", expr = true })
+end, { desc = "Clear search highlights or normal <Esc>" })
