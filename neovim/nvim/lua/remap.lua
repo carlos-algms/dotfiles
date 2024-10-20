@@ -28,10 +28,15 @@ vim.keymap.set(
 vim.keymap.set(
     "v",
     "J",
-    ":m '>+1<CR>gv=gv",
+    "<CMD>m '>+1<CR>gv=gv",
     { desc = "Move selected line down" }
 )
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected line up" })
+vim.keymap.set(
+    "v",
+    "K",
+    "<CMD>m '<-2<CR>gv=gv",
+    { desc = "Move selected line up" }
+)
 
 -- Keeps the cursor on the center of the screen when running Ctrl + D or U
 vim.keymap.set(
@@ -129,14 +134,14 @@ vim.keymap.set(
 vim.keymap.set(
     { "n" },
     "]q",
-    ":cnext<CR>",
+    "<CMD>cnext<CR>",
     { desc = "Next item in the fix list" }
 )
 
 vim.keymap.set(
     { "n" },
     "[q",
-    ":cprev<CR>",
+    "<CMD>cprev<CR>",
     { desc = "Previous item in the fix list" }
 )
 
@@ -152,19 +157,6 @@ vim.keymap.set({ "i" }, "<C-k>", "<C-o>O", { desc = "Insert a new line above" })
 -- better indenting
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
-
--- Disabled to test autopairs plugin
--- -- adding vanilla auto-close for quotes and brackets
--- vim.keymap.set("i", "'", "''<Left>", { desc = "auto close single quotes" })
--- vim.keymap.set("i", '"', '""<Left>', { desc = "auto close double quotes" })
--- vim.keymap.set("i", "[", "[]<Left>", { desc = "auto close square brackets" })
--- vim.keymap.set("i", "{", "{}<Left>", { desc = "auto close curly brackets" })
--- vim.keymap.set(
---     "i",
---     "{<CR>",
---     "{<CR>}<ESC>O",
---     { desc = "auto close curly brackets new line" }
--- )
 
 vim.keymap.set(
     { "n", "i" },
@@ -217,7 +209,6 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
 vim.keymap.set("n", "<Esc>", function()
-    ---@diagnostic disable-next-line: undefined-field
     if vim.opt.hlsearch then
         vim.cmd.nohl()
     else
