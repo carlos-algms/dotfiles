@@ -25,7 +25,6 @@ vim.opt.rtp:prepend(lazypath)
 require("00_version_and_env")
 require("helpers")
 require("vim-options")
-require("my-darcula-theme")
 require("remap")
 require("commands")
 require("autocmds")
@@ -41,4 +40,6 @@ require("lazy").setup("plugins", {
     change_detection = {
         notify = false,
     },
+    -- colorscheme that will be used when installing plugins.
+    install = { colorscheme = { "darcluar" } },
 })

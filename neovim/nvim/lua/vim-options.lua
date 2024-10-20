@@ -1,5 +1,10 @@
 local opt = vim.opt
 
+local ok, _ = pcall(vim.cmd, "colorscheme darcluar")
+if not ok then
+    vim.cmd("colorscheme default") -- if the above fails, then use default
+end
+
 opt.title = true
 opt.titlelen = 0 -- do not shorten title
 opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
