@@ -1,7 +1,17 @@
 return {
     "norcalli/nvim-colorizer.lua",
     enabled = true,
-    event = "VeryLazy",
+
+    ft = {
+        "css",
+        "scss",
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "html",
+    },
+
     config = function()
         require("colorizer").setup({
             "css",
