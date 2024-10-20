@@ -56,7 +56,7 @@ return {
                 "playwright%-report",
                 "/storybook%-static",
                 "test%-results",
-                "/vendor/",
+                -- "/vendor/", -- disabled as it was Blocking PHP lsp
                 "y4m",
                 "%.veedio",
             }
@@ -75,6 +75,7 @@ return {
             )
             table.insert(fileIgnorePatternsWithNodeModules, "pnpm%-lock.yaml")
             table.insert(fileIgnorePatternsWithNodeModules, "yarn%.lock")
+            table.insert(fileIgnorePatternsWithNodeModules, "/vendor/")
 
             local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
                 actions.send_to_qflist(prompt_bufnr)
