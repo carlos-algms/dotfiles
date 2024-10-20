@@ -29,3 +29,19 @@
 
 ((variable_name) @constant.builtin
   (#lua-match? @constant.builtin "^\[$]__[A-Z][A-Z%d_]+__$"))
+
+; things like Route::get() `Route` as flagged as @type
+(scoped_call_expression
+  scope: (name) @variable
+  )
+
+; things like Module::$variable `Module` as flagged as @type
+(scoped_property_access_expression
+  scope: (name) @variable
+  )
+
+; The legacy `var` modifier wasn't highlighted as a keyword
+(property_declaration
+  (var_modifier) @keyword.modifier
+  (#eq? @keyword.modifier "var")
+  )
