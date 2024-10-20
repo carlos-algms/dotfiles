@@ -15,7 +15,7 @@ return {
         "3rd/image.nvim",
         enabled = not vim.g.is_ssh,
         dependencies = {
-            "luarocks.nvim",
+            "vhyrro/luarocks.nvim",
         },
         opts = {},
     },
@@ -48,6 +48,7 @@ return {
                 silent = true,
             },
         },
+
         opts = {
             popup_border_style = "rounded",
             sources = {
@@ -65,9 +66,15 @@ return {
 
             filesystem = {
                 filtered_items = {
-                    visible = true, -- when true, they will just be displayed differently than normal items
+                    visible = false, -- when true, they will just be displayed differently than normal items
                     hide_dotfiles = false,
-                    hide_gitignored = false,
+                    hide_gitignored = true,
+                },
+                group_empty_dirs = true,
+                window = {
+                    mappings = {
+                        ["F"] = "fuzzy_finder",
+                    },
                 },
             },
 
@@ -82,6 +89,7 @@ return {
                 --     end,
                 -- },
             },
+
             window = {
                 position = "left",
                 width = 40,
@@ -89,6 +97,7 @@ return {
                     noremap = true,
                     nowait = true,
                 },
+                -- default mappings for all sources
                 mappings = {
                     ["a"] = {
                         "add",
@@ -110,8 +119,10 @@ return {
                             show_path = "relative",
                         },
                     },
+                    ["/"] = false, -- "fuzzy_finder",
                 },
             },
+
             nesting_rules = {
                 ["package.json"] = {
                     pattern = "^package%.json$", -- <-- Lua pattern
@@ -153,9 +164,5 @@ return {
                 },
             },
         },
-
-        config = function(_, opts)
-            require("neo-tree").setup(opts)
-        end,
     },
 }
