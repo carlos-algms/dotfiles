@@ -63,7 +63,7 @@ return {
         keys = {
             {
                 "<leader>bf",
-                ":FormatCurrentBuffer<CR>",
+                "<CMD>FormatCurrentBuffer<CR>",
                 mode = { "n", "v" },
                 desc = "Format Current Buffer",
             },
@@ -71,7 +71,7 @@ return {
         opts = {
             formatters_by_ft = {
                 lua = { stop_after_first = true, "stylua" },
-                python = { stop_after_first = true, "black" },
+                -- python = { stop_after_first = true, "black" },
             },
             -- log_level = vim.log.levels.DEBUG,
         },
