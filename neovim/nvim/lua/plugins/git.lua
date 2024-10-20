@@ -42,22 +42,22 @@ return {
 
             vim.keymap.set("n", ")", function()
                 if vim.opt.diff:get() then
-                    vim.cmd([[normal! ]c]])
-                else
-                    vim.cmd("normal! )")
+                    return "]c"
                 end
+                return ")"
             end, {
                 desc = "next change hunk",
+                expr = true,
             })
 
             vim.keymap.set("n", "(", function()
                 if vim.opt.diff:get() then
-                    vim.cmd([[normal! [c]])
-                else
-                    vim.cmd("normal! (")
+                    return "[c"
                 end
+                return "("
             end, {
                 desc = "prev change hunk",
+                expr = true,
             })
 
             gitsigns.setup({
@@ -71,6 +71,7 @@ return {
                     ignore_whitespace_change_at_eol = true,
                     ignore_blank_lines = false,
                 },
+                current_line_blame = false, -- I don't think he virtual text is useful
                 current_line_blame_opts = {
                     ignore_whitespace = true,
                 },
