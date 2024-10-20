@@ -4,10 +4,8 @@ return {
         branch = "canary",
         lazy = true,
         dependencies = {
-            -- { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-            {
-                "github/copilot.vim",
-            },
+            { "zbirenbaum/copilot.lua" },
+            -- { "github/copilot.vim" },
             { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
         },
         keys = {
