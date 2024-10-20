@@ -25,7 +25,7 @@ return {
         end,
         opts = {
             expose_as_code_action = "all",
-            complete_function_calls = { "all" },
+            complete_function_calls = true,
             jsx_close_tag = {
                 enable = true,
                 filetypes = { "javascriptreact", "typescriptreact" },
@@ -85,7 +85,7 @@ return {
         opts = {
             auto_open_qflist = true,
             auto_close_qflist = true,
-            auto_focus_qflist = true,
+            auto_focus_qflist = false,
             use_trouble_qflist = true,
         },
     },
