@@ -39,6 +39,7 @@ return {
                 [".zshrc"] = "sh",
                 [".zprofile"] = "sh",
                 [".zshenv"] = "sh",
+                ["composer.lock"] = "json",
             },
             pattern = {
                 ["%.vscode/.*%.json"] = "jsonc",
@@ -262,6 +263,7 @@ return {
                     -- "ts_ls",
                     "html",
                     "cssls",
+                    -- "phpactor",
                     "intelephense",
                 })
             end
@@ -284,12 +286,17 @@ return {
                 vim.lsp.protocol.make_client_capabilities()
             )
 
+        local disabledLspServers = {
+            "ts_ls",
+            "tsserver",
+        }
+
         masonLspConfig.setup({
             ensure_installed = ensureLspInstalled,
             handlers = {
                 function(server_name)
                     -- just make sure they are disabled, as I'm using typescript-tools.nvim
-                    if server_name == "ts_ls" or server_name == "tsserver" then
+                    if vim.tbl_contains(disabledLspServers, server_name) then
                         return false
                     end
 
@@ -339,6 +346,38 @@ return {
                                     library = {
                                         vim.env.VIMRUNTIME,
                                     },
+                                },
+                            },
+                        },
+                    })
+                end,
+
+                phpactor = function()
+                    return false
+                    -- lspConfig.phpactor.setup({
+                    --     capabilities = all_lsp_capabilities,
+                    --     init_options = {
+                    --         ["language_server_phpstan.enabled"] = false,
+                    --         ["language_server_psalm.enabled"] = false,
+                    --     },
+                    -- })
+                end,
+
+                intelephense = function()
+                    lspConfig.intelephense.setup({
+                        capabilities = all_lsp_capabilities,
+                        settings = {
+                            intelephense = {
+                                -- https://github.com/bmewburn/intelephense-docs/blob/master/installation.md
+                                telemetry = {
+                                    enabled = false,
+                                },
+                                files = {
+                                    maxSize = 1000000,
+                                },
+                                format = {
+                                    enable = true,
+                                    braces = "K&R", -- 1TBS
                                 },
                             },
                         },
