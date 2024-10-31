@@ -45,16 +45,22 @@ return {
                 desc = "Run File",
             },
             {
-                "<leader>TT",
+                "<leader>TT", -- this might need to find the root of the project
                 function()
-                    require("neotest").run.run(vim.loop.cwd())
+                    require("neotest").run.run(vim.fn.getcwd())
                 end,
                 desc = "Run All Test Files",
             },
             {
                 "<leader>Tn",
                 function()
-                    require("neotest").run.run()
+                    require("neotest").run.run({
+                        suite = false,
+                        env = {
+                            NODE_ENV = "test",
+                            DEBUG_PRINT_LIMIT = "1000000",
+                        },
+                    })
                 end,
                 desc = "Run Nearest",
             },
