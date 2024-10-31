@@ -60,5 +60,21 @@ return {
         },
     },
 
-    opts = {},
+    opts = {
+        auto_refresh = false,
+        -- The LSP base mode for:
+        -- * lsp_definitions, lsp_references, lsp_implementations
+        -- * lsp_type_definitions, lsp_declarations, lsp_command
+        lsp_base = {
+            params = {
+                -- I want to include current to fully circle around the results
+                include_current = true,
+            },
+        },
+        -- modes = {
+        --     lsp_incoming_calls = {
+        --         auto_refresh = false,
+        --     },
+        -- },
+    },
 }
