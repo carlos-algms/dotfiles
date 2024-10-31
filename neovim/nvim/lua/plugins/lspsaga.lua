@@ -94,7 +94,8 @@ return {
 
         vim.keymap.set(
             { "n" },
-            "<leader>pd",
+            -- "<leader>pd",
+            "gp",
             ":Lspsaga peek_definition<CR>",
             { desc = "LSP Peek Definition", silent = true }
         )
