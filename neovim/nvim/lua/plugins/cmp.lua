@@ -27,7 +27,8 @@ return {
             cmp.setup({
                 preselect = cmp.PreselectMode.Item,
                 completion = {
-                    completeopt = "menu,menuone,fuzzy,noinsert,preview",
+                    -- I left noselect here otherwise Enter would select the first item
+                    completeopt = "menu,menuone,noselect,fuzzy,noinsert,preview",
                 },
                 snippet = {
                     expand = function(args)
@@ -37,12 +38,12 @@ return {
                 sources = cmp.config.sources({
                     -- { name = "nvim_lsp_signature_help" },
                     -- { name = "copilot" },
+                    { name = "nvim_lsp" },
                     {
                         name = "luasnip",
                         -- keyword_length = 2,
                         -- max_item_count = 5,
                     },
-                    { name = "nvim_lsp" },
                     -- {
                     --     name = "nvim_lua",
                     --     keyword_length = 2,
@@ -50,6 +51,7 @@ return {
                     -- },
                 }, {
                     { name = "path", keyword_length = 2, max_item_count = 5 },
+                }, {
                     { name = "buffer", keyword_length = 2, max_item_count = 5 },
                 }),
 
@@ -146,15 +148,16 @@ return {
                 }),
             })
 
-            cmp.setup.cmdline({ "/", "?" }, {
-                completion = {
-                    completeopt = "menu,menuone,noselect,preview,fuzzy",
-                },
-                mapping = cmp.mapping.preset.cmdline(),
-                sources = {
-                    { name = "buffer" },
-                },
-            })
+            -- Disabled as the popup while running a search was annoying
+            -- cmp.setup.cmdline({ "/", "?" }, {
+            --     completion = {
+            --         completeopt = "menu,menuone,noselect,preview,fuzzy",
+            --     },
+            --     mapping = cmp.mapping.preset.cmdline(),
+            --     sources = {
+            --         { name = "buffer" },
+            --     },
+            -- })
 
             cmp.setup.cmdline(":", {
                 mapping = cmp.mapping.preset.cmdline(),
