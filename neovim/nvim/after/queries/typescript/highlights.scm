@@ -1,6 +1,6 @@
 ;; extends
 
-;; fix true, false, null, and undefined when used as types
+; fix true, false, null, and undefined when used as types
 (
  (literal_type) @type.literal (#set! "priority" 140)
  )
@@ -10,6 +10,15 @@
    (string) @type.literal.string (#set! "priority" 150)
    )
 )
+
+; Fix types when there's no LSP
+(type_identifier) @type.identifier
+
+; Fix for `typeof XXXXX`
+(type_query
+  (identifier) @type.identifier (#set! "priority" 150)
+  )
+
 
 (
  (nested_type_identifier
@@ -118,6 +127,12 @@
                        function: (identifier) @_name (#match? @_name "styled")
                        )
            )
+  )
+
+; Fix for styled.div : div wasn't a function
+(member_expression
+  object: (identifier) @_name (#match? @_name "styled")
+  property: (property_identifier) @function (#set! "priority" 150)
   )
 
 
