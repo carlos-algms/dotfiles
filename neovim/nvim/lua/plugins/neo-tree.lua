@@ -3,24 +3,6 @@
 
 return {
     {
-        "vhyrro/luarocks.nvim",
-        priority = 1001, -- this plugin needs to run before anything else
-        enabled = not vim.g.is_ssh,
-        opts = {
-            rocks = { "magick" },
-        },
-    },
-
-    {
-        "3rd/image.nvim",
-        enabled = not vim.g.is_ssh,
-        dependencies = {
-            "vhyrro/luarocks.nvim",
-        },
-        opts = {},
-    },
-
-    {
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         enabled = true,
