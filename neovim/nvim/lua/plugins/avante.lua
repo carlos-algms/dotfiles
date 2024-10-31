@@ -89,6 +89,7 @@ return {
             -- add any opts here
             provider = "copilot",
             auto_suggestions_provider = "copilot",
+            hints = { enabled = false }, -- it sometimes stuck and never goes away
             windows = {
                 ---@type AvantePosition
                 position = "right",
