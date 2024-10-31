@@ -34,14 +34,20 @@ return {
                     auto_trigger = true,
                     keymap = {
                         accept = "<C-l>",
-                        accept_word = false,
-                        accept_line = "<C-.>",
+                        accept_word = "<C-.>",
+                        accept_line = false,
                         next = "˚", -- <Alt-k>
                         prev = "∆", -- <Alt-j>
                         dismiss = "˙", -- <Alt-h>
                     },
                 },
                 panel = { enabled = true },
+                filetypes = {
+                    yaml = true,
+                    markdown = true,
+                    gitcommit = true,
+                    gitrebase = true,
+                },
             })
         end,
     },
