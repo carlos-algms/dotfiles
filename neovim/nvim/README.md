@@ -2,8 +2,8 @@
 
 ## Todo
 
--   [ ] Lua line git branch - show current cwd instead of current file
-    -   this is causing branch to not be visible when editing special files
+-   [ ] make files under `node_modules` read-only
+-   [ ] Make `]d` and `[d` ignore typos, aka `info`
 -   [ ] Check it worth using img-clip.nvim: copy/paste/drag images
     -   https://github.com/HakonHarnes/img-clip.nvim
     -   It was added as Dep from Avante, monitor if I use it
@@ -24,11 +24,16 @@
 -   [ ] Install multi-line plugin
         https://github.com/mg979/vim-visual-multi
 -   [ ] Clean up unused plugins
--   [ ] Add emmet plugin (maybe not, I just need wrap and unwrap)
+-   [x] Add emmet plugin (maybe not, I just need wrap and unwrap)
+    -   I ended up using https://github.com/olrtg/emmet-language-server
+    -   Its a single package and gives full emmet support via LSP and display via CMP
 -   [ ] Create my Own Cheat Sheet of commands and remaps
 -   [ ] Add my surround config from VSCode for markdown bold, inline-code, etc
     -   this might need an attach function to the markdown file-type only
 -   [ ] Keep an eye on UFO - to better fold code
+-   [x] Lua line git branch - show current cwd instead of current file
+    -   I don't think it worth it, given the amount of code to write
+    -   this is causing branch to not be visible when editing special files
     -   https://github.com/kevinhwang91/nvim-ufo
 -   [x] maybe test Avante.nvim to replace Copilot? https://github.com/yetone/avante.nvim
 -   [x] Enums shows white and blue depending on where they are, TS and TSX
