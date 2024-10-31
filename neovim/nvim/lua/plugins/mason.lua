@@ -269,6 +269,7 @@ return {
                             "cssls",
                             -- "phpactor",
                             "intelephense",
+                            "emmet_language_server",
                         })
                 end
             end
