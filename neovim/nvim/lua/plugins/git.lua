@@ -40,26 +40,6 @@ return {
         config = function()
             local gitsigns = require("gitsigns")
 
-            vim.keymap.set("n", ")", function()
-                if vim.opt.diff:get() then
-                    return "]c"
-                end
-                return ")"
-            end, {
-                desc = "next change hunk",
-                expr = true,
-            })
-
-            vim.keymap.set("n", "(", function()
-                if vim.opt.diff:get() then
-                    return "[c"
-                end
-                return "("
-            end, {
-                desc = "prev change hunk",
-                expr = true,
-            })
-
             gitsigns.setup({
                 diff_opts = {
                     -- https://github.com/lewis6991/gitsigns.nvim/blob/main/doc/gitsigns.txt
@@ -82,24 +62,37 @@ return {
                         vim.keymap.set(mode, l, r, opts)
                     end
 
-                    map("n", "]c", function()
+                    local function jumpToNextHunk()
                         if vim.wo.diff then
                             vim.cmd.normal({ "]c", bang = true })
                         else
                             gitsigns.nav_hunk("next")
                         end
-                    end, {
-                        desc = "next change hunk",
-                    })
+                    end
 
-                    map("n", "[c", function()
+                    local function jumpToPrevHunk()
                         if vim.wo.diff then
                             vim.cmd.normal({ "[c", bang = true })
                         else
                             gitsigns.nav_hunk("prev")
                         end
-                    end, {
+                    end
+
+                    map("n", ")", jumpToNextHunk, {
+                        desc = "next change hunk",
+                    })
+
+                    -- I'm remapping parens, as I never use them to navigate paragraphs
+                    map("n", "]c", jumpToNextHunk, {
+                        desc = "next change hunk (same as ]c)",
+                    })
+
+                    map("n", "[c", jumpToPrevHunk, {
                         desc = "prev change hunk",
+                    })
+
+                    map("n", "(", jumpToPrevHunk, {
+                        desc = "prev change hunk (same as [c)",
                     })
 
                     map(
