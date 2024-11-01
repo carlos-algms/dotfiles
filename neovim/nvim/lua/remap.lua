@@ -17,27 +17,6 @@ vim.keymap.set(
 vim.keymap.set("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
 vim.keymap.set("v", [[a']], [[2i']], { desc = "Select single quoted text" })
 
-vim.keymap.set(
-    "n",
-    "<leader>pv",
-    vim.cmd.Ex,
-    { desc = "Open nvim default file explorer" }
-)
-
--- Allows to move selected line of text up and down
-vim.keymap.set(
-    "v",
-    "J",
-    "<CMD>m '>+1<CR>gv=gv",
-    { desc = "Move selected line down" }
-)
-vim.keymap.set(
-    "v",
-    "K",
-    "<CMD>m '<-2<CR>gv=gv",
-    { desc = "Move selected line up" }
-)
-
 -- Keeps the cursor on the center of the screen when running Ctrl + D or U
 vim.keymap.set(
     "n",

@@ -150,14 +150,6 @@ return {
                 mode = { "n", "v" },
                 desc = "󰟶 Debugger hover",
             },
-            {
-                "˙", -- ALT + h
-                function()
-                    require("dap.ui.widgets").hover()
-                end,
-                mode = { "n", "v" },
-                desc = "󰟶 Debugger hover",
-            },
 
             {
                 "<leader>dp",
