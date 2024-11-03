@@ -28,7 +28,8 @@ return {
             },
             FIXIT = {
                 icon = " ", -- icon used for the sign, and in search results
-                color = "#75342e", -- can be a hex color, or a named color (see below)
+                color = "error",
+                -- color = "#75342e", -- can be a hex color, or a named color
             },
         },
     },
