@@ -216,6 +216,7 @@ M.theme = {
         ["@punctuation"] = "Identifier",
         ["@punctuation.bracket.lua"] = "Identifier",
         ["@punctuation.delimiter.jsdoc"] = "@comment.documentation",
+        ["@punctuation.accessor.php"] = "@keyword",
         ["@punctuation.special"] = "@keyword",
         ["@punctuation.special.diff"] = "Identifier",
         ["@selector"] = "@function",

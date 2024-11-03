@@ -6,7 +6,7 @@
 
 [
   "->"
-  ] @punctuation.delimiter
+  ] @punctuation.accessor
 
 (
  (comment) @comment.documentation
@@ -44,4 +44,26 @@
 (property_declaration
   (var_modifier) @keyword.modifier
   (#eq? @keyword.modifier "var")
+  )
+
+; fix Class name when using a static access
+; like: `Class::class`
+(class_constant_access_expression
+  (name) @class
+  (name) @keyword.class.accessor (#eq? @keyword.class.accessor "class") (#set! "priority" 110)
+  )
+
+(class_constant_access_expression
+  (qualified_name)
+  (name) @keyword.class.accessor (#eq? @keyword.class.accessor "class")
+  )
+
+; fix for `ClassName::CONSTANT`
+(class_constant_access_expression
+  (name) @class.name
+  (name) @property
+  )
+
+(function_call_expression
+  function: (variable_name) @function
   )
