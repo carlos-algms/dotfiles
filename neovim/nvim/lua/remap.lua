@@ -179,13 +179,11 @@ vim.keymap.set(
     { desc = "Close current buffer" }
 )
 
-vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
-
-vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
-
-vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
-
-vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+-- Disabled to sue vim-kitty-navigator
+-- vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+-- vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+-- vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+-- vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
 vim.keymap.set("n", "<Esc>", function()
     if vim.opt.hlsearch then
