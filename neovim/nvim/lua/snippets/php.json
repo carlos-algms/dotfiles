@@ -8,5 +8,13 @@
         "prefix": "prf",
         "body": ["protected function $1($2) {", "  $0", "}"],
         "description": "Protected Function"
+    },
+    "phpdoc": {
+        "prefix": "/**",
+        "body": ["/**", " * $1", " */"],
+        "description": "PHPDoc",
+        "luasnip": {
+            "autotrigger": true
+        }
     }
 }
