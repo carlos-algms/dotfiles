@@ -35,6 +35,7 @@
     "folke",
     "gitsigns",
     "intelephense",
+    "interruptible",
     "keymap",
     "lockdown",
     "neovim",
