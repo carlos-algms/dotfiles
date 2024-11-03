@@ -52,7 +52,8 @@ return {
                     hide_dotfiles = false,
                     hide_gitignored = true,
                 },
-                group_empty_dirs = true,
+                -- it's difficult to move files arround when multiple dirs are grouped
+                group_empty_dirs = false,
                 window = {
                     mappings = {
                         ["F"] = "fuzzy_finder",
