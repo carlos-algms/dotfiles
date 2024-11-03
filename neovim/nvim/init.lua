@@ -1,3 +1,6 @@
+require("00_version_and_env")
+require("helpers")
+
 -- https://lazy.folke.io/installation
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -22,8 +25,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("00_version_and_env")
-require("helpers")
 require("vim-options")
 require("remap")
 require("commands")
