@@ -283,6 +283,7 @@ return {
             local masonLspConfig = require("mason-lspconfig")
 
             local lspConfig = require("lspconfig")
+            local util = require("lspconfig.util")
 
             -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig
 
@@ -368,12 +369,36 @@ return {
                         --         ["language_server_phpstan.enabled"] = false,
                         --         ["language_server_psalm.enabled"] = false,
                         --     },
+                        --     root_dir = function(pattern)
+                        --         local cwd = vim.uv.cwd()
+                        --         local root = util.root_pattern(
+                        --             "composer.json",
+                        --             ".git",
+                        --             ".phpactor.json",
+                        --             ".phpactor.yml"
+                        --         )(pattern)
+                        --
+                        --         return root
+                        --
+                        --         -- return util.path.is_descendant(cwd, root)
+                        --         --         and cwd
+                        --         --     or root
+                        --     end,
                         -- })
                     end,
 
                     intelephense = function()
+                        -- return false
                         lspConfig.intelephense.setup({
                             capabilities = all_lsp_capabilities,
+                            root_dir = function(pattern)
+                                local root = util.root_pattern(
+                                    "composer.json",
+                                    ".git"
+                                )(pattern)
+
+                                return root
+                            end,
                             settings = {
                                 intelephense = {
                                     -- https://github.com/bmewburn/intelephense-docs/blob/master/installation.md
