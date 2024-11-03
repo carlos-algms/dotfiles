@@ -12,7 +12,7 @@ return {
 
     keys = {
         {
-            "<C-n>",
+            "-",
             "<cmd>Oil<CR>",
             desc = "Revel current file in Oil",
         },
