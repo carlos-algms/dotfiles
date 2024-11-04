@@ -1,4 +1,5 @@
 return {
     "knubie/vim-kitty-navigator",
-    build = not vim.g.is_ssh and "cp ./*.py ~/.config/kitty/" or nil,
+    -- Disabled to avoid exploit, check the files before copying them
+    -- build = not vim.g.is_ssh and "cp ./*.py ~/.config/kitty/" or nil,
 }
