@@ -4,6 +4,7 @@ return {
         "nvim-lua/plenary.nvim",
         "folke/trouble.nvim",
     },
+    event = "VeryLazy",
     keys = {
         {
             "<leader>xt",
