@@ -27,10 +27,14 @@ return {
                 callback = function(ev)
                     local packageInfo = require("package-info")
 
-                    vim.notify(
-                        "Setting package.json keybindings: " .. ev.event,
-                        "info"
-                    )
+                    -- vim.notify(
+                    --     "Setting package.json keybindings: "
+                    --         .. ev.event
+                    --         .. " "
+                    --         .. ev.file,
+                    --     "info"
+                    -- )
+
                     -- Show dependency versions
                     vim.keymap.set({ "n" }, "<leader>ns", packageInfo.show, {
                         silent = true,
