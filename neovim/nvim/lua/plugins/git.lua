@@ -37,6 +37,42 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         event = "VeryLazy",
+        init = function()
+            local gitsigns = require("gitsigns")
+
+            local function jumpToNextHunk()
+                if vim.wo.diff then
+                    vim.cmd.normal({ "]c", bang = true })
+                else
+                    gitsigns.nav_hunk("next")
+                end
+            end
+
+            local function jumpToPrevHunk()
+                if vim.wo.diff then
+                    vim.cmd.normal({ "[c", bang = true })
+                else
+                    gitsigns.nav_hunk("prev")
+                end
+            end
+
+            vim.keymap.set("n", ")", jumpToNextHunk, {
+                desc = "next change hunk",
+            })
+
+            -- I'm remapping parens, as I never use them to navigate paragraphs
+            vim.keymap.set("n", "]c", jumpToNextHunk, {
+                desc = "next change hunk (same as ]c)",
+            })
+
+            vim.keymap.set("n", "[c", jumpToPrevHunk, {
+                desc = "prev change hunk",
+            })
+
+            vim.keymap.set("n", "(", jumpToPrevHunk, {
+                desc = "prev change hunk (same as [c)",
+            })
+        end,
         config = function()
             local gitsigns = require("gitsigns")
 
@@ -61,39 +97,6 @@ return {
                         opts.buffer = bufnr
                         vim.keymap.set(mode, l, r, opts)
                     end
-
-                    local function jumpToNextHunk()
-                        if vim.wo.diff then
-                            vim.cmd.normal({ "]c", bang = true })
-                        else
-                            gitsigns.nav_hunk("next")
-                        end
-                    end
-
-                    local function jumpToPrevHunk()
-                        if vim.wo.diff then
-                            vim.cmd.normal({ "[c", bang = true })
-                        else
-                            gitsigns.nav_hunk("prev")
-                        end
-                    end
-
-                    map("n", ")", jumpToNextHunk, {
-                        desc = "next change hunk",
-                    })
-
-                    -- I'm remapping parens, as I never use them to navigate paragraphs
-                    map("n", "]c", jumpToNextHunk, {
-                        desc = "next change hunk (same as ]c)",
-                    })
-
-                    map("n", "[c", jumpToPrevHunk, {
-                        desc = "prev change hunk",
-                    })
-
-                    map("n", "(", jumpToPrevHunk, {
-                        desc = "prev change hunk (same as [c)",
-                    })
 
                     map(
                         "n",
