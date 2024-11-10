@@ -41,7 +41,61 @@ return {
 
     config = function()
         local nullLs = require("null-ls")
-        local sources = {}
+        local helpers = require("null-ls.helpers")
+        local utils = require("null-ls.utils")
+        local cmd_resolver = require("null-ls.helpers.command_resolver")
+
+        local sources = {
+            nullLs.builtins.diagnostics.phpstan.with({
+                dynamic_command = cmd_resolver.generic("./vendor/bin"),
+                cwd = helpers.cache.by_bufnr(function(params)
+                    local path = utils.root_pattern(
+                        "phpstan.neon",
+                        "composer.json",
+                        "composer.lock"
+                    )(params.bufname)
+
+                    return path
+                end),
+                -- I had to add args, as it wasn't finding the phpstan.neon because of the root of the project
+                args = function(params)
+                    local args = {
+                        "analyze",
+                        "--error-format",
+                        "json",
+                        "--no-progress",
+                        "$FILENAME",
+                    }
+
+                    local configPath =
+                        utils.path.join(params.cwd, "phpstan.neon")
+
+                    if vim.fn.filereadable(configPath) then
+                        table.insert(args, 1, configPath)
+                        table.insert(args, 1, "--configuration")
+                    end
+
+                    return args
+                end,
+                -- I had to duplicate this to flag it as warning
+                -- from: https://github.com/nvimtools/none-ls.nvim/blob/dcc8cd4efdcb29275681a3c95786a816330dbca6/lua/null-ls/builtins/diagnostics/phpstan.lua#L26
+                on_output = function(params)
+                    local path = params.temp_path or params.bufname
+                    local parser = helpers.diagnostics.from_json({
+                        diagnostic = {
+                            severity = vim.diagnostic.severity.WARN,
+                        },
+                    })
+                    params.messages = params.output
+                            and params.output.files
+                            and params.output.files[path]
+                            and params.output.files[path].messages
+                        or {}
+
+                    return parser({ output = params.messages })
+                end,
+            }),
+        }
 
         local isCSpellInstalled = vim.fn.executable("cspell")
 
