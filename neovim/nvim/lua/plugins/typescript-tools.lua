@@ -25,7 +25,7 @@ return {
         end,
         opts = {
             expose_as_code_action = "all",
-            complete_function_calls = true,
+            complete_function_calls = false,
             jsx_close_tag = {
                 enable = true,
                 filetypes = { "javascriptreact", "typescriptreact" },
