@@ -11,8 +11,17 @@
     },
     "phpdoc": {
         "prefix": "/**",
-        "body": ["/**", " * $1", " */"],
+        "body": ["/**", " * $0", " */"],
         "description": "PHPDoc",
+        "luasnip": {
+            "autotrigger": true
+        }
+    },
+
+    "fixit": {
+        "prefix": "//f",
+        "body": ["// FIXIT: $0"],
+        "description": "Fix it comment",
         "luasnip": {
             "autotrigger": true
         }
