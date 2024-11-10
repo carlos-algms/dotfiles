@@ -2,8 +2,7 @@
 
 ## Todo
 
--   [ ] make files under `node_modules` read-only
--   [ ] Make `]d` and `[d` ignore typos, aka `info`
+-   [ ] Remap focused bindings to use LocalLeader instead of multiple keys
 -   [ ] Check it worth using img-clip.nvim: copy/paste/drag images
     -   https://github.com/HakonHarnes/img-clip.nvim
     -   It was added as Dep from Avante, monitor if I use it
@@ -21,9 +20,11 @@
 -   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
         Grapple calls it "scopes"
         like: bookmarksPath .. project_path .. "-permanent-list" .. ".json", or bookmarksPath .. project_path .. "-ticket-XX-yyy-" .. ".json"
--   [ ] Install multi-line plugin
+-   [x] Make `]d` and `[d` ignore typos, aka `info`
+-   [x] Install multi-line plugin
         https://github.com/mg979/vim-visual-multi
--   [ ] Clean up unused plugins
+        I installed, it's amazing, but seems slow on multiple cursors
+-   [x] Clean up unused plugins
 -   [x] Add emmet plugin (maybe not, I just need wrap and unwrap)
     -   I ended up using https://github.com/olrtg/emmet-language-server
     -   Its a single package and gives full emmet support via LSP and display via CMP
