@@ -1,3 +1,6 @@
+vim.g.mapleader = " "
+vim.g.maplocalleader = ","
+
 require("00_version_and_env")
 require("helpers")
 
