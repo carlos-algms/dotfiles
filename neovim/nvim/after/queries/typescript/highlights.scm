@@ -135,6 +135,10 @@
   property: (property_identifier) @function (#set! "priority" 150)
   )
 
+; Fix enums creation not being flagged as property
+(enum_assignment
+  name: (property_identifier) @variable.member (#set! "priority" 150)
+  )
 
 
 ; (

@@ -183,6 +183,7 @@ M.theme = {
         ["@label.vimdoc"] = "@string",
         ["@lsp.type.class"] = "@identifier",
         ["@lsp.type.enum"] = "@none",
+        ["@lsp.type.enumMember"] = "Constant",
         ["@lsp.type.keyword"] = "@keyword",
         ["@lsp.type.macro.lua"] = "Type",
         ["@lsp.type.property"] = "@none",
