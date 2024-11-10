@@ -114,19 +114,25 @@ return {
             { desc = "LSP Pick incoming calls", silent = true }
         )
 
-        vim.keymap.set(
-            "n",
-            "]d",
-            ":Lspsaga diagnostic_jump_next<CR>",
-            { desc = "Go to next problem" }
-        )
+        vim.keymap.set("n", "]d", function()
+            diagnostic:goto_next({
+                severity = {
+                    vim.diagnostic.severity.ERROR,
+                    vim.diagnostic.severity.WARN, -- Lua LSP doesn't use error
+                    vim.diagnostic.severity.HINT, -- used by TypeScript LSP to show unused variables
+                },
+            })
+        end, { desc = "Go to next problem" })
 
-        vim.keymap.set(
-            "n",
-            "[d",
-            ":Lspsaga diagnostic_jump_prev<CR>",
-            { desc = "Go to previous problem" }
-        )
+        vim.keymap.set("n", "[d", function()
+            diagnostic:goto_prev({
+                severity = {
+                    vim.diagnostic.severity.ERROR,
+                    vim.diagnostic.severity.WARN,
+                    vim.diagnostic.severity.HINT,
+                },
+            })
+        end, { desc = "Go to previous problem" })
 
         vim.keymap.set({ "n", "v" }, "]e", function()
             diagnostic:goto_next({

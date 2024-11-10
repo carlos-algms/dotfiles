@@ -28,7 +28,8 @@ createUserCommand("Float", function(ctx)
 
     local ui = uis[0] or uis[1]
 
-    -- Create the floating window
+    --- Create the floating window
+    --- @type vim.api.keyset.win_config
     local opts = {
         relative = "editor",
         width = width,
