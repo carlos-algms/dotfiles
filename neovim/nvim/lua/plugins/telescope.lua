@@ -305,6 +305,13 @@ return {
                 { desc = "List buffers open" }
             )
 
+            vim.keymap.set("n", "<leader>ba", function()
+                builtin.buffers({
+                    only_cwd = false,
+                    -- cwd_only = false,
+                })
+            end, { desc = "List buffers open" })
+
             vim.keymap.set(
                 "n",
                 "<leader>o",
