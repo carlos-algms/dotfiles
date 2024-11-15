@@ -21,6 +21,10 @@
   (property_identifier) @variable.member (#set! "priority" 150)
   )
 
+(pair
+  key: (property_identifier) @variable.member (#set! "priority" 150)
+  )
+
 ; I had to increase the priority, as LSP was overriding and setting to @identifier
 (call_expression
   function: (identifier) @function.call (#set! "priority" 150)

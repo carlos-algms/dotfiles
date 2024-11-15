@@ -112,22 +112,9 @@
 
 (variable_declarator
   name: (identifier) @function.definition (#set! "priority" 150)
-  value: (call_expression
-           function: (member_expression
-                       object: (identifier) @_name (#match? @_name "styled"
-                                                    )
-                       )
-           )
-  )
+  value: (call_expression) @_name (#match? @_name "^styled")
+    )
 
-(variable_declarator
-  name: (identifier) @function.definition (#set! "priority" 150)
-  value: (call_expression
-           function: (call_expression
-                       function: (identifier) @_name (#match? @_name "styled")
-                       )
-           )
-  )
 
 ; Fix for styled.div : div wasn't a function
 (member_expression
@@ -140,9 +127,3 @@
   name: (property_identifier) @variable.member (#set! "priority" 150)
   )
 
-
-; (
-;  (identifier) @variable
-;  (#match? @variable "^[A-Z]")
-;  (#set! "priority" 120)
-;  )
