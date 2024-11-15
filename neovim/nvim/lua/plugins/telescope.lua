@@ -87,6 +87,42 @@ return {
                 vim.cmd("Trouble quickfix open")
             end
 
+            local lgaQuotePrompt = lga_actions.quote_prompt({
+                trim = true,
+            })
+
+            local lgaAddIglob = lga_actions.quote_prompt({
+                trim = true,
+                postfix = " --iglob ",
+            })
+
+            local function quote_prompt(prompt_bufnr)
+                return lgaQuotePrompt(prompt_bufnr)
+            end
+
+            local function add_iglob(prompt_bufnr)
+                local picker = action_state.get_current_picker(prompt_bufnr)
+                local prompt = picker:_get_prompt()
+
+                if
+                    string.find(prompt, " -F") or string.find(prompt, "--iglob")
+                then
+                    picker:set_prompt(prompt .. " --iglob ")
+                else
+                    lgaAddIglob(prompt_bufnr)
+                end
+            end
+
+            local function exclude_test_files(prompt_bufnr)
+                add_iglob(prompt_bufnr)
+
+                local picker = action_state.get_current_picker(prompt_bufnr)
+                local prompt = picker:_get_prompt()
+                picker:set_prompt(
+                    prompt .. "!**.spec.* --iglob !**.test.* --iglob !**/r2/**"
+                )
+            end
+
             telescope.setup({
                 defaults = {
                     color_devicons = true,
@@ -241,11 +277,10 @@ return {
                         -- define mappings, e.g.
                         mappings = { -- extend mappings
                             i = {
-                                ["<C-k>"] = lga_actions.quote_prompt(),
+                                ["<C-k>"] = quote_prompt,
                                 -- <C-i> is the same as `<Tab>` for historical reasons https://github.com/neovim/neovim/issues/5916
-                                ["<C-l>"] = lga_actions.quote_prompt({
-                                    postfix = " --iglob ",
-                                }),
+                                ["<C-l>"] = add_iglob,
+                                ["<C-e>"] = exclude_test_files,
                             },
                         },
                         -- ... also accepts theme settings, for example:
