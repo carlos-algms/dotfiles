@@ -173,10 +173,6 @@ return {
                                     end
 
                                     if cmd then
-                                        vim.notify(
-                                            "jest cmd from package.json: "
-                                                .. cmd
-                                        )
                                         return cmd
                                     end
 
