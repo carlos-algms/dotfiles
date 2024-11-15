@@ -131,6 +131,7 @@ return {
                     local noKeymapLspClients = {
                         "null-ls",
                         "GitHub Copilot",
+                        "eslint",
                     }
 
                     for _, clientName in ipairs(noKeymapLspClients) do
@@ -317,6 +318,7 @@ return {
 
                     jsonls = function()
                         lspConfig.jsonls.setup({
+                            capabilities = all_lsp_capabilities,
                             settings = {
                                 json = {
                                     schemas = require("schemastore").json.schemas(),
@@ -328,6 +330,7 @@ return {
 
                     yamlls = function()
                         lspConfig.yamlls.setup({
+                            capabilities = all_lsp_capabilities,
                             settings = {
                                 yaml = {
                                     schemaStore = {
@@ -412,6 +415,44 @@ return {
                                     format = {
                                         enable = true,
                                         braces = "K&R", -- 1TBS
+                                    },
+                                },
+                            },
+                        })
+                    end,
+
+                    eslint = function()
+                        lspConfig.eslint.setup({
+                            capabilities = all_lsp_capabilities,
+                            root_dir = function(pattern)
+                                local root = util.root_pattern(
+                                    "eslint.config.js",
+                                    "eslint.config.mjs",
+                                    "eslint.config.ts",
+                                    ".eslintrc",
+                                    ".eslintrc.js",
+                                    ".eslintrc.mjs",
+                                    ".eslintrc.json",
+                                    ".eslintrc.yaml",
+                                    ".eslintrc.yml",
+                                    ".eslintignore",
+                                    ".git"
+                                )(pattern)
+
+                                return root
+                            end,
+                            settings = {
+                                options = {
+                                    overrideConfig = {
+                                        ignores = {
+                                            "**.vscode**",
+                                            "**/nvm/**",
+                                            "**/node_modules/**",
+                                            "**/lib/**",
+                                            "**/dist/**",
+                                            "**/public/**",
+                                            "**/build/**",
+                                        },
                                     },
                                 },
                             },
