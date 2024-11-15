@@ -193,6 +193,20 @@ return {
                 { desc = "Open the diff for the next file" },
             }
 
+            local nextItemKeymap_ = {
+                "n",
+                "J", -- TODO: do the same as select entry to focus on the first hunk
+                actions.select_next_entry,
+                { desc = "Open the diff for the next file" },
+            }
+
+            local prevItemKeymap_ = {
+                "n",
+                "K",
+                actions.select_prev_entry,
+                { desc = "Open the diff for the previous file" },
+            }
+
             local prevItemKeymap = {
                 "n",
                 "[q",
@@ -221,6 +235,8 @@ return {
                         commitNoVerifyKeyMap,
                         nextItemKeymap,
                         prevItemKeymap,
+                        nextItemKeymap_,
+                        prevItemKeymap_,
 
                         {
                             "n",
@@ -253,6 +269,8 @@ return {
                         commitNoVerifyKeyMap,
                         nextItemKeymap,
                         prevItemKeymap,
+                        nextItemKeymap_,
+                        prevItemKeymap_,
 
                         {
                             "n",
