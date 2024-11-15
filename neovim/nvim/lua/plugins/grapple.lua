@@ -16,7 +16,7 @@ return {
                 desc = "Grapple toggle tag",
             },
             {
-                "<C-e>",
+                "<leader>e",
                 "<cmd>Grapple toggle_tags<cr>",
                 desc = "Grapple open tags window",
             },
