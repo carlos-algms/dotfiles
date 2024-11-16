@@ -47,7 +47,7 @@ return {
 
         local sources = {
             nullLs.builtins.diagnostics.phpstan.with({
-                dynamic_command = cmd_resolver.generic("./vendor/bin"),
+                dynamic_command = cmd_resolver.generic("vendor/bin"),
                 cwd = helpers.cache.by_bufnr(function(params)
                     local path = utils.root_pattern(
                         "phpstan.neon",
@@ -60,7 +60,6 @@ return {
                 -- I had to add args, as it wasn't finding the phpstan.neon because of the root of the project
                 args = function(params)
                     local args = {
-                        "analyze",
                         "--error-format",
                         "json",
                         "--no-progress",
@@ -75,11 +74,22 @@ return {
                         table.insert(args, 1, "--configuration")
                     end
 
+                    table.insert(args, 1, "analyse")
+
                     return args
                 end,
                 -- I had to duplicate this to flag it as warning
                 -- from: https://github.com/nvimtools/none-ls.nvim/blob/dcc8cd4efdcb29275681a3c95786a816330dbca6/lua/null-ls/builtins/diagnostics/phpstan.lua#L26
                 on_output = function(params)
+                    if params.err then
+                        vim.notify(
+                            "PHPStan diagnostics: "
+                                .. vim.inspect(params.err):gsub("\\n", "\r"),
+                            vim.log.levels.ERROR
+                        )
+                        return {}
+                    end
+
                     local path = params.temp_path or params.bufname
                     local parser = helpers.diagnostics.from_json({
                         diagnostic = {
