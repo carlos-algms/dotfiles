@@ -123,6 +123,27 @@ return {
                 )
             end
 
+            local function compare_branch_to_head(prompt_bufnr)
+                local selection = action_state.get_selected_entry()
+
+                if selection == nil then
+                    utils.notify("git_compare_branches", {
+                        msg = "No branch selected",
+                        level = "WARN",
+                    })
+                    return
+                end
+
+                actions.close(prompt_bufnr)
+
+                vim.cmd(
+                    string.format(
+                        "DiffviewOpen origin/HEAD...%s --imply-local",
+                        selection.value
+                    )
+                )
+            end
+
             telescope.setup({
                 defaults = {
                     color_devicons = true,
@@ -229,29 +250,7 @@ return {
                     git_branches = {
                         mappings = {
                             i = {
-                                -- @TODO: change this mapping to a more intuitive one
-                                -- Maybe <D-c> Mac's command + c as in [c]ompare
-                                ["<C-a>"] = function(prompt_bufnr)
-                                    local selection =
-                                        action_state.get_selected_entry()
-
-                                    if selection == nil then
-                                        utils.notify("git_compare_branches", {
-                                            msg = "No branch selected",
-                                            level = "WARN",
-                                        })
-                                        return
-                                    end
-
-                                    actions.close(prompt_bufnr)
-
-                                    vim.cmd(
-                                        string.format(
-                                            "DiffviewOpen origin/HEAD...%s --imply-local",
-                                            selection.value
-                                        )
-                                    )
-                                end,
+                                ["<C-f>"] = compare_branch_to_head,
                             },
                         },
                     },
@@ -330,7 +329,7 @@ return {
                 "n",
                 "<leader>pg",
                 builtin.git_files,
-                { desc = "[P]roject wide [G]it files fuzy finder" }
+                { desc = "Project wide Git files fuzzy finder" }
             )
 
             vim.keymap.set(
@@ -354,6 +353,12 @@ return {
                 { desc = "Find recently opened files" }
             )
 
+            vim.keymap.set("n", "<leader>O", function()
+                builtin.oldfiles({
+                    cwd_only = false,
+                })
+            end, { desc = "Find recently opened files" })
+
             vim.keymap.set("n", "<leader>/", function()
                 -- You can pass additional configuration to telescope to change theme, layout, etc.
                 builtin.current_buffer_fuzzy_find(
@@ -367,35 +372,35 @@ return {
                     -- })
                 )
             end, {
-                desc = "[/] Fuzzily search in current buffer on Modal with results",
+                desc = "[/] Fuzzy search in current buffer",
             })
 
             vim.keymap.set(
                 "n",
                 "<leader>tk",
                 builtin.keymaps,
-                { desc = "[T]elescope list all [k]eymaps" }
+                { desc = "Telescope list all keymaps" }
             )
 
             vim.keymap.set(
                 "n",
                 "<leader>th",
                 builtin.help_tags,
-                { desc = "[T]elescope [h]elp tags" }
+                { desc = "Telescope help tags" }
             )
 
             vim.keymap.set(
                 "n",
                 "<leader>tp",
                 builtin.pickers,
-                { desc = "[T]elescope list all [p]ickers" }
+                { desc = "Telescope list all pickers" }
             )
 
             vim.keymap.set(
                 "n",
                 "<leader>tr",
                 builtin.resume,
-                { desc = "[T]elescope [r]esume last picker" }
+                { desc = "Telescope resume last picker" }
             )
 
             -- disabled in favor my custom one with args below
