@@ -61,9 +61,15 @@ if command -v oh-my-posh >/dev/null 2>&1; then
 fi
 
 
-# it doesn't seem to work, vim plugin is overriding it when it loads
-# TODO: send a PR to https://github.com/jeffreytse/zsh-vi-mode to fix these
-# https://github.com/jeffreytse/zsh-vi-mode/blob/cd730cd347dcc0d8ce1697f67714a90f07da26ed/zsh-vi-mode.zsh#L3475
-bindkey '^p' history-search-backward
-bindkey '^n' history-search-forward
+# https://github.com/jeffreytse/zsh-vi-mode
+function vim_mode_lazy_keybindings() {
+    [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+    bindkey "^P" up-line-or-beginning-search
+    bindkey "^N" down-line-or-beginning-search
+}
+
+zvm_after_init_commands+=(vim_mode_lazy_keybindings)
+# zvm_after_lazy_keybindings_commands+=(zvm_after_lazy_keybindings)
+
 
