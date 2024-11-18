@@ -126,6 +126,10 @@ return {
         "sindrets/diffview.nvim",
         enabled = true,
 
+        dependencies = {
+            "nvim-telescope/telescope.nvim",
+        },
+
         cmd = {
             "DiffviewOpen",
             "DiffviewFileHistory",
@@ -136,7 +140,7 @@ return {
                 "<leader>gcm",
                 "<cmd>CompareToMaster<CR>",
                 mode = { "n" },
-                desc = "[C]ompare current branch to [m]aster",
+                desc = "Compare current branch to master",
                 silent = true,
             },
 
@@ -151,7 +155,7 @@ return {
                 "<leader>gh",
                 "<cmd>DiffviewFileHistory % <CR>",
                 mode = "n",
-                desc = "Show [G]it [H]istory for the current file",
+                desc = "Show Git History for the current file",
             },
         },
 
@@ -161,6 +165,40 @@ return {
                 "DiffviewOpen origin/HEAD...HEAD --imply-local",
                 { desc = "Compare current branch to master" }
             )
+
+            local function compare_branch_to_head(prompt_bufnr)
+                local selection =
+                    require("telescope.actions.state").get_selected_entry()
+
+                if selection == nil then
+                    require("telescope.utils").notify("git_compare_branches", {
+                        msg = "No branch selected",
+                        level = "WARN",
+                    })
+                    return
+                end
+
+                require("telescope.actions").close(prompt_bufnr)
+
+                vim.cmd(
+                    string.format(
+                        "DiffviewOpen origin/HEAD...%s --imply-local",
+                        selection.value
+                    )
+                )
+            end
+
+            require("telescope").setup({
+                pickers = {
+                    git_branches = {
+                        mappings = {
+                            i = {
+                                ["<C-f>"] = compare_branch_to_head,
+                            },
+                        },
+                    },
+                },
+            })
         end,
 
         config = function()
@@ -321,7 +359,7 @@ return {
                 "<C-S-p>",
                 "<cmd>Git push -u <CR>",
                 mode = "n",
-                desc = "[G]it [P]ush",
+                desc = "Git Push",
             },
 
             {
@@ -330,7 +368,7 @@ return {
                     require("telescope.builtin").git_branches()
                 end,
                 mode = "n",
-                desc = "Show [g]it [b]ranches",
+                desc = "Show git branches",
             },
 
             {
@@ -339,19 +377,19 @@ return {
                     require("telescope.builtin").git_status()
                 end,
                 mode = "n",
-                desc = "Show [g]it [s]tatus as a list",
+                desc = "Show git status as a list",
             },
             {
                 "<leader>gd",
                 "<cmd>Gvdiffsplit!<CR>",
                 mode = "n",
-                desc = "Show [g]it [d]iff for current file",
+                desc = "Show git diff for current file",
             },
             {
                 "<leader>gb",
                 ":Git blame<CR>",
                 mode = "n",
-                desc = "[G]it [B]lame",
+                desc = "Git Blame",
             },
             {
                 "<leader>gC",
@@ -374,7 +412,7 @@ return {
                     end)
                 end,
                 mode = { "n", "v" },
-                desc = "[G]it [C]reate Branch",
+                desc = "Git Create Branch",
             },
         },
 
@@ -396,7 +434,7 @@ return {
             --     vim.cmd("wincmd 1w")
             --     vim.api.nvim_win_set_width(fugitiveWinId, 50)
             --     vim.cmd("norm 0)")
-            -- end, { desc = "Show [g]it [s]tatus", silent = true })
+            -- end, { desc = "Show git status", silent = true })
 
             -- vim.api.nvim_create_autocmd("FileType", {
             --     desc = "Fugitive overrides",

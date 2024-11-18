@@ -22,7 +22,6 @@ return {
             local telescope = require("telescope")
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
-            local utils = require("telescope.utils")
             local lga_actions = require("telescope-live-grep-args.actions")
 
             -- https://github.com/nvim-telescope/telescope.nvim/wiki/Configuration-Recipes#file-and-text-search-in-hidden-files-and-directories
@@ -77,16 +76,6 @@ return {
             table.insert(fileIgnorePatternsWithNodeModules, "yarn%.lock")
             table.insert(fileIgnorePatternsWithNodeModules, "/vendor/")
 
-            local function send_all_to_quickfix_and_open_trouble(prompt_bufnr)
-                actions.send_to_qflist(prompt_bufnr)
-                vim.cmd("Trouble quickfix open")
-            end
-
-            local function selected_to_quickfix_and_open_trouble(prompt_bufnr)
-                actions.send_selected_to_qflist(prompt_bufnr)
-                vim.cmd("Trouble quickfix open")
-            end
-
             local lgaQuotePrompt = lga_actions.quote_prompt({
                 trim = true,
             })
@@ -120,27 +109,6 @@ return {
                 local prompt = picker:_get_prompt()
                 picker:set_prompt(
                     prompt .. "!**.spec.* --iglob !**.test.* --iglob !**/r2/**"
-                )
-            end
-
-            local function compare_branch_to_head(prompt_bufnr)
-                local selection = action_state.get_selected_entry()
-
-                if selection == nil then
-                    utils.notify("git_compare_branches", {
-                        msg = "No branch selected",
-                        level = "WARN",
-                    })
-                    return
-                end
-
-                actions.close(prompt_bufnr)
-
-                vim.cmd(
-                    string.format(
-                        "DiffviewOpen origin/HEAD...%s --imply-local",
-                        selection.value
-                    )
                 )
             end
 
@@ -188,16 +156,11 @@ return {
                             -- actions.which_key shows the mappings for your picker,
                             -- e.g. git_{create, delete, ...}_branch for the git_branches picker
                             ["<C-h>"] = actions.which_key,
-                            -- Replace mappings to send to quickfix as Alt doesn't work well on Mac, and Alt + q is already mapped to <Esc>
-                            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
-                            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
                         },
                         n = {
                             ["<C-c>"] = actions.close, -- I don't know why this is not the default
                             ["q"] = actions.close,
                             ["<C-h>"] = actions.which_key,
-                            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
-                            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
                         },
                     },
                 },
@@ -246,14 +209,6 @@ return {
                     },
 
                     git_files = { show_untracked = true },
-
-                    git_branches = {
-                        mappings = {
-                            i = {
-                                ["<C-f>"] = compare_branch_to_head,
-                            },
-                        },
-                    },
                 },
                 extensions = {
                     -- Disabling from now, as I don't want code actions to be on the pickers cache
