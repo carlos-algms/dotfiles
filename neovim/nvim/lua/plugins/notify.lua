@@ -1,9 +1,7 @@
 return {
     "rcarriga/nvim-notify",
     lazy = false,
-    dependencies = {
-        "nvim-telescope/telescope.nvim",
-    },
+    priority = 1001,
     config = function()
         local notify = require("notify")
         local banned_messages = { "No information available" }

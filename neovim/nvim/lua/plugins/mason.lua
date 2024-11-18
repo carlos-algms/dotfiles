@@ -167,14 +167,14 @@ return {
                         "n",
                         "go",
                         telescopeBuiltin.lsp_type_definitions,
-                        "[G]o to [o]bject type definition"
+                        "Go to object type definition"
                     )
 
                     lspKeymap(
                         "n",
                         "gi",
                         telescopeBuiltin.lsp_implementations,
-                        "[G]o to [i]mplementation"
+                        "Go to implementation"
                     )
 
                     lspKeymap(
@@ -183,7 +183,7 @@ return {
                         -- went with Telescope, as it is better when there are more than 1 result
                         -- vim.lsp.buf.definition,
                         telescopeBuiltin.lsp_definitions,
-                        "[G]o to [d]efinition"
+                        "Go to definition"
                     )
 
                     -- Implemented on telescope, as it has a better UI
@@ -194,21 +194,21 @@ return {
                         "n",
                         "gr",
                         telescopeBuiltin.lsp_references,
-                        "List [r]eferences using Telescope"
+                        "List references using Telescope"
                     )
 
                     lspKeymap(
                         "n",
                         "<leader>rw",
                         telescopeBuiltin.lsp_workspace_symbols,
-                        "Search for symbol in [w]orkspace"
+                        "Search for symbol in workspace"
                     )
 
                     lspKeymap(
                         "n",
                         "<leader>rd",
                         telescopeBuiltin.lsp_document_symbols,
-                        "Search for symbol in [d]ocument"
+                        "Search for symbol in document"
                     )
 
                     -- Enabled this because the floating input accepts all motions, LSP Saga doesn't
@@ -216,21 +216,21 @@ return {
                         "n",
                         "<leader>rn",
                         vim.lsp.buf.rename,
-                        "[R]ename symbol with native NVim lsp"
+                        "Rename symbol with native NVim lsp"
                     )
 
                     lspKeymap(
                         "i",
                         "<C-h>",
                         vim.lsp.buf.signature_help,
-                        "Show [h]elp for function signature"
+                        "Show help for function signature"
                     )
 
                     lspKeymap(
                         { "n", "v" },
                         "<leader>ca",
                         vim.lsp.buf.code_action,
-                        "Show [c]ode [a]ctions"
+                        "Show code actions"
                     )
 
                     -- Disabled to use Conform
