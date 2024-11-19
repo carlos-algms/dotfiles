@@ -23,6 +23,7 @@ return {
             local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
             local copilotSuggestions = require("copilot.suggestion")
+            local compare = require("cmp.config.compare")
 
             cmp.setup({
                 preselect = cmp.PreselectMode.Item,
@@ -31,15 +32,20 @@ return {
                     -- completeopt = "menu,menuone,noselect,fuzzy,noinsert,preview",
                     completeopt = "menu,menuone,fuzzy,noinsert,preview",
                 },
+
                 snippet = {
                     expand = function(args)
                         luasnip.lsp_expand(args.body)
                     end,
                 },
+
                 sources = cmp.config.sources({
                     -- { name = "nvim_lsp_signature_help" },
                     -- { name = "copilot" },
-                    { name = "nvim_lsp" },
+                    {
+                        name = "nvim_lsp",
+                        max_item_count = 50,
+                    },
                     {
                         name = "luasnip",
                         -- keyword_length = 2,
@@ -55,6 +61,22 @@ return {
                 }, {
                     { name = "buffer", keyword_length = 2, max_item_count = 5 },
                 }),
+
+                sorting = {
+                    priority_weight = 2,
+                    comparators = {
+                        -- compare.recently_used,
+                        -- compare.offset,
+                        -- compare.scopes,
+                        compare.locality,
+                        compare.length,
+                        compare.exact,
+                        compare.kind,
+                        compare.score,
+                        -- compare.sort_text,
+                        compare.order,
+                    },
+                },
 
                 window = {
                     completion = cmp.config.window.bordered({
