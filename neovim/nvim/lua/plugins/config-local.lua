@@ -1,6 +1,8 @@
 return {
-    "klen/nvim-config-local",
+    -- "klen/nvim-config-local",
+    "mrjohannchang/nvim-config-local", -- the original seems to be abandoned
     lazy = false,
+    version = "df334bb", -- fixing a specific hash to avoid exploits or malicious new code
     config = function()
         require("config-local").setup({
             -- Config file patterns to load (lua supported)
