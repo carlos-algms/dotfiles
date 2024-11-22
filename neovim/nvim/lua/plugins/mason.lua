@@ -429,14 +429,12 @@ return {
                                     "eslint.config.js",
                                     "eslint.config.mjs",
                                     "eslint.config.ts",
-                                    ".eslintrc",
                                     ".eslintrc.js",
                                     ".eslintrc.mjs",
                                     ".eslintrc.json",
                                     ".eslintrc.yaml",
                                     ".eslintrc.yml",
-                                    ".eslintignore",
-                                    ".git"
+                                    ".eslintrc"
                                 )(pattern)
 
                                 return root
