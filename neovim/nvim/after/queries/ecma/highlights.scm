@@ -21,8 +21,17 @@
   (property_identifier) @variable.member (#set! "priority" 150)
   )
 
+; Fix a property in an object, sometimes it was flagged as a variable
+; { foo: 'bar' }
 (pair
   key: (property_identifier) @variable.member (#set! "priority" 150)
+  )
+
+; fic a function as an object property
+; { foo: () => {} }
+(pair
+  key: (property_identifier) @function.method (#set! "priority" 150)
+  value: (arrow_function)
   )
 
 ; I had to increase the priority, as LSP was overriding and setting to @identifier
