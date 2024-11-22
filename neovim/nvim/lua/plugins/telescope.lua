@@ -256,7 +256,11 @@ return {
                 hidden = true,
                 no_ignore = false,
                 show_preview = true,
-                live_grep = telescope.extensions.live_grep_args.live_grep_args,
+                live_grep = function(opts)
+                    opts.prompt_title = "Live grep Args on "
+                        .. table.concat(opts.search_dirs, ", ")
+                    telescope.extensions.live_grep_args.live_grep_args(opts)
+                end,
             })
 
             vim.keymap.set(
