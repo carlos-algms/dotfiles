@@ -19,6 +19,11 @@
   (identifier) @type.identifier (#set! "priority" 150)
   )
 
+; fix for `typeof XXX.zzz`
+(type_query
+  (member_expression) @type.identifier (#set! "priority" 160)
+  )
+
 
 (
  (nested_type_identifier
@@ -26,11 +31,6 @@
    name: (type_identifier) @type.member (#set! "priority" 150)
    )
  )
-
-(variable_declarator
-  name: (identifier) @function.declaration (#set! "priority" 150)
-  value: [(function_expression) (arrow_function)]
-  )
 
 (class_declaration
   name: (type_identifier) @class.identifier (#set! "priority" 150)
@@ -67,63 +67,39 @@
 
 (predefined_type) @type.predefined
 
-(import_statement
-  (import_clause
-    (named_imports
-      (import_specifier
-        name: (identifier) @import.identifier
-        )
-      )
-    )
-  )
-
-(import_statement
-  (import_clause
-    (named_imports
-      (import_specifier
-        alias: (identifier) @import.alias (#set! "priority" 150)
-        )
-      )
-    )
-  )
-
-(import_clause
-  (identifier) @import.identifier
-  )
-
-(namespace_import
-  (identifier) @import.identifier
-  )
-
-(lexical_declaration
-  (variable_declarator
-    value: (new_expression
-             constructor: (identifier) @new.identifier (#set! "priority" 150)
-             )
-    )
-  )
-
- (variable_declarator
-   name: (identifier) @function.definition (#set! "priority" 150)
-   value: (call_expression
-            function: (identifier) @_name (#match? @_name "forwardRef|createContext|lazy")
-            )
-   )
-
-(variable_declarator
-  name: (identifier) @function.definition (#set! "priority" 150)
-  value: (call_expression) @_name (#match? @_name "^styled")
-    )
-
-
-; Fix for styled.div : div wasn't a function
-(member_expression
-  object: (identifier) @_name (#match? @_name "styled")
-  property: (property_identifier) @function (#set! "priority" 150)
-  )
 
 ; Fix enums creation not being flagged as property
 (enum_assignment
   name: (property_identifier) @variable.member (#set! "priority" 150)
   )
 
+
+; Fix for styled with a type: `styled.div<Type>`
+(variable_declarator
+  name: (identifier) @function.styled (#set! "priority" 150)
+  value: (binary_expression
+           left: (binary_expression
+                   left: (member_expression
+                           object: (identifier) @_name (#match? @_name "styled")
+                           )
+                   right: (identifier) @type.identifier
+                   )
+           )
+  )
+
+
+;; Fix for `const Component = styled.button.attrs....` - Component set as function
+(variable_declarator
+  name: (identifier) @function.attrs.styled (#set! "priority" 150)
+  value: (binary_expression
+           left: (binary_expression
+                   left: (call_expression
+                           function: (member_expression
+                                       object: (member_expression
+                                                 object: (identifier) @_name (#match? @_name "styled")
+                                                 )
+                                       )
+                           )
+                   )
+           )
+  )
