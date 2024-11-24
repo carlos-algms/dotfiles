@@ -126,18 +126,16 @@ return {
                         { "i", "c" }
                     ),
 
-                    -- I don't want enter to select the first selected item
-                    -- I want it to be selected and the documentation to be shown
-                    -- ["<CR>"] = cmp.mapping(function(fallback)
-                    --     local entry = cmp.get_selected_entry()
-                    --     if cmp.visible() and entry then
-                    --         cmp.confirm({
-                    --             select = true,
-                    --         })
-                    --     else
-                    --         fallback()
-                    --     end
-                    -- end, { "i", "s" }),
+                    ["<CR>"] = cmp.mapping(function(fallback)
+                        local entry = cmp.get_selected_entry()
+                        if cmp.visible() and entry then
+                            cmp.confirm({
+                                select = true,
+                            })
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s" }),
 
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         -- local copilot_keys = vim.fn["copilot#Accept"]()
