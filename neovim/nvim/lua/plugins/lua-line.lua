@@ -25,6 +25,9 @@ local M = {
                     },
                     winbar = {
                         "DiffviewFiles",
+                        "oil",
+                        "neo-tree",
+                        "dap-repl",
                     },
                 },
                 refresh = {
