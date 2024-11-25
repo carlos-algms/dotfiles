@@ -20,7 +20,6 @@ return {
             { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
             { "hrsh7th/cmp-nvim-lsp" },
             { "WhoIsSethDaniel/mason-tool-installer.nvim" },
-            { "nvim-telescope/telescope.nvim" }, -- listing it here to import builtin safely
             { "b0o/schemastore.nvim" },
 
             -- Disabled to keep using typescript-tools.nvim
@@ -158,22 +157,20 @@ return {
                         "n",
                         "gD",
                         vim.lsp.buf.declaration,
-                        "[G]o to [D]eclaration"
+                        "Go to Declaration"
                     )
-
-                    local telescopeBuiltin = require("telescope.builtin")
 
                     lspKeymap(
                         "n",
                         "go",
-                        telescopeBuiltin.lsp_type_definitions,
+                        "<cmd>Telescope lsp_type_definitions<CR>",
                         "Go to object type definition"
                     )
 
                     lspKeymap(
                         "n",
                         "gi",
-                        telescopeBuiltin.lsp_implementations,
+                        "<cmd>Telescope lsp_implementations<CR>",
                         "Go to implementation"
                     )
 
@@ -182,7 +179,7 @@ return {
                         "gd",
                         -- went with Telescope, as it is better when there are more than 1 result
                         -- vim.lsp.buf.definition,
-                        telescopeBuiltin.lsp_definitions,
+                        "<cmd>Telescope lsp_definitions<CR>",
                         "Go to definition"
                     )
 
@@ -193,21 +190,21 @@ return {
                     lspKeymap(
                         "n",
                         "gr",
-                        telescopeBuiltin.lsp_references,
+                        "<cmd>Telescope lsp_references<CR>",
                         "List references using Telescope"
                     )
 
                     lspKeymap(
                         "n",
                         "<leader>rw",
-                        telescopeBuiltin.lsp_workspace_symbols,
+                        "<cmd>Telescope lsp_workspace_symbols<CR>",
                         "Search for symbol in workspace"
                     )
 
                     lspKeymap(
                         "n",
                         "<leader>rd",
-                        telescopeBuiltin.lsp_document_symbols,
+                        "<cmd>Telescope lsp_document_symbols<CR>",
                         "Search for symbol in document"
                     )
 

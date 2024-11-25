@@ -126,10 +126,6 @@ return {
         "sindrets/diffview.nvim",
         enabled = true,
 
-        dependencies = {
-            "nvim-telescope/telescope.nvim",
-        },
-
         cmd = {
             "DiffviewOpen",
             "DiffviewFileHistory",
@@ -165,40 +161,6 @@ return {
                 "DiffviewOpen origin/HEAD...HEAD --imply-local",
                 { desc = "Compare current branch to master" }
             )
-
-            local function compare_branch_to_head(prompt_bufnr)
-                local selection =
-                    require("telescope.actions.state").get_selected_entry()
-
-                if selection == nil then
-                    require("telescope.utils").notify("git_compare_branches", {
-                        msg = "No branch selected",
-                        level = "WARN",
-                    })
-                    return
-                end
-
-                require("telescope.actions").close(prompt_bufnr)
-
-                vim.cmd(
-                    string.format(
-                        "DiffviewOpen origin/HEAD...%s --imply-local",
-                        selection.value
-                    )
-                )
-            end
-
-            require("telescope").setup({
-                pickers = {
-                    git_branches = {
-                        mappings = {
-                            i = {
-                                ["<C-f>"] = compare_branch_to_head,
-                            },
-                        },
-                    },
-                },
-            })
         end,
 
         config = function()
@@ -346,9 +308,6 @@ return {
     },
     {
         "tpope/vim-fugitive",
-        dependencies = {
-            "nvim-telescope/telescope.nvim",
-        },
         cmd = {
             "Git",
             "G",
@@ -363,34 +322,12 @@ return {
             },
 
             {
-                "<leader>gB",
-                function()
-                    require("telescope.builtin").git_branches()
-                end,
-                mode = "n",
-                desc = "Show git branches",
-            },
-
-            {
-                "<leader>gl",
-                function()
-                    require("telescope.builtin").git_status()
-                end,
-                mode = "n",
-                desc = "Show git status as a list",
-            },
-            {
                 "<leader>gd",
                 "<cmd>Gvdiffsplit!<CR>",
                 mode = "n",
                 desc = "Show git diff for current file",
             },
-            {
-                "<leader>gb",
-                ":Git blame<CR>",
-                mode = "n",
-                desc = "Git Blame",
-            },
+
             {
                 "<leader>gC",
                 function()

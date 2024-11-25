@@ -7,7 +7,6 @@ return {
         lazy = true,
         enabled = not vim.g.is_ssh,
         dependencies = {
-            "nvim-telescope/telescope.nvim", -- added to list breakpoints
             {
                 "rcarriga/nvim-dap-ui",
                 dependencies = {
@@ -128,9 +127,7 @@ return {
                 "<leader>dl",
                 function()
                     require("dap").list_breakpoints(false)
-                    require("telescope.builtin").quickfix({
-                        prompt_title = "Dap Breakpoints",
-                    })
+                    vim.cmd("Telescope quickfix prompt_title=Dap\\ Breakpoints")
                 end,
                 desc = " Debugger list breakpoints",
             },
