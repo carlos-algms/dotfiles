@@ -111,6 +111,13 @@ local M = {
 
 local cache = require("helpers.cache")
 
+local symbols = {
+    modified = "[+]",
+    readonly = "[-]",
+    unnamed = "[No Name]",
+    newfile = "[New]",
+}
+
 local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
     local devIcons = require("nvim-web-devicons")
     local highlight = require("lualine.highlight")
@@ -119,7 +126,7 @@ local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
     local relativePath = vim.fn.expand("%:~:.")
 
     if relativePath == "" then
-        return "[No Name]"
+        return symbols.unnamed
     end
 
     local pathToRemove = vim.fn.fnamemodify(vim.fn.getcwd(), ":p")
@@ -166,9 +173,30 @@ local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
     return relativePath
 end)
 
+local function is_new_file()
+    local filename = vim.fn.expand("%")
+    return filename ~= ""
+        and vim.bo.buftype == ""
+        and vim.fn.filereadable(filename) == 0
+end
+
 P.buffer_name = function(self)
     local bufferPath = vim.fn.expand("%:~:p")
-    return cachedBufferName(bufferPath, self)
+    local name = cachedBufferName(bufferPath, self)
+
+    if vim.bo.modified then
+        name = name .. " " .. symbols.modified
+    end
+
+    if vim.bo.readonly or vim.bo.modifiable == false then
+        name = name .. " " .. symbols.readonly
+    end
+
+    if is_new_file() then
+        name = name .. " " .. symbols.newfile
+    end
+
+    return name
 end
 
 return M
