@@ -465,17 +465,19 @@ function P.setupGitFilesPicker()
         )
     end
 
-    require("telescope").setup({
-        pickers = {
-            git_branches = {
-                mappings = {
-                    i = {
-                        ["<C-f>"] = compare_branch_to_head,
-                    },
+    local config = require("telescope.config")
+    local newConfig = {
+        git_branches = {
+            mappings = {
+                i = {
+                    ["<C-f>"] = compare_branch_to_head,
                 },
             },
         },
-    })
+    }
+
+    config.pickers =
+        vim.tbl_deep_extend("force", config.pickers or {}, newConfig)
 end
 
 function P.setupTroubleInTelescope()
@@ -492,19 +494,22 @@ function P.setupTroubleInTelescope()
         vim.cmd("Trouble quickfix open")
     end
 
-    local mappings = vim.F.if_nil(config.mappings, {})
-    config.mappings = mappings
-    local i = vim.F.if_nil(mappings.i, {})
-    mappings.i = i
-    local n = vim.F.if_nil(mappings.n, {})
-    mappings.n = n
+    local new_mappings = {
+        i = {
+            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
+            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
+        },
+        n = {
+            ["<C-S-q>"] = send_all_to_quickfix_and_open_trouble,
+            ["<C-q>"] = selected_to_quickfix_and_open_trouble,
+        },
+    }
 
-    -- Replace mappings to send to quickfix as Alt doesn't work well on Mac, and Alt + q is already mapped to <Esc>
-    i["<C-S-q>"] = send_all_to_quickfix_and_open_trouble
-    i["<C-q>"] = selected_to_quickfix_and_open_trouble
-
-    n["<C-S-q>"] = send_all_to_quickfix_and_open_trouble
-    n["<C-q>"] = selected_to_quickfix_and_open_trouble
+    config.mappings = vim.tbl_deep_extend(
+        "force",
+        vim.F.if_nil(config.mappings, {}),
+        new_mappings
+    )
 end
 
 function P.setupImagePreviewInTelescope()
