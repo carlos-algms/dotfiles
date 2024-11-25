@@ -329,6 +329,13 @@ return {
             },
 
             {
+                "<leader>gb",
+                "<CMD>Git blame<CR>",
+                mode = "n",
+                desc = "Git Blame",
+            },
+
+            {
                 "<leader>gC",
                 function()
                     local defaultName = "cgomes/"
