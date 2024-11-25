@@ -61,7 +61,7 @@ local M = {
 
             {
                 "<leader>bo",
-                "<cmd>Telescope buffers<CR>",
+                "<cmd>Telescope buffers only_cwd=true<CR>",
                 desc = "List buffers open",
                 silent = true,
             },
@@ -75,7 +75,7 @@ local M = {
 
             {
                 "<leader>o",
-                "<cmd>Telescope oldfiles<CR>",
+                "<cmd>Telescope oldfiles only_cwd=true<CR>",
                 desc = "Find recently opened files",
                 silent = true,
             },
@@ -272,9 +272,13 @@ local M = {
                 },
 
                 pickers = {
+                    buffers = {
+                        sort_mru = true,
+                    },
+
                     oldfiles = {
                         -- `cwd` will be the directory where Telescope started.
-                        cwd_only = true,
+                        -- cwd_only = true,
                         -- initial_mode = "normal",
                         file_ignore_patterns = fileIgnorePatternsWithNodeModules,
                     },
