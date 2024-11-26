@@ -25,13 +25,13 @@ local M = {
                     },
                     winbar = {
                         "DiffviewFiles",
-                        "oil",
+                        -- "oil",
                         "neo-tree",
                         "dap-repl",
                     },
                 },
                 refresh = {
-                    statusline = 400,
+                    statusline = 600,
                     tabline = 400,
                     winbar = 100,
                 },
@@ -112,13 +112,15 @@ local M = {
 local cache = require("helpers.cache")
 
 local symbols = {
-    modified = "[+]",
-    readonly = "[-]",
+    modified = "",
+    readonly = "",
     unnamed = "[No Name]",
-    newfile = "[New]",
+    newfile = "",
+    diff = "",
 }
 
-local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
+--- @type fun(path: string, self: table): { name: string, icon: string?, icon_highlight: string? }
+local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
     local devIcons = require("nvim-web-devicons")
     local highlight = require("lualine.highlight")
     local utils = require("lualine.utils.utils")
@@ -126,18 +128,23 @@ local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
     local relativePath = vim.fn.expand("%:~:.")
 
     if relativePath == "" then
-        return symbols.unnamed
+        return {
+            name = symbols.unnamed,
+            icon = nil,
+            icon_highlight = nil,
+        }
     end
 
-    local pathToRemove = vim.fn.fnamemodify(vim.fn.getcwd(), ":p")
-        .. ".git/:0:/"
-
-    relativePath = relativePath:gsub(pathToRemove, "")
+    relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
+    relativePath = relativePath:gsub("fugitive://.*/%.git//0", "fugitive:/")
 
     local icon, icon_highlight_group = devIcons.get_icon(
         vim.fn.expand("%:~:t"),
         vim.fn.expand("#" .. vim.fn.bufnr("%") .. ":e")
     )
+
+    --- @type string|nil
+    local icon_highlight = nil
 
     if icon then
         if not self.icon_hl_cache then
@@ -148,9 +155,7 @@ local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
         local highlight_color =
             utils.extract_highlight_colors(icon_highlight_group, "fg")
         if highlight_color then
-            local default_highlight = self:get_default_hl()
-
-            local icon_highlight = self.icon_hl_cache[highlight_color]
+            icon_highlight = self.icon_hl_cache[highlight_color]
             if
                 not icon_highlight
                 or not highlight.highlight_exists(
@@ -163,14 +168,14 @@ local cachedBufferName = cache.cacheByKey("buffer_name", function(self)
                 )
                 self.icon_hl_cache[highlight_color] = icon_highlight
             end
-
-            icon = self:format_hl(icon_highlight) .. icon .. default_highlight
         end
-
-        return icon .. " " .. relativePath
     end
 
-    return relativePath
+    return {
+        name = relativePath,
+        icon = icon,
+        icon_highlight = icon_highlight,
+    }
 end)
 
 local function is_new_file()
@@ -182,7 +187,15 @@ end
 
 P.buffer_name = function(self)
     local bufferPath = vim.fn.expand("%:~:p")
-    local name = cachedBufferName(bufferPath, self)
+    local bufferInfo = cachedBufferInfo(bufferPath, self)
+    local name, icon, icon_highlight =
+        bufferInfo.name, bufferInfo.icon, bufferInfo.icon_highlight
+
+    if icon then
+        local default_highlight = self:get_default_hl()
+        icon = self:format_hl(icon_highlight) .. icon .. default_highlight
+        name = icon .. " " .. name
+    end
 
     if vim.bo.modified then
         name = name .. " " .. symbols.modified
@@ -192,7 +205,9 @@ P.buffer_name = function(self)
         name = name .. " " .. symbols.readonly
     end
 
-    if is_new_file() then
+    if string.find(name, "diffview://") or string.find(name, "fugitive://") then
+        name = name .. " " .. symbols.diff
+    elseif is_new_file() then
         name = name .. " " .. symbols.newfile
     end
 
