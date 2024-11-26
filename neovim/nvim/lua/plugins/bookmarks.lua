@@ -58,8 +58,7 @@ return {
         local project_path =
             vim.fn.fnamemodify(vim.fn.getcwd(), ":p"):gsub("/", "__")
 
-        local bookmarksPath = os.getenv("HOME")
-            .. "/.cache/nvim/nvim-bookmarks/"
+        local bookmarksPath = vim.fn.stdpath("cache") .. "/nvim-bookmarks/"
 
         vim.cmd("silent !mkdir -p " .. bookmarksPath)
 
