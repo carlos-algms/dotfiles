@@ -3,7 +3,9 @@ local M = {}
 M.cache = {}
 
 --- @param key string: The key to group the caching.
---- @param cb function: The callback function to execute if the cache is empty.
+--- @generic R
+--- @param cb fun(params: table): `R`? The callback function to execute if the cache is empty.
+--- @return fun(path: string, params: table): R?
 M.cacheByKey = function(key, cb)
     if M.cache[key] == nil then
         M.cache[key] = {}
