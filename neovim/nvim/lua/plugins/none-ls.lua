@@ -19,12 +19,9 @@ local M = {
         local nullLs = require("null-ls")
 
         local sources = {}
-        local phpstan_sources = P.make_phpstan_sources()
 
-        vim.list_extend(sources, phpstan_sources)
-
-        local cspell_sources = P.make_cspell_sources()
-        vim.list_extend(sources, cspell_sources)
+        vim.list_extend(sources, P.make_phpstan_sources())
+        vim.list_extend(sources, P.make_cspell_sources())
 
         nullLs.setup({
             fallback_severity = vim.diagnostic.severity.INFO,
