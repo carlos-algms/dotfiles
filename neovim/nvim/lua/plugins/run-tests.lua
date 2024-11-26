@@ -210,7 +210,7 @@ P.getJestAdapter = function()
             cmd = neoTestJestUtils.getJestCommand(file)
         end
 
-        vim.notify("jest cmd: " .. cmd)
+        -- vim.notify("jest cmd: " .. cmd)
 
         return cmd
     end
