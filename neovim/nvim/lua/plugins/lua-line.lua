@@ -137,6 +137,8 @@ local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
 
     relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
     relativePath = relativePath:gsub("fugitive://.*/%.git//0", "fugitive:/")
+    relativePath = relativePath:gsub("octo://.*/file/RIGHT/", "octo://NEW/")
+    relativePath = relativePath:gsub("octo://.*/file/LEFT/", "octo://BASE/")
 
     local icon, icon_highlight_group = devIcons.get_icon(
         vim.fn.expand("%:~:t"),
@@ -207,7 +209,7 @@ P.buffer_name = function(self)
 
     if string.find(name, "diffview://") or string.find(name, "fugitive://") then
         name = name .. " " .. symbols.diff
-    elseif is_new_file() then
+    elseif is_new_file() and not string.find(name, "octo://") then
         name = name .. " " .. symbols.newfile
     end
 
