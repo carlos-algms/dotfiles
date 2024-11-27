@@ -238,6 +238,7 @@ return {
             })
 
             require("mason").setup()
+            local tables = require("helpers.tables")
 
             local ensureToolsInstalled = {
                 "shfmt",
@@ -251,25 +252,27 @@ return {
             }
 
             if vim.g.has_node then
-                table.insert(ensureToolsInstalled, "prettier")
-                ensureLspInstalled =
-                    table.shallowMerge(ensureLspInstalled, { "jsonls" })
+                tables.deep_extend(ensureToolsInstalled, { "prettier" })
+                tables.deep_extend(ensureLspInstalled, { "jsonls" })
             end
 
             if not vim.g.is_ssh then
                 if vim.g.has_node then
-                    table.insert(ensureToolsInstalled, "js-debug-adapter")
-                    ensureLspInstalled =
-                        table.shallowMerge(ensureLspInstalled, {
-                            -- not installing tsserver because of ts-tools plugin
-                            -- "tsserver",
-                            -- "ts_ls",
-                            "html",
-                            "cssls",
-                            -- "phpactor",
-                            "intelephense",
-                            "emmet_language_server",
-                        })
+                    tables.deep_extend(
+                        ensureToolsInstalled,
+                        { "js-debug-adapter" }
+                    )
+
+                    tables.deep_extend(ensureLspInstalled, {
+                        -- not installing tsserver because of ts-tools plugin
+                        -- "tsserver",
+                        -- "ts_ls",
+                        "html",
+                        "cssls",
+                        -- "phpactor",
+                        "intelephense",
+                        "emmet_language_server",
+                    })
                 end
             end
 
