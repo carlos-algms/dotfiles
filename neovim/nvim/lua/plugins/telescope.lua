@@ -262,6 +262,7 @@ local M = {
                             -- actions.which_key shows the mappings for your picker,
                             -- e.g. git_{create, delete, ...}_branch for the git_branches picker
                             ["<C-h>"] = actions.which_key,
+                            ["<C-Space>"] = actions.to_fuzzy_refine,
                         },
                         n = {
                             ["<C-c>"] = actions.close, -- I don't know why this is not the default
@@ -641,11 +642,12 @@ function P.setupImagePreviewInTelescope()
 
     local image_preview = telescope_image_preview()
 
-    require("telescope").setup({
-        defaults = {
-            file_previewer = image_preview.file_previewer,
-            buffer_previewer_maker = image_preview.buffer_previewer_maker,
-        },
+    local config = require("telescope.config")
+    local tables = require("helpers.tables")
+
+    tables.deep_extend(config.values, {
+        file_previewer = image_preview.file_previewer,
+        buffer_previewer_maker = image_preview.buffer_previewer_maker,
     })
 
     -- enable line numbers on telescope previewer pane
