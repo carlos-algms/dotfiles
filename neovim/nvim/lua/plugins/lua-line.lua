@@ -139,6 +139,7 @@ local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
     relativePath = relativePath:gsub("fugitive://.*/%.git//0", "fugitive:/")
     relativePath = relativePath:gsub("octo://.*/file/RIGHT/", "octo://NEW/")
     relativePath = relativePath:gsub("octo://.*/file/LEFT/", "octo://BASE/")
+    relativePath = relativePath:gsub(".*%.fugitiveblame", "fugitive:Blame")
 
     local icon, icon_highlight_group = devIcons.get_icon(
         vim.fn.expand("%:~:t"),
