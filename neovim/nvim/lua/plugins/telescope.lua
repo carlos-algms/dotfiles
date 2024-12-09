@@ -515,6 +515,10 @@ function P.setupTroubleInTelescope()
 end
 
 function P.setupImagePreviewInTelescope()
+    local status, image_api = pcall(require, "image")
+    if not status then
+        return
+    end
     local supported_images =
         { "svg", "png", "jpg", "jpeg", "gif", "webp", "avif" }
 
@@ -530,7 +534,6 @@ function P.setupImagePreviewInTelescope()
         local Previewers = require("telescope.previewers")
 
         local previewers = require("telescope.previewers")
-        local image_api = require("image")
 
         local is_image_preview = false
         local image = nil
