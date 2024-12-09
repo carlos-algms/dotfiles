@@ -136,7 +136,7 @@ local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
     end
 
     relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
-    relativePath = relativePath:gsub("fugitive://.*/%.git//0", "fugitive:/")
+    relativePath = relativePath:gsub("fugitive://.*/%.git//", "fugitive:/")
     relativePath = relativePath:gsub("octo://.*/file/RIGHT/", "octo://NEW/")
     relativePath = relativePath:gsub("octo://.*/file/LEFT/", "octo://BASE/")
     relativePath = relativePath:gsub(".*%.fugitiveblame", "fugitive:Blame")
