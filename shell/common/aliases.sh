@@ -1,4 +1,10 @@
-alias Rsync="$(which -p rsync) --recursive --no-inc-recursive --progress --links --human-readable --times --perms"
+alias Rsync="$(which -p rsync) --recursive \
+    --no-inc-recursive \
+    --progress \
+    --links \
+    --human-readable \
+    --times \
+    --perms"
 
 alias path-show='echo $PATH | tr ":" "\n"'
 
