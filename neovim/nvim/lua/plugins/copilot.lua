@@ -1,21 +1,33 @@
 return {
     {
         "CopilotC-Nvim/CopilotChat.nvim",
-        branch = "canary",
-        lazy = true,
+
+        branch = "main",
+
+        build = "make tiktoken", -- Only on MacOS or Linux
+
         dependencies = {
             { "zbirenbaum/copilot.lua" },
             -- { "github/copilot.vim" },
             { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
         },
+
+        cmd = {
+            "CopilotChat",
+            "CopilotChatOpen",
+            "CopilotChatClose",
+            "CopilotChatToggle",
+        },
+
         keys = {
             {
-                "<leader>C",
-                "<cmd>CopilotChatOpen<CR>",
+                "<Leader>C",
+                "<CMD>CopilotChatOpen<CR>",
                 desc = "Open Copilot Chat",
                 mode = { "n", "v" },
             },
         },
+
         opts = {
             -- debug = true, -- Enable debugging
             -- See Configuration section for rest
