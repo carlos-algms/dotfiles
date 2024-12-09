@@ -42,6 +42,24 @@
            )
   )
 
+;; fix for `styled(Component)<{ ... }>`
+(call_expression
+  function: (non_null_expression
+              (instantiation_expression
+                (call_expression
+                  function: (identifier) @_name (#eq? @_name "styled")
+                  )
+                )
+              )
+  arguments: ((template_string) @injection.content
+                                (#offset! @injection.content 0 1 0 -1)
+                                (#set! injection.include-children)
+                                (#set! injection.language "styled")
+                                )
+  )
+
+
+
 ;; Fix for `styled.div.attrs<xxx>`
 (call_expression
   function: (non_null_expression
