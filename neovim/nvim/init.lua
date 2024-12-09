@@ -40,10 +40,30 @@ vim.keymap.set(
     { desc = "Open Lazy plugin manager modal" }
 )
 
+local function is_user_thread_limited()
+    local user = os.getenv("USER")
+    local thread_limited_users = os.getenv("THREAD_LIMITED_USERS")
+
+    if not thread_limited_users then
+        return false
+    end
+
+    for limited_user in string.gmatch(thread_limited_users, "([^%s]+)") do
+        if limited_user == user then
+            return true
+        end
+    end
+    return false
+end
+
 require("lazy").setup("plugins", {
     change_detection = {
         notify = false,
     },
     -- colorscheme that will be used when installing plugins.
     install = { colorscheme = { "darcluar" } },
+    -- as in the Docs + make it work in Shared Hosts like GoDaddy, where they limit the number of processes and threads
+    concurrency = jit.os:find("Windows")
+            and (vim.loop.available_parallelism() * 2)
+        or (is_user_thread_limited() and 1 or nil),
 })
