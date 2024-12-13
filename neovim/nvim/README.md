@@ -20,6 +20,8 @@
 -   [ ] Bookmarks: code a way of having different named list of files by changing the project_path
         Grapple calls it "scopes"
         like: bookmarksPath .. project_path .. "-permanent-list" .. ".json", or bookmarksPath .. project_path .. "-ticket-XX-yyy-" .. ".json"
+-   [x] fix Eslint Ls crashing after going to a definition inside node_modules
+    -   I don't know how to fix it better, it just trows 1 error now, and keeps working
 -   [x] Make `]d` and `[d` ignore typos, aka `info`
 -   [x] Install multi-line plugin
         https://github.com/mg979/vim-visual-multi
