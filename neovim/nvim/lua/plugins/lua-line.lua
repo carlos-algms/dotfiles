@@ -28,6 +28,8 @@ local M = {
                         -- "oil",
                         "neo-tree",
                         "dap-repl",
+                        "Avante",
+                        "AvanteInput",
                     },
                 },
                 refresh = {
