@@ -302,6 +302,7 @@ return {
 
             masonLspConfig.setup({
                 ensure_installed = ensureLspInstalled,
+                automatic_installation = false,
                 handlers = {
                     function(server_name)
                         -- just make sure they are disabled, as I'm using typescript-tools.nvim
@@ -441,17 +442,18 @@ return {
                             end,
                             settings = {
                                 options = {
-                                    overrideConfig = {
-                                        ignores = {
-                                            "**.vscode**",
-                                            "**/nvm/**",
-                                            "**/node_modules/**",
-                                            "**/lib/**",
-                                            "**/dist/**",
-                                            "**/public/**",
-                                            "**/build/**",
-                                        },
-                                    },
+                                    -- Disabled, as if a config file is found, it won't start. and this is different depending o eslint version
+                                    -- overrideConfig = {
+                                    --     ignores = {
+                                    --         "**.vscode**",
+                                    --         "**/nvm/**",
+                                    --         "**/node_modules/**",
+                                    --         "**/lib/**",
+                                    --         "**/dist/**",
+                                    --         "**/public/**",
+                                    --         "**/build/**",
+                                    --     },
+                                    -- },
                                 },
                             },
                         })
