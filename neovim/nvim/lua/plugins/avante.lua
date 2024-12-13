@@ -155,11 +155,13 @@ return {
                     file_types = {
                         -- "markdown",
                         "Avante",
+                        "copilot-chat",
                     },
                 },
                 ft = {
                     -- "markdown",
                     "Avante",
+                    "copilot-chat",
                 },
             },
         },
