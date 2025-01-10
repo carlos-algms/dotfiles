@@ -106,6 +106,8 @@ return {
                     title = "hover",
                 })
 
+            local bufferBoundCache = {}
+
             vim.api.nvim_create_autocmd("LspAttach", {
                 group = vim.api.nvim_create_augroup(
                     "UserLspConfig",
@@ -119,17 +121,10 @@ return {
                         return
                     end
 
-                    local bufNr = ev.buf
-                    if client.supports_method("textDocument/completion") then
-                        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
-                    end
-                    if client.supports_method("textDocument/definition") then
-                        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
-                    end
-
                     local noKeymapLspClients = {
                         "null-ls",
                         "GitHub Copilot",
+                        "copilot",
                         "eslint",
                     }
 
@@ -139,13 +134,28 @@ return {
                         end
                     end
 
+                    local bufNr = ev.buf
+
+                    if bufferBoundCache[bufNr] then
+                        return
+                    end
+
+                    bufferBoundCache[bufNr] = true
+
+                    if client.supports_method("textDocument/completion") then
+                        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
+                    end
+                    if client.supports_method("textDocument/definition") then
+                        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+                    end
+
                     local lspKeymap = function(
                         when,
                         keyCombination,
                         action,
                         desc
                     )
-                        local opts = { buffer = ev.buf }
+                        local opts = { buffer = bufNr }
                         if desc then
                             opts.desc = desc
                         end
