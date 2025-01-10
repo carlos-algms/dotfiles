@@ -22,7 +22,22 @@ fi
 # e_header "Updating Homebrew"
 brew doctor
 brew update
-brew install coreutils wget git watch
+brew install \
+    ack \
+    bat \
+    coreutils \
+    eza \
+    fd \
+    fzf \
+    git \
+    htop \
+    oh-my-posh \
+    ripgrep \
+    tree \
+    watch \
+    wget \
+    xz \
+    zoxide
 
 brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
