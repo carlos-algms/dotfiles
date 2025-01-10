@@ -45,16 +45,13 @@ fi
 
 if [ ! -z "$(command -v bat)" ]; then
     alias cat="bat "
+elif [ ! -z "$(command -v batcat)" ]; then
+    alias cat="batcat "
 fi
 
-if [ ! -z "$(command -v eza)" ]; then
-    alias ls="eza --group-directories-first --color=auto --icons --almost-all --classify --time-style=long-iso "
-    # https://askubuntu.com/a/466203 - colors explanation
-    export EZA_COLORS="da=0;37:ex=0;32:di=0;34"
+# Fix for the fuzzy cd auto completion
+# https://github.com/ajeetdsouza/zoxide/issues/513#issuecomment-2040488941
+if [ ! -z "$(command -v zoxide)" ]; then
+    eval "${$(zoxide init zsh):s#_files -/#_cd#}"
+    alias cd="z "
 fi
-
-# Disabled as tab doesn't auto complete fuzzily like original cd does
-# if [ ! -z "$(command -v zoxide)" ]; then
-#     eval "$(zoxide init zsh)"
-#     alias cd="z "
-# fi
