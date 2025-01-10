@@ -44,6 +44,7 @@ return {
                 suggestion = {
                     enabled = true,
                     auto_trigger = true,
+                    hide_during_completion = false,
                     keymap = {
                         accept = "<C-l>",
                         accept_word = "<C-.>",
