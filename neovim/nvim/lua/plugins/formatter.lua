@@ -68,13 +68,39 @@ return {
                 desc = "Format Current Buffer",
             },
         },
+
+        --- @type conform.setupOpts
         opts = {
+            notify_no_formatters = true,
             formatters_by_ft = {
                 lua = { stop_after_first = true, "stylua" },
+                go = {
+                    stop_after_first = true,
+                    -- "goimports-reviser",
+                    lsp_format = "fallback",
+                },
                 -- python = { stop_after_first = true, "black" },
             },
+            formatters = {
+                -- Disabled, as it requires go.mod file to be present, and I just want to format
+                -- ["goimports-reviser"] = {
+                --     prepend_args = { "-rm-unused", "-set-alias" },
+                -- },
+            },
             -- log_level = vim.log.levels.DEBUG,
+            format_on_save = function(bufnr)
+                if not shouldFormat() then
+                    return
+                end
+
+                return {
+                    timeout_ms = 500,
+                    lsp_format = "fallback",
+                }
+            end,
         },
+
+        ---@param opts conform.setupOpts
         config = function(_, opts)
             local conform = require("conform")
             local formatters_by_ft = opts.formatters_by_ft or {}
@@ -105,16 +131,6 @@ return {
 
             conform.setup(opts)
 
-            vim.api.nvim_create_autocmd("BufWritePre", {
-                pattern = "*",
-                callback = function(args)
-                    if not shouldFormat() then
-                        return
-                    end
-                    conform.format({ bufnr = args.buf })
-                end,
-            })
-
             vim.api.nvim_create_user_command(
                 "FormatCurrentBuffer",
                 function(args)
@@ -134,7 +150,7 @@ return {
 
                     conform.format({
                         async = true,
-                        lsp_fallback = true,
+                        lsp_format = "fallback",
                         range = range,
                     })
                 end,

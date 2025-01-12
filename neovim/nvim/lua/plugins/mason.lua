@@ -286,6 +286,14 @@ return {
                 end
             end
 
+            if vim.fn.executable("go") == 1 then
+                tables.deep_extend(ensureLspInstalled, { "gopls" })
+                -- tables.deep_extend(
+                --     ensureToolsInstalled,
+                --     { "goimports-reviser" }
+                -- )
+            end
+
             require("mason-tool-installer").setup({
                 -- a list of all tools you want to ensure are installed upon
                 -- start
