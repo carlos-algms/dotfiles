@@ -1,6 +1,9 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 
+-- known issue - :Inspect is not working
+vim.hl = vim.highlight
+
 require("00_version_and_env")
 require("helpers")
 
