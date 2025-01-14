@@ -87,13 +87,17 @@ return {
                 silent = true,
             },
         },
+        --- @module "avante"
+        --- @type avante.Config
         opts = {
             -- add any opts here
             provider = "copilot",
-            auto_suggestions_provider = "copilot",
+            -- auto_suggestions_provider = "copilot",
             hints = { enabled = false }, -- it sometimes stuck and never goes away
+            behaviour = {
+                auto_set_keymaps = false,
+            },
             windows = {
-                ---@type AvantePosition
                 position = "right",
                 wrap = true, -- similar to vim.o.wrap
                 width = 35, -- default % based on available width in vertical layout
