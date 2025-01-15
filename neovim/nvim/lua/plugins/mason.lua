@@ -226,93 +226,44 @@ local M = {
 
                                 local vtslsCommands = require("vtsls").commands
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>io",
-                                    function()
-                                        vtslsCommands.organize_imports(bufNr)
-                                    end,
-                                    {
-                                        desc = "Imports Organize",
+                                --- @param keys string
+                                --- @param func function
+                                --- @param desc string
+                                local function tsKeymap(keys, func, desc)
+                                    vim.keymap.set({ "n", "v" }, keys, func, {
+                                        desc = desc,
                                         silent = true,
                                         buffer = bufNr,
-                                    }
-                                )
+                                    })
+                                end
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>is",
-                                    function()
-                                        vtslsCommands.sort_imports(bufNr)
-                                    end,
-                                    {
-                                        desc = "Imports Sort",
-                                        silent = true,
-                                        buffer = bufNr,
-                                    }
-                                )
+                                tsKeymap("<leader>io", function()
+                                    vtslsCommands.organize_imports(bufNr)
+                                end, "TS Imports Organize")
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>ir",
-                                    function()
-                                        vtslsCommands.remove_unused_imports(
-                                            bufNr
-                                        )
-                                    end,
-                                    {
-                                        desc = "Imports remove unused",
-                                        silent = true,
-                                        buffer = bufNr,
-                                    }
-                                )
+                                tsKeymap("<leader>is", function()
+                                    vtslsCommands.sort_imports(bufNr)
+                                end, "TS Imports Sort")
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>ia",
-                                    function()
-                                        vtslsCommands.add_missing_imports(bufNr)
-                                    end,
-                                    {
-                                        desc = "Imports Add All missing",
-                                        silent = true,
-                                        buffer = bufNr,
-                                    }
-                                )
+                                tsKeymap("<leader>ir", function()
+                                    vtslsCommands.remove_unused_imports(bufNr)
+                                end, "TS Imports remove unused")
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>rf",
-                                    function()
-                                        vtslsCommands.rename_file(bufNr)
-                                    end,
-                                    {
-                                        desc = "Rename File",
-                                        silent = true,
-                                        buffer = bufNr,
-                                    }
-                                )
+                                tsKeymap("<leader>ia", function()
+                                    vtslsCommands.add_missing_imports(bufNr)
+                                end, "TS Imports Add All missing")
 
-                                vim.keymap.set(
-                                    { "n", "v" },
-                                    "<leader>ct",
-                                    function()
-                                        vtslsCommands.select_ts_version(bufNr)
-                                    end,
-                                    {
-                                        desc = "Select Typescript Version",
-                                        silent = true,
-                                        buffer = bufNr,
-                                    }
-                                )
+                                tsKeymap("<leader>rf", function()
+                                    vtslsCommands.rename_file(bufNr)
+                                end, "TS Rename File")
 
-                                vim.keymap.set({ "n", "v" }, "gD", function()
+                                tsKeymap("<leader>ct", function()
+                                    vtslsCommands.select_ts_version(bufNr)
+                                end, "TS Select Typescript Version")
+
+                                tsKeymap("gD", function()
                                     vtslsCommands.goto_source_definition(nil)
-                                end, {
-                                    desc = "Go to source definition",
-                                    silent = true,
-                                    buffer = bufNr,
-                                })
+                                end, "TS Go to source definition")
                             end,
                         }
 
@@ -500,6 +451,73 @@ local M = {
                                     --         "**/build/**",
                                     --     },
                                     -- },
+                                },
+                            },
+                        })
+                    end,
+
+                    gopls = function()
+                        lspConfig.gopls.setup({
+                            capabilities = all_lsp_capabilities,
+                            on_attach = function(client, bufNr)
+                                helpers.onLspAttach(client, bufNr)
+
+                                if
+                                    not client.server_capabilities.semanticTokensProvider
+                                then
+                                    local semantic =
+                                        client.config.capabilities.textDocument.semanticTokens
+                                    client.server_capabilities.semanticTokensProvider =
+                                        {
+                                            full = true,
+                                            legend = {
+                                                tokenTypes = semantic.tokenTypes,
+                                                tokenModifiers = semantic.tokenModifiers,
+                                            },
+                                            range = true,
+                                        }
+                                end
+                            end,
+                            settings = {
+                                gopls = {
+                                    gofumpt = true,
+                                    codelenses = {
+                                        gc_details = false,
+                                        generate = true,
+                                        regenerate_cgo = true,
+                                        run_govulncheck = true,
+                                        test = true,
+                                        tidy = true,
+                                        upgrade_dependency = true,
+                                        vendor = true,
+                                    },
+                                    hints = {
+                                        assignVariableTypes = true,
+                                        compositeLiteralFields = true,
+                                        compositeLiteralTypes = true,
+                                        constantValues = true,
+                                        functionTypeParameters = true,
+                                        parameterNames = true,
+                                        rangeVariableTypes = true,
+                                    },
+                                    analyses = {
+                                        fieldalignment = true,
+                                        nilness = true,
+                                        unusedparams = true,
+                                        unusedwrite = true,
+                                        useany = true,
+                                    },
+                                    usePlaceholders = true,
+                                    completeUnimported = true,
+                                    staticcheck = true,
+                                    directoryFilters = {
+                                        "-.git",
+                                        "-.vscode",
+                                        "-.idea",
+                                        "-.vscode-test",
+                                        "-node_modules",
+                                    },
+                                    semanticTokens = true,
                                 },
                             },
                         })
