@@ -315,10 +315,17 @@ return {
 
         keys = {
             {
-                "<C-S-p>",
+                "<leader>g<C-p>",
                 "<cmd>Git push -u <CR>",
                 mode = "n",
                 desc = "Git Push",
+            },
+
+            {
+                "<leader>g<C-l>",
+                "<cmd>Git pull --rebase --autostash <CR>",
+                mode = "n",
+                desc = "Git pull --rebase --autostash",
             },
 
             {
