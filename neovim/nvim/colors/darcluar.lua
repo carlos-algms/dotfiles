@@ -89,6 +89,7 @@ M.theme = {
         CmpItemKindMethod = "Function",
         CmpItemKindModule = "Type",
         CmpItemKindProperty = "Constant",
+        CmpItemKindField = "Constant",
         CmpItemKindSnippet = "String",
         CmpItemMenu = "Comment",
         ColorColumn = "CursorLine",
