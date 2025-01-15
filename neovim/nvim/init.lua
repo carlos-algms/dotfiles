@@ -35,6 +35,7 @@ require("vim-options")
 require("remap")
 require("commands")
 require("autocmds")
+require("jump_to_node")
 
 vim.keymap.set(
     { "n" },
