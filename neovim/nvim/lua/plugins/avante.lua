@@ -13,6 +13,7 @@ return {
                 "",
                 desc = "Avante",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Aa",
@@ -21,6 +22,7 @@ return {
                 end,
                 desc = "Avante Ask",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Ae",
@@ -29,6 +31,7 @@ return {
                 end,
                 desc = "Avante Edit",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Ar",
@@ -37,6 +40,7 @@ return {
                 end,
                 desc = "Avante Refresh",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Af",
@@ -45,6 +49,7 @@ return {
                 end,
                 desc = "Avante Focus",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>At",
@@ -53,6 +58,7 @@ return {
                 end,
                 desc = "Avante Toggle",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Ad",
@@ -61,6 +67,7 @@ return {
                 end,
                 desc = "Avante Debug",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Ah",
@@ -69,6 +76,7 @@ return {
                 end,
                 desc = "Avante Hint",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>As",
@@ -77,6 +85,7 @@ return {
                 end,
                 desc = "Avante Suggestion",
                 silent = true,
+                mode = { "n", "v" },
             },
             {
                 "<Leader>Ar",
@@ -85,6 +94,7 @@ return {
                 end,
                 desc = "Avante Repomap",
                 silent = true,
+                mode = { "n", "v" },
             },
         },
         --- @module "avante"
