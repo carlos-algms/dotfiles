@@ -1,5 +1,6 @@
 return {
     {
+        -- TODO: it doesn't seem to be working with autocomplete
         "folke/lazydev.nvim",
         ft = "lua", -- only load on lua files
         opts = {
@@ -23,7 +24,7 @@ return {
             { "b0o/schemastore.nvim" },
 
             -- Disabled to keep using typescript-tools.nvim
-            -- { "yioneko/nvim-vtsls" },
+            { "yioneko/nvim-vtsls" },
         },
 
         init = function()
@@ -108,6 +109,7 @@ return {
 
             local bufferBoundCache = {}
 
+            -- TODO: I might be able to extract this and add to the `on_attach` method of the LSP servers config, so I don't need to check for individual servers
             vim.api.nvim_create_autocmd("LspAttach", {
                 group = vim.api.nvim_create_augroup(
                     "UserLspConfig",
@@ -147,6 +149,12 @@ return {
                     end
                     if client.supports_method("textDocument/definition") then
                         vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+                    end
+
+                    if client.server_capabilities.inlayHintProvider then
+                        vim.lsp.inlay_hint.enable(true, {
+                            bufnr = bufNr,
+                        })
                     end
 
                     local lspKeymap = function(
@@ -192,9 +200,6 @@ return {
                         "<cmd>Telescope lsp_definitions<CR>",
                         "Go to definition"
                     )
-
-                    -- Implemented on telescope, as it has a better UI
-                    -- lspKeymap("n", "gr", vim.lsp.buf.references, opts)
 
                     -- enabled again, instead of lspsaga, as I can resume it after closing
                     lspKeymap(
@@ -277,6 +282,7 @@ return {
                         -- not installing tsserver because of ts-tools plugin
                         -- "tsserver",
                         -- "ts_ls",
+                        "vtsls",
                         "html",
                         "cssls",
                         -- "phpactor",
@@ -295,8 +301,7 @@ return {
             end
 
             require("mason-tool-installer").setup({
-                -- a list of all tools you want to ensure are installed upon
-                -- start
+                -- a list of all tools you want to ensure are installed upon start
                 ensure_installed = ensureToolsInstalled,
             })
 
@@ -305,7 +310,7 @@ return {
             local lspConfig = require("lspconfig")
             local util = require("lspconfig.util")
 
-            -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig
+            require("lspconfig.configs").vtsls = require("vtsls").lspconfig
 
             local all_lsp_capabilities =
                 require("cmp_nvim_lsp").default_capabilities(
@@ -315,7 +320,7 @@ return {
             local disabledLspServers = {
                 "ts_ls",
                 "tsserver",
-                "vtsls",
+                -- "vtsls",
             }
 
             masonLspConfig.setup({
@@ -333,6 +338,186 @@ return {
                         lspConfig[server_name].setup({
                             capabilities = all_lsp_capabilities,
                         })
+                    end,
+
+                    vtsls = function()
+                        --- @type lspconfig.Config
+                        ---@diagnostic disable-next-line: missing-fields
+                        local vtsls_config = {
+                            capabilities = all_lsp_capabilities,
+                            root_dir = function(pattern)
+                                local root = util.root_pattern(
+                                    "tsconfig.json",
+                                    "jsconfig.json",
+                                    "package.json",
+                                    ".git"
+                                )(pattern)
+
+                                if not root then
+                                    root = vim.fn.getcwd()
+                                end
+
+                                ---@diagnostic disable-next-line: redundant-return-value
+                                return root
+                            end,
+                            filetypes = {
+                                "javascript",
+                                "javascriptreact",
+                                "javascript.jsx",
+                                "typescript",
+                                "typescriptreact",
+                                "typescript.tsx",
+                            },
+                            -- https://github.com/yioneko/vtsls/blob/541b52a341a740b1b2d1b4ae85f168dbb3ac6d25/packages/service/configuration.schema.json#L1212
+                            settings = {
+                                complete_function_calls = true,
+                                vtsls = {
+                                    enableMoveToFileCodeAction = true,
+                                    autoUseWorkspaceTsdk = true,
+                                    experimental = {
+                                        maxInlayHintLength = 30,
+                                        completion = {
+                                            enableServerSideFuzzyMatch = true,
+                                        },
+                                    },
+                                    typescript = {
+                                        format = {
+                                            indentSize = 2,
+                                        },
+                                    },
+                                },
+                                typescript = {
+                                    updateImportsOnFileMove = {
+                                        enabled = "always",
+                                    },
+                                    suggest = {
+                                        completeFunctionCalls = true,
+                                    },
+                                    inlayHints = {
+                                        enumMemberValues = { enabled = true },
+                                        functionLikeReturnTypes = {
+                                            enabled = true,
+                                        },
+                                        parameterNames = {
+                                            enabled = "literals",
+                                        },
+                                        parameterTypes = { enabled = true },
+                                        propertyDeclarationTypes = {
+                                            enabled = true,
+                                        },
+                                        variableTypes = { enabled = false },
+                                    },
+                                },
+                            },
+                            on_attach = function(client, bufNr)
+                                local vtslsCommands = require("vtsls").commands
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>io",
+                                    function()
+                                        vtslsCommands.organize_imports(bufNr)
+                                    end,
+                                    {
+                                        desc = "Imports Organize",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>is",
+                                    function()
+                                        vtslsCommands.sort_imports(bufNr)
+                                    end,
+                                    {
+                                        desc = "Imports Sort",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>ir",
+                                    function()
+                                        vtslsCommands.remove_unused_imports(
+                                            bufNr
+                                        )
+                                    end,
+                                    {
+                                        desc = "Imports remove unused",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>ia",
+                                    function()
+                                        vtslsCommands.add_missing_imports(bufNr)
+                                    end,
+                                    {
+                                        desc = "Imports Add All missing",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>rf",
+                                    function()
+                                        vtslsCommands.rename_file(bufNr)
+                                    end,
+                                    {
+                                        desc = "Rename File",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set(
+                                    { "n", "v" },
+                                    "<leader>ct",
+                                    function()
+                                        vtslsCommands.select_ts_version(bufNr)
+                                    end,
+                                    {
+                                        desc = "Select Typescript Version",
+                                        silent = true,
+                                        buffer = bufNr,
+                                    }
+                                )
+
+                                vim.keymap.set({ "n", "v" }, "gD", function()
+                                    vtslsCommands.goto_source_definition(nil)
+                                end, {
+                                    desc = "Go to source definition",
+                                    silent = true,
+                                    buffer = bufNr,
+                                })
+                            end,
+                        }
+
+                        vtsls_config.settings.javascript = vim.tbl_deep_extend(
+                            "force",
+                            {},
+                            vtsls_config.settings.typescript,
+                            vtsls_config.settings.javascript or {}
+                        )
+
+                        vtsls_config.settings.vtsls.javascript =
+                            vim.tbl_deep_extend(
+                                "force",
+                                {},
+                                vtsls_config.settings.vtsls.typescript,
+                                vtsls_config.settings.vtsls.javascript or {}
+                            )
+
+                        lspConfig.vtsls.setup(vtsls_config)
                     end,
 
                     jsonls = function()
@@ -476,40 +661,6 @@ return {
                             },
                         })
                     end,
-
-                    -- Disabled to use typescript-tools.nvim
-                    -- ts_ls = function()
-                    --     -- tsserver was renamed to ts_ls
-                    --     -- https://github.com/neovim/nvim-lspconfig/pull/3232#issuecomment-2331025714
-                    --     -- I'm not using the ts_ls, as I'm using typescript-tools.nvim
-                    --     return false
-                    -- end,
-                    --
-                    -- tsserver = function()
-                    --     local function organize_imports()
-                    --         local params = {
-                    --             command = "_typescript.organizeImports",
-                    --             arguments = { vim.api.nvim_buf_get_name(0) },
-                    --         }
-                    --         vim.lsp.buf.execute_command(params)
-                    --     end
-
-                    --     lspconfig.tsserver.setup({
-                    --         capabilities = lsp_capabilities,
-                    --         init_options = {
-                    --             preferences = {
-                    --                 disableSuggestions = false,
-                    --             },
-                    --         },
-                    --         commands = {
-                    --             OrganizeImports = {
-                    --                 organize_imports,
-                    --                 description = "Organize Imports",
-                    --             },
-                    --         },
-                    --     })
-                    --     return false
-                    -- end,
                 },
             })
 
