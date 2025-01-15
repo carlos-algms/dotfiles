@@ -1,6 +1,7 @@
-return {
+local helpers = {}
+
+local M = {
     {
-        -- TODO: it doesn't seem to be working with autocomplete
         "folke/lazydev.nvim",
         ft = "lua", -- only load on lua files
         opts = {
@@ -23,7 +24,6 @@ return {
             { "WhoIsSethDaniel/mason-tool-installer.nvim" },
             { "b0o/schemastore.nvim" },
 
-            -- Disabled to keep using typescript-tools.nvim
             { "yioneko/nvim-vtsls" },
         },
 
@@ -66,191 +66,7 @@ return {
                 { desc = "Open problems in a floating window" }
             )
 
-            -- vim.keymap.set(
-            --     "n",
-            --     "[d",
-            --     vim.diagnostic.goto_prev,
-            --     { desc = "Go to previous problem" }
-            -- )
-
-            -- vim.keymap.set(
-            --     "n",
-            --     "]d",
-            --     vim.diagnostic.goto_next,
-            --     { desc = "Go to next problem" }
-            -- )
-
-            -- disabled to use LSP Saga
-            -- vim.keymap.set("n", "]e", function()
-            --     vim.diagnostic.goto_next({
-            --         severity = vim.diagnostic.severity.ERROR,
-            --     })
-            -- end, { desc = "Go to next Erro" })
-
-            -- vim.keymap.set("n", "[e", function()
-            --     vim.diagnostic.goto_prev({
-            --         severity = vim.diagnostic.severity.ERROR,
-            --     })
-            -- end, { desc = "Go to previous Error" })
-
-            vim.lsp.handlers["textDocument/signatureHelp"] =
-                vim.lsp.with(vim.lsp.handlers.signature_help, {
-                    border = "rounded",
-                    title = "signature",
-                })
-
-            vim.lsp.handlers["textDocument/hover"] =
-                vim.lsp.with(vim.lsp.handlers.hover, {
-                    -- Use a sharp border with `FloatBorder` highlights
-                    border = "rounded",
-                    -- add the title in hover float window
-                    title = "hover",
-                })
-
-            local bufferBoundCache = {}
-
-            -- TODO: I might be able to extract this and add to the `on_attach` method of the LSP servers config, so I don't need to check for individual servers
-            vim.api.nvim_create_autocmd("LspAttach", {
-                group = vim.api.nvim_create_augroup(
-                    "UserLspConfig",
-                    { clear = true }
-                ),
-                desc = "LSP actions",
-                callback = function(ev)
-                    -- https://neovim.io/doc/user/lsp.html#lsp-events
-                    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-                    if client == nil then
-                        return
-                    end
-
-                    local noKeymapLspClients = {
-                        "null-ls",
-                        "GitHub Copilot",
-                        "copilot",
-                        "eslint",
-                    }
-
-                    for _, clientName in ipairs(noKeymapLspClients) do
-                        if client.name == clientName then
-                            return
-                        end
-                    end
-
-                    local bufNr = ev.buf
-
-                    if bufferBoundCache[bufNr] then
-                        return
-                    end
-
-                    bufferBoundCache[bufNr] = true
-
-                    if client.supports_method("textDocument/completion") then
-                        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
-                    end
-                    if client.supports_method("textDocument/definition") then
-                        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
-                    end
-
-                    if client.server_capabilities.inlayHintProvider then
-                        vim.lsp.inlay_hint.enable(true, {
-                            bufnr = bufNr,
-                        })
-                    end
-
-                    local lspKeymap = function(
-                        when,
-                        keyCombination,
-                        action,
-                        desc
-                    )
-                        local opts = { buffer = bufNr }
-                        if desc then
-                            opts.desc = desc
-                        end
-
-                        vim.keymap.set(when, keyCombination, action, opts)
-                    end
-
-                    lspKeymap(
-                        "n",
-                        "gD",
-                        vim.lsp.buf.declaration,
-                        "Go to Declaration"
-                    )
-
-                    lspKeymap(
-                        "n",
-                        "go",
-                        "<cmd>Telescope lsp_type_definitions<CR>",
-                        "Go to object type definition"
-                    )
-
-                    lspKeymap(
-                        "n",
-                        "gi",
-                        "<cmd>Telescope lsp_implementations<CR>",
-                        "Go to implementation"
-                    )
-
-                    lspKeymap(
-                        "n",
-                        "gd",
-                        -- went with Telescope, as it is better when there are more than 1 result
-                        -- vim.lsp.buf.definition,
-                        "<cmd>Telescope lsp_definitions<CR>",
-                        "Go to definition"
-                    )
-
-                    -- enabled again, instead of lspsaga, as I can resume it after closing
-                    lspKeymap(
-                        "n",
-                        "gr",
-                        "<cmd>Telescope lsp_references<CR>",
-                        "List references using Telescope"
-                    )
-
-                    lspKeymap(
-                        "n",
-                        "<leader>rw",
-                        "<cmd>Telescope lsp_workspace_symbols<CR>",
-                        "Search for symbol in workspace"
-                    )
-
-                    lspKeymap(
-                        "n",
-                        "<leader>rd",
-                        "<cmd>Telescope lsp_document_symbols<CR>",
-                        "Search for symbol in document"
-                    )
-
-                    -- Enabled this because the floating input accepts all motions, LSP Saga doesn't
-                    lspKeymap(
-                        "n",
-                        "<leader>rn",
-                        vim.lsp.buf.rename,
-                        "Rename symbol with native NVim lsp"
-                    )
-
-                    lspKeymap(
-                        "i",
-                        "<C-h>",
-                        vim.lsp.buf.signature_help,
-                        "Show help for function signature"
-                    )
-
-                    lspKeymap(
-                        { "n", "v" },
-                        "<leader>ca",
-                        vim.lsp.buf.code_action,
-                        "Show code actions"
-                    )
-
-                    -- Disabled to use Conform
-                    -- lspKeymap("n", "<leader>bf", function()
-                    --     vim.lsp.buf.format({ async = true })
-                    -- end, "[B]uffer [F]ormat")
-                end,
-            })
+            helpers.setupLspRoundedBorders()
 
             require("mason").setup()
             local tables = require("helpers.tables")
@@ -279,9 +95,6 @@ return {
                     )
 
                     tables.deep_extend(ensureLspInstalled, {
-                        -- not installing tsserver because of ts-tools plugin
-                        -- "tsserver",
-                        -- "ts_ls",
                         "vtsls",
                         "html",
                         "cssls",
@@ -301,12 +114,10 @@ return {
             end
 
             require("mason-tool-installer").setup({
-                -- a list of all tools you want to ensure are installed upon start
                 ensure_installed = ensureToolsInstalled,
             })
 
             local masonLspConfig = require("mason-lspconfig")
-
             local lspConfig = require("lspconfig")
             local util = require("lspconfig.util")
 
@@ -337,6 +148,7 @@ return {
 
                         lspConfig[server_name].setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.onLspAttach,
                         })
                     end,
 
@@ -410,6 +222,8 @@ return {
                                 },
                             },
                             on_attach = function(client, bufNr)
+                                helpers.onLspAttach(client, bufNr)
+
                                 local vtslsCommands = require("vtsls").commands
 
                                 vim.keymap.set(
@@ -523,9 +337,18 @@ return {
                     jsonls = function()
                         lspConfig.jsonls.setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.enableLspFeatures,
+                            -- lazy-load schemastore when needed - https://www.lazyvim.org/extras/lang/json#nvim-lspconfig
+                            on_new_config = function(new_config)
+                                new_config.settings.json.schemas =
+                                    vim.tbl_deep_extend(
+                                        "force",
+                                        new_config.settings.json.schemas or {},
+                                        require("schemastore").json.schemas()
+                                    )
+                            end,
                             settings = {
                                 json = {
-                                    schemas = require("schemastore").json.schemas(),
                                     validate = { enable = true },
                                 },
                             },
@@ -535,13 +358,30 @@ return {
                     yamlls = function()
                         lspConfig.yamlls.setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.enableLspFeatures,
+                            -- lazy-load schemastore when needed
+                            on_new_config = function(new_config)
+                                new_config.settings.yaml.schemas =
+                                    vim.tbl_deep_extend(
+                                        "force",
+                                        new_config.settings.yaml.schemas or {},
+                                        require("schemastore").yaml.schemas()
+                                    )
+                            end,
                             settings = {
+                                redhat = { telemetry = { enabled = false } },
                                 yaml = {
+                                    keyOrdering = false,
+                                    format = {
+                                        enable = false, -- conform and prettier are better
+                                    },
+                                    validate = true,
                                     schemaStore = {
+                                        -- Must disable built-in schemaStore support to use schemas from SchemaStore.nvim plugin
                                         enable = false,
+                                        -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
                                         url = "",
                                     },
-                                    schemas = require("schemastore").yaml.schemas(),
                                 },
                             },
                         })
@@ -550,6 +390,7 @@ return {
                     lua_ls = function()
                         lspConfig.lua_ls.setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.onLspAttach,
                             settings = {
                                 Lua = {
                                     telemetry = { enable = false },
@@ -573,6 +414,7 @@ return {
                         return false
                         -- lspConfig.phpactor.setup({
                         --     capabilities = all_lsp_capabilities,
+                        --     on_attach = helpers.onLspAttach,
                         --     init_options = {
                         --         ["language_server_phpstan.enabled"] = false,
                         --         ["language_server_psalm.enabled"] = false,
@@ -596,9 +438,9 @@ return {
                     end,
 
                     intelephense = function()
-                        -- return false
                         lspConfig.intelephense.setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.onLspAttach,
                             root_dir = function(pattern)
                                 local root = util.root_pattern(
                                     "composer.json",
@@ -628,6 +470,7 @@ return {
                     eslint = function()
                         lspConfig.eslint.setup({
                             capabilities = all_lsp_capabilities,
+                            on_attach = helpers.enableLspFeatures,
                             root_dir = function(pattern)
                                 local root = util.root_pattern(
                                     "eslint.config.js",
@@ -691,3 +534,124 @@ return {
         end,
     },
 }
+
+function helpers.setupLspRoundedBorders()
+    vim.lsp.handlers["textDocument/signatureHelp"] =
+        vim.lsp.with(vim.lsp.handlers.signature_help, {
+            border = "rounded",
+            title = "signature",
+        })
+
+    vim.lsp.handlers["textDocument/hover"] =
+        vim.lsp.with(vim.lsp.handlers.hover, {
+            -- Use a sharp border with `FloatBorder` highlights
+            border = "rounded",
+            -- add the title in hover float window
+            title = "hover",
+        })
+end
+
+--- @param client vim.lsp.Client
+--- @param bufNr number
+function helpers.enableLspFeatures(client, bufNr)
+    if client.supports_method("textDocument/completion") then
+        vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
+    end
+    if client.supports_method("textDocument/definition") then
+        vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
+    end
+
+    if client.server_capabilities.inlayHintProvider then
+        vim.lsp.inlay_hint.enable(true, {
+            bufnr = bufNr,
+        })
+    end
+end
+
+--- @param client vim.lsp.Client
+--- @param bufNr number
+function helpers.onLspAttach(client, bufNr)
+    helpers.enableLspFeatures(client, bufNr)
+
+    ---@param when string|string[]
+    ---@param keyCombination string
+    ---@param action function|string
+    ---@param desc string|nil
+    local lspKeymap = function(when, keyCombination, action, desc)
+        local opts = { buffer = bufNr }
+        if desc then
+            opts.desc = desc
+        end
+
+        vim.keymap.set(when, keyCombination, action, opts)
+    end
+
+    lspKeymap("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+
+    lspKeymap(
+        "n",
+        "go",
+        "<cmd>Telescope lsp_type_definitions<CR>",
+        "Go to object type definition"
+    )
+
+    lspKeymap(
+        "n",
+        "gi",
+        "<cmd>Telescope lsp_implementations<CR>",
+        "Go to implementation"
+    )
+
+    lspKeymap(
+        "n",
+        "gd",
+        "<cmd>Telescope lsp_definitions<CR>",
+        "Go to definition"
+    )
+
+    -- Not using LSPSage as it can't be resumed and reused
+    lspKeymap(
+        "n",
+        "gr",
+        "<cmd>Telescope lsp_references<CR>",
+        "List references using Telescope"
+    )
+
+    lspKeymap(
+        "n",
+        "<leader>rw",
+        "<cmd>Telescope lsp_workspace_symbols<CR>",
+        "Search for symbol in workspace"
+    )
+
+    lspKeymap(
+        "n",
+        "<leader>rd",
+        "<cmd>Telescope lsp_document_symbols<CR>",
+        "Search for symbol in document"
+    )
+
+    -- Enabled this because the floating input accepts all motions, LSP Saga doesn't
+    lspKeymap(
+        "n",
+        "<leader>rn",
+        vim.lsp.buf.rename,
+        "Rename symbol with native NVim lsp"
+    )
+
+    lspKeymap(
+        "i",
+        "<C-h>",
+        vim.lsp.buf.signature_help,
+        "Show help for function signature"
+    )
+
+    lspKeymap(
+        { "n", "v" },
+        "<leader>ca",
+        vim.lsp.buf.code_action,
+        "Show code actions"
+    )
+end
+
+return M
