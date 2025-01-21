@@ -208,7 +208,7 @@ local M = {
                                     inlayHints = {
                                         enumMemberValues = { enabled = true },
                                         functionLikeReturnTypes = {
-                                            enabled = true,
+                                            enabled = false,
                                         },
                                         parameterNames = {
                                             enabled = "literals",
@@ -594,11 +594,12 @@ function helpers.enableLspFeatures(client, bufNr)
         vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
     end
 
-    if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint.enable(true, {
-            bufnr = bufNr,
-        })
-    end
+    -- Disabled, I don't find it useful
+    -- if client.server_capabilities.inlayHintProvider then
+    --     vim.lsp.inlay_hint.enable(true, {
+    --         bufnr = bufNr,
+    --     })
+    -- end
 end
 
 --- @param client vim.lsp.Client
@@ -619,7 +620,9 @@ function helpers.onLspAttach(client, bufNr)
         vim.keymap.set(when, keyCombination, action, opts)
     end
 
-    lspKeymap("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+    if client.server_capabilities.declarationProvider then
+        lspKeymap("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+    end
 
     lspKeymap(
         "n",
