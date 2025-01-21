@@ -31,6 +31,8 @@ return {
             kulala.setup({
                 additional_curl_options = { "--insecure", "-L" },
                 default_view = "headers_body",
+                -- Display mode, possible values: "split", "float"
+                display_mode = "split",
             })
 
             vim.api.nvim_create_autocmd("FileType", {
