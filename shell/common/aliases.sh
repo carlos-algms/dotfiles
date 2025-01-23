@@ -45,8 +45,10 @@ fi
 
 if [ ! -z "$(command -v bat)" ]; then
     alias cat="bat "
+    export MANPAGER='bat -l man -p'
 elif [ ! -z "$(command -v batcat)" ]; then
     alias cat="batcat "
+    export MANPAGER='batcat -l man -p'
 fi
 
 # Fix for the fuzzy cd auto completion
