@@ -89,25 +89,6 @@ vim.keymap.set({ "n", "v" }, "Y", [[yy]], { desc = "Yank entire line" })
 
 vim.keymap.set("n", "Q", "<nop>")
 
--- replace all occurrences of the word under the cursor
--- vim.keymap.set(
---     "n",
---     "<leader>s",
---     [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
---     { desc = "Replace all occurrences of the word under the cursor" }
--- )
-
--- window management
--- disabled to force using <C-w>, to check the ergonomics
--- vim.keymap.set("n", "<leader>w", "<C-w>", { desc = "Ctrl + w replacement" })
-
-vim.keymap.set(
-    { "n", "v", "i", "x", "s", "c" },
-    "œ",
-    "<Esc>",
-    { desc = "Alt + q - Same as <Esc>" }
-)
-
 vim.keymap.set(
     { "n" },
     "]q",

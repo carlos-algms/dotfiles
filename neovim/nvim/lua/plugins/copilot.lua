@@ -49,9 +49,9 @@ return {
                         accept = "<C-l>",
                         accept_word = "<C-.>",
                         accept_line = false,
-                        next = "˚", -- <Alt-k>
-                        prev = "∆", -- <Alt-j>
-                        dismiss = "˙", -- <Alt-h>
+                        next = "<A-k>",
+                        prev = "<A-j>",
+                        dismiss = "<A-h>",
                     },
                 },
                 panel = { enabled = true },
