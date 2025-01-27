@@ -18,6 +18,7 @@ alias fdir='find . \( -path "**/node_modules" -o -path "**/.git" \) -prune -o -t
 alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
 
 alias ack='ack --context=2 \
+    --smart-case \
     --ignore-dir={.vscode,node_modules,vendor,.next,build,dist,coverage,storybook-static,.turbo,generated,lib} \
     --ignore-file=ext:{tsbuildinfo} \
     --ignore-file=match:"/test|spec|junit-results|json-results/\.d\.ts" '
