@@ -40,6 +40,31 @@ return {
                 "<cmd>Grapple select index=4<cr>",
                 desc = "Grapple select index 4",
             },
+            {
+                "<leader>5",
+                "<cmd>Grapple select index=5<cr>",
+                desc = "Grapple select index 5",
+            },
+            {
+                "<leader>6",
+                "<cmd>Grapple select index=6<cr>",
+                desc = "Grapple select index 6",
+            },
+            {
+                "<leader>7",
+                "<cmd>Grapple select index=7<cr>",
+                desc = "Grapple select index 7",
+            },
+            {
+                "<leader>8",
+                "<cmd>Grapple select index=8<cr>",
+                desc = "Grapple select index 8",
+            },
+            {
+                "<leader>9",
+                "<cmd>Grapple select index=9<cr>",
+                desc = "Grapple select index 9",
+            },
         },
     },
 }
