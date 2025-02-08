@@ -189,6 +189,7 @@ M.theme = {
         ["@lsp.type.keyword"] = "@keyword",
         ["@lsp.type.macro.lua"] = "Type",
         ["@lsp.type.property"] = "@none",
+        ["@lsp.type.variable"] = "@none",
         ["@lsp.type.variable.dockerfile"] = "Constant",
         ["@markup.heading"] = "Keyword",
         ["@markup.heading.1.html"] = "@none",
