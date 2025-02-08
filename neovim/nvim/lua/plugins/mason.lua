@@ -72,19 +72,31 @@ local M = {
             local tables = require("helpers.tables")
 
             local ensureToolsInstalled = {
-                "shfmt",
                 "stylua",
                 -- "black",
             }
 
             local ensureLspInstalled = {
-                "bashls",
                 "lua_ls",
             }
 
             if vim.g.has_node then
-                tables.deep_extend(ensureToolsInstalled, { "prettier" })
-                tables.deep_extend(ensureLspInstalled, { "jsonls" })
+                -- These need npm to be installed, not to run, most have a binary
+                tables.deep_extend(ensureToolsInstalled, {
+                    "shfmt",
+                    "prettier",
+                })
+
+                tables.deep_extend(ensureLspInstalled, {
+                    "bashls",
+                    "cssls",
+                    "dockerls",
+                    "docker_compose_language_service",
+                    "emmet_language_server",
+                    "html",
+                    "jsonls",
+                    "yamlls",
+                })
             end
 
             if not vim.g.is_ssh then
@@ -96,11 +108,8 @@ local M = {
 
                     tables.deep_extend(ensureLspInstalled, {
                         "vtsls",
-                        "html",
-                        "cssls",
-                        -- "phpactor",
+                        -- "phpactor", -- requires PHP in PATH, and doesn't seem as good as intelephense
                         "intelephense",
-                        "emmet_language_server",
                     })
                 end
             end
@@ -131,7 +140,6 @@ local M = {
             local disabledLspServers = {
                 "ts_ls",
                 "tsserver",
-                -- "vtsls",
             }
 
             masonLspConfig.setup({
@@ -139,7 +147,6 @@ local M = {
                 automatic_installation = false,
                 handlers = {
                     function(server_name)
-                        -- just make sure they are disabled, as I'm using typescript-tools.nvim
                         if
                             vim.tbl_contains(disabledLspServers, server_name)
                         then
@@ -516,7 +523,7 @@ local M = {
                                         rangeVariableTypes = true,
                                     },
                                     analyses = {
-                                        fieldalignment = true,
+                                        -- fieldalignment = true,
                                         nilness = true,
                                         unusedparams = true,
                                         unusedwrite = true,
