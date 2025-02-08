@@ -187,6 +187,7 @@ M.theme = {
         ["@lsp.type.enum"] = "@none",
         ["@lsp.type.enumMember"] = "Constant",
         ["@lsp.type.keyword"] = "@keyword",
+        ["@lsp.type.namespace"] = "@none",
         ["@lsp.type.macro.lua"] = "Type",
         ["@lsp.type.property"] = "@none",
         ["@lsp.type.variable"] = "@none",
