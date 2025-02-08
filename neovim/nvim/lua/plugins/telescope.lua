@@ -82,8 +82,8 @@ local M = {
 
             {
                 "<leader>O",
-                "<cmd>Telescope oldfiles only_cwd=false<CR>",
-                desc = "Find recently opened files",
+                "<cmd>Telescope oldfiles only_cwd=false prompt_title=Oldfiles\\ Everywhere<CR>",
+                desc = "Find All recently opened files",
                 silent = true,
             },
 
