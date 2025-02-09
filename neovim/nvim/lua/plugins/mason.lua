@@ -116,10 +116,10 @@ local M = {
 
             if vim.fn.executable("go") == 1 then
                 tables.deep_extend(ensureLspInstalled, { "gopls" })
-                -- tables.deep_extend(
-                --     ensureToolsInstalled,
-                --     { "goimports-reviser" }
-                -- )
+                tables.deep_extend(ensureToolsInstalled, {
+                    "goimports",
+                    -- "goimports-reviser", -- disabled as it requires go.mod to exist
+                })
             end
 
             require("mason-tool-installer").setup({
