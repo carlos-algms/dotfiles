@@ -75,7 +75,6 @@ M.theme = {
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
         WinSeparator = { fg = M.pallet.muted },
-        ["@markup.strong"] = { fg = M.pallet.keyword, bold = true },
     },
 
     links = {
@@ -214,6 +213,7 @@ M.theme = {
         ["@markup.raw.block.markdown"] = "Identifier",
         ["@markup.raw.delimiter.markdown"] = "Keyword",
         ["@markup.raw.markdown_inline"] = "Bold",
+        ["@markup.strong.html"] = "@none",
         ["@module.builtin.lua"] = "@identifier",
         ["@property"] = "Constant",
         ["@property.declaration.php"] = "@identifier",
