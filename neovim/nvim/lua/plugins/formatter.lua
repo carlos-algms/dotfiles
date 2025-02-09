@@ -73,13 +73,22 @@ return {
         opts = {
             notify_no_formatters = true,
             formatters_by_ft = {
-                lua = { stop_after_first = true, "stylua" },
+                lua = {
+                    stop_after_first = true,
+                    "stylua",
+                },
                 go = {
                     stop_after_first = true,
+                    "goimports",
+                    "gofmt",
                     -- "goimports-reviser",
                     lsp_format = "fallback",
                 },
                 -- python = { stop_after_first = true, "black" },
+                proto = {
+                    stop_after_first = true,
+                    "buf",
+                },
             },
             formatters = {
                 -- Disabled, as it requires go.mod file to be present, and I just want to format
