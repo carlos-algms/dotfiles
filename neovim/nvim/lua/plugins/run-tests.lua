@@ -21,6 +21,7 @@ local M = {
             "antoinemadec/FixCursorHold.nvim",
             "nvim-treesitter/nvim-treesitter",
             "nvim-neotest/neotest-jest",
+            "marilari88/neotest-vitest",
             "mfussenegger/nvim-dap",
         },
 
@@ -148,13 +149,22 @@ local M = {
 
             ---@diagnostic disable-next-line: missing-fields
             neotest.setup({
-                status = { virtual_text = false },
-                output = { open_on_run = true },
+                status = {
+                    virtual_text = false,
+                    enabled = true,
+                    signs = true,
+                },
+                output = {
+                    open_on_run = true,
+                    enabled = true,
+                },
                 discovery = {
                     enabled = false,
+                    concurrent = 0,
                 },
                 adapters = {
                     P.getJestAdapter(),
+                    require("neotest-vitest"),
                 },
             })
 
@@ -168,7 +178,7 @@ local M = {
     },
 }
 
-P.getJestAdapter = function()
+function P.getJestAdapter()
     --- @param testFilePath string
     --- @return string
     local function getJestCommand(testFilePath)
