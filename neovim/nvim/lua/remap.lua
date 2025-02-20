@@ -12,6 +12,17 @@ vim.keymap.set(
     { desc = "Show Inspect Tree" }
 )
 
+vim.keymap.set(
+    { "n" },
+    "<leader>vr",
+    "<cmd>let &relativenumber = !&relativenumber<CR>",
+    { desc = "Toggle line wrapping globally" }
+)
+
+vim.keymap.set({ "n" }, "<leader>vw", function()
+    vim.wo.wrap = not vim.wo.wrap
+end, { desc = "Toggle line wrapping locally" })
+
 vim.keymap.set("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
 vim.keymap.set("v", [[a']], [[2i']], { desc = "Select single quoted text" })
 
