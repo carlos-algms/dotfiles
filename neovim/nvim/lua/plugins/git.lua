@@ -134,7 +134,7 @@ return {
         keys = {
             {
                 "<leader>gcm",
-                "<cmd>CompareToMaster<CR>",
+                "<cmd>DiffviewOpen origin/HEAD...HEAD --imply-local<CR>",
                 mode = { "n" },
                 desc = "Compare current branch to master",
                 silent = true,
@@ -153,15 +153,13 @@ return {
                 mode = "n",
                 desc = "Show Git History for the current file",
             },
+            {
+                "<leader>gH",
+                "<cmd>DiffviewFileHistory <CR>",
+                mode = "n",
+                desc = "Show Git History",
+            },
         },
-
-        init = function()
-            vim.api.nvim_create_user_command(
-                "CompareToMaster",
-                "DiffviewOpen origin/HEAD...HEAD --imply-local",
-                { desc = "Compare current branch to master" }
-            )
-        end,
 
         config = function()
             local actions = require("diffview.actions")
