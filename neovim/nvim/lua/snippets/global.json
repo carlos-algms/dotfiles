@@ -1,1 +1,7 @@
-{}
+{
+    "File Name": {
+        "prefix": "n",
+        "body": ["${1:${TM_FILENAME_BASE/[\\s-.]/_/g}}$0"],
+        "description": "Write the file name to the cursor position"
+    }
+}
