@@ -163,8 +163,8 @@ local M = {
                     concurrent = 0,
                 },
                 adapters = {
-                    P.getJestAdapter(),
                     require("neotest-vitest"),
+                    P.getJestAdapter(),
                 },
             })
 
