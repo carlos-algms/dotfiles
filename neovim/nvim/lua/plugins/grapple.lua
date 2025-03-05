@@ -5,7 +5,11 @@ return {
             -- cwd - current working directory, mutable
             -- git_branch - git branch, mutable
             -- static - initial working directory, should not change
-            scope = "static", -- "git_branch",
+            scope = "static",
+            win_opts = {
+                -- Can be fractional
+                width = 0.85,
+            },
         },
         event = { "BufReadPost", "BufNewFile" },
         cmd = "Grapple",
