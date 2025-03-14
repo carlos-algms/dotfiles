@@ -16,7 +16,7 @@ vim.keymap.set(
     { "n" },
     "<leader>vr",
     "<cmd>let &relativenumber = !&relativenumber<CR>",
-    { desc = "Toggle line wrapping globally" }
+    { desc = "Toggle relative line numbers globally" }
 )
 
 vim.keymap.set({ "n" }, "<leader>vw", function()
