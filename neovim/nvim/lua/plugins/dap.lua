@@ -53,7 +53,7 @@ return {
                                 elements = {
                                     {
                                         id = "scopes",
-                                        size = 0.25,
+                                        size = 0.35,
                                     },
                                     {
                                         id = "breakpoints",
@@ -61,27 +61,26 @@ return {
                                     },
                                     {
                                         id = "stacks",
-                                        size = 0.25,
-                                    },
-                                    {
-                                        id = "watches",
-                                        size = 0.25,
+                                        size = 0.35,
                                     },
                                 },
-                                position = "right",
+                                position = "left",
                                 size = 40,
                             },
                             {
                                 elements = {
                                     {
                                         id = "repl",
-                                        size = 1,
+                                        size = 0.5,
                                     },
-                                    -- Disabled, as for JavaScript it doesn't show any messages
                                     -- {
-                                    --     id = "console",
-                                    --     size = 0.5,
+                                    --     id = "watches",
+                                    --     size = 0.24,
                                     -- },
+                                    {
+                                        id = "console",
+                                        size = 0.5,
+                                    },
                                 },
                                 position = "bottom",
                                 size = 10,
