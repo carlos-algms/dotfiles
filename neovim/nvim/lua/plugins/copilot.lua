@@ -29,8 +29,17 @@ return {
         },
 
         opts = {
+            -- https://github.com/CopilotC-Nvim/CopilotChat.nvim?tab=readme-ov-file#configuration
             -- debug = true, -- Enable debugging
-            -- See Configuration section for rest
+
+            -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
+
+            mappings = {
+                reset = {
+                    normal = "<localleader>r",
+                    insert = "<localleader><C-r>",
+                },
+            },
         },
         -- See Commands section for default commands if you want to lazy load on them
     },
