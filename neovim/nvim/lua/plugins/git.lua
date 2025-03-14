@@ -436,36 +436,4 @@ return {
             -- })
         end,
     },
-    -- {
-    --     "knsh14/vim-github-link",
-    --     -- cmd = { "GetCommitLink" },
-    --     init = function()
-    --         vim.keymap.set(
-    --             { "n", "v" },
-    --             "<leader>gC",
-    --             ":GetCommitLink<CR>",
-    --             { desc = "Copy git remote URL to clipboard" }
-    --         )
-    --     end,
-    -- },
-    {
-        "linrongbin16/gitlinker.nvim",
-
-        cmd = { "GitLink" },
-
-        keys = {
-            {
-                "<leader>gy",
-                "<cmd>GitLink<CR>",
-                mode = { "n", "v" },
-                desc = "Copy git remote URL to clipboard",
-            },
-        },
-
-        config = function()
-            require("gitlinker").setup({
-                message = false,
-            })
-        end,
-    },
 }
