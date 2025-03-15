@@ -126,7 +126,7 @@ return {
                 "<leader>dl",
                 function()
                     require("dap").list_breakpoints(false)
-                    vim.cmd("Telescope quickfix prompt_title=Dap\\ Breakpoints")
+                    Snacks.picker.qflist()
                 end,
                 desc = " Debugger list breakpoints",
             },

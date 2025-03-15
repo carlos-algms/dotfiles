@@ -61,7 +61,7 @@ return {
             { desc = "LSP [h]over [d]oc", silent = true }
         )
 
-        -- Disabled to test Telescope, as this one can't be resumed after closed
+        -- Disabled as this one can't be resumed after closed
         -- vim.keymap.set(
         --     { "n", "v" },
         --     "gr",

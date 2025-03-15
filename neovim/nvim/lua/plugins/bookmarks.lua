@@ -1,9 +1,7 @@
 return {
     "tomasky/bookmarks.nvim",
 
-    dependencies = {
-        "nvim-telescope/telescope.nvim",
-    },
+    dependencies = {},
 
     keys = {
         {
@@ -49,6 +47,8 @@ return {
 
         {
             "<leader>ml",
+            -- FIXIT: how to list bookmarks without Telescope and open the quickfix window?
+            -- https://github.com/tomasky/bookmarks.nvim/blob/0540d52ba64d0ec7677ec1ef14b3624c95a2aaba/lua/bookmarks/actions.lua#L167
             "<cmd>Telescope bookmarks list<CR>",
             desc = "Show bookmarks with Telescope",
         },
@@ -77,8 +77,6 @@ return {
             --     local bm = require("bookmarks")
             -- end,
         })
-
-        require("telescope").load_extension("bookmarks")
 
         -- TODO: link the highlight groups to match SignColumn
         -- https://github.com/tomasky/bookmarks.nvim/blob/main/lua/bookmarks/config.lua
