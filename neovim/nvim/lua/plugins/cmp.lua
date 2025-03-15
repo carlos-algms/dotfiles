@@ -94,7 +94,11 @@ return {
                         preset = "default",
                     }),
                     expandable_indicator = true,
-                    fields = { "abbr", "kind", "menu" },
+                    fields = {
+                        "abbr",
+                        "kind",
+                        -- "menu", -- disabled as it can be pretty long
+                    },
                 },
 
                 mapping = cmp.mapping.preset.insert({
