@@ -130,6 +130,7 @@ return {
             },
         },
     },
+
     keys = {
         {
             "<leader>vn",
@@ -137,6 +138,22 @@ return {
                 Snacks.notifier.show_history()
             end,
             desc = "Notification History",
+        },
+
+        {
+            "<leader>gl",
+            function()
+                Snacks.picker.git_status()
+            end,
+            desc = "Git Status",
+        },
+
+        {
+            "<leader>gB",
+            function()
+                Snacks.picker.git_branches()
+            end,
+            desc = "Git Status",
         },
 
         {
