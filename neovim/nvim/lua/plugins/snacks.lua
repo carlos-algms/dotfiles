@@ -104,6 +104,20 @@ return {
                 },
             },
 
+            win = {
+                input = {
+                    keys = {
+                        ["<C-h>"] = { "toggle_help_list", mode = { "i", "n" } },
+                    },
+                },
+
+                preview = {
+                    keys = {
+                        ["<CR>"] = "confirm",
+                    },
+                },
+            },
+
             on_close = function()
                 -- TODO: implement pickers history
                 -- https://github.com/WizardStark/dotfiles/blob/7749c9ff8f32e9c466ba58fa69966f0a3c5f5739/home/.config/nvim/lua/workspaces/ui.lua#L417
