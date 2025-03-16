@@ -6,6 +6,7 @@ return {
         -- event = "VeryLazy",
         dependencies = {
             "nvim-lua/plenary.nvim",
+            "nvim-telescope/telescope.nvim",
             "nvim-tree/nvim-web-devicons",
         },
         cmd = { "Octo" },
@@ -25,7 +26,7 @@ return {
             require("octo").setup({
                 enable_builtin = true,
                 default_remote = { "origin", "upstream" },
-                picker = "snacks",
+                picker = "telescope",
                 comment_icon = "󰆈 ",
                 suppress_missing_scope = {
                     projects_v2 = true,

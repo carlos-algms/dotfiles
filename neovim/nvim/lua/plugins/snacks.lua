@@ -40,7 +40,7 @@ local M = {
         },
 
         image = {
-            enabled = true,
+            enabled = false,
             formats = {
                 "png",
                 "jpg",
@@ -170,23 +170,7 @@ local M = {
             function()
                 Snacks.notifier.show_history()
             end,
-            desc = "Notification History",
-        },
-
-        {
-            "<leader>gl",
-            function()
-                Snacks.picker.git_status()
-            end,
-            desc = "Git Status",
-        },
-
-        {
-            "<leader>gB",
-            function()
-                Snacks.picker.git_branches()
-            end,
-            desc = "Git Status",
+            desc = "Notification History with Snacks",
         },
 
         {
@@ -195,7 +179,7 @@ local M = {
                 Snacks.gitbrowse.open()
             end,
             mode = { "n", "v" },
-            desc = "Copy git remote URL to clipboard",
+            desc = "Copy git remote URL to clipboard with Snacks",
         },
 
         {
@@ -203,122 +187,7 @@ local M = {
             function()
                 Snacks.picker.resume()
             end,
-            desc = "Resume last picker",
-        },
-        {
-            "<C-p>",
-            function()
-                Snacks.picker.smart()
-            end,
-            desc = "Pick files",
-        },
-
-        {
-            "<leader>o",
-            function()
-                Snacks.picker.recent({
-                    filter = {
-                        cwd = vim.fn.getcwd(),
-                    },
-                })
-            end,
-            desc = "Old files",
-        },
-
-        {
-            "<leader>O",
-            function()
-                Snacks.picker.recent()
-            end,
-            desc = "Old files everywhere",
-        },
-
-        {
-
-            "<leader>f",
-            function()
-                Snacks.picker.grep()
-            end,
-            desc = "Live Grep",
-            silent = true,
-        },
-
-        {
-
-            "<leader>f",
-            function()
-                Snacks.picker.grep_word()
-            end,
-            desc = "Live Grep selection",
-            silent = true,
-            mode = { "v" },
-        },
-
-        {
-            "gd",
-            function()
-                Snacks.picker.lsp_definitions()
-            end,
-            desc = "Goto Definition",
-        },
-
-        {
-            "gD",
-            function()
-                Snacks.picker.lsp_declarations()
-            end,
-            desc = "Goto Declaration",
-        },
-
-        {
-            "gr",
-            function()
-                Snacks.picker.lsp_references()
-            end,
-            desc = "LSP References",
-        },
-
-        {
-            "gi",
-            function()
-                Snacks.picker.lsp_implementations()
-            end,
-            desc = "Goto Implementation",
-        },
-
-        {
-            "go",
-            function()
-                Snacks.picker.lsp_type_definitions()
-            end,
-            desc = "Goto Type Definition",
-        },
-
-        {
-            "<leader>rw",
-            function()
-                Snacks.picker.lsp_workspace_symbols()
-            end,
-            desc = "LSP Workspace Symbols",
-        },
-
-        {
-            "<leader>rd",
-            function()
-                Snacks.picker.lsp_symbols()
-            end,
-            desc = "LSP Document Symbols",
-        },
-
-        {
-            "<leader>tt",
-            function()
-                Snacks.picker.todo_comments({
-                    keywords = { "FIXIT" },
-                })
-            end,
-            desc = "FIXIT Comments",
-            silent = true,
+            desc = "Resume last Snacks picker",
         },
 
         {
@@ -326,7 +195,7 @@ local M = {
             function()
                 P.history_picker()
             end,
-            desc = "List pickers history",
+            desc = "List Snacks pickers history",
         },
     },
 

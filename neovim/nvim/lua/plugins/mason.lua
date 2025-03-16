@@ -631,6 +631,49 @@ function helpers.onLspAttach(client, bufNr)
         lspKeymap("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
     end
 
+    lspKeymap(
+        "n",
+        "go",
+        "<cmd>Telescope lsp_type_definitions<CR>",
+        "Go to object type definition"
+    )
+
+    lspKeymap(
+        "n",
+        "gi",
+        "<cmd>Telescope lsp_implementations<CR>",
+        "Go to implementation"
+    )
+
+    lspKeymap(
+        "n",
+        "gd",
+        "<cmd>Telescope lsp_definitions<CR>",
+        "Go to definition"
+    )
+
+    -- Not using LSPSage as it can't be resumed and reused
+    lspKeymap(
+        "n",
+        "gr",
+        "<cmd>Telescope lsp_references<CR>",
+        "List references using Telescope"
+    )
+
+    lspKeymap(
+        "n",
+        "<leader>rw",
+        "<cmd>Telescope lsp_workspace_symbols<CR>",
+        "Search for symbol in workspace"
+    )
+
+    lspKeymap(
+        "n",
+        "<leader>rd",
+        "<cmd>Telescope lsp_document_symbols<CR>",
+        "Search for symbol in document"
+    )
+
     -- Enabled this because the floating input accepts all motions, LSP Saga doesn't
     lspKeymap(
         "n",

@@ -1,7 +1,9 @@
 return {
     "tomasky/bookmarks.nvim",
 
-    dependencies = {},
+    dependencies = {
+        "nvim-telescope/telescope.nvim",
+    },
 
     keys = {
         {
@@ -77,6 +79,8 @@ return {
             --     local bm = require("bookmarks")
             -- end,
         })
+
+        require("telescope").load_extension("bookmarks")
 
         -- TODO: link the highlight groups to match SignColumn
         -- https://github.com/tomasky/bookmarks.nvim/blob/main/lua/bookmarks/config.lua

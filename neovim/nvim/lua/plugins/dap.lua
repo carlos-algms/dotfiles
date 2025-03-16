@@ -8,6 +8,7 @@ return {
         enabled = not vim.g.is_ssh,
         dependencies = {
             {
+                "nvim-telescope/telescope.nvim",
                 "rcarriga/nvim-dap-ui",
                 dependencies = {
                     "nvim-neotest/nvim-nio",
@@ -126,7 +127,8 @@ return {
                 "<leader>dl",
                 function()
                     require("dap").list_breakpoints(false)
-                    Snacks.picker.qflist()
+                    vim.cmd("Telescope quickfix prompt_title=Dap\\ Breakpoints")
+                    -- Snacks.picker.qflist()
                 end,
                 desc = " Debugger list breakpoints",
             },

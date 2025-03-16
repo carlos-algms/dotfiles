@@ -12,6 +12,12 @@ return {
             desc = "Trouble FIXIT list",
             silent = true,
         },
+        {
+            "<leader>tt",
+            "<cmd>TodoTelescope keywords=FIXIT<cr>",
+            desc = "Telescope FIX list ",
+            silent = true,
+        },
     },
     opts = {
         keywords = {
