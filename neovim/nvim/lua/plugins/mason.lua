@@ -17,6 +17,7 @@ local M = {
         "williamboman/mason.nvim",
 
         dependencies = {
+            { "nvim-telescope/telescope.nvim" },
             { "williamboman/mason-lspconfig.nvim" },
             { "neovim/nvim-lspconfig" },
             { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
@@ -631,34 +632,46 @@ function helpers.onLspAttach(client, bufNr)
         lspKeymap("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
     end
 
-    lspKeymap(
-        "n",
-        "go",
-        "<cmd>Telescope lsp_type_definitions<CR>",
-        "Go to object type definition"
-    )
+    lspKeymap("n", "go", function()
+        local current_word = vim.fn.expand("<cword>")
+        vim.cmd(
+            string.format(
+                "Telescope lsp_type_definitions prompt_title=%s\\ LSP\\ Type\\ definitions",
+                current_word
+            )
+        )
+    end, "Go to object type definition")
 
-    lspKeymap(
-        "n",
-        "gi",
-        "<cmd>Telescope lsp_implementations<CR>",
-        "Go to implementation"
-    )
+    lspKeymap("n", "gi", function()
+        local current_word = vim.fn.expand("<cword>")
+        vim.cmd(
+            string.format(
+                "Telescope lsp_implementations prompt_title=%s\\ LSP\\ Implementations",
+                current_word
+            )
+        )
+    end, "Go to implementation")
 
-    lspKeymap(
-        "n",
-        "gd",
-        "<cmd>Telescope lsp_definitions<CR>",
-        "Go to definition"
-    )
+    lspKeymap("n", "gd", function()
+        local current_word = vim.fn.expand("<cword>")
+        vim.cmd(
+            string.format(
+                "Telescope lsp_definitions prompt_title=%s\\ LSP\\ Definitions",
+                current_word
+            )
+        )
+    end, "Go to definition")
 
-    -- Not using LSPSage as it can't be resumed and reused
-    lspKeymap(
-        "n",
-        "gr",
-        "<cmd>Telescope lsp_references<CR>",
-        "List references using Telescope"
-    )
+    -- Not using LSPSaga as it can't be resumed and reused
+    lspKeymap("n", "gr", function()
+        local current_word = vim.fn.expand("<cword>")
+        vim.cmd(
+            string.format(
+                "Telescope lsp_references prompt_title=%s\\ LSP\\ References",
+                current_word
+            )
+        )
+    end, "List references")
 
     lspKeymap(
         "n",
