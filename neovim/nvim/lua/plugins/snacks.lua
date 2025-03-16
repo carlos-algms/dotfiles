@@ -1,4 +1,8 @@
-return {
+local P = {
+    Snacks_picker_hist = {},
+}
+
+local M = {
     "folke/snacks.nvim",
     priority = 1010,
     lazy = false,
@@ -118,9 +122,24 @@ return {
                 },
             },
 
-            on_close = function()
-                -- TODO: implement pickers history
-                -- https://github.com/WizardStark/dotfiles/blob/7749c9ff8f32e9c466ba58fa69966f0a3c5f5739/home/.config/nvim/lua/workspaces/ui.lua#L417
+            on_close = function(picker)
+                if
+                    not vim.tbl_contains(
+                        { "history_picker", "lsp_references", "recent" },
+                        picker.opts.source
+                    )
+                then
+                    vim.schedule(function()
+                        if #P.Snacks_picker_hist >= 20 then
+                            table.remove(P.Snacks_picker_hist, 20)
+                        end
+                        table.insert(
+                            P.Snacks_picker_hist,
+                            1,
+                            require("snacks.picker.core.picker").last
+                        )
+                    end)
+                end
             end,
         },
 
@@ -301,6 +320,14 @@ return {
             desc = "FIXIT Comments",
             silent = true,
         },
+
+        {
+            "<leader>sp",
+            function()
+                P.history_picker()
+            end,
+            desc = "List pickers history",
+        },
     },
 
     init = function()
@@ -319,3 +346,58 @@ return {
         })
     end,
 }
+
+function P.history_picker()
+    Snacks.picker.pick(
+        ---@type snacks.picker.Config
+        {
+            source = "history_picker",
+            finder = function()
+                local items = {} ---@type snacks.picker.finder.Item[]
+
+                for _, picker in ipairs(P.Snacks_picker_hist) do
+                    local source = picker.opts.source or "unknown source"
+                    local pattern = picker.filter.pattern or ""
+                    local search = picker.filter.search or ""
+                    local text = source .. " | " .. pattern .. " > " .. search
+                    table.insert(items, {
+                        ["data"] = { picker = picker },
+                        text = text,
+                    })
+                end
+
+                return items
+            end,
+            confirm = function(picker, item)
+                picker:close()
+                if item then
+                    require("snacks.picker.core.picker").last = item.data.picker
+                    Snacks.picker.resume()
+                end
+            end,
+            format = function(item, _)
+                local ret = {}
+                ret[#ret + 1] = { item.text }
+                return ret
+            end,
+            layout = {
+                layout = {
+                    backdrop = {
+                        blend = 40,
+                    },
+                    width = 0.3,
+                    min_width = 80,
+                    max_height = 12,
+                    box = "vertical",
+                    border = "rounded",
+                    title = " Picker history ",
+                    title_pos = "center",
+                    { win = "list", border = "none" },
+                    { win = "input", height = 1, border = "top" },
+                },
+            },
+        }
+    )
+end
+
+return M
