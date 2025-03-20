@@ -255,6 +255,7 @@ M.theme = {
         ["@variable.parameter.vimdoc"] = "@type",
         ["phpDefine"] = "@keyword",
         ["phpStorageClass"] = "@keyword",
+        ["SnacksStatusColumnMark"] = "DiagnosticSignInfo",
     },
 }
 
