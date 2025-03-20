@@ -17,12 +17,20 @@ local M = {
 
         notifier = {
             enabled = true,
+            timeout = 6000,
             margin = { top = 1, right = 1, bottom = 0 },
+            filter = function(notif)
+                -- LSP Hover was triggering this but it was working normally
+                if string.match(notif.msg, "No information available") then
+                    return false
+                end
+                return true
+            end,
         },
 
         scroll = { enabled = false },
 
-        statuscolumn = { enabled = true },
+        statuscolumn = { enabled = false },
 
         indent = { enabled = true },
 
