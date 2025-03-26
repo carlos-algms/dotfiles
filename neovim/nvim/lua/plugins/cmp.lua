@@ -130,16 +130,17 @@ return {
                         { "i", "c" }
                     ),
 
-                    ["<CR>"] = cmp.mapping(function(fallback)
-                        local entry = cmp.get_selected_entry()
-                        if cmp.visible() and entry then
-                            cmp.confirm({
-                                select = true,
-                            })
-                        else
-                            fallback()
-                        end
-                    end, { "i", "s" }),
+                    -- disabled to avoid inserting the first item on Enter
+                    -- ["<CR>"] = cmp.mapping(function(fallback)
+                    --     local entry = cmp.get_selected_entry()
+                    --     if cmp.visible() and entry then
+                    --         cmp.confirm({
+                    --             select = true,
+                    --         })
+                    --     else
+                    --         fallback()
+                    --     end
+                    -- end, { "i", "s" }),
 
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         -- local copilot_keys = vim.fn["copilot#Accept"]()
