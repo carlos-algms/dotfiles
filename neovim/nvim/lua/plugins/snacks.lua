@@ -30,7 +30,7 @@ local M = {
 
         scroll = { enabled = false },
 
-        statuscolumn = { enabled = false },
+        statuscolumn = { enabled = true },
 
         indent = { enabled = true },
 
