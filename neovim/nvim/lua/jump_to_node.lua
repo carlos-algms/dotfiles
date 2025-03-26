@@ -2,6 +2,7 @@ local function_node_types = {
     "arrow_function",
     "function_declaration",
     "function_definition",
+    "function_expression",
 }
 
 local function is_function_node(node)
