@@ -9,86 +9,88 @@ return {
         dependencies = {
             {
                 "nvim-telescope/telescope.nvim",
-                "rcarriga/nvim-dap-ui",
-                dependencies = {
-                    "nvim-neotest/nvim-nio",
-                },
-                keys = {
-                    {
-                        "<leader>du",
-                        function()
-                            require("dapui").toggle()
-                        end,
-                        desc = "Toggle Debugger Ui - Dap UI",
+                {
+                    "rcarriga/nvim-dap-ui",
+                    dependencies = {
+                        "nvim-neotest/nvim-nio",
                     },
-                },
-                config = function()
-                    local dapUi = require("dapui")
-                    local dap = require("dap")
-
-                    dap.listeners.before.attach.dapui_config = function()
-                        -- Leaving disabled as I mostly don't use it
-                        -- dapui.open()
-                        -- Dap Repl resizes to 50% every time anything changes, disabling as it is inconvenient, use <leader>dc to open it
-                        -- dap.repl.open()
-                    end
-
-                    dap.listeners.before.launch.dapui_config = function()
-                        -- dapui.open()
-                        -- dap.repl.open()
-                    end
-
-                    -- I don't want it to auto-close, as I want to check the output
-                    -- dap.listeners.before.event_terminated.dapui_config = function()
-                    --     -- dapui.close()
-                    -- end
-
-                    -- dap.listeners.before.event_exited.dapui_config = function()
-                    --     -- dapui.close()
-                    -- end
-
-                    ---@diagnostic disable-next-line: missing-fields
-                    dapUi.setup({
-                        layouts = {
-                            {
-                                elements = {
-                                    {
-                                        id = "scopes",
-                                        size = 0.35,
-                                    },
-                                    {
-                                        id = "breakpoints",
-                                        size = 0.25,
-                                    },
-                                    {
-                                        id = "stacks",
-                                        size = 0.35,
-                                    },
-                                },
-                                position = "left",
-                                size = 40,
-                            },
-                            {
-                                elements = {
-                                    {
-                                        id = "repl",
-                                        size = 0.5,
-                                    },
-                                    -- {
-                                    --     id = "watches",
-                                    --     size = 0.24,
-                                    -- },
-                                    {
-                                        id = "console",
-                                        size = 0.5,
-                                    },
-                                },
-                                position = "bottom",
-                                size = 10,
-                            },
+                    keys = {
+                        {
+                            "<leader>du",
+                            function()
+                                require("dapui").toggle()
+                            end,
+                            desc = "Toggle Debugger Ui - Dap UI",
                         },
-                    })
-                end,
+                    },
+                    config = function()
+                        local dapUi = require("dapui")
+                        local dap = require("dap")
+
+                        dap.listeners.before.attach.dapui_config = function()
+                            -- Leaving disabled as I mostly don't use it
+                            -- dapui.open()
+                            -- Dap Repl resizes to 50% every time anything changes, disabling as it is inconvenient, use <leader>dc to open it
+                            -- dap.repl.open()
+                        end
+
+                        dap.listeners.before.launch.dapui_config = function()
+                            -- dapui.open()
+                            -- dap.repl.open()
+                        end
+
+                        -- I don't want it to auto-close, as I want to check the output
+                        -- dap.listeners.before.event_terminated.dapui_config = function()
+                        --     -- dapui.close()
+                        -- end
+
+                        -- dap.listeners.before.event_exited.dapui_config = function()
+                        --     -- dapui.close()
+                        -- end
+
+                        ---@diagnostic disable-next-line: missing-fields
+                        dapUi.setup({
+                            layouts = {
+                                {
+                                    elements = {
+                                        {
+                                            id = "scopes",
+                                            size = 0.35,
+                                        },
+                                        {
+                                            id = "breakpoints",
+                                            size = 0.25,
+                                        },
+                                        {
+                                            id = "stacks",
+                                            size = 0.35,
+                                        },
+                                    },
+                                    position = "left",
+                                    size = 40,
+                                },
+                                {
+                                    elements = {
+                                        {
+                                            id = "repl",
+                                            size = 0.5,
+                                        },
+                                        -- {
+                                        --     id = "watches",
+                                        --     size = 0.24,
+                                        -- },
+                                        {
+                                            id = "console",
+                                            size = 0.5,
+                                        },
+                                    },
+                                    position = "bottom",
+                                    size = 10,
+                                },
+                            },
+                        })
+                    end,
+                },
             },
             -- Disabled as attaching to a running process was crashing
             -- {
