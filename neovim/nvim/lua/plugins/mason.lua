@@ -207,6 +207,11 @@ local M = {
                                     },
                                 },
                                 typescript = {
+                                    tsserver = {
+                                        -- fix constant crashing in large projects
+                                        -- https://github.com/microsoft/vscode/issues/202894#issuecomment-1901245615
+                                        maxTsServerMemory = 8192,
+                                    },
                                     updateImportsOnFileMove = {
                                         enabled = "always",
                                     },
