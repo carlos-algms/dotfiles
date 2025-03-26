@@ -103,11 +103,16 @@ return {
                 end
 
                 return {
-                    timeout_ms = 500,
+                    timeout_ms = 1000,
                     lsp_format = "fallback",
                 }
             end,
         },
+
+        init = function()
+            -- https://github.com/stevearc/conform.nvim/blob/f9ef25a7ef00267b7d13bfc00b0dea22d78702d5/doc/recipes.md#lazy-loading-with-lazynvim
+            vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+        end,
 
         ---@param opts conform.setupOpts
         config = function(_, opts)
