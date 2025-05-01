@@ -20,9 +20,17 @@ local M = {
             timeout = 6000,
             margin = { top = 1, right = 1, bottom = 0 },
             filter = function(notif)
-                -- LSP Hover was triggering this but it was working normally
-                if string.match(notif.msg, "No information available") then
-                    return false
+                local patterns = {
+                    -- LSP Hover was triggering this but it was working normally
+                    "No information available",
+                    -- triggered when Eslint isn't installed
+                    "Unable to find ESLint library",
+                }
+
+                for _, pattern in ipairs(patterns) do
+                    if string.find(notif.msg, pattern) then
+                        return false
+                    end
                 end
                 return true
             end,
