@@ -192,6 +192,7 @@ M.theme = {
         ["@lsp.type.variable"] = "@none",
         ["@lsp.type.variable.dockerfile"] = "Constant",
         ["@markup.heading"] = "Keyword",
+        ["@markup.heading.astro"] = "@none",
         ["@markup.heading.1.html"] = "@none",
         ["@markup.heading.1.tsx"] = "@none",
         ["@markup.heading.2.html"] = "@none",
@@ -225,6 +226,7 @@ M.theme = {
         ["@punctuation.delimiter.jsdoc"] = "@comment.documentation",
         ["@punctuation.accessor.php"] = "@keyword",
         ["@punctuation.special"] = "@keyword",
+        ["@punctuation.special.astro"] = "@none",
         ["@punctuation.special.diff"] = "Identifier",
         ["@selector"] = "@function",
         ["@string.escape"] = "Constant",
@@ -256,6 +258,7 @@ M.theme = {
         ["phpDefine"] = "@keyword",
         ["phpStorageClass"] = "@keyword",
         ["SnacksStatusColumnMark"] = "DiagnosticSignInfo",
+        ["@type.astro"] = "@none", -- it was flagging JSX tags as types
     },
 }
 
