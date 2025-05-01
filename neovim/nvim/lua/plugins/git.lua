@@ -363,12 +363,19 @@ return {
                 mode = { "n", "v" },
                 desc = "Git Create Branch",
             },
+
+            {
+                "<leader>gU",
+                "<cmd>UndoLastCommit<CR>",
+                mode = "n",
+                desc = "Git Undo last commit",
+            },
         },
 
-        config = function()
+        init = function()
             vim.api.nvim_create_user_command(
                 "UndoLastCommit",
-                "Git reset HEAD~",
+                "Git reset --soft HEAD~",
                 {}
             )
 
