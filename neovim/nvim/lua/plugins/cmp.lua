@@ -150,8 +150,8 @@ return {
                             cmp.confirm({
                                 select = true,
                             })
-                        elseif copilotSuggestions.is_visible() then
-                            copilotSuggestions.accept()
+                            -- elseif copilotSuggestions.is_visible() then
+                            --     copilotSuggestions.accept()
                             -- elseif
                             --     copilot_keys ~= ""
                             --     and type(copilot_keys) == "string"
