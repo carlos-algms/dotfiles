@@ -14,11 +14,11 @@ local M = {
     },
 
     {
-        "williamboman/mason.nvim",
+        "mason-org/mason.nvim",
 
         dependencies = {
             { "nvim-telescope/telescope.nvim" },
-            { "williamboman/mason-lspconfig.nvim" },
+            { "mason-org/mason-lspconfig.nvim" },
             { "neovim/nvim-lspconfig" },
             { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
             { "hrsh7th/cmp-nvim-lsp" },
@@ -43,6 +43,7 @@ local M = {
                 },
                 pattern = {
                     ["%.vscode/.*%.json"] = "jsonc",
+                    [".*%.gitconfig"] = "gitconfig",
                 },
             })
 
@@ -127,10 +128,6 @@ local M = {
                 ensure_installed = ensureToolsInstalled,
             })
 
-            local masonLspConfig = require("mason-lspconfig")
-            local lspConfig = require("lspconfig")
-            local util = require("lspconfig.util")
-
             require("lspconfig.configs").vtsls = require("vtsls").lspconfig
 
             local all_lsp_capabilities =
@@ -143,413 +140,343 @@ local M = {
                 "tsserver",
             }
 
-            masonLspConfig.setup({
-                ensure_installed = ensureLspInstalled,
-                automatic_installation = false,
-                handlers = {
-                    function(server_name)
-                        if
-                            vim.tbl_contains(disabledLspServers, server_name)
-                        then
-                            return false
-                        end
+            vim.lsp.config("*", {
+                capabilities = all_lsp_capabilities,
+                on_attach = function(client, bufNr)
+                    helpers.onLspAttach(client, bufNr)
+                end,
+            })
 
-                        lspConfig[server_name].setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.onLspAttach,
+            vim.lsp.config("vtsls", {
+                root_markers = {
+                    "tsconfig.json",
+                    "jsconfig.json",
+                    "package.json",
+                    ".git",
+                },
+                filetypes = {
+                    "javascript",
+                    "javascriptreact",
+                    "javascript.jsx",
+                    "typescript",
+                    "typescriptreact",
+                    "typescript.tsx",
+                },
+
+                settings = (function()
+                    --- @type lspconfig.Config
+                    ---@diagnostic disable-next-line: missing-fields
+                    local settings = {
+                        -- https://github.com/yioneko/vtsls/blob/541b52a341a740b1b2d1b4ae85f168dbb3ac6d25/packages/service/configuration.schema.json#L1212
+                        complete_function_calls = true,
+                        vtsls = {
+                            enableMoveToFileCodeAction = true,
+                            autoUseWorkspaceTsdk = true,
+                            experimental = {
+                                maxInlayHintLength = 30,
+                                completion = {
+                                    enableServerSideFuzzyMatch = true,
+                                },
+                            },
+                            typescript = {
+                                format = {
+                                    indentSize = 2,
+                                },
+                            },
+                        },
+
+                        typescript = {
+                            tsserver = {
+                                -- fix constant crashing in large projects
+                                -- https://github.com/microsoft/vscode/issues/202894#issuecomment-1901245615
+                                maxTsServerMemory = 8192,
+                            },
+                            updateImportsOnFileMove = {
+                                enabled = "always",
+                            },
+                            suggest = {
+                                completeFunctionCalls = true,
+                            },
+                            inlayHints = {
+                                enumMemberValues = { enabled = true },
+                                functionLikeReturnTypes = {
+                                    enabled = false,
+                                },
+                                parameterNames = {
+                                    enabled = "literals",
+                                },
+                                parameterTypes = { enabled = true },
+                                propertyDeclarationTypes = {
+                                    enabled = true,
+                                },
+                                variableTypes = { enabled = false },
+                            },
+                        },
+                    }
+
+                    settings.javascript = vim.tbl_deep_extend(
+                        "force",
+                        {},
+                        settings.typescript,
+                        settings.javascript or {}
+                    )
+
+                    settings.vtsls.javascript = vim.tbl_deep_extend(
+                        "force",
+                        {},
+                        settings.vtsls.typescript,
+                        settings.vtsls.javascript or {}
+                    )
+                    return settings
+                end)(),
+
+                on_attach = function(client, bufNr)
+                    helpers.onLspAttach(client, bufNr)
+
+                    local vtslsCommands = require("vtsls").commands
+
+                    --- @param keys string
+                    --- @param func function
+                    --- @param desc string
+                    local function tsKeymap(keys, func, desc)
+                        vim.keymap.set({ "n", "v" }, keys, func, {
+                            desc = desc,
+                            silent = true,
+                            buffer = bufNr,
                         })
-                    end,
+                    end
 
-                    vtsls = function()
-                        --- @type lspconfig.Config
-                        ---@diagnostic disable-next-line: missing-fields
-                        local vtsls_config = {
-                            capabilities = all_lsp_capabilities,
-                            root_dir = function(pattern)
-                                local root = util.root_pattern(
-                                    "tsconfig.json",
-                                    "jsconfig.json",
-                                    "package.json",
-                                    ".git"
-                                )(pattern)
+                    tsKeymap("<leader>io", function()
+                        vtslsCommands.organize_imports(bufNr)
+                    end, "TS Imports Organize")
 
-                                if not root then
-                                    root = vim.fn.getcwd()
-                                end
+                    tsKeymap("<leader>is", function()
+                        vtslsCommands.sort_imports(bufNr)
+                    end, "TS Imports Sort")
 
-                                ---@diagnostic disable-next-line: redundant-return-value
-                                return root
-                            end,
-                            filetypes = {
-                                "javascript",
-                                "javascriptreact",
-                                "javascript.jsx",
-                                "typescript",
-                                "typescriptreact",
-                                "typescript.tsx",
+                    tsKeymap("<leader>ir", function()
+                        vtslsCommands.remove_unused_imports(bufNr)
+                    end, "TS Imports remove unused")
+
+                    tsKeymap("<leader>ia", function()
+                        vtslsCommands.add_missing_imports(bufNr)
+                    end, "TS Imports Add All missing")
+
+                    tsKeymap("<leader>rf", function()
+                        vtslsCommands.rename_file(bufNr)
+                    end, "TS Rename File")
+
+                    tsKeymap("<leader>ct", function()
+                        vtslsCommands.select_ts_version(bufNr)
+                    end, "TS Select Typescript Version")
+
+                    tsKeymap("gD", function()
+                        vtslsCommands.goto_source_definition(nil)
+                    end, "TS Go to source definition")
+                end,
+            })
+
+            vim.lsp.config("jsonls", {
+                on_attach = helpers.enableLspFeatures,
+                -- lazy-load schemastore when needed - https://www.lazyvim.org/extras/lang/json#nvim-lspconfig
+                on_new_config = function(new_config)
+                    new_config.settings.json.schemas = vim.tbl_deep_extend(
+                        "force",
+                        new_config.settings.json.schemas or {},
+                        require("schemastore").json.schemas()
+                    )
+                end,
+                settings = {
+                    json = {
+                        validate = { enable = true },
+                    },
+                },
+            })
+
+            vim.lsp.config("yamlls", {
+                on_attach = helpers.enableLspFeatures,
+                -- lazy-load schemastore when needed
+                on_new_config = function(new_config)
+                    new_config.settings.yaml.schemas = vim.tbl_deep_extend(
+                        "force",
+                        new_config.settings.yaml.schemas or {},
+                        require("schemastore").yaml.schemas()
+                    )
+                end,
+                settings = {
+                    redhat = { telemetry = { enabled = false } },
+                    yaml = {
+                        keyOrdering = false,
+                        format = {
+                            enable = false, -- conform and prettier are better
+                        },
+                        validate = true,
+                        schemaStore = {
+                            -- Must disable built-in schemaStore support to use schemas from SchemaStore.nvim plugin
+                            enable = false,
+                            -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+                            url = "",
+                        },
+                    },
+                },
+            })
+
+            vim.lsp.config("lua_ls", {
+                settings = {
+                    Lua = {
+                        telemetry = { enable = false },
+                        runtime = {
+                            version = "LuaJIT",
+                        },
+                        diagnostics = {
+                            globals = { "vim", "get_args" },
+                        },
+                        workspace = {
+                            library = {
+                                vim.env.VIMRUNTIME,
                             },
-                            -- https://github.com/yioneko/vtsls/blob/541b52a341a740b1b2d1b4ae85f168dbb3ac6d25/packages/service/configuration.schema.json#L1212
-                            settings = {
-                                complete_function_calls = true,
-                                vtsls = {
-                                    enableMoveToFileCodeAction = true,
-                                    autoUseWorkspaceTsdk = true,
-                                    experimental = {
-                                        maxInlayHintLength = 30,
-                                        completion = {
-                                            enableServerSideFuzzyMatch = true,
-                                        },
-                                    },
-                                    typescript = {
-                                        format = {
-                                            indentSize = 2,
-                                        },
-                                    },
-                                },
-                                typescript = {
-                                    tsserver = {
-                                        -- fix constant crashing in large projects
-                                        -- https://github.com/microsoft/vscode/issues/202894#issuecomment-1901245615
-                                        maxTsServerMemory = 8192,
-                                    },
-                                    updateImportsOnFileMove = {
-                                        enabled = "always",
-                                    },
-                                    suggest = {
-                                        completeFunctionCalls = true,
-                                    },
-                                    inlayHints = {
-                                        enumMemberValues = { enabled = true },
-                                        functionLikeReturnTypes = {
-                                            enabled = false,
-                                        },
-                                        parameterNames = {
-                                            enabled = "literals",
-                                        },
-                                        parameterTypes = { enabled = true },
-                                        propertyDeclarationTypes = {
-                                            enabled = true,
-                                        },
-                                        variableTypes = { enabled = false },
-                                    },
-                                },
-                            },
-                            on_attach = function(client, bufNr)
-                                helpers.onLspAttach(client, bufNr)
+                            checkThirdParty = false,
+                        },
+                        codeLens = {
+                            enable = true,
+                        },
+                        doc = {
+                            privateName = { "^_" },
+                        },
+                        hint = {
+                            enable = true,
+                            setType = false,
+                            paramType = true,
+                            paramName = "Disable",
+                            semicolon = "Disable",
+                            arrayIndex = "Disable",
+                        },
+                    },
+                },
+            })
 
-                                local vtslsCommands = require("vtsls").commands
+            vim.lsp.config("intelephense", {
+                root_markers = {
+                    "composer.json",
+                    ".git",
+                },
+                settings = {
+                    intelephense = {
+                        -- https://github.com/bmewburn/intelephense-docs/blob/master/installation.md
+                        telemetry = {
+                            enabled = false,
+                        },
+                        files = {
+                            maxSize = 1000000,
+                        },
+                        format = {
+                            enable = true,
+                            braces = "K&R", -- 1TBS
+                        },
+                    },
+                },
+            })
 
-                                --- @param keys string
-                                --- @param func function
-                                --- @param desc string
-                                local function tsKeymap(keys, func, desc)
-                                    vim.keymap.set({ "n", "v" }, keys, func, {
-                                        desc = desc,
-                                        silent = true,
-                                        buffer = bufNr,
-                                    })
-                                end
-
-                                tsKeymap("<leader>io", function()
-                                    vtslsCommands.organize_imports(bufNr)
-                                end, "TS Imports Organize")
-
-                                tsKeymap("<leader>is", function()
-                                    vtslsCommands.sort_imports(bufNr)
-                                end, "TS Imports Sort")
-
-                                tsKeymap("<leader>ir", function()
-                                    vtslsCommands.remove_unused_imports(bufNr)
-                                end, "TS Imports remove unused")
-
-                                tsKeymap("<leader>ia", function()
-                                    vtslsCommands.add_missing_imports(bufNr)
-                                end, "TS Imports Add All missing")
-
-                                tsKeymap("<leader>rf", function()
-                                    vtslsCommands.rename_file(bufNr)
-                                end, "TS Rename File")
-
-                                tsKeymap("<leader>ct", function()
-                                    vtslsCommands.select_ts_version(bufNr)
-                                end, "TS Select Typescript Version")
-
-                                tsKeymap("gD", function()
-                                    vtslsCommands.goto_source_definition(nil)
-                                end, "TS Go to source definition")
-                            end,
-                        }
-
-                        vtsls_config.settings.javascript = vim.tbl_deep_extend(
-                            "force",
-                            {},
-                            vtsls_config.settings.typescript,
-                            vtsls_config.settings.javascript or {}
-                        )
-
-                        vtsls_config.settings.vtsls.javascript =
-                            vim.tbl_deep_extend(
-                                "force",
-                                {},
-                                vtsls_config.settings.vtsls.typescript,
-                                vtsls_config.settings.vtsls.javascript or {}
-                            )
-
-                        lspConfig.vtsls.setup(vtsls_config)
-                    end,
-
-                    jsonls = function()
-                        lspConfig.jsonls.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.enableLspFeatures,
-                            -- lazy-load schemastore when needed - https://www.lazyvim.org/extras/lang/json#nvim-lspconfig
-                            on_new_config = function(new_config)
-                                new_config.settings.json.schemas =
-                                    vim.tbl_deep_extend(
-                                        "force",
-                                        new_config.settings.json.schemas or {},
-                                        require("schemastore").json.schemas()
-                                    )
-                            end,
-                            settings = {
-                                json = {
-                                    validate = { enable = true },
-                                },
-                            },
-                        })
-                    end,
-
-                    yamlls = function()
-                        lspConfig.yamlls.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.enableLspFeatures,
-                            -- lazy-load schemastore when needed
-                            on_new_config = function(new_config)
-                                new_config.settings.yaml.schemas =
-                                    vim.tbl_deep_extend(
-                                        "force",
-                                        new_config.settings.yaml.schemas or {},
-                                        require("schemastore").yaml.schemas()
-                                    )
-                            end,
-                            settings = {
-                                redhat = { telemetry = { enabled = false } },
-                                yaml = {
-                                    keyOrdering = false,
-                                    format = {
-                                        enable = false, -- conform and prettier are better
-                                    },
-                                    validate = true,
-                                    schemaStore = {
-                                        -- Must disable built-in schemaStore support to use schemas from SchemaStore.nvim plugin
-                                        enable = false,
-                                        -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-                                        url = "",
-                                    },
-                                },
-                            },
-                        })
-                    end,
-
-                    lua_ls = function()
-                        lspConfig.lua_ls.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.onLspAttach,
-                            settings = {
-                                Lua = {
-                                    telemetry = { enable = false },
-                                    runtime = {
-                                        version = "LuaJIT",
-                                    },
-                                    diagnostics = {
-                                        globals = { "vim", "get_args" },
-                                    },
-                                    workspace = {
-                                        library = {
-                                            vim.env.VIMRUNTIME,
-                                        },
-                                        checkThirdParty = false,
-                                    },
-                                    codeLens = {
-                                        enable = true,
-                                    },
-                                    doc = {
-                                        privateName = { "^_" },
-                                    },
-                                    hint = {
-                                        enable = true,
-                                        setType = false,
-                                        paramType = true,
-                                        paramName = "Disable",
-                                        semicolon = "Disable",
-                                        arrayIndex = "Disable",
-                                    },
-                                },
-                            },
-                        })
-                    end,
-
-                    phpactor = function()
-                        return false
-                        -- lspConfig.phpactor.setup({
-                        --     capabilities = all_lsp_capabilities,
-                        --     on_attach = helpers.onLspAttach,
-                        --     init_options = {
-                        --         ["language_server_phpstan.enabled"] = false,
-                        --         ["language_server_psalm.enabled"] = false,
+            vim.lsp.config("eslint", {
+                root_markers = {
+                    ".eslintrc.js",
+                    ".eslintrc.json",
+                    ".eslintrc.mjs",
+                    ".eslintrc.yaml",
+                    ".eslintrc.yml",
+                    ".eslintrc",
+                    "eslint.config.js",
+                    "eslint.config.mjs",
+                    "eslint.config.ts",
+                    "node_modules/",
+                    "package.json",
+                },
+                settings = {
+                    options = {
+                        -- Disabled, as if a config file is found, it won't start. and this is different depending o eslint version
+                        -- overrideConfig = {
+                        --     ignores = {
+                        --         "**.vscode**",
+                        --         "**/nvm/**",
+                        --         "**/node_modules/**",
+                        --         "**/lib/**",
+                        --         "**/dist/**",
+                        --         "**/public/**",
+                        --         "**/build/**",
                         --     },
-                        --     root_dir = function(pattern)
-                        --         local cwd = vim.uv.cwd()
-                        --         local root = util.root_pattern(
-                        --             "composer.json",
-                        --             ".git",
-                        --             ".phpactor.json",
-                        --             ".phpactor.yml"
-                        --         )(pattern)
-                        --
-                        --         return root
-                        --
-                        --         -- return util.path.is_descendant(cwd, root)
-                        --         --         and cwd
-                        --         --     or root
-                        --     end,
-                        -- })
-                    end,
+                        -- },
+                    },
+                },
+            })
 
-                    intelephense = function()
-                        lspConfig.intelephense.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.onLspAttach,
-                            root_dir = function(pattern)
-                                local root = util.root_pattern(
-                                    "composer.json",
-                                    ".git"
-                                )(pattern)
+            vim.lsp.config("gopls", {
+                on_attach = function(client, bufNr)
+                    helpers.onLspAttach(client, bufNr)
 
-                                return root
-                            end,
-                            settings = {
-                                intelephense = {
-                                    -- https://github.com/bmewburn/intelephense-docs/blob/master/installation.md
-                                    telemetry = {
-                                        enabled = false,
-                                    },
-                                    files = {
-                                        maxSize = 1000000,
-                                    },
-                                    format = {
-                                        enable = true,
-                                        braces = "K&R", -- 1TBS
-                                    },
-                                },
+                    if
+                        not client.server_capabilities.semanticTokensProvider
+                    then
+                        local semantic =
+                            client.config.capabilities.textDocument.semanticTokens
+                        client.server_capabilities.semanticTokensProvider = {
+                            full = true,
+                            legend = {
+                                tokenTypes = semantic.tokenTypes,
+                                tokenModifiers = semantic.tokenModifiers,
                             },
-                        })
-                    end,
+                            range = true,
+                        }
+                    end
+                end,
 
-                    eslint = function()
-                        lspConfig.eslint.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = helpers.enableLspFeatures,
-                            root_dir = function(pattern)
-                                local root = util.root_pattern(
-                                    "eslint.config.js",
-                                    "eslint.config.mjs",
-                                    "eslint.config.ts",
-                                    ".eslintrc.js",
-                                    ".eslintrc.mjs",
-                                    ".eslintrc.json",
-                                    ".eslintrc.yaml",
-                                    ".eslintrc.yml",
-                                    ".eslintrc"
-                                )(pattern)
+                settings = {
+                    gopls = {
+                        gofumpt = true,
+                        codelenses = {
+                            gc_details = false,
+                            generate = true,
+                            regenerate_cgo = true,
+                            run_govulncheck = true,
+                            test = true,
+                            tidy = true,
+                            upgrade_dependency = true,
+                            vendor = true,
+                        },
+                        hints = {
+                            assignVariableTypes = true,
+                            compositeLiteralFields = true,
+                            compositeLiteralTypes = true,
+                            constantValues = true,
+                            functionTypeParameters = true,
+                            parameterNames = true,
+                            rangeVariableTypes = true,
+                        },
+                        analyses = {
+                            -- fieldalignment = true,
+                            nilness = true,
+                            unusedparams = true,
+                            unusedwrite = true,
+                            useany = true,
+                        },
+                        usePlaceholders = true,
+                        completeUnimported = true,
+                        staticcheck = true,
+                        directoryFilters = {
+                            "-.git",
+                            "-.vscode",
+                            "-.idea",
+                            "-.vscode-test",
+                            "-node_modules",
+                        },
+                        semanticTokens = true,
+                    },
+                },
+            })
 
-                                return root
-                            end,
-                            settings = {
-                                options = {
-                                    -- Disabled, as if a config file is found, it won't start. and this is different depending o eslint version
-                                    -- overrideConfig = {
-                                    --     ignores = {
-                                    --         "**.vscode**",
-                                    --         "**/nvm/**",
-                                    --         "**/node_modules/**",
-                                    --         "**/lib/**",
-                                    --         "**/dist/**",
-                                    --         "**/public/**",
-                                    --         "**/build/**",
-                                    --     },
-                                    -- },
-                                },
-                            },
-                        })
-                    end,
-
-                    gopls = function()
-                        lspConfig.gopls.setup({
-                            capabilities = all_lsp_capabilities,
-                            on_attach = function(client, bufNr)
-                                helpers.onLspAttach(client, bufNr)
-
-                                if
-                                    not client.server_capabilities.semanticTokensProvider
-                                then
-                                    local semantic =
-                                        client.config.capabilities.textDocument.semanticTokens
-                                    client.server_capabilities.semanticTokensProvider =
-                                        {
-                                            full = true,
-                                            legend = {
-                                                tokenTypes = semantic.tokenTypes,
-                                                tokenModifiers = semantic.tokenModifiers,
-                                            },
-                                            range = true,
-                                        }
-                                end
-                            end,
-                            settings = {
-                                gopls = {
-                                    gofumpt = true,
-                                    codelenses = {
-                                        gc_details = false,
-                                        generate = true,
-                                        regenerate_cgo = true,
-                                        run_govulncheck = true,
-                                        test = true,
-                                        tidy = true,
-                                        upgrade_dependency = true,
-                                        vendor = true,
-                                    },
-                                    hints = {
-                                        assignVariableTypes = true,
-                                        compositeLiteralFields = true,
-                                        compositeLiteralTypes = true,
-                                        constantValues = true,
-                                        functionTypeParameters = true,
-                                        parameterNames = true,
-                                        rangeVariableTypes = true,
-                                    },
-                                    analyses = {
-                                        -- fieldalignment = true,
-                                        nilness = true,
-                                        unusedparams = true,
-                                        unusedwrite = true,
-                                        useany = true,
-                                    },
-                                    usePlaceholders = true,
-                                    completeUnimported = true,
-                                    staticcheck = true,
-                                    directoryFilters = {
-                                        "-.git",
-                                        "-.vscode",
-                                        "-.idea",
-                                        "-.vscode-test",
-                                        "-node_modules",
-                                    },
-                                    semanticTokens = true,
-                                },
-                            },
-                        })
-                    end,
+            require("mason-lspconfig").setup({
+                ensure_installed = ensureLspInstalled,
+                automatic_enable = {
+                    exclude = disabledLspServers,
                 },
             })
 
@@ -600,10 +527,10 @@ end
 --- @param client vim.lsp.Client
 --- @param bufNr number
 function helpers.enableLspFeatures(client, bufNr)
-    if client.supports_method("textDocument/completion") then
+    if client:supports_method("textDocument/completion") then
         vim.bo[bufNr].omnifunc = "v:lua.vim.lsp.omnifunc"
     end
-    if client.supports_method("textDocument/definition") then
+    if client:supports_method("textDocument/definition") then
         vim.bo[bufNr].tagfunc = "v:lua.vim.lsp.tagfunc"
     end
 
