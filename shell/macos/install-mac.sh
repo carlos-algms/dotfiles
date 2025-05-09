@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-local shellDir="`dirname ${0:a:h}`"
+local shellDir="$(dirname ${0:a:h})"
 
 source "$shellDir/common/01_logging.sh"
 
@@ -8,7 +8,7 @@ source "$shellDir/common/01_logging.sh"
 if [[ ! "$(type brew)" ]]; then
     e_header "Installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>~/.zprofile
 else
     e_success "Brew is already installed"
 fi
@@ -31,7 +31,12 @@ brew install \
     fzf \
     git \
     htop \
+    kitty \
+    monitorcontrol \
+    neovim \
+    nvm \
     oh-my-posh \
+    pkg-config \
     ripgrep \
     tree \
     watch \

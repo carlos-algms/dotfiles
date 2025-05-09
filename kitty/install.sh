@@ -12,8 +12,10 @@ if [ -z "$IS_MAC" ]; then
     exit 0
 fi
 
-e_header "Installing kitty 🐱"
-curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+if ! command -v kitty >/dev/null 2>&1; then
+    e_header "Installing kitty 🐱"
+    brew install kitty
+fi
 
 if [ ! -d ~/.config/kitty ]; then
     mkdir -p ~/.config/kitty
