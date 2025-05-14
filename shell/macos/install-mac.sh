@@ -32,6 +32,7 @@ brew install \
     git \
     htop \
     kitty \
+    luajit \
     monitorcontrol \
     neovim \
     nvm \
