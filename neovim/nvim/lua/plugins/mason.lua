@@ -278,16 +278,9 @@ local M = {
 
             vim.lsp.config("jsonls", {
                 on_attach = helpers.enableLspFeatures,
-                -- lazy-load schemastore when needed - https://www.lazyvim.org/extras/lang/json#nvim-lspconfig
-                on_new_config = function(new_config)
-                    new_config.settings.json.schemas = vim.tbl_deep_extend(
-                        "force",
-                        new_config.settings.json.schemas or {},
-                        require("schemastore").json.schemas()
-                    )
-                end,
                 settings = {
                     json = {
+                        schemas = require("schemastore").json.schemas(),
                         validate = { enable = true },
                     },
                 },
@@ -295,16 +288,9 @@ local M = {
 
             vim.lsp.config("yamlls", {
                 on_attach = helpers.enableLspFeatures,
-                -- lazy-load schemastore when needed
-                on_new_config = function(new_config)
-                    new_config.settings.yaml.schemas = vim.tbl_deep_extend(
-                        "force",
-                        new_config.settings.yaml.schemas or {},
-                        require("schemastore").yaml.schemas()
-                    )
-                end,
                 settings = {
                     redhat = { telemetry = { enabled = false } },
+                    schemas = require("schemastore").yaml.schemas(),
                     yaml = {
                         keyOrdering = false,
                         format = {
