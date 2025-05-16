@@ -145,6 +145,12 @@ return {
                         "dockerfile*",
                     },
                 },
+                ["tsconfig"] = {
+                    pattern = "(.+)%.json$",
+                    files = {
+                        "%1.*.json",
+                    },
+                },
             },
         },
     },
