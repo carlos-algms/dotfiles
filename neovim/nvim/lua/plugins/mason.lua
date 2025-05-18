@@ -278,9 +278,12 @@ local M = {
 
             vim.lsp.config("jsonls", {
                 on_attach = helpers.enableLspFeatures,
+                before_init = function(_, client_config)
+                    client_config.settings.json.schemas =
+                        require("schemastore").json.schemas()
+                end,
                 settings = {
                     json = {
-                        schemas = require("schemastore").json.schemas(),
                         validate = { enable = true },
                     },
                 },
@@ -288,9 +291,12 @@ local M = {
 
             vim.lsp.config("yamlls", {
                 on_attach = helpers.enableLspFeatures,
+                before_init = function(_, client_config)
+                    client_config.settings.yaml.schemas =
+                        require("schemastore").yaml.schemas()
+                end,
                 settings = {
                     redhat = { telemetry = { enabled = false } },
-                    schemas = require("schemastore").yaml.schemas(),
                     yaml = {
                         keyOrdering = false,
                         format = {
