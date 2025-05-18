@@ -7,6 +7,8 @@ return {
 
         lazy = false,
 
+        enabled = false,
+
         opts = {
             at_edge = "stop",
         },

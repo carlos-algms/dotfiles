@@ -1,10 +1,11 @@
 return {
     "knubie/vim-kitty-navigator",
     -- Disabled to avoid exploit, check the files before copying them
-    -- build = not vim.g.is_ssh and "cp ./*.py ~/.config/kitty/" or nil,
-    dir = not vim.g.is_ssh and nil or "~/projects/vim-kitty-navigator",
+    build = not vim.g.is_ssh and "cp ./*.py ~/.config/kitty/" or nil,
 
-    enabled = false,
+    dir = vim.g.is_ssh and nil or "~/projects/vim-kitty-navigator",
+
+    enabled = true,
 
     config = function()
         -- https://sw.kovidgoyal.net/kitty/mapping/#conditional-mappings-depending-on-the-state-of-the-focused-window
