@@ -41,7 +41,7 @@ elif [ ! -z "$(command -v vi)" ]; then
 fi
 
 if [ ! -z "$(command -v kitten)" ]; then
-    alias s="kitten ssh "
+    alias s="kitten ssh --kitten forward_remote_control=yes "
 fi
 
 if [ ! -z "$(command -v bat)" ]; then
