@@ -137,7 +137,14 @@ local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
         }
     end
 
-    relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
+    relativePath = relativePath:gsub("diffview://.*/%.git/:0:/", "diffview://")
+    relativePath =
+        relativePath:gsub("diffview://.*/%.git/:2:/", "diffview://OURS/")
+    relativePath =
+        relativePath:gsub("diffview://.*/%.git/:3:/", "diffview://THEIRS/")
+    relativePath =
+        relativePath:gsub("diffview://.*/%.git/.-/", "diffview://BASE/")
+    -- relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
     relativePath = relativePath:gsub("fugitive://.*/%.git//", "fugitive:/")
     relativePath = relativePath:gsub("octo://.*/file/RIGHT/", "octo://NEW/")
     relativePath = relativePath:gsub("octo://.*/file/LEFT/", "octo://BASE/")
