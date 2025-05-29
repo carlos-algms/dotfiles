@@ -15,6 +15,12 @@ local M = {
             relative = "cursor",
         },
 
+        bigfile = {
+            enabled = true,
+            size = 1.5 * 1024 * 1024, -- 1.5MB
+            line_length = 300, -- average line length (useful for minified files)
+        },
+
         notifier = {
             enabled = true,
             timeout = 6000,
@@ -25,6 +31,8 @@ local M = {
                     "No information available",
                     -- triggered when Eslint isn't installed
                     "Unable to find ESLint library",
+                    "eslint: -32603", -- no eslint config found
+                    "Could not find config file",
                 }
 
                 for _, pattern in ipairs(patterns) do
@@ -56,7 +64,7 @@ local M = {
         },
 
         image = {
-            enabled = false,
+            enabled = true,
             formats = {
                 "png",
                 "jpg",
