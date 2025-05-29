@@ -1,0 +1,194 @@
+## https://github.com/eza-community/eza/blob/a8d19ab09e13ad616bc06e88765098da3b7bad63/man/eza_colors-explanation.5.md
+## https://www.nerdfonts.com/cheat-sheet
+# link it  to ~/.config/eza/eza-theme.yml
+
+colourful: true
+
+date:
+  foreground: Default
+  is_dimmed: true
+
+header:
+  foreground: Default
+  is_underline: false
+
+users:
+  user_you:
+    foreground: Default
+    is_bold: false
+  user_root:
+    foreground: Red
+    is_bold: true
+
+filekinds:
+  directory:
+    foreground: Blue
+
+file_type:
+  compiled:
+    foreground: Default
+    is_underlined: false
+    is_bold: false
+  build:
+    foreground: Default
+    is_underlined: false
+    is_bold: false
+  source:
+    foreground: Default
+    is_underlined: false
+    is_bold: false
+
+filenames:
+  package.json:
+    filename:
+      foreground: Default
+    icon:
+      style:
+        foreground: Red
+
+  package-lock.json:
+    filename:
+      foreground: Default
+    icon:
+      style:
+        foreground: Red
+
+  .npmrc:
+    icon:
+      style:
+        foreground: Red
+
+  pnpm-lock.yaml:
+    filename:
+      foreground: Default
+    icon:
+      glyph: 
+      style:
+        foreground: Yellow
+
+  pnpm-workspace.yaml:
+    icon:
+      glyph: 
+      style:
+        foreground: Yellow
+
+  prettier.config.ts:
+    icon:
+      glyph: 
+
+  .prettierrc.json:
+    icon:
+      glyph: 
+
+  astro.config.mjs:
+    icon:
+      glyph: 
+
+  .nvmrc:
+    icon:
+      glyph: 󰎙
+      style:
+        foreground: Green
+
+  jest.config.js:
+    icon:
+      glyph: 
+      style:
+        foreground: "#99415b"
+
+  .eslintrc.js:
+    icon:
+      style:
+        foreground: "#4B32C3"
+
+  .eslintignore:
+    icon:
+      style:
+        foreground: "#4B32C3"
+
+  eslint.config.js:
+    icon:
+      glyph: 
+      style:
+        foreground: "#4B32C3"
+
+  .gitignore:
+    icon:
+      style:
+        foreground: "#E44D27"
+
+  .gitattributes:
+    icon:
+      style:
+        foreground: "#E44D27"
+
+  tsconfig.json:
+    filename:
+      is_underlined: false
+      is_bold: false
+    icon:
+      glyph: 
+      style:
+        foreground: Blue
+
+  tsconfig.node.json:
+    icon:
+      glyph: 
+      style:
+        foreground: Blue
+
+  README.md:
+    filename:
+      is_underlined: false
+
+  babel.config.json:
+    icon:
+      glyph: 󰨥
+      style:
+        foreground: "#F7DF1E"
+
+  vitest.config.ts:
+    icon:
+      glyph: 
+      style:
+        foreground: "#6aa108"
+
+  vitest.setup.ts:
+    icon:
+      glyph: 
+      style:
+        foreground: "#6aa108"
+
+  webpack.config.js:
+    filename:
+      is_underlined: false
+      is_bold: false
+    icon:
+      style:
+        foreground: "#8DD6F9"
+
+extensions:
+  html:
+    icon:
+      style:
+        foreground: "#e34c26"
+
+  ts:
+    icon:
+      style:
+        foreground: Blue
+
+  tsx:
+    icon:
+      style:
+        foreground: Blue
+
+  css:
+    icon:
+      style:
+        foreground: "#d1699d"
+
+  scss:
+    icon:
+      style:
+        foreground: "#d1699d"

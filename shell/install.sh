@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${SCRIPT_DIR}/common/00_os.sh"
 source "${SCRIPT_DIR}/common/01_logging.sh"
-
 
 if [[ ! -z "$IS_WIN" ]]; then
     "${SCRIPT_DIR}/windows/install-windows.sh"
@@ -40,17 +39,21 @@ fi
 # ln -snf $SCRIPT_DIR/bashrc.sh              $HOME/.bashrc
 #
 
+e_arrow Setup EZA theme
+mkdir -p $HOME/.config/eza
+ln -snf $SCRIPT_DIR/eza-theme.yml $HOME/.config/eza/theme.yml
+e_success "EZA theme setup done"
 
 # Unix needs to add execution rights
-for f in `find $SCRIPT_DIR/bin -type f ! -name ".*"`; do
+for f in $(find $SCRIPT_DIR/bin -type f ! -name ".*"); do
     chmod u+x "$f"
 done
 
-for f in `find $SCRIPT_DIR/linux/bin -type f ! -name ".*"`; do
+for f in $(find $SCRIPT_DIR/linux/bin -type f ! -name ".*"); do
     chmod u+x "$f"
 done
 
-for f in `find $SCRIPT_DIR/macos/bin -type f ! -name ".*"`; do
+for f in $(find $SCRIPT_DIR/macos/bin -type f ! -name ".*"); do
     chmod u+x "$f"
 done
 
