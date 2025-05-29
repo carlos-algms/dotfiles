@@ -6,6 +6,19 @@ return {
         dependencies = {
             "vhyrro/luarocks.nvim",
         },
-        opts = {},
+        opts = {
+            -- kitty_method = "normal",
+            -- backend = "kitty",
+            -- processor = "magick_cli",
+            hijack_file_patterns = {
+                "*.png",
+                "*.jpg",
+                "*.jpeg",
+                "*.gif",
+                "*.webp",
+                "*.avif",
+                "*.svg",
+            },
+        },
     },
 }
