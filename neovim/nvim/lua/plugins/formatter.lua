@@ -30,7 +30,7 @@ local function shouldFormat()
     local disabled = vim.g.format_on_save_disabled[vim.bo.filetype] or false
 
     if disabled then
-        vim.notify("Format on save disabled for " .. vim.bo.filetype, "warn")
+        print("Format on save disabled for " .. vim.bo.filetype)
         return false
     end
 
