@@ -1,7 +1,9 @@
 return {
     {
         "3rd/image.nvim",
-        enabled = not vim.g.is_ssh,
+        -- enabled = not vim.g.is_ssh,
+        enabled = false,
+
         event = "VeryLazy",
         dependencies = {
             "vhyrro/luarocks.nvim",

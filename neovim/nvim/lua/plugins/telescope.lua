@@ -343,7 +343,9 @@ local M = {
 
             P.setupGitFilesPicker()
             P.setupTroubleInTelescope()
-            P.setupImagePreviewInTelescope()
+
+            -- Disabled as it was freezing telescope when an image was selected
+            -- P.setupImagePreviewInTelescope()
 
             -- telescope.load_extension("ui-select")
             telescope.load_extension("live_grep_args")
