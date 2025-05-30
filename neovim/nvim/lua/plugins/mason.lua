@@ -17,7 +17,6 @@ local M = {
         "mason-org/mason.nvim",
 
         dependencies = {
-            { "nvim-telescope/telescope.nvim" },
             { "mason-org/mason-lspconfig.nvim" },
             { "neovim/nvim-lspconfig" },
             { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
