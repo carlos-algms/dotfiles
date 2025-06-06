@@ -4,3 +4,4 @@
 !.vscode/*.json
 *_compiled.lua
 lazy-lock.json
+.DS_Store
