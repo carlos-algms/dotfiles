@@ -102,11 +102,17 @@ return {
         opts = {
             -- add any opts here
             provider = "copilot",
-            -- auto_suggestions_provider = "copilot",
-            hints = { enabled = false }, -- it sometimes stuck and never goes away
+            -- providers = {
+            --     copilot = {
+            --         model = "claude-3.7-sonnet-thought",
+            --     },
+            -- },
+            auto_suggestions_provider = "copilot",
             behaviour = {
                 auto_set_keymaps = false,
+                auto_suggestions = false,
             },
+            hints = { enabled = false },
             windows = {
                 position = "right",
                 wrap = true, -- similar to vim.o.wrap
