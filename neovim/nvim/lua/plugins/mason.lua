@@ -43,6 +43,8 @@ local M = {
                 pattern = {
                     ["%.vscode/.*%.json"] = "jsonc",
                     [".*%.gitconfig"] = "gitconfig",
+                    -- it doesn't seem the gh-lsp requires it
+                    -- [".*/%.github[%w/]+workflows[%w/]+.*%.ya?ml"] = "yaml.github",
                 },
             })
 
