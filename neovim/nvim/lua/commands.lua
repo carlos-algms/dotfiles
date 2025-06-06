@@ -85,13 +85,30 @@ createUserCommand("RevelInExplorer", function()
     end
 
     local os_name = vim.loop.os_uname().sysname
-    if os_name == "Darwin" then
-        vim.fn.jobstart({ "open", "-R", filepath })
-    elseif os_name == "Windows" or os_name == "Windows_NT" then
-        vim.fn.jobstart({ "explorer", "/select," .. filepath:gsub("/", "\\") })
-    elseif os_name == "Linux" then
-        -- Try common Linux file explorers
-        vim.fn.jobstart({ "xdg-open", vim.fn.fnamemodify(filepath, ":h") })
+    local explorer_map = {
+        Darwin = { "open", "-R", filepath },
+        Windows = { "explorer", "/select," .. filepath:gsub("/", "\\") },
+        ["Windows_NT"] = { "explorer", "/select," .. filepath:gsub("/", "\\") },
+        Linux = { "xdg-open", vim.fn.fnamemodify(filepath, ":h") },
+    }
+
+    local command = explorer_map[os_name]
+    if command then
+        vim.fn.jobstart(command, {
+            on_exit = function(_, exit_code)
+                if exit_code ~= 0 then
+                    vim.notify(
+                        "Failed to open the explorer",
+                        vim.log.levels.ERROR
+                    )
+                else
+                    vim.notify(
+                        "Explorer opened successfully",
+                        vim.log.levels.INFO
+                    )
+                end
+            end,
+        })
     else
         vim.notify("Unsupported OS: " .. os_name, vim.log.levels.ERROR)
     end
