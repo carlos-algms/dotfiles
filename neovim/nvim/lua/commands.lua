@@ -76,3 +76,25 @@ createUserCommand("CloseAllOtherBuffers", function()
         end
     end
 end, {})
+
+createUserCommand("RevelInExplorer", function()
+    local filepath = vim.fn.expand("%:p")
+    if filepath == "" then
+        vim.notify("No file in current buffer", vim.log.levels.ERROR)
+        return
+    end
+
+    local os_name = vim.loop.os_uname().sysname
+    if os_name == "Darwin" then
+        vim.fn.jobstart({ "open", "-R", filepath })
+    elseif os_name == "Windows" or os_name == "Windows_NT" then
+        vim.fn.jobstart({ "explorer", "/select," .. filepath:gsub("/", "\\") })
+    elseif os_name == "Linux" then
+        -- Try common Linux file explorers
+        vim.fn.jobstart({ "xdg-open", vim.fn.fnamemodify(filepath, ":h") })
+    else
+        vim.notify("Unsupported OS: " .. os_name, vim.log.levels.ERROR)
+    end
+end, {
+    desc = "Open the current file's directory in the file explorer",
+})
