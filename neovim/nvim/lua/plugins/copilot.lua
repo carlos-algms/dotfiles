@@ -33,6 +33,7 @@ return {
             -- debug = true, -- Enable debugging
 
             -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
+            model = "claude-3.7-sonnet-thought",
 
             mappings = {
                 reset = {
@@ -50,6 +51,10 @@ return {
         event = "VeryLazy",
         config = function()
             require("copilot").setup({
+                -- it seems there's only 1 model available for autocompletion
+                -- https://github.com/github/copilot.vim/issues/77#issuecomment-2848712690
+                -- so I'll keep it commented out for now
+                -- copilot_model = "copilot:claude-3.7-sonnet",
                 suggestion = {
                     enabled = true,
                     auto_trigger = true,
