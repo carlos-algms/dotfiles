@@ -4,8 +4,9 @@ if [ ! -z "$(command -v eza)" ]; then
     # https://askubuntu.com/a/466203 - colors explanation
     # export EZA_COLORS="da=0;37:ex=0;32:di=0;34"
 
-    # Reset it to only use eze theme and avoid color conflicts
-    export LS_COLORS=""
+    # Reset it to only use eza theme and avoid color conflicts
+    # But I still need to set the directory color, otherwise its horrible
+    export LS_COLORS="di=1;34"
 
     # https://github.com/eza-community/eza/blob/main/man/eza_colors-explanation.5.md
     export EZA_CONFIG_DIR=$HOME/.config/eza
