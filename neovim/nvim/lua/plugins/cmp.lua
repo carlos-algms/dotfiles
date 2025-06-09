@@ -15,7 +15,7 @@ return {
             -- { "zbirenbaum/copilot.lua" },
         },
         init = function()
-            vim.opt.completeopt = "menu,menuone,noinsert,preview"
+            vim.opt.completeopt = "menu,menuone,noinsert,preview,popup"
         end,
         config = function()
             local cmp = require("cmp")
