@@ -12,14 +12,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- resize splits if window got resized
-vim.api.nvim_create_autocmd({ "VimResized" }, {
-    group = augroup("resize_splits"),
-    callback = function()
-        local current_tab = vim.fn.tabpagenr()
-        vim.cmd("tabdo wincmd =")
-        vim.cmd("tabnext " .. current_tab)
-    end,
-})
+-- Disabled as it was causing weird behavior with some windows
+-- vim.api.nvim_create_autocmd({ "VimResized" }, {
+--     group = augroup("resize_splits"),
+--     callback = function()
+--         local current_tab = vim.fn.tabpagenr()
+--         vim.cmd("tabdo wincmd =")
+--         vim.cmd("tabnext " .. current_tab)
+--     end,
+-- })
 
 -- vim.defer_fn(function()
 --     vim.cmd(
