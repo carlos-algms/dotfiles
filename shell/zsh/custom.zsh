@@ -22,7 +22,7 @@ HISTSIZE=5000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
-unsetopt inc_append_history
+# unsetopt inc_append_history
 unsetopt share_history
 setopt hist_ignore_space
 setopt hist_ignore_all_dups
@@ -32,8 +32,8 @@ setopt hist_find_no_dups
 
 # https://github.com/docker/cli/commit/b10fb430481574b34997e4b0e00b703cfcd6669e#diff-474a9d942d53cc2279d5641e4a9dcfb18958e412ad53940b53423a38033857d6
 # https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/docker/README.md#settings
-zstyle ':completion:*:*:docker:*' option-stacking yes
-zstyle ':completion:*:*:docker-*:*' option-stacking yes
+# zstyle ':completion:*:*:docker:*' option-stacking yes
+# zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 export DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
 export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
