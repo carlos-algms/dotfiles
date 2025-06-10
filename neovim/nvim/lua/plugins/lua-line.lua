@@ -30,6 +30,7 @@ local M = {
                         "dap-repl",
                         "Avante",
                         "AvanteInput",
+                        "AvanteSelectedFiles",
                     },
                 },
                 refresh = {
