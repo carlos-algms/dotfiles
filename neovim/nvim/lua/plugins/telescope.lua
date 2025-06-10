@@ -20,7 +20,7 @@ local M = {
                 "nvim-telescope/telescope-fzf-native.nvim",
                 build = "make",
             },
-            "3rd/image.nvim", -- added to support image preview
+            -- "3rd/image.nvim", -- added to support image preview
         },
 
         cmd = { "Telescope" },
