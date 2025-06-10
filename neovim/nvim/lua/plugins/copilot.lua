@@ -33,7 +33,7 @@ return {
             -- debug = true, -- Enable debugging
 
             -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
-            model = "claude-3.7-sonnet-thought",
+            -- model = "claude-3.7-sonnet-thought",
 
             mappings = {
                 reset = {
