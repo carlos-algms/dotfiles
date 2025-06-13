@@ -19,13 +19,21 @@ PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
 ## Hide the default user name from the prompt
 DEFAULT_USER=$(whoami)
 
+# it was setting as user@machine-name making it ugly and long
+# And most likely conflicting with oh-my-posh, as it fixed after any command
+DISABLE_AUTO_TITLE="true"
+ZSH_THEME_TERM_TITLE_IDLE="%~"
+
+# defautl one in case a batcat is not available
+MANPAGER="less -R --use-color -Dd+r -Du+b"
+
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
 if [[ -x "$(command -v code)" ]] && [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR='code --wait'
+    EDITOR='code --wait'
 elif [[ -x "$(command -v nvim)" ]]; then
-    export EDITOR='nvim'
+    EDITOR='nvim'
 elif [[ -x "$(command -v vim)" ]]; then
-    export EDITOR='vim'
+    EDITOR='vim'
 fi
 
 # disable shared history between ZSH instances
@@ -44,11 +52,11 @@ setopt hist_find_no_dups
 
 # https://github.com/docker/cli/commit/b10fb430481574b34997e4b0e00b703cfcd6669e#diff-474a9d942d53cc2279d5641e4a9dcfb18958e412ad53940b53423a38033857d6
 # https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/docker/README.md#settings
-# zstyle ':completion:*:*:docker:*' option-stacking yes
-# zstyle ':completion:*:*:docker-*:*' option-stacking yes
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
-export DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
-export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
+DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
+DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
 . $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
 
