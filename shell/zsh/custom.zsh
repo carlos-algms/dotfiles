@@ -38,12 +38,12 @@ fi
 
 # disable shared history between ZSH instances
 HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
-HISTSIZE=5000
+HISTSIZE=10000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
 # unsetopt inc_append_history
-unsetopt share_history
+# unsetopt share_history
 setopt hist_ignore_space
 setopt hist_ignore_all_dups
 setopt hist_save_no_dups
