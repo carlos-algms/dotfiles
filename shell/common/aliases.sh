@@ -8,12 +8,30 @@ alias Rsync="$(which -p rsync) --recursive \
 
 alias path-show='echo $PATH | tr ":" "\n"'
 
-# Using which because it might change in Windows
-alias ff='`which -p find` . ! -path "**node_modules/**" ! -path "**.vscode/**" ! -path "**vendor/**" -type f -name '
-# consider using `fd -t d -H` instead
-# it also respects .gitignore and seems to be faster
-# I must add some sane excludes in case the cwd isn't a git repo and it cant find a ignore file
-alias fdir='find . \( -path "**/node_modules" -o -path "**/.git" \) -prune -o -type d -print'
+excludes=(
+    .git
+    node_modules
+    .vscode
+    vendor
+    .next
+    build
+    dist
+    coverage
+    storybook-static
+    .turbo
+    generated
+)
+
+if [[ -x "$(command -v fd)" ]]; then
+    alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always --glob "
+
+    alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
+else
+    # Using which because it might change in Windows
+    alias ff="$(which -p find)  . $(printf -- '! -path \"**/%s/**\" ' "${excludes[@]}") -type f -name "
+
+    alias fdir="$(which -p find) . \( $(printf -- '-path \"**/%s\" -o ' "${excludes[@]}") \) -prune -o -type d -print"
+fi
 
 alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
 
@@ -55,6 +73,11 @@ fi
 # Fix for the fuzzy cd auto completion
 # https://github.com/ajeetdsouza/zoxide/issues/513#issuecomment-2040488941
 if [ ! -z "$(command -v zoxide)" ]; then
-    eval "${$(zoxide init zsh):s#_files -/#_cd#}"
+    if [ -n "$ZSH_VERSION" ]; then
+        eval "$(zoxide init zsh)"
+    else
+        eval "$(zoxide init bash)"
+    fi
+
     alias cd="z "
 fi
