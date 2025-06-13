@@ -78,11 +78,17 @@ fi
 
 # https://github.com/jeffreytse/zsh-vi-mode
 function vim_mode_lazy_keybindings() {
-    [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
     bindkey "^P" up-line-or-beginning-search
     bindkey "^N" down-line-or-beginning-search
+
+    if command -v fzf &>/dev/null; then
+        # FZF needs to be loaded after zsh-vi-mode to avoid conflicts
+        source <(fzf --zsh)
+    fi
 }
 
 zvm_after_init_commands+=(vim_mode_lazy_keybindings)
-# zvm_after_lazy_keybindings_commands+=(zvm_after_lazy_keybindings)
+
+FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
+FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
+FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
