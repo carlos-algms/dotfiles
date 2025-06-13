@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
- babel-node \
-  --no-babelrc \
-  --presets=env,flow \
-  --env="{ \"NODE_PATH\": \"${NODE_PATH}\" }" \
-  "${@}"
