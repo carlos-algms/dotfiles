@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 alias p='pnpm'
 alias pa='pnpm add'
 alias pad='pnpm add --save-dev'
