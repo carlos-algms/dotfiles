@@ -1,8 +1,20 @@
 ## https://github.com/ohmyzsh/ohmyzsh/blob/master/custom/example.zsh
 # this file will be loaded automatically by zsh, if it exists under ~/.oh-my-zsh/custom with zsh extensions (.zsh)
 
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
+LANG="en_US.UTF-8"
+LC_ALL="en_US.UTF-8"
+
+# follow XDG base dir specification
+XDG_CONFIG_HOME="$HOME/.config"
+XDG_DATA_HOME="$HOME/.local/share"
+XDG_CACHE_HOME="$HOME/.cache"
+XDG_STATE_HOME="$HOME/.local/state"
+GOPATH="$XDG_DATA_HOME/go"
+GOBIN="$GOPATH/bin"
+GOMODCACHE="$XDG_CACHE_HOME/go/mod"
+FFMPEG_DATADIR="$XDG_CONFIG_HOME/ffmpeg"
+LESSHISTFILE="$XDG_CACHE_HOME/less_history"
+PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
 
 ## Hide the default user name from the prompt
 DEFAULT_USER=$(whoami)
