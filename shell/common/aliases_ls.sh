@@ -10,6 +10,8 @@ if [ ! -z "$(command -v eza)" ]; then
 
     # https://github.com/eza-community/eza/blob/main/man/eza_colors-explanation.5.md
     export EZA_CONFIG_DIR=$HOME/.config/eza
+
+    alias tree="ls --tree --ignore-glob='node_modules|build|public|dist|vendor'"
 elif [ ! -z "$(command -v gls)" ]; then
     # requires coreutils to be installed
     alias ls="gls -F --color=auto --group-directories-first"
