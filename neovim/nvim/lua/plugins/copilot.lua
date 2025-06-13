@@ -28,6 +28,8 @@ return {
             },
         },
 
+        --- @module "CopilotChat"
+        --- @type CopilotChat.config
         opts = {
             -- https://github.com/CopilotC-Nvim/CopilotChat.nvim?tab=readme-ov-file#configuration
             -- debug = true, -- Enable debugging
@@ -35,7 +37,12 @@ return {
             -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
             -- model = "claude-3.7-sonnet-thought",
 
+            sticky = {
+                "#buffer",
+            },
+
             mappings = {
+                ---@diagnostic disable-next-line: missing-fields
                 reset = {
                     normal = "<localleader>r",
                     insert = "<localleader><C-r>",
