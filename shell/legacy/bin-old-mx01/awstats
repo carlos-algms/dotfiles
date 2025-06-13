@@ -1,3 +1,0 @@
-#! /bin/bash
-/usr/lib/cgi-bin/awstats.pl -config=sites -update;
-#echo "run" >> /root/awstats-run;

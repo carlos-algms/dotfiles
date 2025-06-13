@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-npm -g list --depth=0
