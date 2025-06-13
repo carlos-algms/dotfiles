@@ -61,6 +61,12 @@ local M = {
                     timeout = 5000,
                 })
             end,
+            remote_patterns = {
+                -- my custom SSH config to use specific SSH keys
+                -- follow the pattern <company-name>-github:/org/repo.git
+                -- and it should work for any company
+                { "^%S+-github:(.+)%.git$", "https://github.com/%1" },
+            },
         },
 
         image = {
