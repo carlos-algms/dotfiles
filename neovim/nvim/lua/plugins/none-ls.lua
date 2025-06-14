@@ -20,7 +20,7 @@ local M = {
 
         local sources = {}
 
-        vim.list_extend(sources, P.make_phpstan_sources())
+        -- vim.list_extend(sources, P.make_phpstan_sources())
         vim.list_extend(sources, P.make_cspell_sources())
 
         nullLs.setup({
