@@ -10,6 +10,7 @@ return {
         "typescript",
         "typescriptreact",
         "html",
+        "lua",
     },
 
     config = function()
@@ -26,12 +27,17 @@ return {
             "!NvimTree",
             "!lazy",
             "!git",
+
+            lua = {
+                RGB = true,
+            },
         }, {
             mode = "background",
             names = false,
             css = true,
             hsl_fn = true,
             css_fn = true,
+            rgb_fn = true,
         })
     end,
 }
