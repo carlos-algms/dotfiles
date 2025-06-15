@@ -1,4 +1,4 @@
----@type vim.lsp.Config
+--- @type vim.lsp.Config
 return {
     root_markers = {
         "composer.json",
@@ -18,5 +18,9 @@ return {
                 braces = "K&R", -- 1TBS
             },
         },
+    },
+    init_options = {
+        -- TODO: Check if I need to create this directory in the future
+        globalStoragePath = vim.fn.stdpath("cache") .. "/intelephense",
     },
 }
