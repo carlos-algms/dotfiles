@@ -64,6 +64,9 @@ require("lazy").setup("plugins", {
     change_detection = {
         notify = false,
     },
+    rocks = {
+        enabled = false,
+    },
     -- colorscheme that will be used when installing plugins.
     install = { colorscheme = { "darcluar" } },
     -- as in the Docs + make it work in Shared Hosts like GoDaddy, where they limit the number of processes and threads
