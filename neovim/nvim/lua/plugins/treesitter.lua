@@ -35,6 +35,7 @@ return {
                 "markdown_inline",
                 "php",
                 "phpdoc",
+                "regex",
             },
 
             -- Install parsers synchronously (only applied to `ensure_installed`)
