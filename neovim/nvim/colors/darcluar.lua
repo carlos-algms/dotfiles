@@ -75,6 +75,10 @@ M.theme = {
         Type = { fg = M.pallet.type },
         Visual = { bg = M.pallet.selection },
         WinSeparator = { fg = M.pallet.muted },
+        ["@markup.strong.markdown_inline"] = {
+            bold = true,
+            fg = M.pallet.keyword,
+        },
     },
 
     links = {
@@ -131,10 +135,11 @@ M.theme = {
         ["@markup.heading.tsx"] = "@none",
         ["@markup.heading"] = "Keyword",
         ["@markup.link.label"] = "@none",
+        ["@markup.link.label.markdown_inline"] = "@string",
         ["@markup.list_item.complete.markdown"] = "@comment",
         ["@markup.list.checked"] = "@comment",
         ["@markup.list"] = "Keyword",
-        ["@markup.raw.block.markdown"] = "Identifier",
+        ["@fenced_code_block.markdown"] = "Keyword", -- the ``` blocks
         ["@markup.raw.delimiter.markdown"] = "Keyword",
         ["@markup.raw.markdown_inline"] = "Bold",
         ["@markup.strong.html"] = "@none",
