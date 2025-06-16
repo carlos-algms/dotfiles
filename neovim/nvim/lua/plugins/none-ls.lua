@@ -24,6 +24,7 @@ local M = {
         vim.list_extend(sources, P.make_cspell_sources())
 
         nullLs.setup({
+            -- debug = true,
             fallback_severity = vim.diagnostic.severity.INFO,
             sources = sources,
         })
@@ -59,6 +60,16 @@ function P.init_cspell()
                 vim.log.levels.ERROR
             )
         end
+    end
+
+    local dict = folder_path
+        .. "/node_modules/@cspell/dict-pt-br/cspell-ext.json"
+
+    if vim.fn.filereadable(dict) ~= 1 then
+        vim.notify(
+            "CSpell dictionary pt-br not found, please check the installation",
+            vim.log.levels.ERROR
+        )
     end
 end
 
