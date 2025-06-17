@@ -37,10 +37,12 @@ local M = {
                     [".zshenv"] = "sh",
                     ["composer.lock"] = "json",
                     ["phpstan.neon"] = "yaml",
+                    [".env"] = "confini",
                 },
                 pattern = {
                     ["%.vscode/.*%.json"] = "jsonc",
                     [".*%.gitconfig"] = "gitconfig",
+                    ["%.env%..*"] = "confini",
                     -- it doesn't seem the gh-lsp requires it
                     -- [".*/%.github[%w/]+workflows[%w/]+.*%.ya?ml"] = "yaml.github",
                 },
