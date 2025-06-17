@@ -28,6 +28,7 @@ brew install \
     coreutils \
     eza \
     fd \
+    fnm \
     fzf \
     git \
     htop \
@@ -35,7 +36,6 @@ brew install \
     luajit \
     monitorcontrol \
     neovim \
-    nvm \
     oh-my-posh \
     pkg-config \
     ripgrep \

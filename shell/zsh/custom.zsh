@@ -80,10 +80,19 @@ DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 #}
 #zvm_after_init_commands+=(vim_mode_lazy_keybindings)
 
-# TODO: automate install of pnpm-shell-completion
-# https://github.com/g-plane/pnpm-shell-completion?tab=readme-ov-file#oh-my-zsh
+if command -v fnm &>/dev/null; then
+    eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
+    source <(fnm completions --shell zsh)
 
-# eval "$(starship init zsh)"
+    # TODO: automate install of pnpm-shell-completion
+    # https://github.com/g-plane/pnpm-shell-completion?tab=readme-ov-file#oh-my-zsh
+    export PNPM_HOME="/Users/carlos.gomes/Library/pnpm"
+    case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+    source <(pnpm completion zsh)
+fi
 
 # TODO: automate install of oh-my-posh
 # Linux and Mac
