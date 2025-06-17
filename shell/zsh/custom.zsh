@@ -61,15 +61,24 @@ setopt hist_find_no_dups
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
+set -o vi
+
 DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
 DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
 . $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
 
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]; then
-    git clone https://github.com/jeffreytse/zsh-vi-mode \
-        $ZSH_CUSTOM/plugins/zsh-vi-mode
-fi
+# ZSH has a basic vi mode
+# if [ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]; then
+#     git clone https://github.com/jeffreytse/zsh-vi-mode \
+#         $ZSH_CUSTOM/plugins/zsh-vi-mode
+# fi
+# # https://github.com/jeffreytse/zsh-vi-mode
+# function vim_mode_lazy_keybindings() {
+# FZF needs to be loaded after zsh-vi-mode to avoid conflicts
+# move it here if re-enabling zsh-vi-mode
+#}
+#zvm_after_init_commands+=(vim_mode_lazy_keybindings)
 
 # TODO: automate install of pnpm-shell-completion
 # https://github.com/g-plane/pnpm-shell-completion?tab=readme-ov-file#oh-my-zsh
@@ -82,19 +91,12 @@ if command -v oh-my-posh >/dev/null 2>&1; then
     eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
 fi
 
-# https://github.com/jeffreytse/zsh-vi-mode
-function vim_mode_lazy_keybindings() {
-    bindkey "^P" up-line-or-beginning-search
-    bindkey "^N" down-line-or-beginning-search
+bindkey "^P" up-line-or-beginning-search
+bindkey "^N" down-line-or-beginning-search
 
-    if command -v fzf &>/dev/null; then
-        # FZF needs to be loaded after zsh-vi-mode to avoid conflicts
-        source <(fzf --zsh)
-    fi
-}
-
-zvm_after_init_commands+=(vim_mode_lazy_keybindings)
-
-FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
-FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
-FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
+if command -v fzf &>/dev/null; then
+    FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
+    FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
+    FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
+    source <(fzf --zsh)
+fi
