@@ -32,13 +32,15 @@ if command -v brew &>/dev/null; then
 fi
 
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
-if [[ -x "$(command -v code)" ]] && [[ "$TERM_PROGRAM" == "vscode" ]]; then
+if command -v code &>/dev/null && [[ "$TERM_PROGRAM" == "vscode" ]]; then
     EDITOR='code --wait'
-elif [[ -x "$(command -v nvim)" ]]; then
+elif command -v nvim &>/dev/null; then
     EDITOR='nvim'
-elif [[ -x "$(command -v vim)" ]]; then
+elif command -v vim &>/dev/null; then
     EDITOR='vim'
 fi
+
+VISUAL="$EDITOR"
 
 # disable shared history between ZSH instances
 HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
