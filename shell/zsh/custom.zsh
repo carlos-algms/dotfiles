@@ -24,8 +24,12 @@ DEFAULT_USER=$(whoami)
 DISABLE_AUTO_TITLE="true"
 ZSH_THEME_TERM_TITLE_IDLE="%~"
 
-# defautl one in case a batcat is not available
+# default one in case a batcat is not available
 MANPAGER="less -R --use-color -Dd+r -Du+b"
+
+if command -v brew &>/dev/null; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
 if [[ -x "$(command -v code)" ]] && [[ "$TERM_PROGRAM" == "vscode" ]]; then
