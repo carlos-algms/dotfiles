@@ -32,6 +32,7 @@ brew install \
     fzf \
     git \
     htop \
+    jq \
     kitty \
     luajit \
     monitorcontrol \
