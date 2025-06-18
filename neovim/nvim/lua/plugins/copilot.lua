@@ -4,6 +4,8 @@ return {
 
         branch = "main",
 
+        enabled = vim.g.has_node,
+
         build = "make tiktoken", -- Only on MacOS or Linux
 
         dependencies = {
@@ -56,6 +58,9 @@ return {
         "zbirenbaum/copilot.lua",
         cmd = "Copilot",
         event = "VeryLazy",
+
+        enabled = vim.g.has_node,
+
         config = function()
             require("copilot").setup({
                 -- it seems there's only 1 model available for autocompletion
