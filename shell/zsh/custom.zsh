@@ -84,14 +84,21 @@ if command -v fnm &>/dev/null; then
     eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
     source <(fnm completions --shell zsh)
 
+    if [[ -z "$(fnm current)" ]]; then
+        fnm install --lts
+    fi
+
     # TODO: automate install of pnpm-shell-completion
     # https://github.com/g-plane/pnpm-shell-completion?tab=readme-ov-file#oh-my-zsh
-    export PNPM_HOME="/Users/carlos.gomes/Library/pnpm"
+    export PNPM_HOME="$XDG_DATA_HOME/pnpm"
     case ":$PATH:" in
     *":$PNPM_HOME:"*) ;;
     *) export PATH="$PNPM_HOME:$PATH" ;;
     esac
-    source <(pnpm completion zsh)
+
+    if command -v pnpm &>/dev/null; then
+        source <(pnpm completion zsh)
+    fi
 fi
 
 # TODO: automate install of oh-my-posh
