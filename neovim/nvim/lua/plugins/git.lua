@@ -184,13 +184,6 @@ return {
                 { desc = "Commit staged files with --no-verify" },
             }
 
-            local nextItemKeymap = {
-                "n",
-                "]q", -- TODO: do the same as select entry to focus on the first hunk
-                actions.select_next_entry,
-                { desc = "Open the diff for the next file" },
-            }
-
             local nextItemKeymap_ = {
                 "n",
                 "J", -- TODO: do the same as select entry to focus on the first hunk
@@ -201,13 +194,6 @@ return {
             local prevItemKeymap_ = {
                 "n",
                 "K",
-                actions.select_prev_entry,
-                { desc = "Open the diff for the previous file" },
-            }
-
-            local prevItemKeymap = {
-                "n",
-                "[q",
                 actions.select_prev_entry,
                 { desc = "Open the diff for the previous file" },
             }
@@ -231,8 +217,6 @@ return {
                         quitDiffViewKeymap,
                         commitKeyMap,
                         commitNoVerifyKeyMap,
-                        nextItemKeymap,
-                        prevItemKeymap,
                         nextItemKeymap_,
                         prevItemKeymap_,
 
@@ -265,8 +249,6 @@ return {
                         quitDiffViewKeymap,
                         commitKeyMap,
                         commitNoVerifyKeyMap,
-                        nextItemKeymap,
-                        prevItemKeymap,
                         nextItemKeymap_,
                         prevItemKeymap_,
 
@@ -291,8 +273,6 @@ return {
                     },
                     file_history_panel = {
                         quitDiffViewKeymap,
-                        nextItemKeymap,
-                        prevItemKeymap,
                         {
                             "n",
                             "<cr>",

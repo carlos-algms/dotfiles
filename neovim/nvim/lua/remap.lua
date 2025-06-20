@@ -44,43 +44,6 @@ vim.keymap.set(
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
--- replace the selected content without losing the Yanked register
-vim.keymap.set(
-    "v",
-    "<leader>p",
-    [["_dP]],
-    { desc = "Paste replacing selection without losing the Yanked register" }
-)
-
--- Disabled, as I'm too used to `dd` and `D` to cut
--- vim.keymap.set(
---     "n",
---     "d",
---     [["_d]],
---     { desc = "delete without losing yanked register" }
--- )
-
--- vim.keymap.set(
---     "n",
---     "D",
---     [["_D]],
---     { desc = "delete without losing yanked register" }
--- )
-
--- vim.keymap.set(
---     "v",
---     "d",
---     [["_d]],
---     { desc = "Delete selection without losing Yanked register" }
--- )
-
--- vim.keymap.set(
---     "v",
---     "D",
---     [["_D]],
---     { desc = "Delete selection without losing Yanked register" }
--- )
-
 -- copy to system clipboard
 vim.keymap.set(
     { "n", "v" },
@@ -88,6 +51,7 @@ vim.keymap.set(
     [["+y]],
     { desc = "Copy to system clipboard" }
 )
+
 vim.keymap.set(
     { "n", "v" },
     "<leader>Y",
@@ -99,20 +63,6 @@ vim.keymap.set(
 vim.keymap.set({ "n", "v" }, "Y", [[yy]], { desc = "Yank entire line" })
 
 vim.keymap.set("n", "Q", "<nop>")
-
-vim.keymap.set(
-    { "n" },
-    "]q",
-    "<CMD>cnext<CR>",
-    { desc = "Next item in the fix list" }
-)
-
-vim.keymap.set(
-    { "n" },
-    "[q",
-    "<CMD>cprev<CR>",
-    { desc = "Previous item in the fix list" }
-)
 
 vim.keymap.set(
     { "i" },
