@@ -34,8 +34,8 @@ local M = {
                         "AvanteSelectedFiles",
                         "AvanteTodos",
                         -- "trouble",
-                        -- "quickfix",
-                        -- "qf",
+                        "quickfix",
+                        "qf",
                     },
                 },
                 refresh = {
