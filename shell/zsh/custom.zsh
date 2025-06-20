@@ -116,3 +116,6 @@ if command -v fzf &>/dev/null; then
     FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
     source <(fzf --zsh)
 fi
+
+# Load completion system after other scripts might hav modifed fpath
+compinit
