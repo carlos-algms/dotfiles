@@ -28,10 +28,14 @@ local M = {
                         -- "oil",
                         "neo-tree",
                         "dap-repl",
+                        "fugitive",
                         "Avante",
                         "AvanteInput",
                         "AvanteSelectedFiles",
                         "AvanteTodos",
+                        -- "trouble",
+                        -- "quickfix",
+                        -- "qf",
                     },
                 },
                 refresh = {
@@ -107,6 +111,15 @@ local M = {
                     "location",
                 },
             },
+
+            extensions = {
+                -- "quickfix",
+                -- "oil",
+                -- "trouble",
+                -- "neo-tree",
+                -- "fugitive",
+                -- "nvim-dap-ui",
+            },
         }
 
         require("lualine").setup(opts)
@@ -139,14 +152,7 @@ local cachedBufferInfo = cache.cacheByKey("buffer_name", function(self)
         }
     end
 
-    relativePath = relativePath:gsub("diffview://.*/%.git/:0:/", "diffview://")
-    relativePath =
-        relativePath:gsub("diffview://.*/%.git/:2:/", "diffview://OURS/")
-    relativePath =
-        relativePath:gsub("diffview://.*/%.git/:3:/", "diffview://THEIRS/")
-    relativePath =
-        relativePath:gsub("diffview://.*/%.git/.-/", "diffview://BASE/")
-    -- relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
+    relativePath = relativePath:gsub("diffview://.*/%.git/.-/", "diffview://")
     relativePath = relativePath:gsub("fugitive://.*/%.git//", "fugitive:/")
     relativePath = relativePath:gsub("octo://.*/file/RIGHT/", "octo://NEW/")
     relativePath = relativePath:gsub("octo://.*/file/LEFT/", "octo://BASE/")
@@ -199,9 +205,17 @@ local function is_new_file()
         and vim.fn.filereadable(filename) == 0
 end
 
-P.buffer_name = function(self)
-    local bufferPath = vim.fn.expand("%:~:p")
-    local bufferInfo = cachedBufferInfo(bufferPath, self)
+function P.buffer_name(self)
+    local bufferInfo = nil
+
+    if vim.bo.filetype == "trouble" then
+        return "󱖫 Trouble - "
+            .. require("lualine.extensions.trouble").sections.lualine_a[1]()
+    else
+        local bufferPath = vim.fn.expand("%:~:p")
+        bufferInfo = cachedBufferInfo(bufferPath, self)
+    end
+
     local name, icon, icon_highlight =
         bufferInfo.name, bufferInfo.icon, bufferInfo.icon_highlight
 
