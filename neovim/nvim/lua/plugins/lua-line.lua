@@ -36,6 +36,7 @@ local M = {
                         -- "trouble",
                         "quickfix",
                         "qf",
+                        "DiffviewFileHistory",
                     },
                 },
                 refresh = {
