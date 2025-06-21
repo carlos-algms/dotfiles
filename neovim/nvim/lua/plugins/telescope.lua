@@ -93,19 +93,19 @@ local M = {
             --     silent = true,
             -- },
 
-            {
-                "<leader>tk",
-                "<cmd>Telescope keymaps<CR>",
-                desc = "List all keymaps",
-                silent = true,
-            },
+            -- {
+            --     "<leader>tk",
+            --     "<cmd>Telescope keymaps<CR>",
+            --     desc = "List all keymaps",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>th",
-                "<cmd>Telescope help_tags<CR>",
-                desc = "Search help docs",
-                silent = true,
-            },
+            -- {
+            --     "<leader>th",
+            --     "<cmd>Telescope help_tags<CR>",
+            --     desc = "Search help docs",
+            --     silent = true,
+            -- },
 
             {
                 "<leader>tp",

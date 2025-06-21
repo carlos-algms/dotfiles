@@ -316,6 +316,24 @@ local M = {
         --     silent = true,
         --     mode = { "v", "x" },
         -- },
+
+        {
+            "<leader>vh",
+            function()
+                Snacks.picker.help()
+            end,
+            desc = "Neovim Help - Snacks",
+            silent = true,
+        },
+
+        {
+            "<leader>vk",
+            function()
+                Snacks.picker.keymaps()
+            end,
+            desc = "Keymaps - Snacks",
+            silent = true,
+        },
     },
 
     init = function()
