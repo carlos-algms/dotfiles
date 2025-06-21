@@ -228,6 +228,84 @@ local M = {
             end,
             desc = "List Snacks pickers history",
         },
+
+        {
+            "<C-p>",
+            function()
+                Snacks.picker.files({
+                    hidden = true,
+                })
+            end,
+            desc = "Find files by name in the current folder",
+            silent = true,
+        },
+
+        {
+            "<leader>o",
+            function()
+                Snacks.picker.recent({
+                    filter = {
+                        cwd = vim.fn.getcwd(),
+                    },
+                })
+            end,
+            desc = "Find files by name in the current folder",
+            silent = true,
+        },
+
+        {
+            "<leader>O",
+            function()
+                Snacks.picker.recent({
+                    title = "Recent files anywhere",
+                })
+            end,
+            desc = "Find files by name anywhere",
+            silent = true,
+        },
+
+        {
+            "<leader>bo",
+            function()
+                Snacks.picker.buffers({
+                    current = false,
+                    unloaded = false,
+                    matcher = {
+                        history_bonus = true,
+                        frecency = true,
+                    },
+                })
+            end,
+            desc = "List open buffers",
+            silent = true,
+        },
+
+        {
+            "<leader>/",
+            function()
+                Snacks.picker.lines()
+            end,
+            desc = "Fuzzy search in current file",
+            silent = true,
+        },
+
+        {
+            "<leader>gB",
+            function()
+                Snacks.picker.git_branches()
+            end,
+            desc = "List git branches",
+            silent = true,
+        },
+
+        {
+            "<leader>gl",
+            function()
+                Snacks.picker.git_status()
+            end,
+            desc = "List git status",
+            silent = true,
+        },
     },
 
     init = function()

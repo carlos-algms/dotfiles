@@ -27,20 +27,19 @@ local M = {
 
         keys = {
 
-            {
+            -- {
+            --     "<C-p>",
+            --     "<cmd>Telescope find_files<CR>",
+            --     desc = "Find files by name in the current folder",
+            --     silent = true,
+            -- },
 
-                "<C-p>",
-                "<cmd>Telescope find_files<CR>",
-                desc = "Find files by name in the current folder",
-                silent = true,
-            },
-
-            {
-                "<leader>pg",
-                "<cmd>Telescope git_files<CR>",
-                desc = "Find files tracked by git",
-                silent = true,
-            },
+            -- {
+            --     "<leader>pg",
+            --     "<cmd>Telescope git_files<CR>",
+            --     desc = "Find files tracked by git",
+            --     silent = true,
+            -- },
 
             {
                 "<leader>f",
@@ -59,40 +58,40 @@ local M = {
                 mode = "v",
             },
 
-            {
-                "<leader>bo",
-                "<cmd>Telescope buffers only_cwd=true<CR>",
-                desc = "List buffers open",
-                silent = true,
-            },
+            -- {
+            --     "<leader>bo",
+            --     "<cmd>Telescope buffers only_cwd=true<CR>",
+            --     desc = "List buffers open",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>ba",
-                "<cmd>Telescope buffers only_cwd=false<CR>",
-                desc = "List all buffers open everywhere",
-                silent = true,
-            },
+            -- {
+            --     "<leader>ba",
+            --     "<cmd>Telescope buffers only_cwd=false<CR>",
+            --     desc = "List all buffers open everywhere",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>o",
-                "<cmd>Telescope oldfiles only_cwd=true<CR>",
-                desc = "Find recently opened files",
-                silent = true,
-            },
+            -- {
+            --     "<leader>o",
+            --     "<cmd>Telescope oldfiles only_cwd=true<CR>",
+            --     desc = "Find recently opened files",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>O",
-                "<cmd>Telescope oldfiles only_cwd=false prompt_title=Oldfiles\\ Everywhere<CR>",
-                desc = "Find All recently opened files",
-                silent = true,
-            },
+            -- {
+            --     "<leader>O",
+            --     "<cmd>Telescope oldfiles only_cwd=false prompt_title=Oldfiles\\ Everywhere<CR>",
+            --     desc = "Find All recently opened files",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>/",
-                "<cmd>Telescope current_buffer_fuzzy_find<CR>",
-                desc = "[/] Fuzzy search in current buffer",
-                silent = true,
-            },
+            -- {
+            --     "<leader>/",
+            --     "<cmd>Telescope current_buffer_fuzzy_find<CR>",
+            --     desc = "[/] Fuzzy search in current buffer",
+            --     silent = true,
+            -- },
 
             {
                 "<leader>tk",
@@ -145,21 +144,21 @@ local M = {
                 silent = true,
             },
 
-            {
-                "<leader>gB",
-                "<cmd>Telescope git_branches<CR>",
-                mode = "n",
-                desc = "Show git branches",
-                silent = true,
-            },
+            -- {
+            --     "<leader>gB",
+            --     "<cmd>Telescope git_branches<CR>",
+            --     mode = "n",
+            --     desc = "Show git branches",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>gl",
-                "<cmd>Telescope git_status<CR>",
-                mode = "n",
-                desc = "Show git status as a list",
-                silent = true,
-            },
+            -- {
+            --     "<leader>gl",
+            --     "<cmd>Telescope git_status<CR>",
+            --     mode = "n",
+            --     desc = "Show git status as a list",
+            --     silent = true,
+            -- },
         },
 
         config = function()
