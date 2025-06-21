@@ -1,4 +1,5 @@
 local P = {
+    ---@type snacks.picker.Last[]
     Snacks_picker_hist = {},
 }
 
@@ -154,23 +155,7 @@ local M = {
             },
 
             on_close = function(picker)
-                if
-                    not vim.tbl_contains(
-                        { "history_picker", "lsp_references", "recent" },
-                        picker.opts.source
-                    )
-                then
-                    vim.schedule(function()
-                        if #P.Snacks_picker_hist >= 20 then
-                            table.remove(P.Snacks_picker_hist, 20)
-                        end
-                        table.insert(
-                            P.Snacks_picker_hist,
-                            1,
-                            require("snacks.picker.core.picker").last
-                        )
-                    end)
-                end
+                P.store_picker_in_history(picker)
             end,
         },
 
@@ -344,6 +329,51 @@ local M = {
     end,
 }
 
+---@param picker snacks.picker.Last
+local function make_history_item_text(picker)
+    local source = picker.opts.source or "unknown source"
+    local pattern = picker.filter.pattern or ""
+    local search = picker.filter.search or ""
+    local text = source .. " | " .. pattern .. " > " .. search
+    return text
+end
+
+--- @param picker snacks.Picker
+function P.store_picker_in_history(picker)
+    -- I've to schedule  because on_close is called before `last` is set
+    vim.schedule(function()
+        local last = require("snacks.picker.core.picker").last
+
+        if
+            not last
+            or vim.tbl_contains(
+                { "history_picker", "lsp_references", "recent", "files" },
+                picker.opts.source
+            )
+        then
+            return
+        end
+
+        local text = make_history_item_text(last)
+
+        -- Remove the old picker if canse a new one with the same parameters is run
+        for i, p in ipairs(P.Snacks_picker_hist) do
+            local label = make_history_item_text(p)
+
+            if label == text then
+                table.remove(P.Snacks_picker_hist, i)
+                break
+            end
+        end
+
+        table.insert(P.Snacks_picker_hist, 1, last)
+
+        if #P.Snacks_picker_hist >= 20 then
+            table.remove(P.Snacks_picker_hist, 20)
+        end
+    end)
+end
+
 function P.history_picker()
     Snacks.picker.pick(
         ---@type snacks.picker.Config
@@ -353,12 +383,10 @@ function P.history_picker()
                 local items = {} ---@type snacks.picker.finder.Item[]
 
                 for _, picker in ipairs(P.Snacks_picker_hist) do
-                    local source = picker.opts.source or "unknown source"
-                    local pattern = picker.filter.pattern or ""
-                    local search = picker.filter.search or ""
-                    local text = source .. " | " .. pattern .. " > " .. search
+                    local text = make_history_item_text(picker)
+
                     table.insert(items, {
-                        ["data"] = { picker = picker },
+                        data = { picker = picker },
                         text = text,
                     })
                 end
@@ -367,10 +395,13 @@ function P.history_picker()
             end,
             confirm = function(picker, item)
                 picker:close()
-                if item then
-                    require("snacks.picker.core.picker").last = item.data.picker
-                    Snacks.picker.resume()
+
+                if not item then
+                    return
                 end
+
+                require("snacks.picker.core.picker").last = item.data.picker
+                Snacks.picker.resume()
             end,
             format = function(item, _)
                 local ret = {}
