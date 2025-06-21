@@ -306,6 +306,25 @@ local M = {
             desc = "List git status",
             silent = true,
         },
+
+        {
+            "<leader>f",
+            function()
+                Snacks.picker.grep()
+            end,
+            desc = "Live Grep all files - Snacks",
+            silent = true,
+        },
+
+        {
+            "<leader>f",
+            function()
+                Snacks.picker.grep_word()
+            end,
+            desc = "Live Grep all files - Snacks",
+            silent = true,
+            mode = { "v", "x" },
+        },
     },
 
     init = function()

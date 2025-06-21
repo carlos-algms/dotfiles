@@ -41,22 +41,22 @@ local M = {
             --     silent = true,
             -- },
 
-            {
-                "<leader>f",
-                "<cmd>Telescope live_grep_args<CR>",
-                desc = "Live Grep all files",
-                silent = true,
-            },
+            -- {
+            --     "<leader>f",
+            --     "<cmd>Telescope live_grep_args<CR>",
+            --     desc = "Live Grep all files",
+            --     silent = true,
+            -- },
 
-            {
-                "<leader>f",
-                function()
-                    require("telescope-live-grep-args.shortcuts").grep_visual_selection()
-                end,
-                desc = "Live Grep current selection on all files",
-                silent = true,
-                mode = "v",
-            },
+            -- {
+            --     "<leader>f",
+            --     function()
+            --         require("telescope-live-grep-args.shortcuts").grep_visual_selection()
+            --     end,
+            --     desc = "Live Grep current selection on all files",
+            --     silent = true,
+            --     mode = "v",
+            -- },
 
             -- {
             --     "<leader>bo",
