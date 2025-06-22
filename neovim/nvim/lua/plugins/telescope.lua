@@ -136,7 +136,7 @@ local M = {
             },
 
             {
-                "<leader>sg",
+                "<leader>tg",
                 function()
                     P.liveGrepWithGlob.live_grep_with_glob()
                 end,

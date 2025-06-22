@@ -292,30 +292,29 @@ local M = {
             silent = true,
         },
 
-        -- Disabled, as there's too many edge cases and ignores that are already handled by my Telescope setup
-        -- {
-        --     "<leader>f",
-        --     function()
-        --         Snacks.picker.grep({
-        --             matcher = {
-        --                 filename_bonus = true,
-        --                 frecency = true,
-        --             },
-        --         })
-        --     end,
-        --     desc = "Live Grep all files - Snacks",
-        --     silent = true,
-        -- },
+        {
+            "<leader>sg",
+            function()
+                Snacks.picker.grep({
+                    matcher = {
+                        filename_bonus = true,
+                        frecency = true,
+                    },
+                })
+            end,
+            desc = "Live Grep all files - Snacks",
+            silent = true,
+        },
 
-        -- {
-        --     "<leader>f",
-        --     function()
-        --         Snacks.picker.grep_word()
-        --     end,
-        --     desc = "Live Grep all files - Snacks",
-        --     silent = true,
-        --     mode = { "v", "x" },
-        -- },
+        {
+            "<leader>sg",
+            function()
+                Snacks.picker.grep_word()
+            end,
+            desc = "Live Grep all files - Snacks",
+            silent = true,
+            mode = { "v", "x" },
+        },
 
         {
             "<leader>vh",
