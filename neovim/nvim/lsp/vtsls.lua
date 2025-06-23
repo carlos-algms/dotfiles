@@ -69,6 +69,10 @@ return {
                     },
                     variableTypes = { enabled = false },
                 },
+                preferences = {
+                    importModuleSpecifier = "shortest",
+                    preferTypeOnlyAutoImports = true,
+                },
             },
         }
 
