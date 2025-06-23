@@ -92,7 +92,7 @@ local M = {
                 "webp",
             },
             doc = {
-                enabled = true,
+                enabled = false,
                 inline = false,
                 float = true,
             },
@@ -331,6 +331,15 @@ local M = {
                 Snacks.picker.keymaps()
             end,
             desc = "Keymaps - Snacks",
+            silent = true,
+        },
+
+        {
+            "<leader>sh",
+            function()
+                Snacks.image.hover()
+            end,
+            desc = "Show image under cursor",
             silent = true,
         },
     },
