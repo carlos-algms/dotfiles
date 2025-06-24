@@ -5,16 +5,17 @@ LANG="en_US.UTF-8"
 LC_ALL="en_US.UTF-8"
 
 # follow XDG base dir specification
-XDG_CONFIG_HOME="$HOME/.config"
-XDG_DATA_HOME="$HOME/.local/share"
-XDG_CACHE_HOME="$HOME/.cache"
-XDG_STATE_HOME="$HOME/.local/state"
-GOPATH="$XDG_DATA_HOME/go"
-GOBIN="$GOPATH/bin"
-GOMODCACHE="$XDG_CACHE_HOME/go/mod"
-FFMPEG_DATADIR="$XDG_CONFIG_HOME/ffmpeg"
-LESSHISTFILE="$XDG_CACHE_HOME/less_history"
-PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+export GOPATH="$XDG_DATA_HOME/go"
+export GOBIN="$GOPATH/bin"
+export GOMODCACHE="$XDG_CACHE_HOME/go/mod"
+export FFMPEG_DATADIR="$XDG_CONFIG_HOME/ffmpeg"
+export LESSHISTFILE="$XDG_CACHE_HOME/less_history"
+export PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
+export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 
 ## Hide the default user name from the prompt
 DEFAULT_USER=$(whoami)
@@ -25,7 +26,7 @@ DISABLE_AUTO_TITLE="true"
 ZSH_THEME_TERM_TITLE_IDLE="%~"
 
 # default one in case a batcat is not available
-MANPAGER="less -R --use-color -Dd+r -Du+b"
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
 
 if command -v brew &>/dev/null; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -33,19 +34,19 @@ fi
 
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
 if command -v code &>/dev/null && [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    EDITOR='code --wait'
+    export EDITOR='code --wait'
 elif command -v nvim &>/dev/null; then
-    EDITOR='nvim'
+    export EDITOR='nvim'
 elif command -v vim &>/dev/null; then
-    EDITOR='vim'
+    export EDITOR='vim'
 fi
 
-VISUAL="$EDITOR"
+export VISUAL="$EDITOR"
 
 # disable shared history between ZSH instances
-HISTORY_IGNORE="(ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
+HISTORY_IGNORE="(l|ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
 HISTSIZE=10000
-HISTFILE=~/.zsh_history
+HISTFILE="$XDG_STATE_HOME/zsh_history"
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
 # unsetopt inc_append_history
@@ -63,10 +64,10 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 set -o vi
 
-DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
-DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
+export DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
+export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
-. $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
+source $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
 
 # ZSH has a basic vi mode
 # if [ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]; then
@@ -104,9 +105,9 @@ fi
 bindkey "^P" up-line-or-beginning-search
 bindkey "^N" down-line-or-beginning-search
 
-FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
-FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
-FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
+export FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
+export FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
+export FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
 
 if command -v fzf &>/dev/null; then
     source <(fzf --zsh)
