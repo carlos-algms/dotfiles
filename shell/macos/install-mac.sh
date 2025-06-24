@@ -8,7 +8,8 @@ source "$shellDir/common/01_logging.sh"
 if command -v brew &>/dev/null; then
     e_header "Installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>~/.zprofile
+    # Not necessary, brew plugin for omzsh will handle this
+    # echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>~/.zprofile
 else
     e_success "Brew is already installed"
 fi
