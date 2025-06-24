@@ -5,7 +5,7 @@ local shellDir="$(dirname ${0:a:h})"
 source "$shellDir/common/01_logging.sh"
 
 # Install Homebrew.
-if [[ ! "$(type brew)" ]]; then
+if command -v brew &>/dev/null; then
     e_header "Installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>~/.zprofile
@@ -14,7 +14,7 @@ else
 fi
 
 # Exit if, for some reason, Homebrew is not installed.
-if [ ! "$(type brew)" ]; then
+if command -v brew &>/dev/null; then
     e_error "Homebrew failed to install."
     exit 1
 fi
@@ -25,11 +25,13 @@ brew update
 brew install \
     ack \
     bat \
+    bash \
     coreutils \
     eza \
     fd \
     fnm \
     fzf \
+    gh \
     git \
     htop \
     jq \
@@ -46,7 +48,6 @@ brew install \
     xz \
     zoxide
 
-brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
 brew install --cask the-unarchiver
 
