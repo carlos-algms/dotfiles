@@ -11,7 +11,9 @@ return {
                 width = 0.85,
             },
         },
-        event = { "BufReadPost", "BufNewFile" },
+
+        -- event = { "BufReadPost", "BufNewFile" },
+
         cmd = "Grapple",
         keys = {
             {
