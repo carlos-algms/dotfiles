@@ -7,7 +7,7 @@ local M = {
             "davidmh/cspell.nvim",
             -- build = "cd ~/.local/share/nvim/mason/packages/cspell && npm i @cspell/dict-pt-br",
             -- build = "mkdir -p dictionaries && cd $_ && echo '{}' > package.json && npm i @cspell/dict-pt-br",
-            init = function()
+            config = function()
                 P.init_cspell()
             end,
         },
@@ -35,18 +35,20 @@ local M = {
 --- and installs the pt-br dictionary
 function P.init_cspell()
     local folder_path = vim.fn.stdpath("cache") .. "/cspell-dictionaries"
+    local folder_exists = vim.fn.isdirectory(folder_path) == 1
+    local dict = folder_path
+        .. "/node_modules/@cspell/dict-pt-br/cspell-ext.json"
 
-    -- Check if the folder exists
-    local folder_exists = os.execute("test -d " .. folder_path)
-
-    -- If the folder doesn't exist, create it
-    if folder_exists ~= 0 then
+    if not folder_exists then
         vim.notify(
             "Creating folder for cspell dictionaries",
             vim.log.levels.INFO
         )
-        os.execute("mkdir -p " .. folder_path)
 
+        vim.fn.mkdir(folder_path, "p")
+    end
+
+    if vim.fn.filereadable(dict) ~= 1 then
         local status, err = pcall(
             os.execute,
             "cd "
@@ -60,12 +62,7 @@ function P.init_cspell()
                 vim.log.levels.ERROR
             )
         end
-    end
 
-    local dict = folder_path
-        .. "/node_modules/@cspell/dict-pt-br/cspell-ext.json"
-
-    if vim.fn.filereadable(dict) ~= 1 then
         vim.notify(
             "CSpell dictionary pt-br not found, please check the installation",
             vim.log.levels.ERROR
