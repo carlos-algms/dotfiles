@@ -51,15 +51,14 @@ if [[ "$OSTYPE" == "darwin"* || "$OSTYPE" == "linux-gnu"* ]]; then
 
         # Inject pnpm-shell-completion into plugins list in .zshrc if not present
         if ! grep -q "pnpm-shell-completion" "$HOME/.zshrc"; then
-            awk '
-            BEGIN {in_plugins=0}
-            /^plugins=\(/ {in_plugins=1}
-            in_plugins && /\)/ {
-                print "  pnpm-shell-completion"
-                in_plugins=0
-            }
-            {print}
-        ' "$HOME/.zshrc" >"$HOME/.zshrc.tmp" && mv "$HOME/.zshrc.tmp" "$HOME/.zshrc"
+            sed -i '' '/^plugins=(/{
+                :a
+                N
+                /)/!ba
+                s/)/  pnpm-shell-completion\
+)/
+            }' $(realpath "$HOME/.zshrc")
+
             e_arrow "Injected pnpm-shell-completion into plugins list in $HOME/.zshrc"
         fi
 
