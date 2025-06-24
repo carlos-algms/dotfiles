@@ -90,11 +90,8 @@ local M = {
 
                 tables.deep_extend(ensureLspInstalled, {
                     "bashls",
-                    "cssls",
                     "dockerls",
                     "docker_compose_language_service",
-                    "emmet_language_server",
-                    "html",
                     "jsonls",
                     "yamlls",
                 })
@@ -111,6 +108,11 @@ local M = {
                         "vtsls",
                         -- "phpactor", -- requires PHP in PATH, and doesn't seem as good as intelephense
                         "intelephense",
+                        "emmet_language_server",
+                        "html",
+                        "cssls",
+                        "eslint",
+                        "tailwindcss",
                     })
                 end
             end
