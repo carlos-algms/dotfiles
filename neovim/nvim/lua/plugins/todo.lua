@@ -1,3 +1,12 @@
+-- This is normal comment
+-- TODO: this is a todo
+-- FIX: this is a fix
+-- FIXIT: this is a fix
+-- BUG: this is a bug
+-- PERF: this is a perf improvement
+-- HACK: this is a hack
+-- WARNING: this is a warning
+-- NOTE: this is a note
 return {
     "folke/todo-comments.nvim",
     dependencies = {
@@ -23,15 +32,35 @@ return {
         keywords = {
             FIX = {
                 icon = " ", -- icon used for the sign, and in search results
-                color = "error", -- can be a hex color, or a named color (see below)
+                color = "#4c2e2e", -- can be a hex color, or a named color (see below)
                 alt = { "FIXME", "BUG", "ISSUE" }, -- a set of other keywords that all map to this FIX keywords
                 -- signs = false, -- configure signs for some keywords individually
             },
             FIXIT = {
                 icon = " ", -- icon used for the sign, and in search results
-                color = "error",
+                color = "#4c2e2e",
                 -- color = "#75342e", -- can be a hex color, or a named color
             },
+            TODO = { color = "#2e4e4e" },
+            PERF = { color = "#3e3a4e" },
+            HACK = { color = "#4e3e2e" },
+            WARN = { color = "#4e4030" },
+            NOTE = { color = "#2e3e4e" },
+        },
+        gui_style = {
+            fg = "NONE", -- The gui style to use for the fg highlight group.
+            bg = "NONE", -- The gui style to use for the bg highlight group.
         },
     },
+
+    config = function(_, opts)
+        require("todo-comments").setup(opts)
+
+        for k, v in pairs(opts.keywords) do
+            vim.api.nvim_set_hl(0, "TodoBg" .. k, {
+                bg = v.color,
+                fg = "#1c1c1c",
+            })
+        end
+    end,
 }
