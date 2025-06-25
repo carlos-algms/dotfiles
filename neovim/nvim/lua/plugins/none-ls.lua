@@ -62,11 +62,6 @@ function P.init_cspell()
                 vim.log.levels.ERROR
             )
         end
-
-        vim.notify(
-            "CSpell dictionary pt-br not found, please check the installation",
-            vim.log.levels.ERROR
-        )
     end
 end
 
