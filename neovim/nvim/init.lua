@@ -45,10 +45,10 @@ vim.keymap.set(
 )
 
 local function is_user_thread_limited()
-    local user = os.getenv("USER")
-    local thread_limited_users = os.getenv("THREAD_LIMITED_USERS")
+    local user = vim.fn.getenv("USER")
+    local thread_limited_users = vim.fn.getenv("THREAD_LIMITED_USERS")
 
-    if not thread_limited_users then
+    if not thread_limited_users or thread_limited_users == vim.NIL then
         return false
     end
 
