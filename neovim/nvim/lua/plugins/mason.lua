@@ -69,7 +69,13 @@ local M = {
                 { desc = "Open problems in a floating window" }
             )
 
-            require("mason").setup()
+            require("mason").setup({
+                -- In case I want to test a new registry I need to clone my fork of mason-registry
+                -- registries = {
+                --     "file:~/projects/mason-registry",
+                -- },
+            })
+
             local tables = require("helpers.tables")
 
             local ensureToolsInstalled = {
