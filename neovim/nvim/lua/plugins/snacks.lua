@@ -49,7 +49,7 @@ local M = {
 
         statuscolumn = { enabled = true },
 
-        indent = { enabled = true },
+        indent = { enabled = false },
 
         gitbrowse = {
             what = "permalink",
