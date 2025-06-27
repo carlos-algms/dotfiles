@@ -37,6 +37,7 @@ local M = {
                         "quickfix",
                         "qf",
                         "DiffviewFileHistory",
+                        "gitsigns-blame",
                     },
                 },
                 refresh = {
