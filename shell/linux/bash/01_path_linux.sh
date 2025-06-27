@@ -1,6 +1,6 @@
-PATH="$HOME/.local/bin:${DOTFILES_SHELL_PATH}/linux/bin:${DOTFILES_SHELL_PATH}/bin:$PATH"
+export PATH="${DOTFILES_SHELL_PATH}/linux/bin:${DOTFILES_SHELL_PATH}/bin:$PATH"
 
-FNM_PATH="$HOME/.local/share/fnm"
+export FNM_PATH="$HOME/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
-    PATH="$FNM_PATH:$PATH"
+    export PATH="$FNM_PATH:$PATH"
 fi

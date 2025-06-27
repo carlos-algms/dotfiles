@@ -16,6 +16,8 @@ export FFMPEG_DATADIR="$XDG_CONFIG_HOME/ffmpeg"
 export LESSHISTFILE="$XDG_CACHE_HOME/less_history"
 export PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+# Set local bin early so all commands are available
+export PATH="$HOME/.local/bin:$PATH"
 
 ## Hide the default user name from the prompt
 DEFAULT_USER=$(whoami)
