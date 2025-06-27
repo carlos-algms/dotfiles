@@ -4,13 +4,17 @@
 return {
     {
         "nvim-neo-tree/neo-tree.nvim",
+
         branch = "v3.x",
+
         enabled = true,
+
         dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
             "MunifTanjim/nui.nvim",
         },
+
         -- init = function()
         --     if vim.fn.argc(-1) == 1 then
         --         local stat = vim.loop.fs_stat(vim.fn.argv(0))
@@ -19,6 +23,7 @@ return {
         --         end
         --     end
         -- end,
+
         cmd = { "Neotree" },
 
         keys = {
@@ -31,15 +36,17 @@ return {
             },
         },
 
+        ---@module "neo-tree"
+        ---@type neotree.Config?
         opts = {
             popup_border_style = "rounded",
             sources = {
                 "filesystem",
-                "buffers",
-                "git_status",
-                "document_symbols",
+                -- "buffers",
+                -- "git_status",
+                -- "document_symbols",
             },
-            enable_git_status = true,
+            enable_git_status = false,
             enable_diagnostics = false,
             sort_case_insensitive = true,
             default_component_config = {
@@ -52,11 +59,32 @@ return {
                     hide_dotfiles = false,
                     hide_gitignored = true,
                 },
-                -- it's difficult to move files arround when multiple dirs are grouped
+                -- it's difficult to move files around when multiple dirs are grouped
                 group_empty_dirs = false,
                 window = {
                     mappings = {
                         ["F"] = "fuzzy_finder",
+                        ["t"] = "toggle_node",
+                        ["a"] = {
+                            "add",
+                            -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
+                            -- some commands may take optional config options, see `:h neo-tree-mappings` for details
+                            config = {
+                                show_path = "relative", -- "none", "relative", "absolute"
+                            },
+                        },
+                        ["A"] = {
+                            "add_directory",
+                            config = {
+                                show_path = "relative",
+                            },
+                        },
+                        ["m"] = {
+                            "move",
+                            config = {
+                                show_path = "relative",
+                            },
+                        },
                     },
                 },
             },
@@ -82,26 +110,6 @@ return {
                 },
                 -- default mappings for all sources
                 mappings = {
-                    ["a"] = {
-                        "add",
-                        -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
-                        -- some commands may take optional config options, see `:h neo-tree-mappings` for details
-                        config = {
-                            show_path = "relative", -- "none", "relative", "absolute"
-                        },
-                    },
-                    ["A"] = {
-                        "add_directory",
-                        config = {
-                            show_path = "relative",
-                        },
-                    },
-                    ["m"] = {
-                        "move",
-                        config = {
-                            show_path = "relative",
-                        },
-                    },
                     ["/"] = false, -- "fuzzy_finder",
                 },
             },
