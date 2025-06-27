@@ -49,6 +49,7 @@
     "interruptible",
     "keymap",
     "lockdown",
+    "neotree",
     "neovim",
     "nvim",
     "nvimtools",
