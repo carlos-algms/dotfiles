@@ -34,9 +34,12 @@ return {
             })
         end,
     },
+
     {
         "lewis6991/gitsigns.nvim",
+
         event = "VeryLazy",
+
         init = function()
             local gitsigns = require("gitsigns")
 
@@ -73,6 +76,7 @@ return {
                 desc = "prev change hunk (same as [c)",
             })
         end,
+
         config = function()
             local gitsigns = require("gitsigns")
 
@@ -91,6 +95,17 @@ return {
                 current_line_blame_opts = {
                     ignore_whitespace = true,
                 },
+
+                ---@type vim.api.keyset.win_config
+                preview_config = {
+                    -- Options passed to nvim_open_win
+                    style = "minimal",
+                    relative = "cursor",
+                    row = -1,
+                    col = 2,
+                    border = "rounded",
+                },
+
                 on_attach = function(bufnr)
                     local function map(mode, l, r, opts)
                         opts = opts or {}
@@ -122,6 +137,7 @@ return {
             })
         end,
     },
+
     {
         "sindrets/diffview.nvim",
         enabled = true,
