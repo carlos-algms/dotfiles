@@ -10,7 +10,6 @@ return {
         },
         config = function()
             local ls = require("luasnip")
-            local types = require("luasnip.util.types")
             local sharedJsAndTs = require("snippets.js_and_ts")
 
             -- borrowed from
