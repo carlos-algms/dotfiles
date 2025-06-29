@@ -32,20 +32,20 @@ return {
         keywords = {
             FIX = {
                 icon = " ", -- icon used for the sign, and in search results
-                color = "#4c2e2e", -- can be a hex color, or a named color (see below)
+                color = "#804747", -- can be a hex color, or a named color (see below)
                 alt = { "FIXME", "BUG", "ISSUE" }, -- a set of other keywords that all map to this FIX keywords
                 -- signs = false, -- configure signs for some keywords individually
             },
             FIXIT = {
                 icon = " ", -- icon used for the sign, and in search results
-                color = "#4c2e2e",
+                color = "#804747",
                 -- color = "#75342e", -- can be a hex color, or a named color
             },
-            TODO = { color = "#2e4e4e" },
-            PERF = { color = "#3e3a4e" },
-            HACK = { color = "#4e3e2e" },
-            WARN = { color = "#4e4030" },
-            NOTE = { color = "#2e3e4e" },
+            TODO = { color = "#45617d" },
+            PERF = { color = "#544c75" },
+            HACK = { color = "#8f653b" },
+            WARN = { color = "#8f653b" },
+            NOTE = { color = "#45617d" },
         },
         gui_style = {
             fg = "NONE", -- The gui style to use for the fg highlight group.
