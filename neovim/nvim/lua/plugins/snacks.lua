@@ -86,7 +86,7 @@ local M = {
                 "mp4",
                 "pdf",
                 "png",
-                "svg",
+                -- "svg",
                 "tiff",
                 "webm",
                 "webp",
