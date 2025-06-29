@@ -240,6 +240,7 @@ M.theme = {
         htmlEndTag = "@tag",
         htmlHead = "@none",
         htmlSpecialTagName = "@tag",
+        htmlTagN = "@tag",
         htmlTagName = "@tag",
         htmlTitle = "@none",
         javaScript = "@none",
