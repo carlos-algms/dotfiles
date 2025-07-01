@@ -54,6 +54,16 @@ local M = {
         gitbrowse = {
             what = "permalink",
             notify = false,
+
+            config = function(opts, _defaults)
+                -- it seems to be called twice, but I use it so little that I don't care, for now
+                -- I had to add this, because the config doesen't merge array like objects
+                table.insert(
+                    opts.remote_patterns,
+                    { "^%S+-github:(.+)%.git$", "https://github.com/%1" }
+                )
+            end,
+
             open = function(url)
                 vim.fn.setreg("+", url)
                 Snacks.notify.info("Link copied to clipboard:\n" .. url, {
@@ -62,12 +72,6 @@ local M = {
                     timeout = 5000,
                 })
             end,
-            remote_patterns = {
-                -- my custom SSH config to use specific SSH keys
-                -- follow the pattern <company-name>-github:/org/repo.git
-                -- and it should work for any company
-                { "^%S+-github:(.+)%.git$", "https://github.com/%1" },
-            },
         },
 
         image = {
