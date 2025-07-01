@@ -44,7 +44,7 @@ local function shouldFormat()
         if result > 0 then
             vim.notify(
                 "Format on save disabled for pattern: " .. pattern,
-                "warn"
+                vim.log.levels.WARN
             )
             return false
         end
