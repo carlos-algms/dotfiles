@@ -49,8 +49,18 @@ return {
             enable_git_status = false,
             enable_diagnostics = false,
             sort_case_insensitive = true,
-            default_component_config = {
+            default_component_configs = {
                 group_empty_dirs = true,
+                file_size = {
+                    enabled = false,
+                },
+                type = {
+                    enabled = false,
+                },
+                last_modified = {
+                    enabled = false,
+                    format = "",
+                },
             },
 
             filesystem = {
@@ -127,6 +137,7 @@ return {
                 ["tsx"] = {
                     pattern = "(.+)%.tsx$",
                     files = {
+                        "%1.tsx.map",
                         "%1.*.ts",
                         "%1.*.tsx",
                         "%1.*.css",
@@ -137,11 +148,18 @@ return {
                 ["ts"] = {
                     pattern = "(.+)%.ts$",
                     files = {
+                        "%1.ts.map",
                         "%1.*.ts",
                         "%1.*.tsx",
                         "%1.*.css",
                         "%1.*.scss",
                         "%1.*.mdx",
+                    },
+                },
+                ["js"] = {
+                    pattern = "(.+)%.js$",
+                    files = {
+                        "%1.js.map",
                     },
                 },
                 ["docker"] = {
