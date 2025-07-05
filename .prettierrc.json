@@ -1,0 +1,22 @@
+{
+  "printWidth": 80,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "proseWrap": "always",
+
+  "overrides": [
+    {
+      "files": ["*.ejs", "*.njk", "*.xml"],
+      "options": { "parser": "html" }
+    },
+    {
+      "files": ["*.svg"],
+      "options": { "parser": "html" }
+    },
+    {
+      "files": ["*.avanterules"],
+      "options": { "parser": "markdown" }
+    }
+  ]
+}
