@@ -43,6 +43,8 @@ return {
                 "#buffer",
             },
 
+            insert_at_end = true,
+
             mappings = {
                 ---@diagnostic disable-next-line: missing-fields
                 reset = {

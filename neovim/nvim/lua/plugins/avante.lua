@@ -1,4 +1,4 @@
-return {
+local M = {
     {
         "yetone/avante.nvim",
         enabled = not vim.g.is_ssh,
@@ -92,21 +92,35 @@ return {
                 function()
                     require("avante.repo_map").show()
                 end,
-                desc = "Avante Repomap",
+                desc = "Avante RepoMap",
+                silent = true,
+                mode = { "n", "v" },
+            },
+            {
+                "<leader>AS",
+                function()
+                    require("avante.api").stop()
+                end,
+                desc = "Avante Stop",
                 silent = true,
                 mode = { "n", "v" },
             },
         },
+
         --- @module "avante"
         --- @type avante.Config
         opts = {
+            -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
+            override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
+
             -- add any opts here
             provider = "copilot",
-            -- providers = {
-            --     copilot = {
-            --         model = "claude-3.7-sonnet-thought",
-            --     },
-            -- },
+            providers = {
+                copilot = {
+                    -- model = "claude-3.7-sonnet-thought",
+                    model = "gpt-4.1",
+                },
+            },
             auto_suggestions_provider = "copilot",
             behaviour = {
                 auto_set_keymaps = false,
@@ -186,3 +200,5 @@ return {
         },
     },
 }
+
+return M
