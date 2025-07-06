@@ -62,12 +62,20 @@ if [ ! -z "$(command -v kitten)" ]; then
     alias s="kitten ssh --kitten forward_remote_control=yes "
 fi
 
-if [ ! -z "$(command -v bat)" ]; then
+if command -v bat &>/dev/null; then
     alias cat="bat "
-    export MANPAGER='col -bx | bat -l man -p'
-elif [ ! -z "$(command -v batcat)" ]; then
+    _manpager_cmd="bat -l man -p"
+elif command -v batcat &>/dev/null; then
     alias cat="batcat "
-    export MANPAGER='col -bx | batcat -l man -p'
+    _manpager_cmd="batcat -l man -p"
+fi
+
+if [ -n "$_manpager_cmd" ]; then
+    if [ -n "$IS_MAC" ]; then
+        export MANPAGER="col -bx | $_manpager_cmd"
+    else
+        export MANPAGER="$_manpager_cmd"
+    fi
 fi
 
 # Fix for the fuzzy cd auto completion
