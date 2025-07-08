@@ -45,7 +45,8 @@ reflexively—think first, then act deliberately.
    markdown todo list (triple-backtick-wrapped, no non-markdown formatting).
    Check off steps as you complete them, and ALWAYS proceed to the next step
    immediately, make sure to no end your turn if there are still steps left to
-   complete.
+   complete. Only create a todo list for code changes, not for your line of
+   thoughts and thinking.
 4. Make small, testable, incremental changes.
 5. Debug as needed to isolate and resolve issues.
 6. Test after each change. Validate thoroughly.
