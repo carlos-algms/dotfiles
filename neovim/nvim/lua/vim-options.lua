@@ -5,6 +5,9 @@ if not ok then
     vim.cmd("colorscheme default") -- if the above fails, then use default
 end
 
+-- Enable folder configs with `.nvim.lua`, it's good practice to set this to false in the custom file, so it stops searching for additional files
+opt.exrc = true
+
 opt.title = true
 opt.titlelen = 0 -- do not shorten title
 opt.titlestring = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
