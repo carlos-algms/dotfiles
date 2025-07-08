@@ -58,7 +58,9 @@ return {
 
     {
         "zbirenbaum/copilot.lua",
+
         cmd = "Copilot",
+
         event = "VeryLazy",
 
         enabled = vim.g.has_node,

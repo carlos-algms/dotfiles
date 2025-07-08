@@ -1,10 +1,22 @@
 local M = {
     {
         "yetone/avante.nvim",
+
         enabled = not vim.g.is_ssh,
-        event = "VeryLazy",
-        lazy = false,
+
+        -- event = "VeryLazy",
+        -- lazy = false,
+
+        cmd = {
+            "AvanteAsk",
+            "AvanteChat",
+            "AvanteEdit",
+            "AvanteStop",
+            "AvanteChatNew",
+        },
+
         version = false, -- set this if you want to always pull the latest change
+
         build = "make", -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
         keys = {
@@ -21,6 +33,17 @@ local M = {
                     require("avante.api").ask()
                 end,
                 desc = "Avante Ask",
+                silent = true,
+                mode = { "n", "v" },
+            },
+            {
+                "<Leader>An",
+                function()
+                    require("avante.api").ask({
+                        new_chat = true,
+                    })
+                end,
+                desc = "Avante new Chat",
                 silent = true,
                 mode = { "n", "v" },
             },
