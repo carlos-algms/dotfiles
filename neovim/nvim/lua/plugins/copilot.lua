@@ -36,6 +36,7 @@ return {
             -- https://github.com/CopilotC-Nvim/CopilotChat.nvim?tab=readme-ov-file#configuration
             -- debug = true, -- Enable debugging
 
+            model = "gpt-4.1",
             -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
             -- model = "claude-3.7-sonnet-thought",
 
