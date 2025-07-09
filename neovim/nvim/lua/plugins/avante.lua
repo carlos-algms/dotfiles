@@ -2,7 +2,7 @@ local M = {
     {
         "yetone/avante.nvim",
 
-        enabled = not vim.g.is_ssh,
+        -- enabled = not vim.g.is_ssh,
 
         -- event = "VeryLazy",
         -- lazy = false,
