@@ -16,26 +16,27 @@ return {
         require("nvim-treesitter.configs").setup({
             -- A list of parser names, or "all" (the five listed parsers should always be installed)
             ensure_installed = {
-                "lua",
+                "css",
+                "dap_repl",
+                "html",
                 "javascript",
                 "jsdoc",
-                "typescript",
-                "tsx",
                 "json",
                 "jsonc",
-                "rust",
-                "python",
-                "css",
-                "scss",
-                "styled",
-                "html",
-                "vim",
-                "vimdoc",
-                "markdown",
+                "lua",
                 "markdown_inline",
+                "markdown",
                 "php",
                 "phpdoc",
+                "python",
                 "regex",
+                "rust",
+                "scss",
+                "styled",
+                "tsx",
+                "typescript",
+                "vim",
+                "vimdoc",
             },
 
             -- Install parsers synchronously (only applied to `ensure_installed`)
@@ -121,6 +122,8 @@ return {
                 },
             },
         })
+
+        vim.treesitter.language.register("markdown", "mdx")
 
         -- https://github.com/nvim-treesitter/nvim-treesitter-context?tab=readme-ov-file#configuration
         require("treesitter-context").setup({

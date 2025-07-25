@@ -30,7 +30,8 @@ local M = {
                 extension = {
                     zsh = "sh",
                     sh = "sh", -- force sh-files with zsh-shebang to still get sh as filetype
-                    alloy = "hcl", -- Grafana Alloy language
+                    alloy = "hcl", -- Grafana Alloy language, not perfect, better than no highlighting
+                    mdx = "markdown",
                 },
                 filename = {
                     [".zshrc"] = "sh",

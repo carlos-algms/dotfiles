@@ -113,14 +113,6 @@ return {
                 "LiadOz/nvim-dap-repl-highlights",
                 config = function()
                     require("nvim-dap-repl-highlights").setup()
-
-                    ---@diagnostic disable-next-line: missing-fields
-                    require("nvim-treesitter.configs").setup({
-                        highlight = {
-                            enable = true,
-                        },
-                        ensure_installed = { "dap_repl" },
-                    })
                 end,
             },
             -- Disabled because the virtual text was not being cleared
