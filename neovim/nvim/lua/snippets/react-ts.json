@@ -1,14 +1,14 @@
 {
-    "fcf": {
-        "prefix": "fcf",
-        "body": [
-            "type ${1:${TM_FILENAME_BASE/[\\s-.]/_/g}}Props = {};",
-            "",
-            "export default function $1(props: $1Props) {",
-            "\treturn <div>$0</div>;",
-            "};",
-            ""
-        ],
-        "description": "functional component file"
-    }
+  "fcf": {
+    "prefix": "fcf",
+    "body": [
+      "interface ${1:${TM_FILENAME_BASE/[\\s-.]/_/g}}Props {};",
+      "",
+      "export default function $1(props: $1Props) {",
+      "\treturn <div>$0</div>;",
+      "};",
+      ""
+    ],
+    "description": "functional component file"
+  }
 }
