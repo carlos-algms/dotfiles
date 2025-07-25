@@ -98,22 +98,22 @@ return {
                     set_jumps = true, -- whether to set jumps in the jumplist
                     goto_next_start = {
                         ["]m"] = "@function.outer",
-                        ["]b"] = {
-                            query = "@fold",
-                            query_group = "folds",
-                            desc = "Next fold",
-                        },
+                        -- ["]b"] = {
+                        --     query = "@fold",
+                        --     query_group = "folds",
+                        --     desc = "Next fold",
+                        -- },
                     },
                     goto_next_end = {
                         ["]M"] = "@function.outer",
                     },
                     goto_previous_start = {
                         ["[m"] = "@function.outer",
-                        ["[b"] = {
-                            query = "@fold",
-                            query_group = "folds",
-                            desc = "Previous fold",
-                        },
+                        -- ["[b"] = {
+                        --     query = "@fold",
+                        --     query_group = "folds",
+                        --     desc = "Previous fold",
+                        -- },
                     },
                     goto_previous_end = {
                         ["[M"] = "@function.outer",
