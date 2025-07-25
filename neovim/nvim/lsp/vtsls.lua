@@ -22,7 +22,7 @@ return {
         ---@diagnostic disable-next-line: missing-fields
         local settings = {
             -- https://github.com/yioneko/vtsls/blob/541b52a341a740b1b2d1b4ae85f168dbb3ac6d25/packages/service/configuration.schema.json#L1212
-            complete_function_calls = true,
+            complete_function_calls = false,
             vtsls = {
                 enableMoveToFileCodeAction = true,
                 autoUseWorkspaceTsdk = true,
@@ -53,7 +53,7 @@ return {
                     enabled = "always",
                 },
                 suggest = {
-                    completeFunctionCalls = true,
+                    completeFunctionCalls = false,
                 },
                 inlayHints = {
                     enumMemberValues = { enabled = true },
