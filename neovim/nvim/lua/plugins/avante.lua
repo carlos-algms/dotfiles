@@ -141,7 +141,7 @@ local M = {
             providers = {
                 copilot = {
                     -- model = "claude-3.7-sonnet-thought",
-                    model = "gpt-4.1",
+                    model = "gpt-4.1-2025-04-14",
                 },
             },
             auto_suggestions_provider = "copilot",
