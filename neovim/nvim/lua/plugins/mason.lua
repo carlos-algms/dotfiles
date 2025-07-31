@@ -51,6 +51,14 @@ local M = {
                 },
             })
 
+            -- vim.treesitter.language.register("markdown", "jinja")
+            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+                pattern = { "*.avanterules" },
+                callback = function()
+                    vim.cmd("setlocal syntax=markdown")
+                end,
+            })
+
             vim.keymap.set(
                 { "n" },
                 "<leader>vm",
