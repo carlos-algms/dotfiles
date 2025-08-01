@@ -134,6 +134,7 @@ local M = {
         --- @type avante.Config
         opts = {
             -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
+            -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
             -- add any opts here
@@ -154,7 +155,9 @@ local M = {
                 position = "right",
                 wrap = true, -- similar to vim.o.wrap
                 width = 35, -- default % based on available width in vertical layout
-                height = 40,
+                input = {
+                    height = 10,
+                },
                 edit = {
                     border = "rounded",
                     start_insert = true, -- Start insert mode when opening the edit window
