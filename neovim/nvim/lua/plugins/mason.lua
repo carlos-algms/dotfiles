@@ -32,7 +32,7 @@ local M = {
                     sh = "sh", -- force sh-files with zsh-shebang to still get sh as filetype
                     alloy = "hcl", -- Grafana Alloy language, not perfect, better than no highlighting
                     mdx = "markdown",
-                    avanterules = "markdown",
+                    -- avanterules = "markdown",
                 },
                 filename = {
                     [".zshrc"] = "sh",
@@ -52,12 +52,12 @@ local M = {
             })
 
             -- vim.treesitter.language.register("markdown", "jinja")
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-                pattern = { "*.avanterules" },
-                callback = function()
-                    vim.cmd("setlocal syntax=markdown")
-                end,
-            })
+            -- vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+            --     pattern = { "*.avanterules" },
+            --     callback = function()
+            --         vim.cmd("setlocal syntax=markdown")
+            --     end,
+            -- })
 
             vim.keymap.set(
                 { "n" },
