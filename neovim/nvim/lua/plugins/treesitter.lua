@@ -17,7 +17,7 @@ return {
             -- A list of parser names, or "all" (the five listed parsers should always be installed)
             ensure_installed = {
                 "css",
-                "dap_repl",
+                -- "dap_repl", -- it seems to doesn't exist
                 "html",
                 "javascript",
                 "jsdoc",
