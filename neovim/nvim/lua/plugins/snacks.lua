@@ -34,6 +34,7 @@ local M = {
                     "Unable to find ESLint library",
                     "eslint: -32603", -- no eslint config found
                     "Could not find config file",
+                    "Content is not an image",
                 }
 
                 for _, pattern in ipairs(patterns) do
