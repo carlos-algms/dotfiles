@@ -144,6 +144,7 @@ local M = {
                 desc = "Previous failed test",
             },
         },
+
         config = function()
             local neotest = require("neotest")
 
@@ -163,8 +164,14 @@ local M = {
                     concurrent = 0,
                 },
                 adapters = {
-                    require("neotest-vitest"),
+                    P.getVitestAdapter(),
                     P.getJestAdapter(),
+                },
+                floating = {
+                    border = "rounded",
+                    max_height = 0.6,
+                    max_width = 0.6,
+                    options = {},
                 },
             })
 
@@ -178,85 +185,124 @@ local M = {
     },
 }
 
-function P.getJestAdapter()
-    --- @param testFilePath string
-    --- @return string
-    local function getJestCommand(testFilePath)
-        -- hack to enter watch mode and still find the jest config in a mono repo
-        if testFilePath == vim.fn.getcwd() then
-            testFilePath = vim.fn.expand("%:p")
-        end
+local function path_join(...)
+    return table.concat(vim.iter({ ... }):flatten():totable(), "/")
+end
 
-        local file = vim.fn.fnamemodify(testFilePath, ":p")
-        local cmd = nil
+local function path_exists(...)
+    local path = path_join(...)
+    local stat = vim.uv.fs_stat(path)
+    return stat and stat.type or false
+end
 
-        -- TODO: try to use find()
-        --         local projects_dir = vim.fs.find("projects", {
-        --              upwards = true,
-        --              stop = vim.loop.os_homedir()
-        --         })
-        for p in vim.fs.parents(vim.fs.normalize(file) .. "/") do
-            local path = p .. "/package.json"
-            if vim.fn.filereadable(path) == 1 then
-                local f = assert(io.open(path, "r"))
-                local content = f:read("*a")
-                f:close()
-                local package = vim.json.decode(content)
+local function is_file(...)
+    return path_exists(...) == "file"
+end
 
-                if package.scripts then
-                    if package.scripts["test:unit"] then
-                        cmd = "pnpm run --silent test:unit"
-                        break
-                    elseif package.scripts.test then
-                        cmd = "pnpm run --silent test"
-                        break
-                    end
-                end
-            end
-        end
+-- Returns the package manager for the current project directory.
+local function getPackageManager()
+    local root = vim.fn.getcwd()
 
-        if not cmd then
-            local neoTestJestUtils = require("neotest-jest.jest-util")
-            cmd = neoTestJestUtils.getJestCommand(file)
-        end
-
-        -- vim.notify("jest cmd: " .. cmd)
-
-        return cmd
+    if
+        is_file(root, "pnpm-lock.yaml") or is_file(root, "pnpm-workspace.yaml")
+    then
+        return "pnpm"
+    elseif is_file(root, "yarn.lock") then
+        return "yarn"
+    elseif is_file(root, "bun.lockb") then
+        return "bun"
     end
 
-    --- @param testFilePath string
-    local function getJestCwd(testFilePath)
-        -- hack to enter watch mode and still find the jest config in a mono repo
-        if testFilePath == vim.fn.getcwd() then
-            testFilePath = vim.fn.expand("%:p")
-        end
+    return "npm"
+end
 
-        local file = vim.fn.fnamemodify(testFilePath, ":p")
+local function getPackageJsonRootForCurrentFile()
+    return vim.fs.root(0, { "package.json", "node_modules" })
+end
 
-        for p in vim.fs.parents(vim.fs.normalize(file) .. "/") do
-            local base = p .. "/jest.config"
-            if vim.fn.filereadable(base .. ".js") == 1 then
-                return p
-            end
-            if vim.fn.filereadable(base .. ".ts") == 1 then
-                return p
-            end
-        end
+--- @param dir string
+local function readCommandFromPackageJson(dir)
+    local path = dir .. "/package.json"
 
-        vim.notify("Could not find jest config file: " .. file)
-        return vim.fn.getcwd()
+    if not is_file(path) then
+        return nil
     end
 
-    return require("neotest-jest")({
-        jest_test_discovery = true,
-        jestCommand = getJestCommand,
-        cwd = getJestCwd,
+    local f = assert(io.open(path, "r"))
+    local content = f:read("*a")
+    f:close()
+
+    local package = vim.json.decode(content)
+
+    if not package.scripts then
+        return nil
+    end
+
+    local packageManager = getPackageManager()
+
+    if package.scripts["test:unit"] then
+        return packageManager .. " run --silent test:unit"
+    elseif package.scripts.test then
+        return packageManager .. " run --silent test"
+    end
+end
+
+--- @param name string
+local function get_executable(name)
+    local root = getPackageJsonRootForCurrentFile()
+
+    if root then
+        local cmd = readCommandFromPackageJson(root)
+
+        if cmd then
+            return cmd
+        end
+
+        local binary = path_join(root, "node_modules", ".bin", name)
+
+        if path_exists(binary) then
+            return binary
+        end
+    end
+
+    return name
+end
+
+function P.getVitestAdapter()
+    ---@type neotest.VitestOptions
+    local config = {
+        vitestCommand = function()
+            return get_executable("vitest")
+        end,
+        cwd = function()
+            return getPackageJsonRootForCurrentFile() or vim.fn.getcwd()
+        end,
         env = {
             NODE_ENV = "test",
             DEBUG_PRINT_LIMIT = "1000000",
         },
-    })
+    }
+
+    return require("neotest-vitest")(config)
+end
+
+function P.getJestAdapter()
+    --- @type neotest.JestOptions
+    local config = {
+        jest_test_discovery = true,
+        jestCommand = function()
+            return get_executable("jest")
+        end,
+        cwd = function()
+            return getPackageJsonRootForCurrentFile() or vim.fn.getcwd()
+        end,
+        env = {
+            NODE_ENV = "test",
+            DEBUG_PRINT_LIMIT = "1000000",
+        },
+    }
+
+    return require("neotest-jest")(config)
 end
 
 return M
