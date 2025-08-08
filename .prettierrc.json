@@ -16,7 +16,10 @@
     },
     {
       "files": ["*.avanterules"],
-      "options": { "parser": "markdown" }
+      "options": {
+        "parser": "markdown",
+        "proseWrap": "preserve"
+      }
     }
   ]
 }

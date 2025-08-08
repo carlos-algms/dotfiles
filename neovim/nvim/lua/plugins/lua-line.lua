@@ -32,6 +32,7 @@ local M = {
                         "Avante",
                         "AvanteInput",
                         "AvanteSelectedFiles",
+                        "AvanteSelectedCode",
                         "AvanteTodos",
                         -- "trouble",
                         "quickfix",
