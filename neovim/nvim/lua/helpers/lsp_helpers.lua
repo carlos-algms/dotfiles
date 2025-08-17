@@ -1,21 +1,5 @@
 local M = {}
 
-function M.setupLspRoundedBorders()
-    vim.lsp.handlers["textDocument/signatureHelp"] =
-        vim.lsp.with(vim.lsp.handlers.signature_help, {
-            border = "rounded",
-            title = "signature",
-        })
-
-    vim.lsp.handlers["textDocument/hover"] =
-        vim.lsp.with(vim.lsp.handlers.hover, {
-            -- Use a sharp border with `FloatBorder` highlights
-            border = "rounded",
-            -- add the title in hover float window
-            title = "hover",
-        })
-end
-
 --- @param client vim.lsp.Client
 --- @param bufNr number
 function M.enableLspFeatures(client, bufNr)
@@ -119,12 +103,11 @@ function M.onLspAttach(client, bufNr)
         "Rename symbol with native NVim lsp"
     )
 
-    lspKeymap(
-        "i",
-        "<C-h>",
-        vim.lsp.buf.signature_help,
-        "Show help for function signature"
-    )
+    lspKeymap("i", "<C-h>", function()
+        vim.lsp.buf.signature_help({
+            border = "rounded",
+        })
+    end, "Show help for function signature")
 
     lspKeymap(
         { "n", "v" },
