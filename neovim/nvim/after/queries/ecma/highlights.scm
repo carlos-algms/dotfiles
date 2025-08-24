@@ -21,11 +21,12 @@
   (property_identifier) @variable.member (#set! "priority" 150)
   )
 
+; 2025-08-22: disabling it as methods were not tagged as functions, test it for a while before committing
 ; Fix a property in an object, sometimes it was flagged as a variable
 ; { foo: 'bar' }
-(pair
-  key: (property_identifier) @variable.member (#set! "priority" 150)
-  )
+; (pair
+;   key: (property_identifier) @variable.member (#set! "priority" 150)
+;   )
 
 ; fic a function as an object property
 ; { foo: () => {} }
