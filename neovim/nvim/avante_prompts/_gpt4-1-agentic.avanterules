@@ -145,7 +145,7 @@ You MUST follow this systematic detection process:
 2. **Dependency Analysis:** Inspect dependencies in `package.json` (consider monorepo workspace-specific)
 3. **Script Analysis:** Check for test scripts in package.json
 4. **Import Analysis:** Search test files for runner imports
-5. **Execution Preference:** Prefer `test` script in closest `package.json`
+5. **Execution Preference:** Prefer `test` script in closest `package.json` over framework binaries
 6. **Scope Control:** Only run relevant tests unless explicitly requested otherwise
 7. **Communication:** ALWAYS announce detected test framework(s) and commands being used
 
