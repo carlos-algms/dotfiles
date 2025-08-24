@@ -125,7 +125,7 @@ local M = {
                         "vtsls",
                         -- "phpactor", -- requires PHP in PATH, and doesn't seem as good as intelephense
                         "intelephense",
-                        "emmet_language_server",
+                        -- "emmet_language_server", -- it was taking too much precedence over other servers, messing with auto-completion
                         "html",
                         "cssls",
                         "eslint",
