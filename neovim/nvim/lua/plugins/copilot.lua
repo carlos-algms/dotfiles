@@ -31,12 +31,13 @@ return {
         },
 
         --- @module "CopilotChat"
-        --- @type CopilotChat.config
+        --- @type CopilotChat.config.Config
         opts = {
             -- https://github.com/CopilotC-Nvim/CopilotChat.nvim?tab=readme-ov-file#configuration
             -- debug = true, -- Enable debugging
 
-            model = "gpt-4.1",
+            -- model = "gpt-4o",
+            model = "gpt-4.1", -- use CopilotChatModels to see all models
             -- model = "claude-3.7-sonnet", -- 'gpt-4o', -- Default model to use, see ':CopilotChatModels'
             -- model = "claude-3.7-sonnet-thought",
 
