@@ -13,12 +13,14 @@ local M = {
             "AvanteEdit",
             "AvanteStop",
             "AvanteChatNew",
+            "AvanteModels",
         },
 
         version = false, -- set this if you want to always pull the latest change
 
         build = "make", -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+
         keys = {
             {
                 "<Leader>A",
@@ -137,26 +139,45 @@ local M = {
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
-            -- add any opts here
             provider = "copilot",
+
             providers = {
+                ---@type AvanteSupportedProvider
                 copilot = {
                     -- model = "claude-3.7-sonnet-thought",
                     model = "gpt-4.1-2025-04-14",
                 },
+
+                ---@type AvanteSupportedProvider
+                ollama = {
+                    endpoint = "http://127.0.0.1:11434",
+                    -- model = "qwen3:4b-thinking-2507-q4_K_M",
+                    model = "gemma3:4b",
+                    -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
+                    is_env_set = function()
+                        return true
+                    end,
+                    -- context_window = 8000,
+                },
             },
+
             auto_suggestions_provider = "copilot",
+
             behaviour = {
                 auto_set_keymaps = false,
                 auto_suggestions = false,
             },
-            hints = { enabled = false },
+
+            selection = {
+                hint_display = "none",
+            },
+
             windows = {
                 position = "right",
                 wrap = true, -- similar to vim.o.wrap
-                width = 35, -- default % based on available width in vertical layout
+                width = 40, -- default % based on available width in vertical layout
                 input = {
-                    height = 10,
+                    height = 12,
                 },
                 edit = {
                     border = "rounded",
