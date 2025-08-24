@@ -128,9 +128,9 @@ return {
             vtslsCommands.rename_file(bufNr)
         end, "TS Rename File")
 
-        tsKeymap("<leader>ct", function()
-            vtslsCommands.select_ts_version(bufNr)
-        end, "TS Select Typescript Version")
+        -- tsKeymap("<leader>ct", function()
+        --     vtslsCommands.select_ts_version(bufNr)
+        -- end, "TS Select Typescript Version")
 
         tsKeymap("gD", function()
             vtslsCommands.goto_source_definition(nil)
