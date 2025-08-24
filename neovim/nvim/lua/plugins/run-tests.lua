@@ -240,11 +240,19 @@ local function readCommandFromPackageJson(dir)
 
     local packageManager = getPackageManager()
 
+    local cmd = nil
+
     if package.scripts["test:unit"] then
-        return packageManager .. " run --silent test:unit"
+        cmd = packageManager .. " run --silent test:unit"
     elseif package.scripts.test then
-        return packageManager .. " run --silent test"
+        cmd = packageManager .. " run --silent test"
     end
+
+    if cmd and packageManager == "npm" then
+        cmd = cmd .. " --"
+    end
+
+    return cmd
 end
 
 --- @param name string
@@ -271,17 +279,48 @@ end
 function P.getVitestAdapter()
     ---@type neotest.VitestOptions
     local config = {
-        vitestCommand = function()
-            return get_executable("vitest")
-        end,
-        cwd = function()
-            return getPackageJsonRootForCurrentFile() or vim.fn.getcwd()
-        end,
         env = {
             NODE_ENV = "test",
             DEBUG_PRINT_LIMIT = "1000000",
         },
     }
+    config.vitestCommand = function()
+        return get_executable("vitest")
+    end
+
+    config.cwd = function()
+        return getPackageJsonRootForCurrentFile() or vim.fn.getcwd()
+    end
+
+    --- @return string|nil
+    config.vitestConfigFile = function()
+        local rootPath = config.cwd()
+
+        if not rootPath then
+            return nil
+        end
+
+        local possibleVitestConfigNames = {
+            "vitest.config.mts",
+            "vitest.config.ts",
+            "vitest.config.js",
+            "vitest.config.mjs",
+            "vite.config.mts",
+            "vite.config.ts",
+            "vite.config.js",
+            "vite.config.mjs",
+        }
+
+        for _, configName in ipairs(possibleVitestConfigNames) do
+            local configPath = path_join(rootPath, configName)
+
+            if path_exists(configPath) then
+                return configPath
+            end
+        end
+
+        return nil
+    end
 
     return require("neotest-vitest")(config)
 end
