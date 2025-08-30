@@ -99,7 +99,7 @@ local M = {
             },
 
             {
-                "<A-i>S",
+                "<A-i>s",
                 function()
                     require("avante.api").stop()
                 end,
@@ -116,19 +116,37 @@ local M = {
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
-            ---@type "copilot" | "ollama" | "claude" | "openai" | "azure" | "gemini"
+            ---@type "copilot" | "ollama" | "lm_studio" | "claude" | "openai" | "azure" | "gemini"
             provider = "copilot",
 
             providers = {
                 ---@type AvanteSupportedProvider
                 copilot = {
                     -- model = "claude-3.7-sonnet",
-                    model = "claude-3.7-sonnet-thought",
-                    -- model = "gpt-4.1-2025-04-14",
+                    model = "gpt-4.1-2025-04-14",
                 },
 
-                ---@type AvanteSupportedProvider
+                --- @type AvanteSupportedProvider
+                -- lm_studio = {
+                --     __inherited_from = "openai",
+                --     ["local"] = true,
+                --     api_key_name = "",
+                --     endpoint = "http://localhost:1234/v1",
+                --
+                --     -- model = "qwen/qwen3-coder-30b",
+                --     -- context_window = 256000,
+                --
+                --     model = "openai/gpt-oss-20b", -- it was returning empty responses
+                --     context_window = 131072,
+                --
+                --     is_env_set = function()
+                --         return true
+                --     end,
+                -- },
+
+                --- @type AvanteSupportedProvider
                 -- ollama = {
+                --     ["local"] = true,
                 --     endpoint = "http://127.0.0.1:11434",
                 --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
                 --     model = "gpt-oss:20b",
