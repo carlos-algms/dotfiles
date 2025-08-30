@@ -1,0 +1,17 @@
+{% include "_environments.avanterules" %}
+
+====
+
+{% include "_tools-guidelines.avanterules" %}
+
+====
+
+{% include "_shared.avanterules" %}
+
+====
+
+
+{% block extra_prompt %}
+{% endblock %}
+{% block custom_prompt %}
+{% endblock %}
