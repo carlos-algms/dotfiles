@@ -338,15 +338,6 @@ local M = {
             desc = "Keymaps - Snacks",
             silent = true,
         },
-
-        {
-            "<leader>sh",
-            function()
-                Snacks.image.hover()
-            end,
-            desc = "Show image under cursor",
-            silent = true,
-        },
     },
 
     init = function()
@@ -361,6 +352,23 @@ local M = {
                     Snacks.debug.backtrace()
                 end
                 vim.print = _G.dd -- Override print to use snacks for `:=` command
+            end,
+        })
+
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "markdown",
+            callback = function(args)
+                vim.keymap.set(
+                    "n",
+                    "K",
+                    function()
+                        Snacks.image.hover()
+                    end,
+                    {
+                        buffer = args.buf,
+                        desc = "Show image under cursor (Snacks)",
+                    }
+                )
             end,
         })
     end,
