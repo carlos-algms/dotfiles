@@ -4,6 +4,26 @@
     "allowed_tools": ["view", "ls", "grep", "edit"]
   },
   "providers": {
+    "lmstudio": {
+      "name": "LM Studio",
+      "base_url": "http://localhost:1234/v1/",
+      "type": "openai",
+      "models": [
+        {
+          "name": "Qwen 3 Coder 30B",
+          "id": "qwen/qwen3-coder-30b",
+          "context_window": 262144,
+          "default_max_tokens": 20000,
+          "can_reason": true,
+          "supports_attachments": true,
+          "cost_per_1m_in": 0,
+          "cost_per_1m_out": 0,
+          "cost_per_1m_in_cached": 0,
+          "cost_per_1m_out_cached": 0,
+          "has_reasoning_efforts": true
+        }
+      ]
+    },
     "ollama": {
       "name": "Ollama",
       "base_url": "http://localhost:11434/v1/",
