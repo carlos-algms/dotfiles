@@ -10,8 +10,8 @@
       "type": "openai",
       "models": [
         {
-          "name": "qwen3:8b-q4_K_M",
-          "id": "qwen3:8b-q4_K_M",
+          "name": "gpt-oss:20b",
+          "id": "gpt-oss:20b",
           "context_window": 40000,
           "default_max_tokens": 20000,
           "can_reason": true,
