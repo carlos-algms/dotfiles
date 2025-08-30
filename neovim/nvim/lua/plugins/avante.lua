@@ -4,7 +4,8 @@ local M = {
 
         -- enabled = not vim.g.is_ssh,
 
-        -- event = "VeryLazy",
+        -- it seems better to lazy load  on event, as the generate template error doesn't happen
+        event = "VeryLazy",
         -- lazy = false,
 
         cmd = {
@@ -23,34 +24,32 @@ local M = {
 
         keys = {
             {
-                "<Leader>A",
-                "",
-                desc = "Avante",
-                silent = true,
-                mode = { "n", "v" },
-            },
-            {
-                "<Leader>Aa",
+                "<A-i>",
                 function()
-                    require("avante.api").ask()
+                    require("avante.api").ask({
+                        ask = true,
+                    })
                 end,
                 desc = "Avante Ask",
                 silent = true,
-                mode = { "n", "v" },
+                mode = { "n", "v", "i" },
             },
+
             {
-                "<Leader>An",
+                "<A-i>n",
                 function()
                     require("avante.api").ask({
+                        ask = true,
                         new_chat = true,
                     })
                 end,
                 desc = "Avante new Chat",
                 silent = true,
-                mode = { "n", "v" },
+                mode = { "n", "v", "i" },
             },
+
             {
-                "<Leader>Ae",
+                "<A-i>e",
                 function()
                     require("avante.api").edit()
                 end,
@@ -58,8 +57,9 @@ local M = {
                 silent = true,
                 mode = { "n", "v" },
             },
+
             {
-                "<Leader>Ar",
+                "<A-i>r",
                 function()
                     require("avante.api").refresh()
                 end,
@@ -67,51 +67,27 @@ local M = {
                 silent = true,
                 mode = { "n", "v" },
             },
+
             {
-                "<Leader>Af",
+                "<A-i>f",
                 function()
                     require("avante.api").focus()
                 end,
                 desc = "Avante Focus",
                 silent = true,
-                mode = { "n", "v" },
+                mode = { "n", "v", "i" },
             },
+
             {
-                "<Leader>At",
+                "<A-i>t",
                 function()
                     require("avante").toggle()
                 end,
                 desc = "Avante Toggle",
                 silent = true,
-                mode = { "n", "v" },
+                mode = { "n", "v", "i" },
             },
-            {
-                "<Leader>Ad",
-                function()
-                    require("avante").toggle.debug()
-                end,
-                desc = "Avante Debug",
-                silent = true,
-                mode = { "n", "v" },
-            },
-            {
-                "<Leader>Ah",
-                function()
-                    require("avante").toggle.hint()
-                end,
-                desc = "Avante Hint",
-                silent = true,
-                mode = { "n", "v" },
-            },
-            {
-                "<Leader>As",
-                function()
-                    require("avante").toggle.suggestion()
-                end,
-                desc = "Avante Suggestion",
-                silent = true,
-                mode = { "n", "v" },
-            },
+
             {
                 "<Leader>Ar",
                 function()
@@ -121,14 +97,15 @@ local M = {
                 silent = true,
                 mode = { "n", "v" },
             },
+
             {
-                "<leader>AS",
+                "<A-i>S",
                 function()
                     require("avante.api").stop()
                 end,
                 desc = "Avante Stop",
                 silent = true,
-                mode = { "n", "v" },
+                mode = { "n", "v", "i" },
             },
         },
 
@@ -139,26 +116,28 @@ local M = {
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
+            ---@type "copilot" | "ollama" | "claude" | "openai" | "azure" | "gemini"
             provider = "copilot",
 
             providers = {
                 ---@type AvanteSupportedProvider
                 copilot = {
-                    -- model = "claude-3.7-sonnet-thought",
-                    model = "gpt-4.1-2025-04-14",
+                    -- model = "claude-3.7-sonnet",
+                    model = "claude-3.7-sonnet-thought",
+                    -- model = "gpt-4.1-2025-04-14",
                 },
 
                 ---@type AvanteSupportedProvider
-                ollama = {
-                    endpoint = "http://127.0.0.1:11434",
-                    -- model = "qwen3:4b-thinking-2507-q4_K_M",
-                    model = "gemma3:4b",
-                    -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
-                    is_env_set = function()
-                        return true
-                    end,
-                    -- context_window = 8000,
-                },
+                -- ollama = {
+                --     endpoint = "http://127.0.0.1:11434",
+                --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
+                --     model = "gpt-oss:20b",
+                --     -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
+                --     is_env_set = function()
+                --         return true
+                --     end,
+                --     context_window = 128000,
+                -- },
             },
 
             auto_suggestions_provider = "copilot",
@@ -187,19 +166,6 @@ local M = {
                     floating = false, -- Open the 'AvanteAsk' prompt in a floating window
                     border = "rounded",
                     start_insert = true, -- Start insert mode when opening the ask window
-                },
-                mappings = {
-                    ask = "<leader>Aa",
-                    edit = "<leader>Ae",
-                    refresh = "<leader>Ar",
-                    focus = "<leader>Af",
-                    toggle = {
-                        default = "<leader>At",
-                        debug = "<leader>Ad",
-                        hint = "<leader>Ah",
-                        suggestion = "<leader>As",
-                        repomap = "<leader>Ar",
-                    },
                 },
             },
         },
