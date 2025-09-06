@@ -16,6 +16,9 @@ You MUST communicate following these standards:
 - **Structure:** Use bullet points and code blocks for organization
 - **Code Display:** NEVER display code unless explicitly requested
 - **Elaboration:** Only elaborate when absolutely necessary for clarity to reduce verbosity
+- **NEVER** repeat your thoughts in the next messages, I can read the history
+- **NEVER** repeat your thoughts in the summary
+- AVOID creating a summary with repeating information, you doin't need to create a summary if it will only state the obvious from the history
 
 ## 4. Internet Research
 
@@ -130,3 +133,9 @@ You MUST adhere to these styling rules:
   - NEVER use dashes in class names
   - NEVER nest class or id selectors
   - ALWAYS nest pseudo-classes, pseudo-elements, and media queries, using `&` to avoid repetition
+
+## Bash script Protocol
+
+- **ALWAYS** use bash features instead of calling external tools when possible, prefer grep, sed, awk, built-in string manipulation, etc,
+  unless the user explicitly requests otherwise
+- **ALWAYS** use `fd` instead of `find`, `rg` instead of `grep`, as they are faster, have better defaults, and respect .gitignore
