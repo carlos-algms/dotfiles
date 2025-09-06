@@ -22,6 +22,96 @@ local M = {
         build = "make", -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
 
+        --- @module "avante"
+        --- @type avante.Config
+        opts = {
+            -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
+            -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
+            override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
+
+            ---@type "copilot" | "ollama" | "lm_studio" | "claude" | "claude-cli" | "openai" | "azure" | "gemini"
+            provider = "claude",
+
+            providers = {
+                ---@type AvanteSupportedProvider
+                copilot = {
+                    -- model = "claude-3.7-sonnet",
+                    model = "gpt-4.1-2025-04-14",
+                },
+
+                ---@type AvanteSupportedProvider
+                claude = {
+                    endpoint = "https://api.anthropic.com",
+                    model = "claude-sonnet-4-20250514",
+                    timeout = 30000,
+                    extra_request_body = {
+                        temperature = 0.75,
+                        max_tokens = 64000,
+                    },
+                },
+
+                --- @type AvanteSupportedProvider
+                -- lm_studio = {
+                --     __inherited_from = "openai",
+                --     ["local"] = true,
+                --     api_key_name = "",
+                --     endpoint = "http://localhost:1234/v1",
+                --
+                --     -- model = "qwen/qwen3-coder-30b",
+                --     -- context_window = 256000,
+                --
+                --     model = "openai/gpt-oss-20b", -- it was returning empty responses
+                --     context_window = 131072,
+                --
+                --     is_env_set = function()
+                --         return true
+                --     end,
+                -- },
+
+                --- @type AvanteSupportedProvider
+                -- ollama = {
+                --     ["local"] = true,
+                --     endpoint = "http://127.0.0.1:11434",
+                --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
+                --     model = "gpt-oss:20b",
+                --     -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
+                --     is_env_set = function()
+                --         return true
+                --     end,
+                --     context_window = 128000,
+                -- },
+            },
+
+            auto_suggestions_provider = "copilot",
+
+            behaviour = {
+                auto_set_keymaps = false,
+                auto_suggestions = false,
+            },
+
+            selection = {
+                hint_display = "none",
+            },
+
+            windows = {
+                position = "right",
+                wrap = true, -- similar to vim.o.wrap
+                width = 40, -- default % based on available width in vertical layout
+                input = {
+                    height = 12,
+                },
+                edit = {
+                    border = "rounded",
+                    start_insert = true, -- Start insert mode when opening the edit window
+                },
+                ask = {
+                    floating = false, -- Open the 'AvanteAsk' prompt in a floating window
+                    border = "rounded",
+                    start_insert = true, -- Start insert mode when opening the ask window
+                },
+            },
+        },
+
         keys = {
             {
                 "<A-i>",
@@ -106,85 +196,6 @@ local M = {
                 desc = "Avante Stop",
                 silent = true,
                 mode = { "n", "v", "i" },
-            },
-        },
-
-        --- @module "avante"
-        --- @type avante.Config
-        opts = {
-            -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
-            -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
-            override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
-
-            ---@type "copilot" | "ollama" | "lm_studio" | "claude" | "openai" | "azure" | "gemini"
-            provider = "copilot",
-
-            providers = {
-                ---@type AvanteSupportedProvider
-                copilot = {
-                    -- model = "claude-3.7-sonnet",
-                    model = "gpt-4.1-2025-04-14",
-                },
-
-                --- @type AvanteSupportedProvider
-                -- lm_studio = {
-                --     __inherited_from = "openai",
-                --     ["local"] = true,
-                --     api_key_name = "",
-                --     endpoint = "http://localhost:1234/v1",
-                --
-                --     -- model = "qwen/qwen3-coder-30b",
-                --     -- context_window = 256000,
-                --
-                --     model = "openai/gpt-oss-20b", -- it was returning empty responses
-                --     context_window = 131072,
-                --
-                --     is_env_set = function()
-                --         return true
-                --     end,
-                -- },
-
-                --- @type AvanteSupportedProvider
-                -- ollama = {
-                --     ["local"] = true,
-                --     endpoint = "http://127.0.0.1:11434",
-                --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
-                --     model = "gpt-oss:20b",
-                --     -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
-                --     is_env_set = function()
-                --         return true
-                --     end,
-                --     context_window = 128000,
-                -- },
-            },
-
-            auto_suggestions_provider = "copilot",
-
-            behaviour = {
-                auto_set_keymaps = false,
-                auto_suggestions = false,
-            },
-
-            selection = {
-                hint_display = "none",
-            },
-
-            windows = {
-                position = "right",
-                wrap = true, -- similar to vim.o.wrap
-                width = 40, -- default % based on available width in vertical layout
-                input = {
-                    height = 12,
-                },
-                edit = {
-                    border = "rounded",
-                    start_insert = true, -- Start insert mode when opening the edit window
-                },
-                ask = {
-                    floating = false, -- Open the 'AvanteAsk' prompt in a floating window
-                    border = "rounded",
-                    start_insert = true, -- Start insert mode when opening the ask window
-                },
             },
         },
 
