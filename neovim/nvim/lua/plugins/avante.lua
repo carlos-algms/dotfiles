@@ -29,7 +29,7 @@ local M = {
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
-            ---@type "copilot" | "ollama" | "lm_studio" | "claude" | "claude-cli" | "openai" | "azure" | "gemini"
+            ---@type "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "azure"
             provider = "claude",
 
             providers = {
@@ -80,6 +80,26 @@ local M = {
                 --     end,
                 --     context_window = 128000,
                 -- },
+            },
+
+            -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
+            acp_providers = {
+                ["gemini-cli"] = {
+                    command = "gemini",
+                    args = { "--experimental-acp" },
+                    env = {
+                        NODE_NO_WARNINGS = "1",
+                        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+                    },
+                },
+                ["claude-code"] = {
+                    command = "pnpm",
+                    args = { "dlx", "acp-claude-code" },
+                    env = {
+                        NODE_NO_WARNINGS = "1",
+                        ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+                    },
+                },
             },
 
             auto_suggestions_provider = "copilot",
