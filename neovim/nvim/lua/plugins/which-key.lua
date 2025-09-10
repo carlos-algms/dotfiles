@@ -6,7 +6,7 @@ return {
     },
     init = function()
         vim.o.timeout = true
-        vim.o.timeoutlen = 300
+        vim.o.timeoutlen = 400
     end,
     opts = {},
 }
