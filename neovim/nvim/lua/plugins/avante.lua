@@ -4,7 +4,7 @@ local M = {
 
         -- enabled = not vim.g.is_ssh,
 
-        -- it seems better to lazy load  on event, as the generate template error doesn't happen
+        -- it seems better to lazy load on event, as the generate template error doesn't happen
         event = "VeryLazy",
         -- lazy = false,
 
@@ -29,8 +29,13 @@ local M = {
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
             override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
 
-            ---@type "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "azure"
-            provider = "claude",
+            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai"
+
+            ---@type AvanteProviders
+            provider = vim.g.is_ssh and "copilot" or "claude-code",
+
+            ---@type AvanteProviders
+            auto_suggestions_provider = "copilot",
 
             providers = {
                 ---@type AvanteSupportedProvider
@@ -101,8 +106,6 @@ local M = {
                     },
                 },
             },
-
-            auto_suggestions_provider = "copilot",
 
             behaviour = {
                 auto_set_keymaps = false,
