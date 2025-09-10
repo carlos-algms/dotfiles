@@ -40,13 +40,11 @@ return {
                 opts = { vertical = true, close = true },
                 desc = "Open the entry in a vertical split",
             },
-            ["<C-x>"] = {
+            ["<C-s>"] = {
                 "actions.select",
                 opts = { horizontal = true, close = true },
                 desc = "Open the entry in a horizontal split",
             },
-            -- Disabled to avoid mistyping
-            ["<C-s>"] = false,
             ["<C-h>"] = false,
             ["_"] = false,
             ["`"] = false,
