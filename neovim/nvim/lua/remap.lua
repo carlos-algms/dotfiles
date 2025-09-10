@@ -59,9 +59,6 @@ vim.keymap.set(
     { desc = "Copy entire line to system clipboard" }
 )
 
--- Yank entire line
-vim.keymap.set({ "n", "v" }, "Y", [[yy]], { desc = "Yank entire line" })
-
 vim.keymap.set("n", "Q", "<nop>")
 
 vim.keymap.set(
