@@ -1,0 +1,16 @@
+{
+  "preferredEditor": "neovim",
+  "selectedAuthType": "oauth-personal",
+  "useRipgrep": true,
+  "tools": {
+    "allowed": [
+      "glob",
+      "google_web_search",
+      "list_directory",
+      "read_file",
+      "read_many_files",
+      "search_file_content",
+      "web_fetch"
+    ]
+  }
+}
