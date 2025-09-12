@@ -102,6 +102,7 @@ You MUST implement these practices:
 - **Hook Logic:** Prefer named functions inside hooks for async or complex logic
 - **Accessibility:** Follow accessibility best practices without exception
 - Do not use `useCallback` if the function is used in the same component
+- **ALWAYS** add `displayName` to React components with forwardRef
 
 ## CSS Protocol
 
