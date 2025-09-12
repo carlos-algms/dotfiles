@@ -3,5 +3,7 @@
     "allow": ["Glob", "Grep", "Read", "WebSearch", "WebFetch"],
     "deny": [],
     "ask": []
-  }
+  },
+  "model": "opus"
 }
+
