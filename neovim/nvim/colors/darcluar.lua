@@ -295,6 +295,8 @@ M.theme = {
         zshShortDeref = "Constant",
         zshSubstDelim = "Keyword",
         zshSubstQuoted = "String",
+        typescriptObjectLabel = "Constant",
+        typescriptVariable = "Keyword",
     },
 }
 
