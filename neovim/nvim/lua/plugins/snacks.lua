@@ -35,6 +35,11 @@ local M = {
                     "eslint: -32603", -- no eslint config found
                     "Could not find config file",
                     "Content is not an image",
+                    -- ACP from Avante
+                    "Spawning Claude Code process",
+                    "ACP stderr: Error: The provided `old_string` does not appear in the file",
+                    "ACP stderr: Progress",
+                    "ACP stderr: Packages",
                 }
 
                 for _, pattern in ipairs(patterns) do
@@ -358,17 +363,12 @@ local M = {
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "markdown",
             callback = function(args)
-                vim.keymap.set(
-                    "n",
-                    "K",
-                    function()
-                        Snacks.image.hover()
-                    end,
-                    {
-                        buffer = args.buf,
-                        desc = "Show image under cursor (Snacks)",
-                    }
-                )
+                vim.keymap.set("n", "K", function()
+                    Snacks.image.hover()
+                end, {
+                    buffer = args.buf,
+                    desc = "Show image under cursor (Snacks)",
+                })
             end,
         })
     end,
