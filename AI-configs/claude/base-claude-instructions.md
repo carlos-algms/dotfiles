@@ -8,6 +8,9 @@ Use `gemini -p` to leverage Google Gemini's large context capacity.
 
 You can consider gemini as a sub-agent that can execute your requests.
 
+MAKE sure to tell gemini to not make any code changes, just summarize or analyze
+what you asked.
+
 ## File and Directory Inclusion Syntax
 
 Use the `@` syntax to include files and directories in your Gemini prompts. The
@@ -17,48 +20,39 @@ paths should be relative to WHERE you run the gemini command:
 
 ```bash
 # Single file analysis:
-gemini -p "@src/main.py Explain this file's purpose and structure"
+gemini -p "@src/main.py Explain this file's purpose and structure. Don't make any changes, just give a deep analysis."
 
 # Multiple files:
-gemini -p "@package.json @src/index.js Analyze the dependencies used in the code"
+gemini -p "@package.json @src/index.js Analyze the dependencies used in the code. Don't make any changes just summarize and give a list"
 
 # Entire directory:
-gemini -p "@src/ Summarize the architecture of this codebase"
+gemini -p "@src/ Summarize the architecture of this codebase. Don't make any changes, just give deep, and structured, overview."
 
 # Multiple directories:
-gemini -p "@src/ @tests/ Analyze test coverage for the source code"
+gemini -p "@src/ @tests/ Analyze test coverage for the source code. Don't make any changes, just give a detailed report."
 
 # Current directory and subdirectories:
-gemini -p "@./ Give me an overview of this entire project"
+gemini -p "@./ Give me an overview of this entire project. Don't make any changes, just summarize the structure and the tech stack."
 
 # Or use --all_files flag:
-gemini --all_files -p "Analyze the project structure and dependencies"
+gemini --all_files -p "Analyze the project structure and dependencies. Don't make any changes, just summarize the architecture and tech stack."
 
 # Implementation Verification Examples
 
 # Check if a feature is implemented:
-gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions"
+gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions. Don't make any changes"
 
 # Verify authentication implementation:
-gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware"
+gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware. Don't make any changes"
 
 # Check for specific patterns:
-gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths"
+gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths. Don't make any changes"
 
 # Verify error handling:
-gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks"
-
-# Check for rate limiting:
-gemini -p "@backend/ @middleware/ Is rate limiting implemented for the API? Show the implementation details"
-
-# Verify caching strategy:
-gemini -p "@src/ @lib/ @services/ Is Redis caching implemented? List all cache-related functions and their usage"
-
-# Check for specific security measures:
-gemini -p "@src/ @api/ Are SQL injection protections implemented? Show how user inputs are sanitized"
+gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks. Don't make any changes"
 
 # Verify test coverage for features:
-gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases"
+gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases. Don't make any changes"
 ```
 
 ## Processing Online Documentation
@@ -70,13 +64,13 @@ ask Gemini to search for relevant information.
 
 ```bash
 # Direct URL analysis:
-gemini -p "Please summarize this article: https://react.dev/learn/describing-the-ui"
+gemini -p "Give me a deep and structured summary of this article: https://react.dev/learn/describing-the-ui. Don't make any changes"
 
 # Find specific information:
-gemini -p "In the documentation at https://react.dev/learn/describing-the-ui, how do I use props?"
+gemini -p "In the documentation at https://react.dev/learn/describing-the-ui, how do I use props? Don't make any changes."
 
 # Search when unsure of source:
-gemini -p "Search for official React documentation on handling user events and explain key concepts"
+gemini -p "Search for official React documentation on handling user events and explain key concepts. Don't make any changes."
 ```
 
 ## When to Use Gemini CLI
@@ -102,9 +96,9 @@ gemini -p "Search for official React documentation on handling user events and e
 - Gemini's context window can handle entire codebases that would overflow
   Claude's context
 - When checking implementations, be specific about what you're looking for to
-  get accurate results # Using Gemini CLI for Large Codebase Analysis
+  get accurate results
 - Ask Gemini to summarize and avoid printing the full content it fetched, so it
-  doesn't overflow your context
+  doesn't flood your context and token usage
 
 ====
 
