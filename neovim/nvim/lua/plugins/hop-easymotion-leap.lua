@@ -7,7 +7,8 @@ return {
         opts = {
             -- I want to be precise when focusing on a specific word
             case_insensitive = false,
-            -- keys = "etovxqpdygfblzhckisuran",
+            -- I added this key sequence to avoid using `s` to start the motion, and any key from the left side as the jump key
+            keys = "jkl;hnuiopasdfgqwertyzxcvb",
         },
         keys = {
             {
