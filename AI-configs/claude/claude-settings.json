@@ -1,9 +1,8 @@
 {
   "permissions": {
-    "allow": ["Glob", "Grep", "Read", "WebSearch", "WebFetch"],
+    "allow": ["Glob", "Grep", "Read", "WebSearch", "WebFetch", "Bash(ls:*)"],
     "deny": [],
     "ask": []
-  },
-  "model": "opus"
+  }
 }
 
