@@ -1,4 +1,5 @@
 local P = {
+    ---@module 'snacks'
     ---@type snacks.picker.Last[]
     Snacks_picker_hist = {},
 }
@@ -8,7 +9,6 @@ local M = {
     priority = 1010,
     lazy = false,
 
-    ---@module 'snacks'
     ---@type snacks.Config
     opts = {
         input = {
