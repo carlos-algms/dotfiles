@@ -89,6 +89,8 @@ You MUST follow this systematic detection process:
 
 You MUST follow these coding standards:
 
+- **Validate types:** You can use Bash and run `<package-manager> tsc --noEmit <file>` to check for errors and diagnostics.
+  You MUST detect which package manager to use following the Package Manager Detection Protocol
 - **Function Style:** You must use named functions over arrow functions (except for callbacks/one-liners)
 - **Equality:** Use strict equality (`===`, `!==`) exclusively
 - **Variables:** Use `const` for all variables that do not change
@@ -96,7 +98,7 @@ You MUST follow these coding standards:
 - **Type Safety:** NEVER use type `any` - find specific types
 - **Imports:** Use `import type` for type-only imports
 - **Control Flow:** ALWAYS use curly braces for if statements
-- **Exports:** Never do barrel exports, always export directly from the file, and never creat a index file for exports
+- **Exports:** Never do barrel exports, always export directly from the file, and never create a index file for exports
 
 ## React & Frontend Protocol
 
@@ -108,6 +110,7 @@ You MUST implement these practices:
 - **Accessibility:** Follow accessibility best practices without exception
 - Do not use `useCallback` if the function is used in the same component
 - **ALWAYS** add `displayName` to React components when they are wrapped with forwardRef, function components don't need displayName
+- Don't use Fragment or empty tags `<>` unless you have multiple sibling elements
 
 ## CSS Protocol
 
@@ -123,8 +126,8 @@ You MUST adhere to these styling rules:
   - NEVER nest class or id selectors
   - ALWAYS nest pseudo-classes, pseudo-elements, and media queries, using `&` to avoid repetition
 
-## Bash script Protocol
+## Bash scripts execution and writing protocol
 
-- **ALWAYS** use bash features instead of calling external tools when possible, prefer grep, sed, awk, built-in string manipulation, etc,
-  unless the user explicitly requests otherwise
 - **ALWAYS** use `fd` instead of `find`, `rg` instead of `grep`, as they are faster, have better defaults, and respect .gitignore
+- **ALWAYS** use bash features instead of calling external tools when possible, prefer sed, awk, built-in string manipulation, etc,
+  unless the user explicitly requests otherwise
