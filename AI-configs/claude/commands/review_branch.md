@@ -41,17 +41,19 @@ or enter to confirm, yes should be the default pre-selected option.
 
 - The very first header, should be  
   "# Code Review [date] [current time] [branch name]"
+- If there are not suggestions for a file, don't add a section for it, to the
+  file is smaller.
+- Respect indentation and limit to 80 characters per line
 
 ### The file list file
 
-It should be a clean list with the Markdown todo list format, like this:
-
-```
-- [ ] relative/path/to/file1.ext
-- [ ] relative/path/to/file2.ext
-```
-
-Don't add anything else to the file.
+- It should be a clean list with the Markdown todo list format, like this:
+  ```
+  - [ ] relative/path/to/file1.ext
+  - [ ] relative/path/to/file2.ext
+  ```
+  Don't add anything else to the file.
+- Don't limit the number of characters per line, as the file names can be long
 
 ## Review Process
 

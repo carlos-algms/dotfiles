@@ -127,14 +127,29 @@ Use nested lists for multiple suggestions on the same subject.
 
 - explain the issue or suggestion you're making and why it is relevant.  
   relative/path/to/file.ext:xx-yy
+
   ```diff
   - original line of code
   + your suggested change
   ```
-  </example>
-  Dont be limited to the `diff` type, if you have code examples, or snippets, 
-  use the proper language for syntax highlighting.
-  Use relative paths for files.
+
+</example>
+
+Only add `-` and `+` in code blocks when you're showing a diff
+
+Don't be limited to the `diff` type, if you have code examples, or snippets, use
+the proper language for syntax highlighting.  
+Use relative paths for files.  
+When there's JSX, or React code, use `tsx` as the syntax
+
+<example>
+
+```tsx
+const [state, setState] = useState(false);
+<Component oldProp="value" />;
+```
+
+</example>
 
 ## Important
 
