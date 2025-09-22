@@ -10,7 +10,7 @@
 - You MUST follow all instructions in `<memory>` when available - no exceptions
 - You MUST accommodate non-native English speakers; tolerate typos and grammar variations; the user prefers English.
 - If the user rejects or refuses a suggestion or a tool approval request, without a reason,
-  you MUST stop your current plan and ask what they would like to do instead, do not try alternative solutions without asking.
+  you MUST stop your current plan and ask what they would like to do instead, do not try alternative solutions without asking, do not continue your plan.
 
 # COMMON SHARED DIRECTIVES (ABSOLUTE PRIORITY)
 
@@ -65,31 +65,34 @@ DO NOT apply or suggest code changes before your solution is fully compliant wit
 
 ## Package Manager Detection Protocol
 
-Before running pnpm, npm, or npx, You **MUST** follow this exact detection sequence:
+If you don't know the correct package manager to use, because user didn't tell you, you didn't figure it out yet,
+before running pnpm, pnpm dlx, npm, or npx, You **MUST** follow this exact detection sequence:
 
-2. **Monorepo Handling:** Detect if working in a monorepo, and run commands on the closest workspace to the file you ara working on
-3. **Lock File Analysis:** Check for lock files (`pnpm-lock.yaml`, `pnpm-workspace.yaml`, `yarn.lock`, `package-lock.json`)
-4. **Package.json Analysis:** Check for `packageManager` field in `package.json`
-5. **Fallback:** Use npm ONLY as final fallback after trying all other methods
-6. **Communication:** ALWAYS announce which package manager was detected and being used
+- **Monorepo Handling:** Detect if working in a monorepo, and run commands on the closest workspace to the file you ara working on
+- **Lock File Analysis:** Check for lock files (`pnpm-lock.yaml`, `pnpm-workspace.yaml`, `yarn.lock`, `package-lock.json`)
+- **Package.json Analysis:** Check for `packageManager` field in `package.json`
+- **Fallback:** Use npm ONLY as final fallback after exhausting all other detection methods
+- **ALWAYS** announce which package manager was detected and being used!!
+
 
 ## Test Framework Detection Protocol
 
 You MUST follow this systematic detection process:
 
-1. **Config File Detection:** Look for config files (`vitest.config.*`, `jest.config.*`, etc.)
-2. **Dependency Analysis:** Inspect dependencies in `package.json` (consider monorepo workspace-specific)
-3. **Script Analysis:** Check for test scripts in package.json
-4. **Import Analysis:** Search test files for runner imports
-5. **Execution Preference:** Prefer `test` script in closest `package.json` over framework binaries
-6. **Scope Control:** Only run relevant tests unless explicitly requested otherwise
-7. **Communication:** ALWAYS announce detected test framework(s) and commands being used
+- **Config File Detection:** Look for config files (`vitest.config.*`, `jest.config.*`, etc.)
+- **Dependency Analysis:** Inspect dependencies in `package.json` (consider monorepo workspace-specific)
+- **Script Analysis:** Check for test scripts in package.json
+- **Import Analysis:** Search test files for runner imports
+- **Execution Preference:** Prefer `test` script in closest `package.json` over framework binaries
+- **Scope Control:** Only run relevant tests unless explicitly requested otherwise
+- **Communication:** ALWAYS announce detected test framework(s) and commands being used
 
 ## TypeScript & JavaScript Protocol
 
 You MUST follow these coding standards:
 
-- **Validate types:** You can use Bash and run `<package-manager> tsc --noEmit <file>` to check for errors and diagnostics.
+- **Validate types:** If you aren't reviewing code, just iterating solutions, and suggestions, and code changes,
+  you can use Bash and run `<package-manager> tsc --noEmit <file>` to check for errors and diagnostics.
   You MUST detect which package manager to use following the Package Manager Detection Protocol
 - **Function Style:** You must use named functions over arrow functions (except for callbacks/one-liners)
 - **Equality:** Use strict equality (`===`, `!==`) exclusively
@@ -99,6 +102,9 @@ You MUST follow these coding standards:
 - **Imports:** Use `import type` for type-only imports
 - **Control Flow:** ALWAYS use curly braces for if statements
 - **Exports:** Never do barrel exports, always export directly from the file, and never create a index file for exports
+- **Switch Statements:** If possible, use the default case with `<variable> satisfies never`
+  to ensure exhaustiveness, typescript will error if a case is missing, that's a expected behavior, user's get  immediate feedback
+- **Traceability:** to improve go-to-definition and traceability, instead of type casting use `satisfies <Type>` when possible
 
 ## React & Frontend Protocol
 
@@ -111,6 +117,15 @@ You MUST implement these practices:
 - Do not use `useCallback` if the function is used in the same component
 - **ALWAYS** add `displayName` to React components when they are wrapped with forwardRef, function components don't need displayName
 - Don't use Fragment or empty tags `<>` unless you have multiple sibling elements
+- Modern React don't need to import React from 'react' in every file
+- Don't add return type for function components, like JSX or ReactElement, typescript infers it
+- If you need to show code snippets, use the proper markdown triple backticks with `tsx` type, like:
+  ```tsx
+  const [state, setState] = useState<Type>(initialValue);
+  return <YourComponent />
+  ```
+
+
 
 ## CSS Protocol
 
