@@ -202,20 +202,20 @@ local M = {
             }
 
             -- forcing node_modules to be ignored for normal grep search
-            local fileIgnorePatternsWithNodeModules = {
-                unpack(fileIgnorePatterns),
+            local additionalPatterns = {
+                "node_modules/",
+                "/build/",
+                "/dist/",
+                "package%-lock.json",
+                "pnpm%-lock.yaml",
+                "yarn%.lock",
+                "/vendor/"
             }
 
-            table.insert(fileIgnorePatternsWithNodeModules, "node_modules/")
-            table.insert(fileIgnorePatternsWithNodeModules, "/build/")
-            table.insert(fileIgnorePatternsWithNodeModules, "/dist/")
-            table.insert(
-                fileIgnorePatternsWithNodeModules,
-                "package%-lock.json"
-            )
-            table.insert(fileIgnorePatternsWithNodeModules, "pnpm%-lock.yaml")
-            table.insert(fileIgnorePatternsWithNodeModules, "yarn%.lock")
-            table.insert(fileIgnorePatternsWithNodeModules, "/vendor/")
+            local fileIgnorePatternsWithNodeModules = {
+                unpack(fileIgnorePatterns),
+                unpack(additionalPatterns)
+            }
 
             telescope.setup({
                 defaults = {
