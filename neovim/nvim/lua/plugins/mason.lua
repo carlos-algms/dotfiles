@@ -17,11 +17,8 @@ local M = {
         dependencies = {
             { "mason-org/mason-lspconfig.nvim" },
             { "neovim/nvim-lspconfig" },
-            { "hrsh7th/nvim-cmp" }, -- adding it here to wait for it to config
-            { "hrsh7th/cmp-nvim-lsp" },
             { "WhoIsSethDaniel/mason-tool-installer.nvim" },
             { "b0o/schemastore.nvim" },
-
             { "yioneko/nvim-vtsls" },
         },
 
@@ -149,18 +146,12 @@ local M = {
 
             require("lspconfig.configs").vtsls = require("vtsls").lspconfig
 
-            local all_lsp_capabilities =
-                require("cmp_nvim_lsp").default_capabilities(
-                    vim.lsp.protocol.make_client_capabilities()
-                )
-
             local disabledLspServers = {
                 "ts_ls",
                 "tsserver",
             }
 
             vim.lsp.config("*", {
-                capabilities = all_lsp_capabilities,
                 on_attach = function(client, bufNr)
                     require("helpers.lsp_helpers").onLspAttach(client, bufNr)
                 end,

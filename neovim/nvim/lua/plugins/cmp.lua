@@ -1,7 +1,9 @@
 return {
     {
         "hrsh7th/nvim-cmp",
+
         event = { "VeryLazy" },
+
         dependencies = {
             { "hrsh7th/cmp-nvim-lsp" },
             { "hrsh7th/cmp-buffer" },
@@ -14,16 +16,21 @@ return {
             { "onsails/lspkind.nvim" },
             -- { "zbirenbaum/copilot.lua" },
         },
+
         init = function()
             vim.opt.completeopt = "menu,menuone,noinsert,preview,popup"
         end,
+
         config = function()
+            vim.lsp.config("*", {
+                capabilities = require("cmp_nvim_lsp").default_capabilities(),
+            })
+
             local cmp = require("cmp")
             local luasnip = require("luasnip")
             local lspkind = require("lspkind")
             local cmp_select = { behavior = cmp.SelectBehavior.Select }
             -- local copilotSuggestions = require("copilot.suggestion")
-            local compare = require("cmp.config.compare")
 
             cmp.setup({
                 preselect = cmp.PreselectMode.Item,
@@ -42,6 +49,7 @@ return {
                 sources = cmp.config.sources({
                     -- { name = "nvim_lsp_signature_help" },
                     -- { name = "copilot" },
+                    { name = "lazydev" },
                     {
                         name = "nvim_lsp",
                         max_item_count = 50,
@@ -61,22 +69,6 @@ return {
                 }, {
                     { name = "buffer", keyword_length = 2, max_item_count = 5 },
                 }),
-
-                sorting = {
-                    priority_weight = 2,
-                    comparators = {
-                        -- compare.recently_used,
-                        -- compare.offset,
-                        -- compare.scopes,
-                        compare.locality,
-                        compare.length,
-                        compare.exact,
-                        compare.kind,
-                        compare.score,
-                        -- compare.sort_text,
-                        compare.order,
-                    },
-                },
 
                 window = {
                     completion = cmp.config.window.bordered({
