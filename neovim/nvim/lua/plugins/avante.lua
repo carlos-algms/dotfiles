@@ -113,6 +113,8 @@ local M = {
             behaviour = {
                 auto_set_keymaps = false,
                 auto_suggestions = false,
+                auto_apply_diff_after_generation = false,
+                auto_approve_tool_permissions = false,
             },
 
             selection = {
