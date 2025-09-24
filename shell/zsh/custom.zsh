@@ -31,16 +31,16 @@ ZSH_THEME_TERM_TITLE_IDLE="%~"
 export MANPAGER="less -R --use-color -Dd+r -Du+b"
 
 if command -v brew &>/dev/null; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
 if command -v code &>/dev/null && [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR='code --wait'
+  export EDITOR='code --wait'
 elif command -v nvim &>/dev/null; then
-    export EDITOR='nvim'
+  export EDITOR='nvim'
 elif command -v vim &>/dev/null; then
-    export EDITOR='vim'
+  export EDITOR='vim'
 fi
 
 export VISUAL="$EDITOR"
@@ -90,12 +90,12 @@ case ":$PATH:" in
 esac
 
 if command -v fnm &>/dev/null; then
-    eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
-    source <(fnm completions --shell zsh)
+  eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
+  source <(fnm completions --shell zsh)
 
-    if [[ -z "$(fnm current)" ]]; then
-        fnm install --lts
-    fi
+  if [[ -z "$(fnm current)" ]]; then
+    fnm install --lts
+  fi
 
 fi
 
@@ -108,13 +108,16 @@ bindkey "^P" up-line-or-beginning-search
 bindkey "^N" down-line-or-beginning-search
 
 export FZF_DEFAULT_COMMAND="fd --follow $(printf -- '--exclude %s ' .git node_modules vendor) --hidden --color=never"
-export FZF_DEFAULT_OPTS="--preview='bat -p --color=always {}'"
+export FZF_DEFAULT_OPTS="--preview='$(
+  cmd=$(command -v batcat || command -v bat)
+  [[ -n $cmd ]] && echo "$cmd -p --color=always" || echo "cat"
+) {}'"
 export FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
 
 if command -v fzf &>/dev/null; then
-    source <(fzf --zsh)
+  source <(fzf --zsh)
 fi
 
 if command -v oh-my-posh >/dev/null 2>&1; then
-    eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
+  eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
 fi
