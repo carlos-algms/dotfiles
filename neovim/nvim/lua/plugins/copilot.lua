@@ -4,7 +4,7 @@ return {
 
         branch = "main",
 
-        enabled = vim.g.has_node,
+        enabled = false, -- vim.g.has_node,
 
         build = "make tiktoken", -- Only on MacOS or Linux
 
@@ -67,6 +67,15 @@ return {
 
         enabled = vim.g.has_node,
 
+        dependencies = {
+            {
+                "copilotlsp-nvim/copilot-lsp",
+                init = function()
+                    vim.g.copilot_nes_debounce = 500
+                end,
+            },
+        },
+
         config = function()
             require("copilot").setup({
                 -- it seems there's only 1 model available for autocompletion
@@ -81,12 +90,23 @@ return {
                         accept = "<C-l>",
                         accept_word = "<C-.>",
                         accept_line = false,
-                        next = "<A-k>",
-                        prev = "<A-j>",
+                        next = "<A-]>",
+                        prev = "<A-[>",
                         dismiss = "<A-h>",
                     },
                 },
+
                 panel = { enabled = true },
+
+                nes = {
+                    enabled = true,
+                    keymap = {
+                        accept_and_goto = "<Tab>",
+                        accept = false,
+                        dismiss = "<Esc>",
+                    },
+                },
+
                 filetypes = {
                     yaml = true,
                     markdown = true,
@@ -96,67 +116,4 @@ return {
             })
         end,
     },
-
-    -- It's too slow and with fewer suggestions
-    -- {
-    --     "zbirenbaum/copilot-cmp",
-    --     enabled = false,
-    --     dependencies = {},
-    --     config = function()
-    --         require("copilot_cmp").setup()
-    --     end,
-    -- },
-
-    -- Disabled to test the lua version
-    -- {
-    --     "github/copilot.vim",
-    --     event = { "VeryLazy" },
-    --     enabled = false,
-    --     keys = {
-    --         {
-    --             "<C-l>",
-    --             [[ copilot#Accept("\\<CR>") ]],
-    --             mode = "i",
-    --             desc = "Copilot accept suggestion",
-    --             expr = true,
-    --             replace_keycodes = false,
-    --         },
-    --         {
-    --             "<C-.>",
-    --             "<Plug>(copilot-accept-word)",
-    --             mode = "i",
-    --             desc = "Copilot accept word",
-    --         },
-    --         {
-    --             "<C-;>",
-    --             "<Plug>(copilot-next)",
-    --             mode = "i",
-    --             desc = "Copilot next suggestion",
-    --         },
-    --         {
-    --             "<C-,>",
-    --             "<Plug>(copilot-suggest)",
-    --             mode = "i",
-    --             desc = "Copilot suggest",
-    --         },
-    --     },
-    --     -- used init instead of config because copilot was holding Tab anyway
-    --     init = function()
-    --         -- I will use CMP mappings to have <Tab> fallback
-    --         vim.g.copilot_no_tab_map = true
-    --         vim.g.copilot_assume_mapped = true
-    --         vim.g.copilot_tab_fallback = ""
-
-    --         vim.g.copilot_filetypes = {
-    --             yml = true,
-    --             yaml = true,
-    --             markdown = true,
-    --             gitcommit = true,
-    --             sagarename = false,
-    --             spectre_panel = false,
-    --             DressingInput = false,
-    --             oil = false,
-    --         }
-    --     end,
-    -- },
 }

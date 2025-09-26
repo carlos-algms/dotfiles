@@ -105,7 +105,9 @@ local M = {
                     },
                     env = {
                         NODE_NO_WARNINGS = "1",
-                        ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+                        ANTHROPIC_API_KEY = os.getenv(
+                            "AVANTE_ANTHROPIC_API_KEY"
+                        ),
                     },
                 },
             },
