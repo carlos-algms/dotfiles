@@ -89,7 +89,7 @@ return {
                     keymap = {
                         accept = "<C-l>",
                         accept_word = "<C-.>",
-                        accept_line = false,
+                        accept_line = "<C-j>",
                         next = "<A-]>",
                         prev = "<A-[>",
                         dismiss = "<A-h>",
@@ -99,9 +99,10 @@ return {
                 panel = { enabled = true },
 
                 nes = {
-                    enabled = true,
+                    enabled = false,
+                    auto_trigger = false,
                     keymap = {
-                        accept_and_goto = "<Tab>",
+                        accept_and_goto = "<C-y>",
                         accept = false,
                         dismiss = "<Esc>",
                     },
