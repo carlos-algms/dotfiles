@@ -1,8 +1,17 @@
 {
   "permissions": {
-    "allow": ["Glob", "Grep", "Read", "WebSearch", "WebFetch", "Bash(ls:*)"],
+    "allow": [
+      "Glob",
+      "Grep",
+      "Read",
+      "WebSearch",
+      "WebFetch",
+      "Bash(ls:*)",
+      "Bash(fd:*)",
+      "Bash(find:*)"
+    ],
     "deny": [],
     "ask": []
-  }
+  },
+  "model": "sonnet[1m]"
 }
-
