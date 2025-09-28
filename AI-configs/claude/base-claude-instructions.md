@@ -2,19 +2,36 @@
 
 When analyzing large codebases, multiple files, fetching pages, doing online
 searches, or reading online documentations that might exceed context limits, use
-the Gemini CLI with its massive context window.
-
-Use `gemini -p` to leverage Google Gemini's large context capacity.
+the Gemini CLI to benefit from its massive context window.
 
 You can consider gemini as a sub-agent that can execute your requests.
 
 MAKE sure to tell gemini to not make any code changes, just summarize or analyze
 what you asked.
 
+## Processing Online Documentation
+
+When searching or analyzing online documentation, you can provide direct URLs or
+ask Gemini to search for relevant information.
+
+### Examples:
+
+```bash
+# Direct URL analysis:
+gemini -p "Give me a deep and structured summary of this article: https://react.dev/learn/describing-the-ui. Don't make any changes"
+
+# Find specific information:
+gemini -p "In the documentation at https://react.dev/learn/describing-the-ui, how do I use props? Don't make any changes."
+
+# Search when unsure of source:
+gemini -p "Search for official React documentation on handling user events and explain key concepts. Don't make any changes."
+```
+
 ## File and Directory Inclusion Syntax
 
-Use the `@` syntax to include files and directories in your Gemini prompts. The
-paths should be relative to WHERE you run the gemini command:
+When writing prompts to Gemini that needs to reference files,  
+add `@` as prefix to the relative path.  
+The paths should be relative to WHERE you run the gemini command:
 
 ### Examples:
 
@@ -55,24 +72,6 @@ gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoint
 gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases. Don't make any changes"
 ```
 
-## Processing Online Documentation
-
-When searching or analyzing online documentation, you can provide direct URLs or
-ask Gemini to search for relevant information.
-
-### Examples:
-
-```bash
-# Direct URL analysis:
-gemini -p "Give me a deep and structured summary of this article: https://react.dev/learn/describing-the-ui. Don't make any changes"
-
-# Find specific information:
-gemini -p "In the documentation at https://react.dev/learn/describing-the-ui, how do I use props? Don't make any changes."
-
-# Search when unsure of source:
-gemini -p "Search for official React documentation on handling user events and explain key concepts. Don't make any changes."
-```
-
 ## When to Use Gemini CLI
 
 - Analyzing entire codebases or large directories
@@ -102,4 +101,4 @@ gemini -p "Search for official React documentation on handling user events and e
 
 ====
 
-@shared.md
+See @~/.claude/shared.md for user's shared instructions.
