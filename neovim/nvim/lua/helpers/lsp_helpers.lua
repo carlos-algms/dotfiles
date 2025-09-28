@@ -111,7 +111,7 @@ function M.onLspAttach(client, bufNr)
 
     lspKeymap(
         { "n", "v" },
-        "<leader>ca",
+        "<C-.>",
         vim.lsp.buf.code_action,
         "Show code actions"
     )
