@@ -37,6 +37,31 @@ local M = {
             ---@type AvanteProviders
             auto_suggestions_provider = "copilot",
 
+            -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
+            acp_providers = {
+                ["gemini-cli"] = {
+                    command = "gemini",
+                    args = { "--experimental-acp" },
+                    env = {
+                        NODE_NO_WARNINGS = "1",
+                        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+                    },
+                },
+                ["claude-code"] = {
+                    command = "pnpm",
+                    args = {
+                        "dlx",
+                        "@zed-industries/claude-code-acp",
+                    },
+                    env = {
+                        NODE_NO_WARNINGS = "1",
+                        ANTHROPIC_API_KEY = os.getenv(
+                            "AVANTE_ANTHROPIC_API_KEY"
+                        ),
+                    },
+                },
+            },
+
             providers = {
                 ---@type AvanteSupportedProvider
                 copilot = {
@@ -47,7 +72,7 @@ local M = {
                 ---@type AvanteSupportedProvider
                 claude = {
                     endpoint = "https://api.anthropic.com",
-                    model = "claude-sonnet-4-20250514",
+                    -- model = "claude-sonnet-4-20250514",
                     timeout = 30000,
                     extra_request_body = {
                         temperature = 0.75,
@@ -87,35 +112,49 @@ local M = {
                 -- },
             },
 
-            -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
-            acp_providers = {
-                ["gemini-cli"] = {
-                    command = "gemini",
-                    args = { "--experimental-acp" },
-                    env = {
-                        NODE_NO_WARNINGS = "1",
-                        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
-                    },
+            ---@type AvanteSlashCommand[]
+            slash_commands = {},
+
+            ---@type AvanteShortcut[]
+            shortcuts = {
+                {
+                    name = "explain",
+                    description = "Explain without making any changes",
+                    details = "Explain the file or the selected code",
+                    prompt = "Explain the selected code, or the entire file without making any changes.",
                 },
-                ["claude-code"] = {
-                    command = "pnpm",
-                    args = {
-                        "dlx",
-                        "@zed-industries/claude-code-acp",
-                    },
-                    env = {
-                        NODE_NO_WARNINGS = "1",
-                        ANTHROPIC_API_KEY = os.getenv(
-                            "AVANTE_ANTHROPIC_API_KEY"
-                        ),
-                    },
+                {
+                    name = "q",
+                    description = "Answer a Question",
+                    details = "Answer the question without making any changes",
+                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.",
+                },
+                {
+                    name = "plan",
+                    description = "/plan implement the fibonacci function in this file",
+                    details = "Create a detailed plan with actionable steps to achieve the goal.\n/plan create a sum function that adds two numbers",
+                    prompt = ([[
+                            You won't make any changes, just create a detailed plan with actionable steps.
+                            Be concise, clear, and structured.
+                            Avoid filler words and generic content like: should do, could do, etc.
+                            I want it to be very specific, actionable, and direct like: install X, run Y, create Z, remove A, refactor B to do C, etc.
+                            Make it a numbered todo-list, so it's possible to stop and continue from any step, or refine and increase the number of steps.
+                            Don't include a "next steps" section.
+                            Use markdown format with headings, subheadings, and bullet points, use emojis when appropriate.
+                            Use nested lists where the first level is the file name and the second level is all the actions to be done in that file.
+                            State relative location like "at the top", "at the bottom", "in the middle", "after the imports", inside of the function F, etc.
+                            Write the plan to a markdown file, derive the file name from the goal.
+                        ]]):gsub("^%s+", ""):gsub(
+                        "\n%s+",
+                        "\n"
+                    ),
                 },
             },
 
             behaviour = {
                 auto_set_keymaps = false,
                 auto_suggestions = false,
-                auto_apply_diff_after_generation = false,
+                auto_apply_diff_after_generation = true, -- doesn't seem to work with ACP
                 auto_approve_tool_permissions = false,
             },
 
@@ -269,6 +308,10 @@ local M = {
                     "Avante",
                     "AvanteTodos",
                     "copilot-chat",
+                },
+
+                completions = {
+                    lsp = { enabled = true },
                 },
             },
         },
