@@ -1,0 +1,14 @@
+###
+
+GET https://api.anthropic.com/v1/models HTTP/1.1
+Accept: application/json
+X-Api-Key: {{SHARED_ANTHROPIC_API_KEY}}
+Anthropic-Version: 2023-06-01
+
+
+###
+
+GET https://api.anthropic.com/v1/models/claude-sonnet-4-5 HTTP/1.1
+Accept: application/json
+X-Api-Key: {{SHARED_ANTHROPIC_API_KEY}}
+Anthropic-Version: 2023-06-01

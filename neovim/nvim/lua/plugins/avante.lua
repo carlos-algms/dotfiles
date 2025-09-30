@@ -72,11 +72,13 @@ local M = {
                 ---@type AvanteSupportedProvider
                 claude = {
                     endpoint = "https://api.anthropic.com",
-                    -- model = "claude-sonnet-4-20250514",
+                    --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
+                    model = "claude-opus-4-1-20250805",
+                    api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
                     timeout = 30000,
                     extra_request_body = {
                         temperature = 0.75,
-                        max_tokens = 64000,
+                        -- max_tokens = 32000,
                     },
                 },
 
@@ -183,7 +185,7 @@ local M = {
 
         keys = {
             {
-                "<A-i>",
+                "<A-i>o",
                 function()
                     require("avante.api").ask({
                         ask = true,
