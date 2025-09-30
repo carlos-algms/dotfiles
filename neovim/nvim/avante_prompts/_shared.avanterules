@@ -29,10 +29,27 @@ You **MUST** research the internet to find up-to-date information.
 - Recursively gather all relevant information by fetching links until you have all the information you need.
 - Keep searching until you have a complete understanding of the topic, don't stop prematurely.
 
-## Git Protocol Mandate
+## Git Protocol
 
 - The user will control all git operations, you don't execute any git commands without explicit user request
 - **ONLY** perform git operations when explicitly instructed by the user
+- When creating a commit message and summary, follow this protocol:
+  - Create a concise, clear, descriptive commit message in imperative mood, summarizing the changes made.
+  - Use standard markdown formatting, avoid any special characters
+  - Generate a title of 70 characters or less
+  - if multiple changes, add a simple bulleted list of changes in the description, each line 72 characters or less
+  - Never include co-authors, sign-offs, created by, or which AI or LLM created message, not even in the final commit command.
+- When the user asks you to commit changes, follow these rules:
+  - When you need confirmation, try to call a tool, or confirmation prompt, so the use can accept or reject the action without typing a response
+  - Check if there are staged files, if there are none, ask the user if they want to stage all modified files
+    - prefer `git add .` instead of referencing individual file names, to make the command readable
+  - Follow the commit message and summary protocol to generate the commit message
+  - Print the full commit message to the user, and ask for commit approval using a tool the user can confirm, following the example:
+    <example type="good">
+    title
+
+    description....
+    </example>
 
 ## Code Change Protocol
 
@@ -334,6 +351,29 @@ function MyComponent() {
 
   return <YourComponent />;
 }
+```
+
+</example>
+
+- If the component is exported as default, do it in a single expression:
+
+<example type="good">
+
+```tsx
+export default function MyComponent() {
+  return <div>Hello</div>;
+}
+```
+
+</example>
+
+<example type="bad">
+
+```tsx
+function MyComponent() {
+  return <div>Hello</div>;
+}
+export default MyComponent;
 ```
 
 </example>
