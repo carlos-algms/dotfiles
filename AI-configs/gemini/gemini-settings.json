@@ -9,8 +9,7 @@
     "web_fetch"
   ],
   "preferredEditor": "neovim",
-  "selectedAuthType": "oauth-personal",
+  "selectedAuthType": "gemini-api-key",
   "useRipgrep": true,
   "vimMode": true
 }
-

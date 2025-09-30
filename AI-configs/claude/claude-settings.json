@@ -13,5 +13,10 @@
     "deny": [],
     "ask": []
   },
-  "model": "sonnet[1m]"
+  "alwaysThinkingEnabled": true,
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "DISABLE_AUTOUPDATER": "1"
+  }
 }
+
