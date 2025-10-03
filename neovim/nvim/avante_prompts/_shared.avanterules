@@ -15,7 +15,9 @@
 - Use bullet points and code blocks for organization
 - NEVER display code unless explicitly requested
 - Reduce verbosity, be concise, avoid filler words, and make your thoughts small and simple
-- I can read our chat history, so you should not repeat yourself
+- I can read our chat history, you should not repeat yourself
+- If you've access to the tool `attempt_completion`, and you're going to call it,
+  prefer silence over repeating what is already in the history
 - AVOID creating a summary with repeating information, you don't need to create a summary if it will only state the obvious from the history
 - You're allowed to use emojis in your responses
 
@@ -33,28 +35,47 @@ You **MUST** research the internet to find up-to-date information.
 
 - The user will control all git operations, you don't execute any git commands without explicit user request
 - **ONLY** perform git operations when explicitly instructed by the user
+
 - When creating a commit message and summary, follow this protocol:
-  - Create a concise, clear, descriptive commit message in imperative mood, summarizing the changes made.
+  - Never use `git log` to read commit history, you aren't going to infer anything from previous commit messages
+  - Create a concise, clear, descriptive commit message in imperative mood, summarizing the changes made
   - Use standard markdown formatting, avoid any special characters
-  - Generate a title of 70 characters or less
-  - if multiple changes, add a simple bulleted list of changes in the description, each line 72 characters or less
+  - Generate a title of 70 characters or less, counting all characters, including the type, scope, parens, colon, and spaces
+  - If multiple changes, add a simple bulleted list of changes in the description, each line 72 characters or less
   - Never include co-authors, sign-offs, created by, or which AI or LLM created message, not even in the final commit command.
-- When the user asks you to commit changes, follow these rules:
-  - When you need confirmation, try to call a tool, or confirmation prompt, so the use can accept or reject the action without typing a response
-  - Check if there are staged files, if there are none, ask the user if they want to stage all modified files
-    - prefer `git add .` instead of referencing individual file names, to make the command readable
-  - Follow the commit message and summary protocol to generate the commit message
-  - Print the full commit message to the user, and ask for commit approval using a tool the user can confirm, following the example:
-    <example type="good">
+  - If the user doesn't give you a more specific format, follow the example:
+    <example type="general">
     title
 
     description....
     </example>
 
+  - If the user is asking you for a conventional commit, follow these additional rules:
+    - The commit must start with the title: `<type>(<scope>): <subject>`
+    - If the user doesn't provide a type, try to infer it from the changes, if you can't, ask the user for it, stop and wait for an answer
+    - The user can provide the scope, it can be a ticket ID that matches this regex `[A-Z]{3,3}-[0-9]+`, or any valid scope name
+      - If the user doesn't inform it, and the user is in a branch that is not `main` or `master`,
+        try to infer the scope from the branch name, using the regex, if the scope is not present, ask the user for it.
+    - Create a conventional commit title and message following the pattern:
+      <example type="conventional">
+      type(scope): subject
+
+      description...
+      </example>
+
+- When the user asks you to commit changes, follow these rules:
+  - When you need confirmation, try to call a tool, or confirmation prompt, so the use can accept or reject the action without typing a response
+  - Check if there are staged files, if there are none, ask the user if they want to stage all modified files
+    - Use `git add .` instead of referencing individual file names, to make the command readable
+  - Follow the commit message and summary protocol to generate the commit message
+  - The user always wants to review the generated text, and have it in the chat history,
+    you must send the full commit message as a text snippet using triple backticks and markdown format
+  - Then, as the final step ask for commit approval using a tool the user can confirm
+
 ## Code Change Protocol
 
 - Make minimal, focused, reviewable changes
-- Prefer small changes for clearer diffs
+- Prefer small changes for easier to read diffs
 - If you're applying similar changes, like replacing a function or variable name, pattern replace, something that will require imports, etc..., do it in a single change.
 - Preserve existing functionality unless explicitly requested otherwise
 - The user will take care of writing documentation or README, you should only write guides or documentation if explicitly requested
@@ -79,8 +100,7 @@ before running pnpm, npm, or npx, You **MUST** follow this exact detection seque
   - Workspace being the concept of a folder that contains a package.json.
 - Check for lock files (`pnpm-lock.yaml`, `pnpm-workspace.yaml`, `yarn.lock`, `package-lock.json`)
 - Check for `packageManager` field in the root `package.json`.
-- If unsure, ask the user which package manager to use, do not guess or assume, `npm` is not always the right answer
-- Use npm ONLY as final fallback after exhausting all other detection methods
+- If unsure, ask the user which package manager to use, do not guess or assume, `npm` and `npx` are not always the right answer
 
 ## Unit Testing Protocol
 
@@ -559,6 +579,8 @@ function MyComponent(): JSX.Element {
   - ALWAYS nest pseudo-classes, pseudo-elements, and media queries, using `&` to avoid repetition
 
 ## Bash scripts execution and writing protocol
+
+- Don't use bash or `cat`, neither similar tools to read, or view files, use a proper tool call
 
 - Use `fd` instead of `find`, `rg` instead of `grep`, as they are faster, have better defaults, and respect .gitignore
   - pay attention to the extension filter syntax, `fd -e ts`, as variations like `tsx` don't exist, `ts` already includes `tsx`.

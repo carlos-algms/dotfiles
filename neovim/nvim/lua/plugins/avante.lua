@@ -32,7 +32,7 @@ local M = {
             ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai"
 
             ---@type AvanteProviders
-            provider = vim.g.is_ssh and "copilot" or "claude-code",
+            provider = vim.g.is_ssh and "copilot" or "claude",
 
             ---@type AvanteProviders
             auto_suggestions_provider = "copilot",
@@ -55,9 +55,7 @@ local M = {
                     },
                     env = {
                         NODE_NO_WARNINGS = "1",
-                        ANTHROPIC_API_KEY = os.getenv(
-                            "AVANTE_ANTHROPIC_API_KEY"
-                        ),
+                        ANTHROPIC_API_KEY = os.getenv("ACS_ANTHROPIC_API_KEY"),
                     },
                 },
             },
@@ -66,19 +64,20 @@ local M = {
                 ---@type AvanteSupportedProvider
                 copilot = {
                     -- model = "claude-3.7-sonnet",
-                    model = "gpt-4.1-2025-04-14",
+                    model = "gpt-4.1",
                 },
 
                 ---@type AvanteSupportedProvider
                 claude = {
                     endpoint = "https://api.anthropic.com",
                     --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
-                    model = "claude-opus-4-1-20250805",
-                    api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
+                    model = "claude-sonnet-4-5-20250929",
+                    -- api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
+                    api_key_name = "cmd:echo $CARLOS_ANTHROPIC_API_KEY",
                     timeout = 30000,
                     extra_request_body = {
                         temperature = 0.75,
-                        -- max_tokens = 32000,
+                        max_tokens = 32000,
                     },
                 },
 
@@ -123,13 +122,13 @@ local M = {
                     name = "explain",
                     description = "Explain without making any changes",
                     details = "Explain the file or the selected code",
-                    prompt = "Explain the selected code, or the entire file without making any changes.",
+                    prompt = "Explain the selected code, or the entire file without making any changes.\n",
                 },
                 {
                     name = "q",
                     description = "Answer a Question",
                     details = "Answer the question without making any changes",
-                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.",
+                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.\n",
                 },
                 {
                     name = "plan",
@@ -145,11 +144,20 @@ local M = {
                             Use markdown format with headings, subheadings, and bullet points, use emojis when appropriate.
                             Use nested lists where the first level is the file name and the second level is all the actions to be done in that file.
                             State relative location like "at the top", "at the bottom", "in the middle", "after the imports", inside of the function F, etc.
-                            Write the plan to a markdown file, derive the file name from the goal.
-                        ]]):gsub("^%s+", ""):gsub(
-                        "\n%s+",
-                        "\n"
-                    ),
+                            Write the plan to a markdown file, derive the file name from the goal prefixed with `plan-`,
+                            the file should be saved next to the selected file, or in the current working directory.
+                            After you create, or edit this file, run prettier to format it like: `prettier --prose-wrap always --print-width 80 --write "FILENAME.md"`
+                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
+                },
+                {
+                    name = "conventional-commit",
+                    description = "Create a conventional commit message and commit",
+                    details = "Create a conventional commit message based on the changes made in the project, stage, commit, and show an URL to create a pull request",
+                    prompt = ([[
+                        You're going to commit the changes on the user's behalf using the conventional commit strategy.
+                        If there're no changed files, abort and tell the user the reason.
+                        If the user is on the `main` or `master` branch, you must create a new branch with the pattern `cgomes/<scope>-short-description` before committing.
+                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
                 },
             },
 
