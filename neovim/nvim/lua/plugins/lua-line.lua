@@ -39,6 +39,7 @@ local M = {
                         "qf",
                         "DiffviewFileHistory",
                         "gitsigns-blame",
+                        "kulala_ui",
                     },
                 },
                 refresh = {
