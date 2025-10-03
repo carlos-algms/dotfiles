@@ -1,14 +1,61 @@
 ###
 
+@CLAUDE_API_KEY = {{CARLOS_ANTHROPIC_API_KEY}}
+
+
+###
+
+# list all available models
+# https://docs.claude.com/en/api/models-list
+
+# @jq .data[] | { id, display_name }
+
 GET https://api.anthropic.com/v1/models HTTP/1.1
 Accept: application/json
-X-Api-Key: {{SHARED_ANTHROPIC_API_KEY}}
+X-Api-Key: {{CLAUDE_API_KEY}}
 Anthropic-Version: 2023-06-01
+
+
+###
+
+POST https://api.anthropic.com/v1/messages HTTP/2
+X-Api-Key: {{CLAUDE_API_KEY}}
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+
+{
+  "max_tokens": 1024,
+  "messages": [
+    {
+      "content": "Hi, who're you? state your name, model, version, release date, and knowledge cutoff date.",
+      "role": "user"
+    }
+  ],
+  "model": "claude-sonnet-4-5-20250929"
+}
 
 
 ###
 
 GET https://api.anthropic.com/v1/models/claude-sonnet-4-5 HTTP/1.1
 Accept: application/json
-X-Api-Key: {{SHARED_ANTHROPIC_API_KEY}}
+X-Api-Key: {{CLAUDE_API_KEY}}
 Anthropic-Version: 2023-06-01
+
+
+###
+
+< {%
+  const os = require('os');
+  const path = require('path');
+  const fs = require('fs');
+  const appsPath = path.join(os.homedir(), '.config/github-copilot/apps.json');
+  const appsJson = fs.readFileSync(appsPath, 'utf8').trim();
+  const [auth] = Object.values(JSON.parse(appsJson));
+  request.variables.set('TOKEN', auth.oauth_token);
+%}
+
+GET https://api.githubcopilot.com/models HTTP/1.1
+Accept: Accept: application/vnd.github+json
+Authorization: Bearer {{TOKEN}}
+X-Github-Api-Version: 2025-04-01
