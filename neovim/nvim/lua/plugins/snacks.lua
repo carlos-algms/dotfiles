@@ -63,7 +63,7 @@ local M = {
 
             config = function(opts, _defaults)
                 -- it seems to be called twice, but I use it so little that I don't care, for now
-                -- I had to add this, because the config doesen't merge array like objects
+                -- I had to add this, because the config doesn't merge array like objects
                 table.insert(
                     opts.remote_patterns,
                     { "^%S+-github:(.+)%.git$", "https://github.com/%1" }
@@ -303,9 +303,11 @@ local M = {
         },
 
         {
-            "<leader>sg",
+            "<leader>f",
             function()
                 Snacks.picker.grep({
+                    hidden = true,
+                    live = true,
                     matcher = {
                         filename_bonus = true,
                         frecency = true,
@@ -317,9 +319,15 @@ local M = {
         },
 
         {
-            "<leader>sg",
+            "<leader>f",
             function()
-                Snacks.picker.grep_word()
+                Snacks.picker.grep_word({
+                    hidden = true,
+                    matcher = {
+                        filename_bonus = true,
+                        frecency = true,
+                    },
+                })
             end,
             desc = "Live Grep all files - Snacks",
             silent = true,
@@ -356,7 +364,15 @@ local M = {
                 _G.bt = function()
                     Snacks.debug.backtrace()
                 end
-                vim.print = _G.dd -- Override print to use snacks for `:=` command
+
+                -- Override print to use snacks for `:=` command
+                if vim.fn.has("nvim-0.11") == 1 then
+                    vim._print = function(_, ...)
+                        dd(...)
+                    end
+                else
+                    vim.print = _G.dd
+                end
             end,
         })
 

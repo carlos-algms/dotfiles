@@ -42,14 +42,14 @@ local M = {
             -- },
 
             {
-                "<leader>f",
+                "<leader>tf",
                 "<cmd>Telescope live_grep_args<CR>",
                 desc = "Live Grep all files",
                 silent = true,
             },
 
             {
-                "<leader>f",
+                "<leader>tf",
                 function()
                     require("telescope-live-grep-args.shortcuts").grep_visual_selection()
                 end,
@@ -209,12 +209,12 @@ local M = {
                 "package%-lock.json",
                 "pnpm%-lock.yaml",
                 "yarn%.lock",
-                "/vendor/"
+                "/vendor/",
             }
 
             local fileIgnorePatternsWithNodeModules = {
                 unpack(fileIgnorePatterns),
-                unpack(additionalPatterns)
+                unpack(additionalPatterns),
             }
 
             telescope.setup({
