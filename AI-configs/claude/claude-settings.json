@@ -17,6 +17,5 @@
     "deny": [],
     "ask": []
   },
-  "alwaysThinkingEnabled": true,
   "model": "sonnet[1m]"
 }
