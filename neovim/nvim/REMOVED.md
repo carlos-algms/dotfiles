@@ -8,3 +8,4 @@
 - github/copilot.vim - I'm using the lua version
 - milanglacier/minuet-ai.nvim - Copiot-lua is Faster than Claude for
   auto-suggestions
+- princejoogie/dir-telescope.nvim - I implemented custom code with Snacks

@@ -4,6 +4,25 @@ local P = {
     Snacks_picker_hist = {},
 }
 
+local customGrepOptions = {
+    hidden = true,
+    live = true,
+    matcher = {
+        filename_bonus = true,
+        frecency = true,
+    },
+    args = {
+        "-g",
+        "!pnpm-lock.yaml",
+        "-g",
+        "!pnpm-workspace.yaml",
+        "-g",
+        "!yarn.lock",
+        "-g",
+        "!package-lock.json",
+    },
+}
+
 local M = {
     "folke/snacks.nvim",
     priority = 1010,
@@ -110,12 +129,41 @@ local M = {
 
         picker = {
             ui_select = true, -- replace `vim.ui.select` with the snacks picker
+
             matcher = {
                 fuzzy = true,
                 smartcase = true,
                 frecency = false,
                 history_bonus = false,
             },
+
+            actions = {
+                add_iglob = function(picker)
+                    local search = picker.input.filter.search
+                    local prefix = ""
+
+                    if not string.find(search, " %-%- ") then
+                        prefix = " -- "
+                    end
+
+                    picker.input:set(nil, search .. prefix .. " --iglob ")
+                end,
+
+                exclude_test_files = function(picker)
+                    local search = picker.input.filter.search
+                    local prefix = ""
+
+                    if not string.find(search, " %-%- ") then
+                        prefix = " -- "
+                    end
+
+                    picker.input:set(
+                        nil,
+                        search .. prefix .. " --iglob !**.{test,spec}.**"
+                    )
+                end,
+            },
+
             layouts = {
                 default = {
                     layout = {
@@ -153,7 +201,12 @@ local M = {
             win = {
                 input = {
                     keys = {
-                        ["<C-h>"] = { "toggle_help_list", mode = { "i", "n" } },
+                        ["<C-h>"] = { "toggle_help_input", mode = { "i", "n" } },
+                        ["<C-l>"] = { "add_iglob", mode = { "i", "n" } },
+                        ["<C-e>"] = {
+                            "exclude_test_files",
+                            mode = { "i", "n" },
+                        },
                     },
                 },
 
@@ -305,14 +358,7 @@ local M = {
         {
             "<leader>f",
             function()
-                Snacks.picker.grep({
-                    hidden = true,
-                    live = true,
-                    matcher = {
-                        filename_bonus = true,
-                        frecency = true,
-                    },
-                })
+                Snacks.picker.grep(customGrepOptions)
             end,
             desc = "Live Grep all files - Snacks",
             silent = true,
@@ -321,13 +367,7 @@ local M = {
         {
             "<leader>f",
             function()
-                Snacks.picker.grep_word({
-                    hidden = true,
-                    matcher = {
-                        filename_bonus = true,
-                        frecency = true,
-                    },
-                })
+                Snacks.picker.grep_word(customGrepOptions)
             end,
             desc = "Live Grep all files - Snacks",
             silent = true,
@@ -349,6 +389,15 @@ local M = {
                 Snacks.picker.keymaps()
             end,
             desc = "Keymaps - Snacks",
+            silent = true,
+        },
+
+        {
+            "<leader>sd",
+            function()
+                P.grep_on_dir()
+            end,
+            desc = "Grep on directory - Snacks",
             silent = true,
         },
     },
@@ -392,11 +441,73 @@ local M = {
 
 ---@param picker snacks.picker.Last
 local function make_history_item_text(picker)
-    local source = picker.opts.source or "unknown source"
+    local prefix = picker.opts.title or picker.opts.source or "unknown source"
     local pattern = picker.filter.pattern or ""
     local search = picker.filter.search or ""
-    local text = source .. " | " .. pattern .. " > " .. search
+    local text = prefix .. " | " .. pattern .. " > " .. search
     return text
+end
+
+--- First, Show a picker to select directories
+--- Then, Show the Grep picker focused on the selected directories only
+function P.grep_on_dir()
+    Snacks.picker.pick({
+        source = "dir_picker_for_grep",
+        layout = {
+            preset = "select",
+            cycle = true,
+        },
+
+        finder = function()
+            local items = {} ---@type snacks.picker.finder.Item[]
+
+            local cmd = { "fd", "-t", "d" }
+            local result = vim.fn.systemlist(cmd)
+
+            if vim.v.shell_error ~= 0 then
+                Snacks.notify.error("Failed to run fd command", {
+                    title = "Grep on Directory",
+                })
+                return items
+            end
+
+            for _, dir in ipairs(result) do
+                table.insert(items, {
+                    data = { dir = dir },
+                    text = dir,
+                })
+            end
+
+            return items
+        end,
+
+        confirm = function(picker)
+            picker:close()
+
+            local items = picker:selected({ fallback = true })
+
+            if not items or #items == 0 then
+                return
+            end
+
+            local dirs = {}
+            for _, item in ipairs(items) do
+                table.insert(dirs, item.data.dir)
+            end
+
+            Snacks.picker.grep(vim.tbl_extend("force", {}, customGrepOptions, {
+                dirs = dirs,
+                title = "Grep in: " .. table.concat(dirs, ", "),
+            }))
+        end,
+
+        format = function(item, _)
+            local ret = {
+                { item.text },
+            }
+            return ret
+        end,
+    })
 end
 
 --- @param picker snacks.Picker

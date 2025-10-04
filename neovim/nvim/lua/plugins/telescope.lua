@@ -10,8 +10,6 @@ local M = {
         dependencies = {
             { "nvim-lua/plenary.nvim" },
             { "nvim-tree/nvim-web-devicons" },
-            -- { "nvim-telescope/telescope-ui-select.nvim" },
-            { "princejoogie/dir-telescope.nvim" },
             {
                 "nvim-telescope/telescope-live-grep-args.nvim",
                 version = "^1.1.0",
@@ -20,7 +18,6 @@ local M = {
                 "nvim-telescope/telescope-fzf-native.nvim",
                 build = "make",
             },
-            -- "3rd/image.nvim", -- added to support image preview
         },
 
         cmd = { "Telescope" },
@@ -44,7 +41,7 @@ local M = {
             {
                 "<leader>tf",
                 "<cmd>Telescope live_grep_args<CR>",
-                desc = "Live Grep all files",
+                desc = "Live Grep all files - Telescope",
                 silent = true,
             },
 
@@ -53,7 +50,7 @@ local M = {
                 function()
                     require("telescope-live-grep-args.shortcuts").grep_visual_selection()
                 end,
-                desc = "Live Grep current selection on all files",
+                desc = "Live Grep current selection on all files - Telescope",
                 silent = true,
                 mode = "v",
             },
@@ -125,13 +122,6 @@ local M = {
                 "<leader>cm",
                 "<cmd>Telescope filetypes<CR>",
                 desc = "Change file type",
-                silent = true,
-            },
-
-            {
-                "<leader>sd",
-                "<cmd>Telescope dir live_grep<CR>",
-                desc = "Search in directory with Args",
                 silent = true,
             },
 
@@ -321,18 +311,12 @@ local M = {
                     git_files = { show_untracked = true },
                 },
                 extensions = {
-                    -- Disabling from now, as I don't want code actions to be on the pickers cache
-                    -- ["ui-select"] = {
-                    --     require("telescope.themes").get_dropdown({}),
-                    -- },
-
                     -- https://github.com/nvim-telescope/telescope-fzf-native.nvim?tab=readme-ov-file#telescope-setup-and-configuration
                     fzf = {
                         fuzzy = true, -- false will only do exact matching
                         override_generic_sorter = true, -- override the generic sorter
                         override_file_sorter = true, -- override the file sorter
-                        case_mode = "smart_case", -- or "ignore_case" or "respect_case"
-                        -- the default case_mode is "smart_case"
+                        case_mode = "smart_case", -- or "ignore_case" or "respect_case", the default case_mode is "smart_case"
                     },
                     live_grep_args = P.getLiveGrepArgsSettings(
                         fileIgnorePatternsWithNodeModules
@@ -346,22 +330,8 @@ local M = {
             -- Disabled as it was freezing telescope when an image was selected
             -- P.setupImagePreviewInTelescope()
 
-            -- telescope.load_extension("ui-select")
             telescope.load_extension("live_grep_args")
-            telescope.load_extension("dir")
             telescope.load_extension("fzf")
-
-            require("dir-telescope").setup({
-                -- these are the default options set
-                hidden = true,
-                no_ignore = false,
-                show_preview = true,
-                live_grep = function(opts)
-                    opts.prompt_title = "Live grep Args on "
-                        .. table.concat(opts.search_dirs, ", ")
-                    telescope.extensions.live_grep_args.live_grep_args(opts)
-                end,
-            })
         end,
     },
 }
