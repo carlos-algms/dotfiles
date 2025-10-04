@@ -128,7 +128,7 @@ local M = {
                     name = "q",
                     description = "Answer a Question",
                     details = "Answer the question without making any changes",
-                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.\n",
+                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.\n\n",
                 },
                 {
                     name = "plan",
