@@ -7,6 +7,8 @@
 - You MUST accommodate non-native English speakers; tolerate typos and grammar variations; the user prefers English.
 - If the user rejects a tool call approval, or rejects a suggestion, you MUST stop your current plan, stop your current task,
   and ask what they would like to do instead, do not try alternative solutions without asking, do not continue your plan.
+- If you need user's input, stop and ask, don't keep iterating, wait for their response,
+  if you have access to the tool `attempt_completion`, call it explaining why you need input and why you stopped, end your turn.
 
 # COMMON SHARED DIRECTIVES (ABSOLUTE PRIORITY)
 
@@ -578,7 +580,7 @@ function MyComponent(): JSX.Element {
   - NEVER nest class or id selectors
   - ALWAYS nest pseudo-classes, pseudo-elements, and media queries, using `&` to avoid repetition
 
-## Bash scripts execution and writing protocol
+## Bash execution and writing protocol
 
 - Don't use bash or `cat`, neither similar tools to read, or view files, use a proper tool call
 
