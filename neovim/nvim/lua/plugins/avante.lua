@@ -78,6 +78,9 @@ local M = {
                     extra_request_body = {
                         temperature = 0.75,
                         max_tokens = 32000,
+                        thinking = {
+                            type = "disabled",
+                        },
                     },
                 },
 
@@ -150,13 +153,28 @@ local M = {
                     ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
                 },
                 {
-                    name = "conventional-commit",
+                    name = "conventional_commit",
                     description = "Create a conventional commit message and commit",
-                    details = "Create a conventional commit message based on the changes made in the project, stage, commit, and show an URL to create a pull request",
+                    details = "Create a conventional commit message based on the changes made in the project, stage, commit",
                     prompt = ([[
                         You're going to commit the changes on the user's behalf using the conventional commit strategy.
                         If there're no changed files, abort and tell the user the reason.
                         If the user is on the `main` or `master` branch, you must create a new branch with the pattern `cgomes/<scope>-short-description` before committing.
+                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
+                },
+
+                {
+                    name = "conventional_message",
+                    description = "Create a conventional message but don't commit",
+                    details = "Create a conventional commit message based on the changes made in the project",
+                    prompt = ([[
+                        You're only going to generate the conventional commit message, don't commit.
+                        If you're on the file `.git/COMMIT_EDITMSG`, I use the verbose commit command, so all the information you need to create a good commit message is there.
+                        Avoid reading other files.
+                        Follow the standard conventional commit message generation protocol.
+                        If you are in the file `.git/COMMIT_EDITMSG`,
+                        apply the message to the top of the file, otherwise just send me the generated text as a normal message.
+                        This is usually a long file, so you can ignore cspell spell diagnostics and other linter warnings.
                     ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
                 },
             },
@@ -164,7 +182,10 @@ local M = {
             behaviour = {
                 auto_set_keymaps = false,
                 auto_suggestions = false,
-                auto_apply_diff_after_generation = true, -- doesn't seem to work with ACP
+                auto_apply_diff_after_generation = false,
+                support_paste_from_clipboard = false,
+                minimize_diff = true,
+                enable_token_counting = true,
                 auto_approve_tool_permissions = false,
             },
 
@@ -218,6 +239,34 @@ local M = {
             },
 
             {
+                "<A-i>c",
+                function()
+                    -- I `edit()` with a prefilled text is crashing, leaving it as an example
+                    -- local current_file = vim.fn.expand("%:p")
+                    -- if current_file:match("%.git/COMMIT_EDITMSG$") then
+                    --     local _, selection = require("avante").get()
+                    --     if not selection then
+                    --         vim.cmd("normal! ggV")
+                    --     end
+                    --     require("avante.api").edit(
+                    --         "#conventional_message",
+                    --         1,
+                    --         1
+                    --     )
+                    -- else
+                    -- end
+                    require("avante.api").ask({
+                        ask = true,
+                        new_chat = true,
+                        question = "#conventional_message",
+                    })
+                end,
+                desc = "Avante write conventional commit message",
+                silent = true,
+                mode = { "n", "v", "i" },
+            },
+
+            {
                 "<A-i>e",
                 function()
                     require("avante.api").edit()
@@ -258,21 +307,23 @@ local M = {
             },
 
             {
-                "<Leader>Ar",
-                function()
-                    require("avante.repo_map").show()
-                end,
-                desc = "Avante RepoMap",
-                silent = true,
-                mode = { "n", "v" },
-            },
-
-            {
                 "<A-i>s",
                 function()
                     require("avante.api").stop()
                 end,
                 desc = "Avante Stop",
+                silent = true,
+                mode = { "n", "v", "i" },
+            },
+
+            {
+                "<A-i>a",
+                function()
+                    require("avante.api").add_selected_file(
+                        vim.fn.expand("%:.")
+                    )
+                end,
+                desc = "Add current file to context",
                 silent = true,
                 mode = { "n", "v", "i" },
             },
