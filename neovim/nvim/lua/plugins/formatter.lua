@@ -95,6 +95,60 @@ return {
                 -- ["goimports-reviser"] = {
                 --     prepend_args = { "-rm-unused", "-set-alias" },
                 -- },
+                prettier = {
+                    args = function(self, ctx)
+                        -- https://prettier.io/docs/configuration.html
+                        local has_cwd = vim.fs.root(ctx.buf or 0, {
+                            ".prettierrc",
+                            ".prettierrc.json",
+                            ".prettierrc.yml",
+                            ".prettierrc.yaml",
+                            ".prettierrc.json5",
+                            ".prettierrc.js",
+                            "prettier.config.js",
+                            ".prettierrc.ts",
+                            "prettier.config.ts",
+                            ".prettierrc.mjs",
+                            "prettier.config.mjs",
+                            ".prettierrc.mts",
+                            "prettier.config.mts",
+                            ".prettierrc.cjs",
+                            "prettier.config.cjs",
+                            ".prettierrc.cts",
+                            "prettier.config.cts",
+                            ".prettierrc.toml",
+                        })
+
+                        if has_cwd then
+                            return { "--stdin-filepath", "$FILENAME" }
+                        end
+
+                        local config = {
+                            "--stdin-filepath",
+                            "$FILENAME",
+                            "--single-quote",
+                            "--trailing-comma",
+                            "all",
+                            "--arrow-parens",
+                            "always",
+                        }
+
+                        local ft = vim.bo[ctx.buf].filetype
+
+                        if ft == "markdown" then
+                            vim.list_extend(
+                                config,
+                                { "--prose-wrap", "always" }
+                            )
+                        end
+
+                        if ft == "svg" then
+                            vim.list_extend(config, { "--parser", "html" })
+                        end
+
+                        return config
+                    end,
+                },
             },
             -- log_level = vim.log.levels.DEBUG,
             format_on_save = function(bufnr)
