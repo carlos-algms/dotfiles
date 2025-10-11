@@ -44,7 +44,7 @@ return {
                 "filesystem",
                 -- "buffers",
                 -- "git_status",
-                -- "document_symbols",
+                "document_symbols",
             },
             enable_git_status = false,
             enable_diagnostics = false,
