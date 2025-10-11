@@ -297,6 +297,7 @@ M.theme = {
         zshSubstQuoted = "String",
         typescriptObjectLabel = "Constant",
         typescriptVariable = "Keyword",
+        tsxAttrib = "@tag.attribute",
     },
 }
 
