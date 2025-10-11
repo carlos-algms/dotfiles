@@ -9,28 +9,28 @@ alias Rsync="$(which -p rsync) --recursive \
 alias path-show='echo $PATH | tr ":" "\n"'
 
 excludes=(
-    .git
-    node_modules
-    .vscode
-    vendor
-    .next
-    build
-    dist
-    coverage
-    storybook-static
-    .turbo
-    generated
+  .git
+  node_modules
+  .vscode
+  vendor
+  .next
+  build
+  dist
+  coverage
+  storybook-static
+  .turbo
+  generated
 )
 
-if [[ -x "$(command -v fd)" ]]; then
-    alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always --glob "
+if command -v fd > /dev/null 2>&1; then
+  alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always --glob "
 
-    alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
+  alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
 else
-    # Using which because it might change in Windows
-    alias ff="$(which -p find)  . $(printf -- '! -path \"**/%s/**\" ' "${excludes[@]}") -type f -name "
+  # Using which because it might change in Windows
+  alias ff="$(which -p find)  . $(printf -- '! -path \"**/%s/**\" ' "${excludes[@]}") -type f -name "
 
-    alias fdir="$(which -p find) . \( $(printf -- '-path \"**/%s\" -o ' "${excludes[@]}") \) -prune -o -type d -print"
+  alias fdir="$(which -p find) . \( $(printf -- '-path \"**/%s\" -o ' "${excludes[@]}") \) -prune -o -type d -print"
 fi
 
 alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
@@ -50,42 +50,42 @@ alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist|vendor'"
 ## adding watch so it can use other aliases
 alias watch="watch "
 
-if [ ! -z "$(command -v nvim)" ]; then
-    alias v="nvim "
-elif [ ! -z "$(command -v vim)" ]; then
-    alias v="vim "
-elif [ ! -z "$(command -v vi)" ]; then
-    alias v="vi "
+if command -v nvim > /dev/null 2>&1; then
+  alias v="nvim "
+elif command -v vim > /dev/null 2>&1; then
+  alias v="vim "
+elif command -v vi > /dev/null 2>&1; then
+  alias v="vi "
 fi
 
-if [ ! -z "$(command -v kitten)" ]; then
-    alias s="kitten ssh --kitten forward_remote_control=yes "
+if command -v kitten > /dev/null 2>&1; then
+  alias s="kitten ssh --kitten forward_remote_control=yes "
 fi
 
-if command -v bat &>/dev/null; then
-    alias cat="bat "
-    _manpager_cmd="bat -l man -p"
-elif command -v batcat &>/dev/null; then
-    alias cat="batcat "
-    _manpager_cmd="batcat -l man -p"
+if command -v bat > /dev/null 2>&1; then
+  alias cat="bat "
+  _manpager_cmd="bat -l man -p"
+elif command -v batcat > /dev/null 2>&1; then
+  alias cat="batcat "
+  _manpager_cmd="batcat -l man -p"
 fi
 
 if [ -n "$_manpager_cmd" ]; then
-    if [ -n "$IS_MAC" ]; then
-        export MANPAGER="col -bx | $_manpager_cmd"
-    else
-        export MANPAGER="$_manpager_cmd"
-    fi
+  if [ -n "$IS_MAC" ]; then
+    export MANPAGER="col -bx | $_manpager_cmd"
+  else
+    export MANPAGER="$_manpager_cmd"
+  fi
 fi
 
 # Fix for the fuzzy cd auto completion
 # https://github.com/ajeetdsouza/zoxide/issues/513#issuecomment-2040488941
-if [ ! -z "$(command -v zoxide)" ]; then
-    if [ -n "$ZSH_VERSION" ]; then
-        eval "$(zoxide init zsh)"
-    else
-        eval "$(zoxide init bash)"
-    fi
+if command -v zoxide > /dev/null 2>&1 && [ "$DISABLE_ZOXIDE" != "1" ]; then
+  if [ -n "$ZSH_VERSION" ]; then
+    eval "$(zoxide init zsh)"
+  else
+    eval "$(zoxide init bash)"
+  fi
 
-    alias cd="z "
+  alias cd="z "
 fi
