@@ -85,12 +85,12 @@ return {
         --     { desc = "LSP [c]ode [a]ction", silent = true }
         -- )
 
-        vim.keymap.set(
-            { "n", "v" },
-            "<leader>ro",
-            ":Lspsaga outline<CR>",
-            { desc = "LSP Outline", silent = true }
-        )
+        -- vim.keymap.set(
+        --     { "n", "v" },
+        --     "<leader>ro",
+        --     ":Lspsaga outline<CR>",
+        --     { desc = "LSP Outline", silent = true }
+        -- )
 
         vim.keymap.set(
             { "n" },

@@ -44,6 +44,14 @@ return {
         },
 
         {
+
+            "<leader>ro",
+            "<cmd>Trouble symbols toggle focus=true win.position=right win.size=0.45 filter.buf=0<cr>",
+            desc = "LSP References (Trouble)",
+            silent = true,
+        },
+
+        {
             "[x",
             function()
                 require("trouble").prev({ skip_groups = true, jump = true })
@@ -77,16 +85,11 @@ return {
             }, "a")
         end, { desc = "Add current file to quickfix" })
 
-        vim.keymap.set(
-            "n",
-            "<leader>qo",
-            "<CMD>copen<CR>",
-            {
-                silent = true,
-                noremap = true,
-                desc = "Open the native quickFix list",
-            }
-        )
+        vim.keymap.set("n", "<leader>qo", "<CMD>copen<CR>", {
+            silent = true,
+            noremap = true,
+            desc = "Open the native quickFix list",
+        })
 
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "qf",
