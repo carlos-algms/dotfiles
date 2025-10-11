@@ -4,9 +4,11 @@ local P = {
     Snacks_picker_hist = {},
 }
 
+--- @type snacks.picker.grep.Config
 local customGrepOptions = {
     hidden = true,
     live = true,
+    regex = false, -- defualt to false, I search form [, {, -, etc too often, <A-r> to toggle it
     matcher = {
         filename_bonus = true,
         frecency = true,
@@ -20,6 +22,8 @@ local customGrepOptions = {
         "!yarn.lock",
         "-g",
         "!package-lock.json",
+        "-g",
+        "!node_modules/",
     },
 }
 
@@ -37,8 +41,8 @@ local M = {
 
         bigfile = {
             enabled = true,
-            size = 1.5 * 1024 * 1024, -- 1.5MB
-            line_length = 300, -- average line length (useful for minified files)
+            size = 3 * 1024 * 1024,
+            line_length = 600, -- average line length (useful for minified files)
         },
 
         notifier = {
@@ -201,6 +205,11 @@ local M = {
             win = {
                 input = {
                     keys = {
+                        ["<a-r>"] = { -- not docummented, but works
+                            "toggle_regex",
+                            mode = { "i", "n" },
+                            desc = "Toggle Regex",
+                        },
                         ["<C-h>"] = { "toggle_help_input", mode = { "i", "n" } },
                         ["<C-l>"] = { "add_iglob", mode = { "i", "n" } },
                         ["<C-e>"] = {
