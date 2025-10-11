@@ -151,6 +151,8 @@ local M = {
                 "tsserver",
             }
 
+            vim.lsp.set_log_level("error")
+
             vim.lsp.config("*", {
                 on_attach = function(client, bufNr)
                     require("helpers.lsp_helpers").onLspAttach(client, bufNr)
