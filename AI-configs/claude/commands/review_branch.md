@@ -18,6 +18,23 @@ If the user doesn't give you a target branch, use `origin/HEAD` as the target
 branch, provide it and the relative file name to the Task tool, never use full
 paths.
 
+## Shared Context Preparation
+
+Before launching subagents for reviews, identify common dependencies across all
+files:
+
+1. Check if package.json, tsconfig.json, or similar config files changed
+2. Identify common imports used by multiple files being reviewed
+3. Create `review_context.md` with shared dependency analysis:
+   - Package.json changes summary
+   - Common type definitions
+   - Renamed symbols across files
+   - New dependencies introduced
+   - A minimal graph of which files import which other files, including
+     non-changed files importing the changed files
+4. Pass the review_context.md path to each subagent via the prompt: "Review
+   context available at: review_context.md"
+
 When there are multiple files to review, launch multiple Task tool calls in
 parallel (in a single message with multiple tool uses) to maximize performance.
 Limited to 2 tasks at a time. Don't create batches if you can, as soon as one
@@ -59,17 +76,30 @@ or enter to confirm, yes should be the default pre-selected option.
 
 1. First, create the files if they don't exist
 
-2. Do not review lock files, binary files, or images, immediately mark them as
+### Pre-Review Filtering
+
+2. Before launching subagents, filter out:
+   - Lock files (package-lock.json, pnpm-lock.yaml, etc.)
+   - Generated files (dist/, build/, .next/)
+   - Files with only whitespace/formatting changes (check git diff
+     --ignore-all-space)
+   - Mark filtered files as reviewed with '✓' immediately
+
+3. Do not review lock files, binary files, or images, immediately mark them as
    reviewed without suggestions
 
-3. For each file reviewed:
+4. For each file reviewed:
    - Write to the files immediately, don't batch writes
    - Do not clean, or transform the responses you receive, just write to the
      file as your received from the Task tool
-   - Mark the todo item as checked, and for files without suggestions add "✓" or
-     "󰟶" if there are suggestions
+   - **Ensure responses contain NO praise, positive comments, or benefits of
+     changes**
+   - **Reviews should ONLY contain issues, problems, or suggestions for
+     improvement**
+   - Mark the todo item as checked
 
      ```
-     - [x] 󰟶 path/to/file.ext
-     - [x] ✓ path/to/another_file.ext
+     - [x] path/to/file.ext
+     - [x] path/to/another_file.ext
      ```
+
