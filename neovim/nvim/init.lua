@@ -36,6 +36,7 @@ require("remap")
 require("commands")
 require("autocmds")
 require("jump_to_node")
+require("eslint")
 
 vim.keymap.set(
     { "n" },
