@@ -29,13 +29,20 @@ createUserCommand("Eslint", function()
     local cwd = vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
 
     vim.notify(
-        string.format("## Running eslint:\n`%s`", table.concat(command, " ")),
+        string.format(
+            "## Running eslint:\n`%s`\nOn cwd:\n`%s`",
+            table.concat(command, " "),
+            cwd
+        ),
         vim.log.levels.INFO
     )
 
     vim.system(command, { text = true, cwd = cwd }, function(result)
         if result.code == 0 then
-            vim.notify("🎉 No eslint issues found", vim.log.levels.INFO)
+            vim.notify(
+                string.format("🎉 No eslint issues found for:\n`%s`", cwd),
+                vim.log.levels.INFO
+            )
             return
         end
 
