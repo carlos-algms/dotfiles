@@ -22,17 +22,24 @@ local M = {
         build = "make", -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
 
+        opts = function(_, _maybeOpts)
+            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "codex-acp"
+            ---@type AvanteProviders
+            local provider = "claude-code"
+
+            if vim.g.is_ssh then
+                provider = "copilot"
+            end
+
         --- @module "avante"
         --- @type avante.Config
-        opts = {
+            local config = {
             -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
             -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
-            override_prompt_dir = vim.fn.stdpath("config") .. "/avante_prompts",
+                override_prompt_dir = vim.fn.stdpath("config")
+                    .. "/avante_prompts",
 
-            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai"
-
-            ---@type AvanteProviders
-            provider = vim.g.is_ssh and "copilot" or "claude",
+                provider = provider,
 
             ---@type AvanteProviders
             auto_suggestions_provider = "copilot",
@@ -44,18 +51,32 @@ local M = {
                     args = { "--experimental-acp" },
                     env = {
                         NODE_NO_WARNINGS = "1",
+                            DISABLE_ZOXIDE = "1",
                         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
                     },
                 },
                 ["claude-code"] = {
-                    command = "pnpm",
-                    args = {
-                        "dlx",
-                        "@zed-industries/claude-code-acp",
-                    },
+                        command = "claude-code-acp", -- I installed it globally with `pnpm i -g @zed-industries/claude-code-acp`, to avoid issues with projects using only npm
+                        -- command = "pnpm",
+                        -- args = {
+                        --     "dlx",
+                        --     "@zed-industries/claude-code-acp",
+                        -- },
                     env = {
                         NODE_NO_WARNINGS = "1",
-                        ANTHROPIC_API_KEY = os.getenv("ACS_ANTHROPIC_API_KEY"),
+                            DISABLE_ZOXIDE = "1",
+                            ANTHROPIC_API_KEY = os.getenv(
+                                "ACS_ANTHROPIC_API_KEY"
+                            ),
+                        },
+                    },
+                    ["codex-acp"] = {
+                        -- https://github.com/zed-industries/codex-acp/releases
+                        -- xattr -dr com.apple.quarantine ~/.local/bin/codex-acp
+                        command = "codex-acp",
+                        args = {},
+                        env = {
+                            DISABLE_ZOXIDE = "1",
                     },
                 },
             },
@@ -69,19 +90,10 @@ local M = {
 
                 ---@type AvanteSupportedProvider
                 claude = {
-                    endpoint = "https://api.anthropic.com",
                     --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
                     model = "claude-sonnet-4-5-20250929",
                     -- api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
                     api_key_name = "cmd:echo $CARLOS_ANTHROPIC_API_KEY",
-                    timeout = 30000,
-                    extra_request_body = {
-                        temperature = 0.75,
-                        max_tokens = 32000,
-                        thinking = {
-                            type = "disabled",
-                        },
-                    },
                 },
 
                 --- @type AvanteSupportedProvider
@@ -150,7 +162,10 @@ local M = {
                             Write the plan to a markdown file, derive the file name from the goal prefixed with `plan-`,
                             the file should be saved next to the selected file, or in the current working directory.
                             After you create, or edit this file, run prettier to format it like: `prettier --prose-wrap always --print-width 80 --write "FILENAME.md"`
-                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
+                    ]]):gsub("^%s+", ""):gsub(
+                            "\n%s+",
+                            "\n"
+                        ),
                 },
                 {
                     name = "conventional_commit",
@@ -160,7 +175,10 @@ local M = {
                         You're going to commit the changes on the user's behalf using the conventional commit strategy.
                         If there're no changed files, abort and tell the user the reason.
                         If the user is on the `main` or `master` branch, you must create a new branch with the pattern `cgomes/<scope>-short-description` before committing.
-                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
+                    ]]):gsub("^%s+", ""):gsub(
+                            "\n%s+",
+                            "\n"
+                        ),
                 },
 
                 {
@@ -175,7 +193,10 @@ local M = {
                         If you are in the file `.git/COMMIT_EDITMSG`,
                         apply the message to the top of the file, otherwise just send me the generated text as a normal message.
                         This is usually a long file, so you can ignore cspell spell diagnostics and other linter warnings.
-                    ]]):gsub("^%s+", ""):gsub("\n%s+", "\n"),
+                    ]]):gsub("^%s+", ""):gsub(
+                            "\n%s+",
+                            "\n"
+                        ),
                 },
             },
 
@@ -185,8 +206,9 @@ local M = {
                 auto_apply_diff_after_generation = false,
                 support_paste_from_clipboard = false,
                 minimize_diff = true,
-                enable_token_counting = true,
+                    enable_token_counting = false,
                 auto_approve_tool_permissions = false,
+                    confirmation_ui_style = "popup",
             },
 
             selection = {
@@ -210,7 +232,10 @@ local M = {
                     start_insert = true, -- Start insert mode when opening the ask window
                 },
             },
-        },
+            }
+
+            return config
+        end,
 
         keys = {
             {
