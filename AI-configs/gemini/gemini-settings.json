@@ -1,15 +1,40 @@
 {
-  "allowedTools": [
-    "glob",
-    "google_web_search",
-    "list_directory",
-    "read_file",
-    "read_many_files",
-    "search_file_content",
-    "web_fetch"
-  ],
-  "preferredEditor": "neovim",
-  "selectedAuthType": "gemini-api-key",
-  "useRipgrep": true,
-  "vimMode": true
+  "tools": {
+    "allowed": [
+      "glob",
+      "google_web_search",
+      "list_directory",
+      "read_file",
+      "read_many_files",
+      "search_file_content",
+      "web_fetch"
+    ],
+    "useRipgrep": true,
+    "shell": {
+      "showColor": true
+    },
+    "enableToolOutputTruncation": true
+  },
+  "general": {
+    "preferredEditor": "neovim",
+    "vimMode": true,
+    "disableAutoUpdate": true,
+    "enablePromptCompletion": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "output": {
+    "format": "text"
+  },
+  "ui": {
+    "showLineNumbers": true,
+    "showCitations": true,
+    "accessibility": {
+      "screenReader": false
+    }
+  }
 }
+
