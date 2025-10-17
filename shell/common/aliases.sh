@@ -22,7 +22,7 @@ excludes=(
   generated
 )
 
-if command -v fd > /dev/null 2>&1; then
+if command -v fd >/dev/null 2>&1; then
   alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always --glob "
 
   alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
@@ -50,22 +50,22 @@ alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist|vendor'"
 ## adding watch so it can use other aliases
 alias watch="watch "
 
-if command -v nvim > /dev/null 2>&1; then
+if command -v nvim >/dev/null 2>&1; then
   alias v="nvim "
-elif command -v vim > /dev/null 2>&1; then
+elif command -v vim >/dev/null 2>&1; then
   alias v="vim "
-elif command -v vi > /dev/null 2>&1; then
+elif command -v vi >/dev/null 2>&1; then
   alias v="vi "
 fi
 
-if command -v kitten > /dev/null 2>&1; then
+if command -v kitten >/dev/null 2>&1; then
   alias s="kitten ssh --kitten forward_remote_control=yes "
 fi
 
-if command -v bat > /dev/null 2>&1; then
+if command -v bat >/dev/null 2>&1; then
   alias cat="bat "
   _manpager_cmd="bat -l man -p"
-elif command -v batcat > /dev/null 2>&1; then
+elif command -v batcat >/dev/null 2>&1; then
   alias cat="batcat "
   _manpager_cmd="batcat -l man -p"
 fi
@@ -80,12 +80,19 @@ fi
 
 # Fix for the fuzzy cd auto completion
 # https://github.com/ajeetdsouza/zoxide/issues/513#issuecomment-2040488941
-if command -v zoxide > /dev/null 2>&1 && [ "$DISABLE_ZOXIDE" != "1" ]; then
+if command -v zoxide >/dev/null 2>&1 && [ "$DISABLE_ZOXIDE" != "1" ]; then
   if [ -n "$ZSH_VERSION" ]; then
     eval "$(zoxide init zsh)"
   else
     eval "$(zoxide init bash)"
   fi
 
-  alias cd="z "
+  ## Fix fo claude-code not working with zoxide
+  cd() {
+    if [ "$DISABLE_ZOXIDE" = "1" ]; then
+      builtin cd "$@"
+    else
+      z "$@"
+    fi
+  }
 fi
