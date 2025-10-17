@@ -53,7 +53,7 @@ function P.init_cspell()
             os.execute,
             "cd "
                 .. folder_path
-                .. " && echo '{}' > package.json && npm i @cspell/dict-pt-br"
+                .. " && echo '{}' > package.json && npm i @cspell/dict-pt-br @cspell/dict-de-de"
         )
 
         if err ~= 0 then
