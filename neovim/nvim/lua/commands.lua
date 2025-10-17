@@ -6,6 +6,7 @@ createUserCommand("Redir", function(ctx)
     vim.cmd("vnew")
     vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
     vim.opt_local.modified = false
+    vim.opt_local.buftype = "nofile"
 end, { nargs = "+", complete = "command" })
 
 createUserCommand("Float", function(ctx)
