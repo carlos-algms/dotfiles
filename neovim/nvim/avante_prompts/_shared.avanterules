@@ -205,6 +205,15 @@ cd apps/demo-app && npm exec tsc --noEmit
 
   </example>
 
+- If the typescript includes JSX, or React components, you must use `tsx` as the file type for markdown triple backticks
+  <example type="good">
+
+  ```tsx
+  <Component />
+  ```
+
+  </example>
+
 - Use early returns to reduce nesting and improve readability
 
 <example type="good">
@@ -369,7 +378,13 @@ const myObject: Record<string, string> = {
   <example type="good">
 
   ```tsx
-  return <Component />;
+  import { useState } from 'react';
+
+  export function MyComponent() {
+    const [count, setCount] = useState(0);
+
+    return <Component />;
+  }
   ```
 
   </example>
