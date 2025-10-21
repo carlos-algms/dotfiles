@@ -27,6 +27,8 @@ local M = {
             ---@type AvanteProviders
             local provider = "claude-code"
 
+            local claudeKeyName = "CARLOS_ANTHROPIC_API_KEY"
+
             if vim.g.is_ssh then
                 provider = "copilot"
             end
@@ -52,7 +54,7 @@ local M = {
                     env = {
                         NODE_NO_WARNINGS = "1",
                             DISABLE_ZOXIDE = "1",
-                        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+                            -- GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
                     },
                 },
                 ["claude-code"] = {
@@ -65,9 +67,7 @@ local M = {
                     env = {
                         NODE_NO_WARNINGS = "1",
                             DISABLE_ZOXIDE = "1",
-                            ANTHROPIC_API_KEY = os.getenv(
-                                "ACS_ANTHROPIC_API_KEY"
-                            ),
+                            ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
                     ["codex-acp"] = {
@@ -93,7 +93,11 @@ local M = {
                     --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
                     model = "claude-sonnet-4-5-20250929",
                     -- api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
-                    api_key_name = "cmd:echo $CARLOS_ANTHROPIC_API_KEY",
+                        -- api_key_name = "cmd:echo $CARLOS_ANTHROPIC_API_KEY",
+                        api_key_name = string.format(
+                            "cmd:echo $%s",
+                            claudeKeyName
+                        ),
                 },
 
                 --- @type AvanteSupportedProvider
@@ -208,7 +212,7 @@ local M = {
                 minimize_diff = true,
                     enable_token_counting = false,
                 auto_approve_tool_permissions = false,
-                    confirmation_ui_style = "popup",
+                    confirmation_ui_style = "inline_buttons",
             },
 
             selection = {
