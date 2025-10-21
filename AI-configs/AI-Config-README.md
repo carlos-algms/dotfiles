@@ -20,3 +20,12 @@ ln -s ~/projects/dotfiles/neovim/nvim/avante_prompts/_shared.avanterules ~/.clau
 mkdir -p ~/.gemini
 ln -s ~/projects/dotfiles/AI-configs/gemini/settings.json ~/.gemini/settings.json
 ```
+
+## OpenCode
+
+https://opencode.ai/docs/config/
+
+```bash
+mkdir -p ~/.config/opencode/{agent,command,tool}
+ln -s ~/projects/dotfiles/AI-configs/opencode/{opencode.json,agent,command,tool} ~/.config/opencode/
+```

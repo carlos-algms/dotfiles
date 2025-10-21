@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "opencode",
+  "autoupdate": false,
+
+  "permission": {
+    "edit": "ask",
+    "webfetch": "allow",
+    "bash": {
+      "ls": "allow",
+      "fd": "allow",
+      "rg": "allow",
+      "find": "allow",
+      "pwd": "allow",
+      "git status": "allow",
+      "git diff": "allow"
+    }
+  },
+
+  "model": "anthropic/claude-sonnet-4-5",
+  "small_model": "anthropic/claude-haiku-4-5",
+
+  "provider": {
+    "anthropic": {
+      "models": {},
+      "options": {
+        "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}"
+      }
+    }
+  }
+}
