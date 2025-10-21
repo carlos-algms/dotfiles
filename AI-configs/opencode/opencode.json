@@ -26,6 +26,18 @@
       "options": {
         "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}"
       }
+    },
+
+    "lmstudio": {
+      "name": "LM Studio (local)",
+      "options": {
+        "baseURL": "http://localhost:1234/v1"
+      },
+      "models": {
+        "qwen/qwen3-coder-30b": {
+          "name": "Qwen 3 Coder 30B"
+        }
+      }
     }
   }
 }
