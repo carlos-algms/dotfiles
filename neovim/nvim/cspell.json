@@ -19,7 +19,6 @@
     "npm"
   ],
   "flagWords": [],
-  "useGitignore": true,
   "ignorePaths": [
     "**/.git/**",
     "**/node_modules/**",
@@ -37,6 +36,7 @@
     "~/.cache/nvim/cspell-dictionaries/node_modules/@cspell/dict-de-de/cspell-ext.json"
   ],
   "language": "de, de_DE, en, pt_BR",
+  "useGitignore": true,
   "version": "0.2",
   "words": [
     "Brandkit",
@@ -68,6 +68,7 @@
     "nvimtools",
     "octo",
     "ollama",
+    "opencode",
     "parloa",
     "portainer",
     "shada",
