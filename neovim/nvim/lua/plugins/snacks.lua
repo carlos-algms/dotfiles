@@ -386,7 +386,7 @@ local M = {
             "<leader>f",
             function()
                 Snacks.picker.grep(
-                    vim.tbl_extend("force", {}, customGrepOptions)
+                    vim.tbl_deep_extend("force", {}, customGrepOptions)
                 )
             end,
             desc = "Live Grep all files - Snacks",
@@ -396,7 +396,7 @@ local M = {
             "<leader>f",
             function()
                 Snacks.picker.grep_word(
-                    vim.tbl_extend("force", {}, customGrepOptions)
+                    vim.tbl_deep_extend("force", {}, customGrepOptions)
                 )
             end,
             desc = "Live Grep all files - Snacks",
@@ -430,7 +430,10 @@ local M = {
         {
             "gd",
             function()
-                Snacks.picker.lsp_definitions()
+                local current_word = vim.fn.expand("<cword>")
+                Snacks.picker.lsp_definitions({
+                    title = string.format("LSP Definitions `%s`", current_word),
+                })
             end,
             desc = "Go to definition or list all - Snacks",
             mode = { "n", "v" },
@@ -439,7 +442,10 @@ local M = {
         {
             "gr",
             function()
-                Snacks.picker.lsp_references()
+                local current_word = vim.fn.expand("<cword>")
+                Snacks.picker.lsp_references({
+                    title = string.format("LSP References `%s`", current_word),
+                })
             end,
             desc = "Go to reference or list all - Snacks",
             mode = { "n", "v" },
@@ -448,7 +454,13 @@ local M = {
         {
             "gi",
             function()
-                Snacks.picker.lsp_implementations()
+                local current_word = vim.fn.expand("<cword>")
+                Snacks.picker.lsp_implementations({
+                    title = string.format(
+                        "LSP Implementations `%s`",
+                        current_word
+                    ),
+                })
             end,
             desc = "Go to implementation or list all - Snacks",
             mode = { "n", "v" },
@@ -457,7 +469,13 @@ local M = {
         {
             "gD",
             function()
-                Snacks.picker.lsp_declarations()
+                local current_word = vim.fn.expand("<cword>")
+                Snacks.picker.lsp_declarations({
+                    title = string.format(
+                        "LSP Declarations `%s`",
+                        current_word
+                    ),
+                })
             end,
             desc = "Go to declaration or list all - Snacks",
             mode = { "n", "v" },
@@ -466,15 +484,20 @@ local M = {
         {
             "go",
             function()
-                -- if the title is generic, I might want to run the same I was using in telescope
-                Snacks.picker.lsp_type_definitions()
+                local current_word = vim.fn.expand("<cword>")
+                Snacks.picker.lsp_type_definitions({
+                    title = string.format(
+                        "LSP Type Definitions `%s`",
+                        current_word
+                    ),
+                })
             end,
             desc = "Go to type definition or list all - Snacks",
             mode = { "n", "v" },
         },
 
         {
-            "<leader>rd",
+            "gO",
             function()
                 Snacks.picker.lsp_symbols()
             end,
@@ -482,7 +505,7 @@ local M = {
         },
 
         {
-            "<leader>rw",
+            "gW",
             function()
                 Snacks.picker.lsp_workspace_symbols()
             end,
@@ -583,10 +606,12 @@ function P.grep_on_dir()
                 table.insert(dirs, item.data.dir)
             end
 
-            Snacks.picker.grep(vim.tbl_extend("force", {}, customGrepOptions, {
-                dirs = dirs,
-                title = "Grep in: " .. table.concat(dirs, ", "),
-            }))
+            Snacks.picker.grep(
+                vim.tbl_deep_extend("force", {}, customGrepOptions, {
+                    dirs = dirs,
+                    title = "Grep in: " .. table.concat(dirs, ", "),
+                })
+            )
         end,
 
         format = function(item, _)
