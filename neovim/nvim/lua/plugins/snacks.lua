@@ -28,6 +28,9 @@ local customGrepOptions = {
 }
 
 local M = {
+    -- dir = vim.uv.os_homedir() .. "/projects/snacks-nvim",
+    -- dev = true,
+    -- name = "snacks.nvim",
     "folke/snacks.nvim",
     priority = 1010,
     lazy = false,
@@ -37,6 +40,10 @@ local M = {
         input = {
             enabled = true,
             relative = "cursor",
+        },
+
+        bufdelete = {
+            enabled = true,
         },
 
         bigfile = {
@@ -294,7 +301,6 @@ local M = {
                 })
             end,
             desc = "Find files by name in the current folder",
-            silent = true,
         },
 
         {
@@ -307,7 +313,6 @@ local M = {
                 })
             end,
             desc = "Find files by name in the current folder",
-            silent = true,
         },
 
         {
@@ -318,7 +323,6 @@ local M = {
                 })
             end,
             desc = "Find files by name anywhere",
-            silent = true,
         },
 
         {
@@ -334,7 +338,6 @@ local M = {
                 })
             end,
             desc = "List open buffers",
-            silent = true,
         },
 
         {
@@ -343,7 +346,6 @@ local M = {
                 Snacks.picker.lines()
             end,
             desc = "Fuzzy search in current file",
-            silent = true,
         },
 
         {
@@ -352,7 +354,6 @@ local M = {
                 Snacks.picker.git_branches()
             end,
             desc = "List git branches",
-            silent = true,
         },
 
         {
@@ -361,7 +362,6 @@ local M = {
                 Snacks.picker.git_status()
             end,
             desc = "List git status",
-            silent = true,
         },
 
         {
@@ -370,7 +370,6 @@ local M = {
                 Snacks.picker.grep(customGrepOptions)
             end,
             desc = "Live Grep all files - Snacks",
-            silent = true,
         },
 
         {
@@ -379,7 +378,6 @@ local M = {
                 Snacks.picker.grep_word(customGrepOptions)
             end,
             desc = "Live Grep all files - Snacks",
-            silent = true,
             mode = { "v", "x" },
         },
 
@@ -389,7 +387,6 @@ local M = {
                 Snacks.picker.help()
             end,
             desc = "Neovim Help - Snacks",
-            silent = true,
         },
 
         {
@@ -398,7 +395,6 @@ local M = {
                 Snacks.picker.keymaps()
             end,
             desc = "Keymaps - Snacks",
-            silent = true,
         },
 
         {
@@ -407,7 +403,68 @@ local M = {
                 P.grep_on_dir()
             end,
             desc = "Grep on directory - Snacks",
-            silent = true,
+        },
+
+        {
+            "gd",
+            function()
+                Snacks.picker.lsp_definitions()
+            end,
+            desc = "Go to definition or list all - Snacks",
+            mode = { "n", "v" },
+        },
+
+        {
+            "gr",
+            function()
+                Snacks.picker.lsp_references()
+            end,
+            desc = "Go to reference or list all - Snacks",
+            mode = { "n", "v" },
+        },
+
+        {
+            "gi",
+            function()
+                Snacks.picker.lsp_implementations()
+            end,
+            desc = "Go to implementation or list all - Snacks",
+            mode = { "n", "v" },
+        },
+
+        {
+            "gD",
+            function()
+                Snacks.picker.lsp_declarations()
+            end,
+            desc = "Go to declaration or list all - Snacks",
+            mode = { "n", "v" },
+        },
+
+        {
+            "go",
+            function()
+                -- if the title is generic, I might want to run the same I was using in telescope
+                Snacks.picker.lsp_type_definitions()
+            end,
+            desc = "Go to type definition or list all - Snacks",
+            mode = { "n", "v" },
+        },
+
+        {
+            "<leader>rd",
+            function()
+                Snacks.picker.lsp_symbols()
+            end,
+            desc = "Search for symbol in document - Snacks",
+        },
+
+        {
+            "<leader>rw",
+            function()
+                Snacks.picker.lsp_workspace_symbols()
+            end,
+            desc = "Search for symbol in workspace - Snacks",
         },
     },
 
@@ -518,6 +575,8 @@ function P.grep_on_dir()
         end,
     })
 end
+
+-- FIXIT: it seems Folke removed the `.last` field, so this code doesn't work anymore
 
 --- @param picker snacks.Picker
 function P.store_picker_in_history(picker)
