@@ -1,6 +1,3 @@
---     doesn't work
---     "mxsdev/nvim-dap-vscode-js",
-
 return {
     {
         "mfussenegger/nvim-dap",
@@ -92,44 +89,19 @@ return {
                     end,
                 },
             },
-            -- Disabled as attaching to a running process was crashing
-            -- {
-            --     "nvim-telescope/telescope-dap.nvim",
-            --     dependencies = {
-            --         "nvim-telescope/telescope.nvim",
-            --     },
-            --     keys = {
-            --         {
-            --             "<leader>dl",
-            --             ":Telescope dap list_breakpoints<CR>",
-            --             desc = " List breakpoint",
-            --         },
-            --     },
-            --     config = function()
-            --         require("telescope").load_extension("dap")
-            --     end,
-            -- },
             {
                 "LiadOz/nvim-dap-repl-highlights",
                 config = function()
                     require("nvim-dap-repl-highlights").setup()
                 end,
             },
-            -- Disabled because the virtual text was not being cleared
-            -- {
-            --     "theHamsta/nvim-dap-virtual-text",
-            --     opts = {
-            --       clear_on_continue = true,
-            --     }
-            -- },
         },
         keys = {
             {
                 "<leader>dl",
                 function()
                     require("dap").list_breakpoints(false)
-                    vim.cmd("Telescope quickfix prompt_title=Dap\\ Breakpoints")
-                    -- Snacks.picker.qflist()
+                    Snacks.picker.qflist()
                 end,
                 desc = " Debugger list breakpoints",
             },
