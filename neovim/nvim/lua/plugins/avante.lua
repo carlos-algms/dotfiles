@@ -23,7 +23,7 @@ local M = {
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
 
         opts = function(_, _maybeOpts)
-            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "codex-acp"
+            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "codex-acp" | "opencode-acp"
             ---@type AvanteProviders
             local provider = "claude-code"
 
@@ -57,6 +57,7 @@ local M = {
                             -- GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
                     },
                 },
+
                 ["claude-code"] = {
                         command = "claude-code-acp", -- I installed it globally with `pnpm i -g @zed-industries/claude-code-acp`, to avoid issues with projects using only npm
                         -- command = "pnpm",
@@ -70,6 +71,7 @@ local M = {
                             ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
+
                     ["codex-acp"] = {
                         -- https://github.com/zed-industries/codex-acp/releases
                         -- xattr -dr com.apple.quarantine ~/.local/bin/codex-acp
@@ -79,6 +81,16 @@ local M = {
                             DISABLE_ZOXIDE = "1",
                     },
                 },
+
+                    ["opencode-acp"] = {
+                        command = "opencode",
+                        args = { "acp" },
+                        env = {
+                            NODE_NO_WARNINGS = "1",
+                            DISABLE_ZOXIDE = "1",
+                            CARLOS_ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
+                        },
+                    },
             },
 
             providers = {
