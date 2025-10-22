@@ -1,9 +1,10 @@
 local P = {
     ---@module 'snacks'
-    ---@type snacks.picker.Last[]
+    ---@type snacks.picker.resume.State[]
     Snacks_picker_hist = {},
 }
 
+--- Remember to deep copy before use
 --- @type snacks.picker.grep.Config
 local customGrepOptions = {
     hidden = true,
@@ -35,229 +36,246 @@ local M = {
     priority = 1010,
     lazy = false,
 
-    ---@type snacks.Config
-    opts = {
-        input = {
-            enabled = true,
-            relative = "cursor",
-        },
+    opts = function()
+        local resume = require("snacks.picker.resume")
+        local original_add = resume.add
 
-        bufdelete = {
-            enabled = true,
-        },
+        ---@diagnostic disable-next-line: duplicate-set-field
+        resume.add = function(picker)
+            original_add(picker)
+            local source = picker.opts.source or "custom"
+            local state = resume.state[source]
+            if not state then
+                return
+            end
+            P.store_picker_in_history(state)
+        end
 
-        bigfile = {
-            enabled = true,
-            size = 3 * 1024 * 1024,
-            line_length = 600, -- average line length (useful for minified files)
-        },
+        ---@type snacks.Config
+        local opts = {
+            input = {
+                enabled = true,
+                relative = "cursor",
+            },
 
-        notifier = {
-            enabled = true,
-            timeout = 6000,
-            margin = { top = 1, right = 1, bottom = 0 },
-            filter = function(notif)
-                local patterns = {
-                    -- LSP Hover was triggering this but it was working normally
-                    "No information available",
-                    -- triggered when Eslint isn't installed
-                    "Unable to find ESLint library",
-                    "eslint: -32603", -- no eslint config found
-                    "Could not find config file",
-                    "Content is not an image",
-                    -- ACP from Avante
-                    "Spawning Claude Code process",
-                    "ACP stderr: Error: The provided `old_string` does not appear in the file",
-                    "ACP stderr: Progress",
-                    "ACP stderr: Packages",
-                }
+            bufdelete = {
+                enabled = true,
+            },
 
-                for _, pattern in ipairs(patterns) do
-                    if string.find(notif.msg, pattern) then
-                        return false
+            bigfile = {
+                enabled = true,
+                size = 3 * 1024 * 1024,
+                line_length = 600, -- average line length (useful for minified files)
+            },
+
+            notifier = {
+                enabled = true,
+                timeout = 6000,
+                margin = { top = 1, right = 1, bottom = 0 },
+                filter = function(notif)
+                    local patterns = {
+                        -- LSP Hover was triggering this but it was working normally
+                        "No information available",
+                        -- triggered when Eslint isn't installed
+                        "Unable to find ESLint library",
+                        "eslint: -32603", -- no eslint config found
+                        "Could not find config file",
+                        "Content is not an image",
+                        -- ACP from Avante
+                        "Spawning Claude Code process",
+                        "ACP stderr: Error: The provided `old_string` does not appear in the file",
+                        "ACP stderr: Progress",
+                        "ACP stderr: Packages",
+                    }
+
+                    for _, pattern in ipairs(patterns) do
+                        if string.find(notif.msg, pattern) then
+                            return false
+                        end
                     end
-                end
-                return true
-            end,
-        },
-
-        scroll = { enabled = false },
-
-        statuscolumn = { enabled = true },
-
-        indent = { enabled = false },
-
-        gitbrowse = {
-            what = "permalink",
-            notify = false,
-
-            config = function(opts, _defaults)
-                -- it seems to be called twice, but I use it so little that I don't care, for now
-                -- I had to add this, because the config doesn't merge array like objects
-                table.insert(
-                    opts.remote_patterns,
-                    { "^%S+-github:(.+)%.git$", "https://github.com/%1" }
-                )
-            end,
-
-            open = function(url)
-                vim.fn.setreg("+", url)
-                Snacks.notify.info("Link copied to clipboard:\n" .. url, {
-                    title = "Snacks - GitBrowse",
-                    icon = "🔗 ",
-                    timeout = 5000,
-                })
-            end,
-        },
-
-        image = {
-            enabled = true,
-            formats = {
-                "avi",
-                "avif",
-                "bmp",
-                "gif",
-                "heic",
-                "ico",
-                "jpeg",
-                "jpg",
-                "mkv",
-                "mov",
-                "mp4",
-                "pdf",
-                "png",
-                -- "svg",
-                "tiff",
-                "webm",
-                "webp",
-            },
-            doc = {
-                enabled = false,
-                inline = false,
-                float = true,
-            },
-        },
-
-        picker = {
-            ui_select = true, -- replace `vim.ui.select` with the snacks picker
-
-            matcher = {
-                fuzzy = true,
-                smartcase = true,
-                frecency = false,
-                history_bonus = false,
-            },
-
-            actions = {
-                add_iglob = function(picker)
-                    local search = picker.input.filter.search
-                    local prefix = ""
-
-                    if not string.find(search, " %-%- ") then
-                        prefix = " -- "
-                    end
-
-                    picker.input:set(nil, search .. prefix .. " --iglob ")
+                    return true
                 end,
+            },
 
-                exclude_test_files = function(picker)
-                    local search = picker.input.filter.search
-                    local prefix = ""
+            scroll = { enabled = false },
 
-                    if not string.find(search, " %-%- ") then
-                        prefix = " -- "
-                    end
+            statuscolumn = { enabled = true },
 
-                    picker.input:set(
-                        nil,
-                        search .. prefix .. " --iglob !**.{test,spec}.**"
+            indent = { enabled = false },
+
+            gitbrowse = {
+                what = "permalink",
+                notify = false,
+
+                config = function(opts, _defaults)
+                    -- it seems to be called twice, but I use it so little that I don't care, for now
+                    -- I had to add this, because the config doesn't merge array like objects
+                    table.insert(
+                        opts.remote_patterns,
+                        { "^%S+-github:(.+)%.git$", "https://github.com/%1" }
                     )
                 end,
+
+                open = function(url)
+                    vim.fn.setreg("+", url)
+                    Snacks.notify.info("Link copied to clipboard:\n" .. url, {
+                        title = "Snacks - GitBrowse",
+                        icon = "🔗 ",
+                        timeout = 5000,
+                    })
+                end,
             },
 
-            layouts = {
-                default = {
-                    layout = {
-                        box = "horizontal",
-                        width = 0.97,
-                        min_width = 120,
-                        height = 0.9,
-                        {
-                            box = "vertical",
-                            border = "rounded",
-                            title = "{title} {live} {flags}",
+            image = {
+                enabled = true,
+                formats = {
+                    "avi",
+                    "avif",
+                    "bmp",
+                    "gif",
+                    "heic",
+                    "ico",
+                    "jpeg",
+                    "jpg",
+                    "mkv",
+                    "mov",
+                    "mp4",
+                    "pdf",
+                    "png",
+                    -- "svg",
+                    "tiff",
+                    "webm",
+                    "webp",
+                },
+                doc = {
+                    enabled = false,
+                    inline = false,
+                    float = true,
+                },
+            },
+
+            picker = {
+                ui_select = true, -- replace `vim.ui.select` with the snacks picker
+
+                matcher = {
+                    fuzzy = true,
+                    smartcase = true,
+                    frecency = false,
+                    history_bonus = false,
+                },
+
+                actions = {
+                    add_iglob = function(picker)
+                        local search = picker.input.filter.search
+                        local prefix = ""
+
+                        if not string.find(search, " %-%- ") then
+                            prefix = " -- "
+                        end
+
+                        picker.input:set(nil, search .. prefix .. " --iglob ")
+                    end,
+
+                    exclude_test_files = function(picker)
+                        local search = picker.input.filter.search
+                        local prefix = ""
+
+                        if not string.find(search, " %-%- ") then
+                            prefix = " -- "
+                        end
+
+                        picker.input:set(
+                            nil,
+                            search .. prefix .. " --iglob !**.{test,spec}.**"
+                        )
+                    end,
+                },
+
+                layouts = {
+                    default = {
+                        layout = {
+                            box = "horizontal",
+                            width = 0.97,
+                            min_width = 120,
+                            height = 0.9,
                             {
-                                win = "input",
-                                height = 1,
-                                border = "bottom",
+                                box = "vertical",
+                                border = "rounded",
+                                title = "{title} {live} {flags}",
+                                {
+                                    win = "input",
+                                    height = 1,
+                                    border = "bottom",
+                                },
+                                { win = "list", border = "none" },
                             },
-                            { win = "list", border = "none" },
+                            {
+                                win = "preview",
+                                title = "{preview:Preview}",
+                                border = "rounded",
+                                width = 0.55,
+                            },
                         },
-                        {
-                            win = "preview",
-                            title = "{preview:Preview}",
-                            border = "rounded",
-                            width = 0.55,
+                    },
+                },
+
+                previewers = {
+                    file = {
+                        max_size = 1024 * 1024 * 5,
+                    },
+                },
+
+                win = {
+                    input = {
+                        keys = {
+                            ["<a-r>"] = { -- not docummented, but works
+                                "toggle_regex",
+                                mode = { "i", "n" },
+                                desc = "Toggle Regex",
+                            },
+                            ["<C-h>"] = {
+                                "toggle_help_input",
+                                mode = { "i", "n" },
+                            },
+                            ["<C-l>"] = { "add_iglob", mode = { "i", "n" } },
+                            ["<C-e>"] = {
+                                "exclude_test_files",
+                                mode = { "i", "n" },
+                            },
+                        },
+                    },
+
+                    preview = {
+                        keys = {
+                            ["<CR>"] = "confirm",
                         },
                     },
                 },
             },
 
-            previewers = {
-                file = {
-                    max_size = 1024 * 1024 * 5,
-                },
-            },
-
-            win = {
+            styles = {
                 input = {
-                    keys = {
-                        ["<a-r>"] = { -- not docummented, but works
-                            "toggle_regex",
-                            mode = { "i", "n" },
-                            desc = "Toggle Regex",
-                        },
-                        ["<C-h>"] = { "toggle_help_input", mode = { "i", "n" } },
-                        ["<C-l>"] = { "add_iglob", mode = { "i", "n" } },
-                        ["<C-e>"] = {
-                            "exclude_test_files",
-                            mode = { "i", "n" },
-                        },
+                    relative = "cursor",
+                    row = -3,
+                    col = 0,
+                },
+                notification = {
+                    relative = "editor",
+                    wo = {
+                        wrap = true,
                     },
                 },
-
-                preview = {
-                    keys = {
-                        ["<CR>"] = "confirm",
+                notification_history = {
+                    relative = "editor",
+                    wo = {
+                        wrap = true,
                     },
                 },
             },
+        }
 
-            on_close = function(picker)
-                P.store_picker_in_history(picker)
-            end,
-        },
-
-        styles = {
-            input = {
-                relative = "cursor",
-                row = -3,
-                col = 0,
-            },
-            notification = {
-                relative = "editor",
-                wo = {
-                    wrap = true,
-                },
-            },
-            notification_history = {
-                relative = "editor",
-                wo = {
-                    wrap = true,
-                },
-            },
-        },
-    },
+        return opts
+    end,
 
     keys = {
         {
@@ -367,7 +385,9 @@ local M = {
         {
             "<leader>f",
             function()
-                Snacks.picker.grep(customGrepOptions)
+                Snacks.picker.grep(
+                    vim.tbl_extend("force", {}, customGrepOptions)
+                )
             end,
             desc = "Live Grep all files - Snacks",
         },
@@ -375,7 +395,9 @@ local M = {
         {
             "<leader>f",
             function()
-                Snacks.picker.grep_word(customGrepOptions)
+                Snacks.picker.grep_word(
+                    vim.tbl_extend("force", {}, customGrepOptions)
+                )
             end,
             desc = "Live Grep all files - Snacks",
             mode = { "v", "x" },
@@ -505,11 +527,11 @@ local M = {
     end,
 }
 
----@param picker snacks.picker.Last
-local function make_history_item_text(picker)
-    local prefix = picker.opts.title or picker.opts.source or "unknown source"
-    local pattern = picker.filter.pattern or ""
-    local search = picker.filter.search or ""
+---@param state snacks.picker.resume.State
+local function make_history_item_text(state)
+    local prefix = state.opts.title or state.opts.source or "unknown source"
+    local pattern = state.filter.pattern or ""
+    local search = state.filter.search or ""
     local text = prefix .. " | " .. pattern .. " > " .. search
     return text
 end
@@ -576,43 +598,39 @@ function P.grep_on_dir()
     })
 end
 
--- FIXIT: it seems Folke removed the `.last` field, so this code doesn't work anymore
+--- @param state snacks.picker.resume.State
+function P.store_picker_in_history(state)
+    local source = state.opts.source
+    if
+        source
+        and not source:find("^lsp_")
+        and not vim.tbl_contains({
+            -- allowed list, not block
+            "grep",
+            "grep_word",
+            "lines",
+        }, source)
+    then
+        return
+    end
 
---- @param picker snacks.Picker
-function P.store_picker_in_history(picker)
-    -- I've to schedule  because on_close is called before `last` is set
-    vim.schedule(function()
-        local last = require("snacks.picker.core.picker").last
+    local text = make_history_item_text(state)
 
-        if
-            not last
-            or not vim.tbl_contains({ -- allowed list, not block
-                "grep",
-                "grep_word",
-                "lines",
-            }, picker.opts.source)
-        then
-            return
+    -- Remove the old picker if canse a new one with the same parameters is run
+    for i, p in ipairs(P.Snacks_picker_hist) do
+        local label = make_history_item_text(p)
+
+        if label == text then
+            table.remove(P.Snacks_picker_hist, i)
+            break
         end
+    end
 
-        local text = make_history_item_text(last)
+    table.insert(P.Snacks_picker_hist, 1, state)
 
-        -- Remove the old picker if canse a new one with the same parameters is run
-        for i, p in ipairs(P.Snacks_picker_hist) do
-            local label = make_history_item_text(p)
-
-            if label == text then
-                table.remove(P.Snacks_picker_hist, i)
-                break
-            end
-        end
-
-        table.insert(P.Snacks_picker_hist, 1, last)
-
-        if #P.Snacks_picker_hist >= 20 then
-            table.remove(P.Snacks_picker_hist, 20)
-        end
-    end)
+    if #P.Snacks_picker_hist >= 20 then
+        table.remove(P.Snacks_picker_hist, 20)
+    end
 end
 
 function P.history_picker()
@@ -623,26 +641,28 @@ function P.history_picker()
             finder = function()
                 local items = {} ---@type snacks.picker.finder.Item[]
 
-                for _, picker in ipairs(P.Snacks_picker_hist) do
-                    local text = make_history_item_text(picker)
+                for _, state in ipairs(P.Snacks_picker_hist) do
+                    local text = make_history_item_text(state)
 
                     table.insert(items, {
-                        data = { picker = picker },
+                        data = { state = state },
                         text = text,
                     })
                 end
 
                 return items
             end,
-            confirm = function(picker, item)
-                picker:close()
+            confirm = function(historyPicker, item)
+                historyPicker:close()
 
                 if not item then
                     return
                 end
 
-                require("snacks.picker.core.picker").last = item.data.picker
-                Snacks.picker.resume()
+                vim.schedule(function()
+                    local resume = require("snacks.picker.resume")
+                    resume._resume(item.data.state)
+                end)
             end,
             format = function(item, _)
                 local ret = {}
