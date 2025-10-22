@@ -13,7 +13,9 @@ return {
         "nvim-lua/plenary.nvim",
         -- "folke/trouble.nvim",
     },
+
     event = "VeryLazy",
+
     keys = {
         {
             "<leader>xt",
@@ -23,8 +25,12 @@ return {
         },
         {
             "<leader>tt",
-            "<cmd>TodoTelescope keywords=FIXIT<cr>",
-            desc = "Telescope FIX list ",
+            function()
+                Snacks.picker.todo_comments({
+                    keywords = { "FIXIT" },
+                })
+            end,
+            desc = "FIXIT Todo Comments - Snacks",
             silent = true,
         },
     },
