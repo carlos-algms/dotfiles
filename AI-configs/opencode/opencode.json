@@ -7,6 +7,7 @@
     "edit": "ask",
     "webfetch": "allow",
     "bash": {
+      "*": "ask",
       "ls": "allow",
       "fd": "allow",
       "rg": "allow",
