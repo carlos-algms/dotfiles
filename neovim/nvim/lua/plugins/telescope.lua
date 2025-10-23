@@ -118,12 +118,12 @@ local M = {
                 silent = true,
             },
 
-            {
-                "<leader>cm",
-                "<cmd>Telescope filetypes<CR>",
-                desc = "Change file type",
-                silent = true,
-            },
+            -- {
+            --     "<leader>cm",
+            --     "<cmd>Telescope filetypes<CR>",
+            --     desc = "Change file type",
+            --     silent = true,
+            -- },
 
             {
                 "<leader>tg",

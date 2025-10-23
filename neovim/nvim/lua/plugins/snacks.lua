@@ -55,7 +55,6 @@ local M = {
         local opts = {
             input = {
                 enabled = true,
-                relative = "cursor",
             },
 
             bufdelete = {
@@ -511,6 +510,14 @@ local M = {
             end,
             desc = "Search for symbol in workspace - Snacks",
         },
+
+        {
+            "<leader>cm",
+            function()
+                P.file_type_picker()
+            end,
+            desc = "Change current buffer filetype - Snacks",
+        },
     },
 
     init = function()
@@ -709,6 +716,47 @@ function P.history_picker()
                     { win = "list", border = "none" },
                     { win = "input", height = 1, border = "top" },
                 },
+            },
+        }
+    )
+end
+
+function P.file_type_picker()
+    Snacks.picker.pick(
+        ---@type snacks.picker.Config
+        {
+            source = "history_picker",
+            finder = function()
+                local items = {} ---@type snacks.picker.finder.Item[]
+                local filetypes = vim.fn.getcompletion("", "filetype")
+
+                for _, text in ipairs(filetypes) do
+                    table.insert(items, {
+                        data = text,
+                        text = text,
+                    })
+                end
+
+                return items
+            end,
+            confirm = function(historyPicker, item)
+                historyPicker:close()
+
+                if not item then
+                    return
+                end
+
+                vim.schedule(function()
+                    vim.bo.filetype = item.data
+                end)
+            end,
+            format = function(item, _)
+                local ret = {}
+                ret[#ret + 1] = { item.text }
+                return ret
+            end,
+            layout = {
+                preset = "select",
             },
         }
     )
