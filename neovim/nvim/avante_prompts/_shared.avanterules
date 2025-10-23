@@ -659,7 +659,7 @@ These are commands you can run to delegate tasks to another CLI:
 
 - **gemini**: `gemini -p "<full prompt>"`
 - **codex**: `codex --search exec "<full prompt>"`
-- **claude-code**: `claude --permission-mode=auto -p "<full prompt>"`
+- **claude-code**: `claude -p "<full prompt>"`
 
 If you need to add files to the prompt, use `@` and the relative file path. like:
 
@@ -669,3 +669,14 @@ codex --search exec "Review the code in @src/components/Button.tsx"
 gemini -p "Create tests for the file @src/utils/helpers.ts"
 ## etc...
 ```
+
+If the task requires Internet research, even it seems like live-data, and you don't have access to a `web_search`, `WebSearch`,
+or similar tool to research the internet (`curl` isn't a search tool),
+you can ask Gemini first, or Claude if it fails, to do it for you, like:
+
+```bash
+gemini -p "Research the internet about <topic>, provide a summary of findings, and relevant links."
+```
+
+Since web search could be a slow process, if possible, increase your timeout to at least 60 seconds.
+Also make sure to include in the prompt for it to include relevant links, sources, from where it got the information from.
