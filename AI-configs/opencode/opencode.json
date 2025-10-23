@@ -9,12 +9,12 @@
     "bash": {
       "*": "ask",
       "ls": "allow",
-      "fd": "allow",
-      "rg": "allow",
-      "find": "allow",
+      "fd *": "allow",
+      "rg *": "allow",
       "pwd": "allow",
-      "git status": "allow",
-      "git diff": "allow"
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git rev-parse*": "allow"
     }
   },
 
@@ -39,6 +39,33 @@
           "name": "Qwen 3 Coder 30B"
         }
       }
+    }
+  },
+
+  "formatter": {
+    "prettier": {
+      "disabled": true
+    },
+    "custom-prettier": {
+      "command": ["prettier", "--write", "$FILE"],
+      "environment": {},
+      "extensions": [
+        ".js",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".mjs",
+        ".mts",
+        ".json",
+        ".jsonc",
+        ".css",
+        ".scss",
+        ".md",
+        ".html",
+        ".yaml",
+        ".yml",
+        ".svg"
+      ]
     }
   }
 }
