@@ -79,10 +79,20 @@ You **MUST** research the internet to find up-to-date information.
     you must send the full commit message as a text snippet using triple backticks and markdown format
   - Then, as the final step ask for commit approval using a tool I can confirm
 
-## File reading and writing protocol
+## Files system Protocol
 
 - Use a proper tool call to read, view, and write files, never use `cat`, `echo`, `python`, or similar bash commands
+
 - You have access to a grep tool as well, prefer using it to find content inside files, instead of combining `cat` and `grep` with Bash.
+
+- Don't use Bash or `cat`, neither similar tools to read, or view files, use a proper tool call
+
+- If you don't have access to a `find`, or `grep` tool to use, use `fd` instead of `find`, `rg` instead of `grep`,
+  as they are faster, have better defaults, and respect .gitignore
+  - pay attention to the extension filter syntax, `fd -e ts`, as variantes like `tsx` will be included as well, if you include `tsx` in the command it will fail
+
+- Use bash features instead of calling external tools when possible, prefer `sed`, `awk`, and other commands, built-in bash string manipulation, etc,
+  unless the user explicitly requests otherwise
 
 ## Code Change Protocol
 
@@ -631,12 +641,31 @@ function MyComponent(): JSX.Element {
   - NEVER nest class or id selectors
   - ALWAYS nest pseudo-classes, pseudo-elements, and media queries, using `&` to avoid repetition
 
-## Bash execution and writing protocol
+## Bash script Protocol
 
-- Don't use bash or `cat`, neither similar tools to read, or view files, use a proper tool call
+- Offer to add a trap or cleanup functions if the user don't have already
+- Prefer using `sed`, `awk`, `jq`, and other built-in bash string manipulation instead of calling external tools like python, node, etc...
 
-- Use `fd` instead of `find`, `rg` instead of `grep`, as they are faster, have better defaults, and respect .gitignore
-  - pay attention to the extension filter syntax, `fd -e ts`, as variations like `tsx` don't exist, `ts` already includes `tsx`.
+# Additional tools and commands
 
-- Use bash features instead of calling external tools when possible, prefer `sed`, `awk`, and other commands, built-in bash string manipulation, etc,
-  unless the user explicitly requests otherwise
+## Other AI CLIs
+
+You can act as an orchestrator agent, coordinating one or multiple subagents to perform complex tasks, if I ask you to do so.
+
+IMPORTANT: be cautious when building the prompts for the AI CLIs,
+make sure to mention to not make file changes if the task is only a question, plan, review, analysis, summary, etc...
+
+These are commands you can run to delegate tasks to another CLI:
+
+- **gemini**: `gemini -p "<full prompt>"`
+- **codex**: `codex --search exec "<full prompt>"`
+- **claude-code**: `claude --permission-mode=auto -p "<full prompt>"`
+
+If you need to add files to the prompt, use `@` and the relative file path. like:
+
+```bash
+codex --search exec "Review the code in @src/components/Button.tsx"
+## OR
+gemini -p "Create tests for the file @src/utils/helpers.ts"
+## etc...
+```
