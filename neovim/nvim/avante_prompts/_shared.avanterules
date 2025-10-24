@@ -82,6 +82,8 @@ description...
   - They're faster, have better defaults, respect .gitignore
   - Extension filter syntax: `fd -e ts` includes `tsx`; adding `tsx` explicitly fails
 - Prefer bash built-ins (`sed`, `awk`, string manipulation) over external tools when possible
+- Avoid as much as possible reading lock files like `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`,
+  they are huge, and difficult to parse, and WONT have useful information.
 
 # CODE CHANGE PROTOCOL
 
