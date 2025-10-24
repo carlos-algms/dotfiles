@@ -26,9 +26,10 @@ ln -s $(pwd)/AI-configs/gemini/settings.json ~/.gemini/settings.json
 https://opencode.ai/docs/config/
 
 ```bash
-mkdir -p ~/.config/opencode/
-ln -s $(pwd)/AI-configs/opencode/{opencode.json,agent,command,tool} ~/.config/opencode/
-ln -s $(pwd)/neovim/nvim/avante_prompts/_shared.avanterules ~/.config/opencode/AGENTS.md
+mkdir -p ~/.config
+ln -s $(pwd)/AI-configs/opencode ~/.config/opencode
+## PS: check next time if the AGENTS.md link is still needed
+# ln -s $(pwd)/neovim/nvim/avante_prompts/_shared.avanterules ~/.config/opencode/AGENTS.md
 ```
 
 ## crush AI cli

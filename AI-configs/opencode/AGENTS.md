@@ -1,0 +1,1 @@
+/Users/carlos.gomes/projects/dotfiles/neovim/nvim/avante_prompts/_shared.avanterules
