@@ -33,3 +33,6 @@ Use relative location like "at the top", "at the bottom", "in the middle",
 Write the plan to a markdown file, derive the file name from the goal and prefix
 it with `plan-`, the file should be saved next to the selected file, or in the
 current working directory.
+
+If I don't provide a goal, or an description of what I want to achieve, ask me
+and wait for the next message
