@@ -4,47 +4,52 @@
   "autoupdate": false,
 
   "permission": {
-    "edit": "ask",
-    "webfetch": "allow",
-    "bash": {
-      "*": "ask",
-      "ls": "allow",
-      "fd *": "allow",
-      "rg *": "allow",
-      "pwd": "allow",
-      "git status*": "allow",
-      "git diff*": "allow",
-      "git rev-parse*": "allow"
-    }
+    // waiting for https://github.com/sst/opencode/pull/3403
+    // disabled to use it in Avante
+    // "edit": "ask",
+    // "webfetch": "allow",
+    // "bash": {
+    //   "*": "ask",
+    //   "ls": "allow",
+    //   "fd *": "allow",
+    //   "rg *": "allow",
+    //   "pwd": "allow",
+    //   "git status*": "allow",
+    //   "git diff*": "allow",
+    //   "git rev-parse*": "allow",
+    // },
   },
 
   "model": "anthropic/claude-sonnet-4-5",
   "small_model": "anthropic/claude-haiku-4-5",
 
+  // instructions are merged with AGENTS.md
+  // "instructions": ["~/.config/opencode/rules/*.md"],
+
   "provider": {
     "anthropic": {
       "models": {},
       "options": {
-        "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}"
-      }
+        "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}",
+      },
     },
 
     "lmstudio": {
       "name": "LM Studio (local)",
       "options": {
-        "baseURL": "http://localhost:1234/v1"
+        "baseURL": "http://localhost:1234/v1",
       },
       "models": {
         "qwen/qwen3-coder-30b": {
-          "name": "Qwen 3 Coder 30B"
-        }
-      }
-    }
+          "name": "Qwen 3 Coder 30B",
+        },
+      },
+    },
   },
 
   "formatter": {
     "prettier": {
-      "disabled": true
+      "disabled": true,
     },
     "custom-prettier": {
       "command": ["prettier", "--write", "$FILE"],
@@ -64,8 +69,8 @@
         ".html",
         ".yaml",
         ".yml",
-        ".svg"
-      ]
-    }
-  }
+        ".svg",
+      ],
+    },
+  },
 }

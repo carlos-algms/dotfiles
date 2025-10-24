@@ -28,8 +28,7 @@ https://opencode.ai/docs/config/
 ```bash
 mkdir -p ~/.config
 ln -s $(pwd)/AI-configs/opencode ~/.config/opencode
-## PS: check next time if the AGENTS.md link is still needed
-# ln -s $(pwd)/neovim/nvim/avante_prompts/_shared.avanterules ~/.config/opencode/AGENTS.md
+ln -s $(pwd)/neovim/nvim/avante_prompts/_shared.avanterules ~/.config/opencode/AGENTS.md
 ```
 
 ## crush AI cli
