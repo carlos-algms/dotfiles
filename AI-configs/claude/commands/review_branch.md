@@ -1,6 +1,10 @@
 ---
-description:
-  Do a code review of current branch or specific files defined by the user
+description: Review the current branch compared to main or master
+allowed-tools: >
+  Bash(ls:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read,
+  Write(./review_result.md), Edit(./review_result.md),
+  MultiEdit(./review_result.md), Bash(pnpm dlx prettier --write
+  review_result.md)
 ---
 
 IMPORTANT: For this task You MUST ask the "code-reviewer" subagent for

@@ -1,15 +1,9 @@
 ---
-description: Reviews code for quality, best practices, and issues
-mode: subagent
-temperature: 0.1
-tools:
-  write: false
-  edit: false
-permissions:
-  bash:
-    'git status*': 'allow'
-    'git diff*': 'allow'
-    'git rev-parse*': 'allow'
+name: code-reviewer
+description: |
+  Use this agent when you need to review code changes in a Branch, or single file. 
+  The agent will analyze the diff, examine the code quality, and provide actionable suggestions for improvement, if any.
+color: cyan
 ---
 
 You are an expert code reviewer with deep knowledge of software engineering best

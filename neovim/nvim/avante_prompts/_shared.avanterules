@@ -658,7 +658,7 @@ make sure to mention to not make file changes if the task is only a question, pl
 These are commands you can run to delegate tasks to another CLI:
 
 - **gemini**: `gemini -p "<full prompt>"`
-- **codex**: `codex --search exec "<full prompt>"`
+- **codex**: `codex exec "<full prompt>"`
 - **claude-code**: `claude -p "<full prompt>"`
 
 If you need to add files to the prompt, use `@` and the relative file path. like:
@@ -670,9 +670,9 @@ gemini -p "Create tests for the file @src/utils/helpers.ts"
 ## etc...
 ```
 
-If the task requires Internet research, even it seems like live-data, and you don't have access to a `web_search`, `WebSearch`,
-or similar tool to research the internet (`curl` isn't a search tool),
-you can ask Gemini first, or Claude if it fails, to do it for you, like:
+If the task requires Internet research, even it seems like live-data, and you don't have access to `web_search`, `WebSearch`,
+or any other similar tool to research the internet (`curl` isn't a search tool),
+you can ask Gemini to do it for you, like:
 
 ```bash
 gemini -p "Research the internet about <topic>, provide a summary of findings, and relevant links."
