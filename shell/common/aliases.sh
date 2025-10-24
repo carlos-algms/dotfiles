@@ -45,7 +45,9 @@ alias yf="yarn --frozen-lockfile "
 alias yff="yf --force "
 alias clear-node-modules="find . -type d -name node_modules -prune | awk '{print length(\$0), \$0}' | sort -rn | cut -d' ' -f2- | xargs -L 1 -I % sh -c 'echo %; rm -rf %'"
 
-alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist|vendor'"
+if ! alias tree &>/dev/null; then
+  alias tree="tree -C --dirsfirst -I 'node_modules|build|public|dist|vendor|.next|.turbo'"
+fi
 
 ## adding watch so it can use other aliases
 alias watch="watch "
