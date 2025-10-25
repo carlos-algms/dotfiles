@@ -2,12 +2,7 @@
 return {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    dependencies = { "hrsh7th/nvim-cmp" },
     config = function()
         require("nvim-autopairs").setup({})
-        -- If you want to automatically add `(` after selecting a function or method
-        local cmp_autoPairs = require("nvim-autopairs.completion.cmp")
-        local cmp = require("cmp")
-        cmp.event:on("confirm_done", cmp_autoPairs.on_confirm_done())
     end,
 }
