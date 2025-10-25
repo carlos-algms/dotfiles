@@ -13,6 +13,8 @@ return {
                 "kristijanhusak/vim-dadbod-completion",
                 ft = { "sql", "mysql", "plsql" },
             },
+
+            { "Kaiser-Yang/blink-cmp-avante" },
         },
 
         ---@module 'blink.cmp'
@@ -25,14 +27,28 @@ return {
 
                     per_filetype = {
                         sql = { inherit_defaults = true, "dadbod" },
-                        -- optionally inherit from the `default` sources
-                        -- lua = { inherit_defaults = true, "lazydev" },
+                        AvanteInput = { "avante" },
+                        lua = { inherit_defaults = true, "lazydev" },
                     },
 
                     providers = {
                         dadbod = {
                             name = "Dadbod",
                             module = "vim_dadbod_completion.blink",
+                        },
+
+                        avante = {
+                            module = "blink-cmp-avante",
+                            name = "Avante",
+                            opts = {
+                                -- options for blink-cmp-avante
+                            },
+                        },
+
+                        lazydev = {
+                            name = "LazyDev",
+                            module = "lazydev.integrations.blink",
+                            score_offset = 100,
                         },
                     },
                 },
