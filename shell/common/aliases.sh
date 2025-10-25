@@ -89,12 +89,5 @@ if command -v zoxide >/dev/null 2>&1 && [ "$DISABLE_ZOXIDE" != "1" ]; then
     eval "$(zoxide init bash)"
   fi
 
-  ## Fix fo claude-code not working with zoxide
-  cd() {
-    if [ "$DISABLE_ZOXIDE" = "1" ]; then
-      builtin cd "$@"
-    else
-      z "$@"
-    fi
-  }
+  alias cd="z "
 fi
