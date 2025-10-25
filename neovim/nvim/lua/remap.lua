@@ -28,6 +28,13 @@ end, { desc = "Toggle line wrapping locally" })
 setKeymap("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
 setKeymap("v", [[a']], [[2i']], { desc = "Select single quoted text" })
 
+setKeymap(
+    { "v" },
+    "<Leader>cs",
+    ":'<,'>!sort -f<CR>",
+    { desc = "Sort selected lines" }
+)
+
 -- Tabs management
 setKeymap(
     "n",
