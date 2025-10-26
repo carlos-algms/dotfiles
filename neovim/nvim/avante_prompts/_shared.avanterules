@@ -7,6 +7,7 @@
 - When rejection occurs (tool call/suggestion): stop current plan, ask for direction, do not continue
 - When input is needed: stop, ask, wait for response
 - If `attempt_completion` tool exists: call it with reason for stopping, end turn
+- Execute git operations ONLY when explicitly requested.
 
 # COMMUNICATION STANDARDS
 
@@ -20,621 +21,6 @@
   - Call with "done" or empty if response already sent
   - Do not duplicate greetings/casual responses
 - Emojis allowed and encouraged
-
-# INTERNET RESEARCH
-
-Your Knowledge cutoff is in the past. Research internet for current information.
-
-- Fetch links thoroughly, follow relevant links within content recursively
-- When given URL: retrieve and analyze content
-  - Prefer a fetch tool if available, over `curl` or similar
-- Continue gathering information until complete understanding achieved
-
-# GIT PROTOCOL
-
-Execute git operations ONLY when explicitly requested.
-
-## Commit Messages
-
-- Never use `git log` to infer message style
-- Use imperative mood, concise, clear, descriptive
-- Standard markdown only, no special characters
-- Title: ≤70 characters (including type, scope, parens, colon, spaces)
-- Multi-change commits: bulleted list in description, each line ≤72 characters
-- Never include: co-authors, sign-offs, AI attribution
-
-### Standard Format
-
-```
-title
-
-description....
-```
-
-### Conventional Commit Format
-
-```
-type(scope): subject
-
-description...
-```
-
-**Rules:**
-
-- Infer type from changes; if unable, ask and wait
-- Scope sources: user-provided, ticket ID matching `[A-Z]{3}-[0-9]+`, branch name (if not main/master)
-- If scope unavailable: ask and wait
-
-## Commit Workflow
-
-1. Check for confirmation tool availability
-2. Check staged files; if none, ask to stage all modified files
-3. Use `git add .` (not individual file names)
-4. Generate commit message per protocol
-5. Display full commit message in chat using triple backticks
-6. Request approval via confirmation tool to commit, even if previously approved
-
-# FILE SYSTEM PROTOCOL
-
-- Use dedicated tools for file operations: never `cat`, `echo`, `python`, or similar bash commands
-- Use grep tool for content search (not `cat` + `grep`)
-- When find/grep tools unavailable: use `fd` (not `find`), `rg` (not `grep`)
-  - They're faster, have better defaults, respect .gitignore
-  - Extension filter syntax: `fd -e ts` includes `tsx`; adding `tsx` explicitly fails
-- Prefer bash built-ins (`sed`, `awk`, string manipulation) over external tools when possible
-- Avoid as much as possible reading lock files like `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`,
-  they are huge, and difficult to parse, and WONT have useful information.
-
-# CODE CHANGE PROTOCOL
-
-- Make minimal, focused, reviewable changes
-- Prefer small diffs for readability
-- Apply similar changes (function/variable renames, pattern replacements, import updates) in single operation, even if spanning multiple lines
-- Preserve existing functionality unless explicitly requested otherwise
-- Write documentation/README only when explicitly requested
-- If new file is rejected: delete immediately
-- Show code examples using markdown triple backticks (correct type); never apply changes to show examples
-
-# PRE-CHANGE REVIEW PROTOCOL
-
-Before making/suggesting code changes:
-
-1. Review solution against all protocols
-2. Verify compliance with language/technology-specific rules
-3. Do NOT proceed until fully compliant
-
-# PACKAGE MANAGER DETECTION
-
-Before running pnpm, npm, or npx, follow this sequence:
-
-1. Detect monorepo; run commands in closest workspace (folder with package.json)
-2. Check lock files: `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `yarn.lock`, `package-lock.json`
-3. Check `packageManager` field in root `package.json`, not the closest to the working file
-4. If uncertain: ask which package manager to use
-
-# UNIT TESTING PROTOCOL
-
-## Test Framework Detection
-
-Never assume Jest or Vitest. Detect framework:
-
-1. Check config files: `vitest.config.*`, `jest.config.*`
-2. Inspect dependencies in `package.json` (workspace-specific in monorepos)
-3. Grep test scripts in package.json (usually contain `jest` or `vitest`)
-4. Check test file imports
-
-## Running Tests
-
-Run relevant tests only unless explicitly requested otherwise:
-
-<example type="good">
-
-```bash
-pnpm run test path/to/file.test.ts
-# or
-npm run test path/to/file.test.ts
-```
-
-</example>
-
-<example type="good" environment="monorepo">
-
-```bash
-cd apps/demo-app && pnpm run test path/to/file.test.ts
-# or
-cd apps/demo-app && npm run test path/to/file.test.ts
-```
-
-</example>
-
-For all tests, prefer `test` script in closest `package.json`:
-
-<example type="good">
-
-```bash
-pnpm run test
-# or
-npm run test
-```
-
-</example>
-
-<example type="good" environment="monorepo">
-
-```bash
-cd apps/demo-app && pnpm run test
-# or
-cd apps/demo-app && npm run test
-```
-
-</example>
-
-# TYPESCRIPT & JAVASCRIPT PROTOCOL
-
-## Type Checking
-
-When iterating solutions (not reviewing code):
-
-- Detect package manager per protocol
-- Run `<package-manager> exec tsc --noEmit` to check errors
-
-<example type="good">
-
-```bash
-pnpm tsc --noEmit
-# or
-npm exec tsc --noEmit
-```
-
-</example>
-
-<example type="good" environment="monorepo">
-
-```bash
-cd apps/demo-app && pnpm tsc --noEmit
-# or
-cd apps/demo-app && npm exec tsc --noEmit
-```
-
-</example>
-
-## Code Block Types
-
-- Pure TypeScript: use `ts`
-- TypeScript with JSX/React: use `tsx`
-
-## Style Rules
-
-- Early returns over nested conditionals
-- Named functions over arrow functions (except callbacks/one-liners)
-- Strict equality: `===`, `!==` exclusively
-- `const` for non-changing variables
-- `async/await` over `.then()`
-- Never use `any` type - grep and find specific types
-- `import type` for type-only imports
-- Always use curly braces for `if` statements
-- Never create an index.ts file to do barrel exports
-- Never write code in an index.ts(x) file, give it a specific name
-- Use `satisfies never` in switch default for exhaustiveness checking
-- Prefer `satisfies <Type>` over type casting for traceability
-
-## Examples
-
-<example type="good" kind="early-return">
-
-```ts
-function process(data: DataType | null) {
-  if (!data) {
-    return;
-  }
-  // process data
-}
-```
-
-</example>
-
-<example type="bad">
-
-```ts
-function process(data: DataType | null) {
-  if (data) {
-    // process data
-  }
-}
-```
-
-</example>
-
-<example type="good" kind="named-function">
-
-```ts
-function add(a: number, b: number): number {
-  return a + b;
-}
-// One-liner arrow function: acceptable
-const add = (a: number, b: number): number => a + b;
-```
-
-</example>
-
-<example type="bad">
-
-```ts
-const add = (a: number, b: number): number => {
-  return a + b;
-};
-```
-
-</example>
-
-<example type="good" kind="type-only-imports">
-
-```ts
-import type { MyType } from './types';
-import { type ReactNode } from 'react';
-```
-
-</example>
-
-<example type="good" kind="exhaustiveness-checking">
-
-```ts
-function factory(target: 'a' | 'b'): A | B | null {
-  switch (target) {
-    case 'a':
-      return new A();
-    case 'b':
-      return new B();
-    default:
-      target satisfies never;
-      return null;
-  }
-}
-```
-
-</example>
-
-<example type="good" kind="satisfies-traceability">
-
-```ts
-const myObject = {
-  key: 'value',
-} satisfies Record<string, string>;
-
-interface MyInterface {
-  key: string;
-}
-const myObject2: MyInterface = {
-  key: 'value',
-};
-```
-
-</example>
-
-<example type="bad">
-
-```ts
-const myObject: Record<string, string> = {
-  key: 'value',
-};
-```
-
-</example>
-
-<example type="good" kind="async-await">
-
-```ts
-async function fetchData() {
-  // ...
-}
-const data = await fetchData();
-```
-
-</example>
-
-<example type="bad">
-
-```ts
-fetchData()
-  .then((data) => {
-    /* ... */
-  })
-  .catch((error) => {
-    /* ... */
-  });
-```
-
-</example>
-
-<example type="good" kind="always-curly-braces">
-
-```ts
-if (!condition) {
-  return;
-}
-```
-
-</example>
-
-<example type="bad">
-
-```ts
-if (!condition) return;
-if (other) return;
-```
-
-</example>
-
-<example type="good" kind="jsx-code-block">
-
-```tsx
-import { useState } from 'react';
-
-export function MyComponent() {
-  const [count, setCount] = useState(0);
-  return <Component />;
-}
-```
-
-</example>
-
-<example type="bad" kind="not-using-jsx-code-block">
-
-```ts
-// Using 'ts' for JSX code, very bad
-return <Component />;
-```
-
-</example>
-
-# REACT & FRONTEND PROTOCOL
-
-## Component Structure
-
-- Functional components with hooks only (never class components)
-- No `import React from 'react'` needed in modern React
-- Import from 'react' individually: never use `React.*` in code
-- Export default in single expression when applicable
-- Named functions (not arrows) inside hooks for async/complex logic
-- No return types for components (TypeScript infers)
-
-## Hooks
-
-- Generic type for `useState` only when needed:
-  - Not needed: `string`, `boolean`, `number`
-  - Needed: union types, complex types
-- No `useCallback` for same-component functions
-- `useCallback` acceptable for functions returned from custom hooks
-
-## Other Rules
-
-- Follow accessibility best practices
-- Add `displayName` to `forwardRef` components ONLY
-- Use Fragment/`<>` only for multiple sibling elements
-
-## Examples
-
-<example type="good">
-
-```tsx
-// Component with default export
-export default function MyComponent() {
-  return <div>Hello</div>;
-}
-```
-
-</example>
-
-<example type="bad">
-
-```tsx
-function MyComponent() {
-  return <div>Hello</div>;
-}
-export default MyComponent;
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// Individual Imports from 'react'
-import { useState, type ReactNode } from 'react';
-
-interface Props {
-  children: ReactNode;
-}
-useState();
-```
-
-</example>
-
-<example type="bad">
-
-```tsx
-import React from 'react';
-React.useState();
-interface Props {
-  children: React.ReactNode; // very bad
-}
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// Named function for async logic in hooks
-import { useEffect } from 'react';
-
-function MyComponent() {
-  useEffect(() => {
-    async function fetchData() {
-      const response = await fetch('/api/data');
-      // ...
-    }
-    void fetchData();
-  }, []);
-}
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// useState Generic Types
-import { useState } from 'react';
-
-function MyComponent() {
-  const [state, setState] = useState<Type>(initialValue);
-  const [isEnabled, setIsEnabled] = useState(false); // string, boolean, number don't need generic
-  const [name, setName] = useState<string | null>(null); // union types need generic
-
-  return <YourComponent />;
-}
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// useCallback only when function is returned
-function MyComponent() {
-  function handleClick() {
-    // ...
-  }
-
-  return <button onClick={handleClick}>Click me</button>;
-}
-
-function useDataProcessor() {
-  // useCallback acceptable here - function returned from hook
-  const processData = useCallback(() => {
-    // ...
-  }, []);
-
-  return { processData };
-}
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// displayName with forwardRef
-import { forwardRef } from 'react';
-
-const MyInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
-  return <input ref={ref} {...props} />;
-});
-
-MyInput.displayName = 'MyInput';
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// Fragment only for multiple siblings
-return (
-  <>
-    <div>First child</div>
-    <div>Second child</div>
-  </>
-);
-```
-
-</example>
-
-<example type="bad">
-
-```tsx
-// Unnecessary Fragment
-return (
-  <>
-    <div>Only child</div>
-  </>
-);
-```
-
-</example>
-
-<example type="good">
-
-```tsx
-// No return type - TypeScript infers
-function MyComponent() {
-  return <div>Hello</div>;
-}
-```
-
-</example>
-
-<example type="bad">
-
-```tsx
-function MyComponent(): JSX.Element {
-  return <div>Hello</div>;
-}
-```
-
-</example>
-
-# CSS PROTOCOL
-
-## Modern Features
-
-Use modern CSS: `:has()`, nesting, `&`, `&:hover`
-
-<example type="good">
-
-```css
-.button {
-  color: blue;
-
-  &:hover {
-    color: darkblue;
-  }
-
-  @media (max-width: 600px) {
-    width: 100%;
-  }
-}
-```
-
-</example>
-
-## CSS Modules
-
-- Never use tag selectors at root level
-- Always camelCase for classes
-- Never use dashes in class names
-- Never nest class/id selectors
-- Always nest pseudo-classes, pseudo-elements, media queries using `&`
-
-### Naming for CSS modules
-
-Class selectors: unique, simple, readable, camelCase
-
-<example type="good">
-
-```css
-.container { ... }
-.headerTitle { ... }
-.submitButton { ... }
-```
-
-</example>
-
-# BASH SCRIPT PROTOCOL
-
-- Offer trap/cleanup functions if not present
-- Prefer `sed`, `awk`, `jq`, built-in bash string manipulation over external tools (python, node, etc)
 
 # AI Agents CLI ORCHESTRATION
 
@@ -661,9 +47,19 @@ gemini -p "Create tests for @src/utils/helpers.ts"
 
 </example>
 
+# INTERNET RESEARCH
+
+Your Knowledge cutoff is in the past. Research internet for current information.
+
+- Fetch links thoroughly, follow relevant links within content recursively
+- When given URL: retrieve and analyze content
+  - Prefer a fetch tool if available, over `curl` or similar
+- Continue gathering information until complete understanding achieved
+
 ## Internet Research Delegation
 
-When internet research needed and web search tools unavailable:
+When internet research needed and web search tools unavailable,
+delegate it to another agent CLI (prefer `gemini`):
 
 <example type="good">
 
@@ -675,3 +71,46 @@ gemini -p "Research internet about <topic>, provide summary and relevant links. 
 
 - Use ≥60s timeout for web searches
 - Request relevant links and sources in prompt, for fact checking
+
+# FILE SYSTEM PROTOCOL
+
+- Use dedicated tools for file operations: never `cat`, `echo`, `python`, or similar bash commands
+- **AVOID** `cat` as much as possible, you have access to file read tools, use tools instead
+- Use grep tool for content search (not `cat` + `grep`)
+- When find/grep tools unavailable: use `fd` (not `find`), `rg` (not `grep`)
+  - They're faster, have better defaults, respect .gitignore
+  - Extension filter syntax: `fd -e ts` includes `tsx`; adding `tsx` explicitly fails
+- Prefer bash built-ins (`sed`, `awk`, string manipulation) over external tools when possible
+- Avoid as much as possible reading lock files like `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`,
+  they are huge, and difficult to parse, and WONT have useful information.
+
+# CODE CHANGE PROTOCOL
+
+- Apply similar changes (function/variable renames, pattern replacements, import updates) in single operation, even if spanning multiple lines
+- Preserve existing functionality unless explicitly requested otherwise
+- Write documentation or README only when explicitly requested
+- If new file is rejected: delete immediately
+- Show code examples using markdown triple backticks (correct type)
+- Never apply changes to a file to show examples
+
+# PRE-CHANGE REVIEW PROTOCOL
+
+Before making/suggesting code changes:
+
+1. Review solution against all protocols
+2. Verify compliance with language/technology-specific rules
+3. Do NOT proceed until fully compliant
+
+# PACKAGE MANAGER DETECTION
+
+Before running pnpm, npm, or npx, follow this sequence:
+
+1. Detect monorepo; run commands in closest workspace (folder with package.json)
+2. Check lock files: `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `yarn.lock`, `package-lock.json`
+3. Check `packageManager` field in root `package.json`, not the closest to the working file
+4. If uncertain: ask which package manager to use
+
+# BASH SCRIPT PROTOCOL
+
+- Offer trap/cleanup functions if not present
+- Prefer `sed`, `awk`, `jq`, built-in bash string manipulation over external tools (python, node, etc)

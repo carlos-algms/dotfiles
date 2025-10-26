@@ -13,9 +13,11 @@
       "Read",
       "WebSearch",
       "WebFetch",
+      "TodoWrite",
       "Bash(ls:*)",
       "Bash(fd:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Skill"
     ],
     "deny": [],
     "ask": []
