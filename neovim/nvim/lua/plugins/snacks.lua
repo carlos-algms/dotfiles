@@ -500,7 +500,7 @@ local M = {
             function()
                 Snacks.picker.lsp_symbols()
             end,
-            desc = "Search for symbol in document - Snacks",
+            desc = "LSP Document Symbols - Snacks",
         },
 
         {
@@ -508,7 +508,7 @@ local M = {
             function()
                 Snacks.picker.lsp_workspace_symbols()
             end,
-            desc = "Search for symbol in workspace - Snacks",
+            desc = "LSP Workspace Symbols - Snacks",
         },
 
         {
