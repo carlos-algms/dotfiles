@@ -1,1 +1,1 @@
-/Users/carlos.gomes/projects/dotfiles/neovim/nvim/avante_prompts/_shared.avanterules
+/Users/carlos.gomes/projects/dotfiles/AI-configs/base-ai-instructions.md
