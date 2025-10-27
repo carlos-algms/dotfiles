@@ -1,8 +1,6 @@
 ---@type vim.lsp.Config
 return {
     on_attach = function(client, bufNr)
-        require("helpers.lsp_helpers").onLspAttach(client, bufNr)
-
         if not client.server_capabilities.semanticTokensProvider then
             local semantic =
                 client.config.capabilities.textDocument.semanticTokens

@@ -93,8 +93,6 @@ return {
     end)(),
 
     on_attach = function(client, bufNr)
-        require("helpers.lsp_helpers").onLspAttach(client, bufNr)
-
         local vtslsCommands = require("vtsls").commands
 
         --- @param keys string

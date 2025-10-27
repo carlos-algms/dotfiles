@@ -28,6 +28,10 @@ end, { desc = "Toggle line wrapping locally" })
 setKeymap("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
 setKeymap("v", [[a']], [[2i']], { desc = "Select single quoted text" })
 
+setKeymap({ "n", "v" }, "<C-.>", vim.lsp.buf.code_action, {
+    desc = "LSP Code Action - nvim",
+})
+
 setKeymap(
     { "v" },
     "<Leader>cs",

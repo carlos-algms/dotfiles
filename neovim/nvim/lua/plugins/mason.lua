@@ -154,12 +154,6 @@ local M = {
 
             vim.lsp.set_log_level("error")
 
-            vim.lsp.config("*", {
-                on_attach = function(client, bufNr)
-                    require("helpers.lsp_helpers").onLspAttach(client, bufNr)
-                end,
-            })
-
             require("mason-lspconfig").setup({
                 ensure_installed = ensureLspInstalled,
                 automatic_enable = {
@@ -176,22 +170,15 @@ local M = {
                     border = "rounded",
                     focusable = true,
                 },
+                signs = {
+                    text = {
+                        [vim.diagnostic.severity.ERROR] = "",
+                        [vim.diagnostic.severity.WARN] = "",
+                        [vim.diagnostic.severity.HINT] = "",
+                        [vim.diagnostic.severity.INFO] = "",
+                    },
+                },
             })
-
-            local signs = {
-                Error = "",
-                Warn = "",
-                Hint = "",
-                Info = "",
-            }
-
-            for type, icon in pairs(signs) do
-                local hl = "DiagnosticSign" .. type
-                vim.fn.sign_define(
-                    hl,
-                    { text = icon, texthl = hl, numhl = nil }
-                )
-            end
         end,
     },
 }
