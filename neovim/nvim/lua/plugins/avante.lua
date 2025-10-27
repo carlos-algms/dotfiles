@@ -263,6 +263,18 @@ local M = {
 
         keys = {
             {
+                "<C-CR>",
+                function()
+                    require("avante.api").ask({
+                        ask = true,
+                    })
+                end,
+                desc = "Avante Ask",
+                silent = true,
+                mode = { "n", "v", "i" },
+            },
+
+            {
                 "<A-i>o",
                 function()
                     require("avante.api").ask({
