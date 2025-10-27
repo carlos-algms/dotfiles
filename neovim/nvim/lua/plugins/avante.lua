@@ -30,43 +30,51 @@ local M = {
             local claudeKeyName = "CARLOS_ANTHROPIC_API_KEY"
 
             if vim.g.is_ssh then
-                provider = "copilot"
+                if os.getenv(claudeKeyName) then
+                    if vim.fn.executable("claude-code-acp") == 1 then
+                        provider = "claude-code"
+                    else
+                        provider = "claude"
+                    end
+                else
+                    provider = "copilot"
+                end
             end
 
-        --- @module "avante"
-        --- @type avante.Config
+            --- @module "avante"
+            --- @type avante.Config
             local config = {
-            -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
-            -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
+                -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
+                -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
                 override_prompt_dir = vim.fn.stdpath("config")
                     .. "/avante_prompts",
 
                 provider = provider,
 
-            ---@type AvanteProviders
-            auto_suggestions_provider = "copilot",
+                ---@type AvanteProviders
+                auto_suggestions_provider = "copilot",
 
-            -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
-            acp_providers = {
-                ["gemini-cli"] = {
-                    command = "gemini",
-                    args = { "--experimental-acp" },
-                    env = {
-                        NODE_NO_WARNINGS = "1",
+                -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
+                acp_providers = {
+                    ["gemini-cli"] = {
+                        command = "gemini",
+                        args = { "--experimental-acp" },
+                        env = {
+                            NODE_NO_WARNINGS = "1",
                             DISABLE_ZOXIDE = "1",
                             -- GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+                        },
                     },
-                },
 
-                ["claude-code"] = {
+                    ["claude-code"] = {
                         command = "claude-code-acp", -- I installed it globally with `pnpm i -g @zed-industries/claude-code-acp`, to avoid issues with projects using only npm
                         -- command = "pnpm",
                         -- args = {
                         --     "dlx",
                         --     "@zed-industries/claude-code-acp",
                         -- },
-                    env = {
-                        NODE_NO_WARNINGS = "1",
+                        env = {
+                            NODE_NO_WARNINGS = "1",
                             DISABLE_ZOXIDE = "1",
                             ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
@@ -79,8 +87,8 @@ local M = {
                         args = {},
                         env = {
                             DISABLE_ZOXIDE = "1",
+                        },
                     },
-                },
 
                     ["opencode-acp"] = {
                         command = "opencode",
@@ -91,81 +99,81 @@ local M = {
                             CARLOS_ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
-            },
-
-            providers = {
-                ---@type AvanteSupportedProvider
-                copilot = {
-                    -- model = "claude-3.7-sonnet",
-                    model = "gpt-4.1",
                 },
 
-                ---@type AvanteSupportedProvider
-                claude = {
-                    --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
-                    model = "claude-sonnet-4-5-20250929",
-                    -- api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
+                providers = {
+                    ---@type AvanteSupportedProvider
+                    copilot = {
+                        -- model = "claude-3.7-sonnet",
+                        model = "gpt-4.1",
+                    },
+
+                    ---@type AvanteSupportedProvider
+                    claude = {
+                        --- @type "claude-sonnet-4-5-20250929" | "claude-opus-4-1-20250805" | "claude-sonnet-4-20250514"
+                        model = "claude-sonnet-4-5-20250929",
+                        -- api_key_name = "cmd:echo $SHARED_ANTHROPIC_API_KEY",
                         -- api_key_name = "cmd:echo $CARLOS_ANTHROPIC_API_KEY",
                         api_key_name = string.format(
                             "cmd:echo $%s",
                             claudeKeyName
                         ),
+                    },
+
+                    --- @type AvanteSupportedProvider
+                    -- lm_studio = {
+                    --     __inherited_from = "openai",
+                    --     ["local"] = true,
+                    --     api_key_name = "",
+                    --     endpoint = "http://localhost:1234/v1",
+                    --
+                    --     -- model = "qwen/qwen3-coder-30b",
+                    --     -- context_window = 256000,
+                    --
+                    --     model = "openai/gpt-oss-20b", -- it was returning empty responses
+                    --     context_window = 131072,
+                    --
+                    --     is_env_set = function()
+                    --         return true
+                    --     end,
+                    -- },
+
+                    --- @type AvanteSupportedProvider
+                    -- ollama = {
+                    --     ["local"] = true,
+                    --     endpoint = "http://127.0.0.1:11434",
+                    --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
+                    --     model = "gpt-oss:20b",
+                    --     -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
+                    --     is_env_set = function()
+                    --         return true
+                    --     end,
+                    --     context_window = 128000,
+                    -- },
                 },
 
-                --- @type AvanteSupportedProvider
-                -- lm_studio = {
-                --     __inherited_from = "openai",
-                --     ["local"] = true,
-                --     api_key_name = "",
-                --     endpoint = "http://localhost:1234/v1",
-                --
-                --     -- model = "qwen/qwen3-coder-30b",
-                --     -- context_window = 256000,
-                --
-                --     model = "openai/gpt-oss-20b", -- it was returning empty responses
-                --     context_window = 131072,
-                --
-                --     is_env_set = function()
-                --         return true
-                --     end,
-                -- },
+                ---@type AvanteSlashCommand[]
+                slash_commands = {},
 
-                --- @type AvanteSupportedProvider
-                -- ollama = {
-                --     ["local"] = true,
-                --     endpoint = "http://127.0.0.1:11434",
-                --     -- model = "qwen3:4b-thinking-2507-q4_K_M",
-                --     model = "gpt-oss:20b",
-                --     -- model = "codegemma:7b-instruct-v1.1-q5_K_M",
-                --     is_env_set = function()
-                --         return true
-                --     end,
-                --     context_window = 128000,
-                -- },
-            },
-
-            ---@type AvanteSlashCommand[]
-            slash_commands = {},
-
-            ---@type AvanteShortcut[]
-            shortcuts = {
-                {
-                    name = "explain",
-                    description = "Explain without making any changes",
-                    details = "Explain the file or the selected code",
-                    prompt = "Explain the selected code, or the entire file without making any changes.\n",
-                },
-                {
-                    name = "q",
-                    description = "Answer a Question",
-                    details = "Answer the question without making any changes",
-                    prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.\n\n",
-                },
-                {
-                    name = "plan",
-                    description = "/plan implement the fibonacci function in this file",
-                    details = "Create a detailed plan with actionable steps to achieve the goal.\n/plan create a sum function that adds two numbers",
-                    prompt = ([[
+                ---@type AvanteShortcut[]
+                shortcuts = {
+                    {
+                        name = "explain",
+                        description = "Explain without making any changes",
+                        details = "Explain the file or the selected code",
+                        prompt = "Explain the selected code, or the entire file without making any changes.\n",
+                    },
+                    {
+                        name = "q",
+                        description = "Answer a Question",
+                        details = "Answer the question without making any changes",
+                        prompt = "Answer the question without making any changes. Consider the context, selected code or the entire file.\n\n",
+                    },
+                    {
+                        name = "plan",
+                        description = "/plan implement the fibonacci function in this file",
+                        details = "Create a detailed plan with actionable steps to achieve the goal.\n/plan create a sum function that adds two numbers",
+                        prompt = ([[
                             You won't make any changes, just create a detailed plan with actionable steps.
                             Be concise, clear, and structured.
                             Avoid filler words and generic content like: should do, could do, etc.
@@ -182,12 +190,12 @@ local M = {
                             "\n%s+",
                             "\n"
                         ),
-                },
-                {
-                    name = "conventional_commit",
-                    description = "Create a conventional commit message and commit",
-                    details = "Create a conventional commit message based on the changes made in the project, stage, commit",
-                    prompt = ([[
+                    },
+                    {
+                        name = "conventional_commit",
+                        description = "Create a conventional commit message and commit",
+                        details = "Create a conventional commit message based on the changes made in the project, stage, commit",
+                        prompt = ([[
                         You're going to commit the changes on the user's behalf using the conventional commit strategy.
                         If there're no changed files, abort and tell the user the reason.
                         If the user is on the `main` or `master` branch, you must create a new branch with the pattern `cgomes/<scope>-short-description` before committing.
@@ -195,13 +203,13 @@ local M = {
                             "\n%s+",
                             "\n"
                         ),
-                },
+                    },
 
-                {
-                    name = "conventional_message",
-                    description = "Create a conventional message but don't commit",
-                    details = "Create a conventional commit message based on the changes made in the project",
-                    prompt = ([[
+                    {
+                        name = "conventional_message",
+                        description = "Create a conventional message but don't commit",
+                        details = "Create a conventional commit message based on the changes made in the project",
+                        prompt = ([[
                         You're only going to generate the conventional commit message, don't commit.
                         If you're on the file `.git/COMMIT_EDITMSG`, I use the verbose commit command, so all the information you need to create a good commit message is there.
                         Avoid reading other files.
@@ -213,41 +221,41 @@ local M = {
                             "\n%s+",
                             "\n"
                         ),
+                    },
                 },
-            },
 
-            behaviour = {
-                auto_set_keymaps = false,
-                auto_suggestions = false,
-                auto_apply_diff_after_generation = false,
-                support_paste_from_clipboard = false,
-                minimize_diff = true,
+                behaviour = {
+                    auto_set_keymaps = false,
+                    auto_suggestions = false,
+                    auto_apply_diff_after_generation = false,
+                    support_paste_from_clipboard = false,
+                    minimize_diff = true,
                     enable_token_counting = false,
-                auto_approve_tool_permissions = false,
+                    auto_approve_tool_permissions = false,
                     confirmation_ui_style = "inline_buttons",
-            },
+                },
 
-            selection = {
-                hint_display = "none",
-            },
+                selection = {
+                    hint_display = "none",
+                },
 
-            windows = {
-                position = "right",
-                wrap = true, -- similar to vim.o.wrap
-                width = 40, -- default % based on available width in vertical layout
-                input = {
-                    height = 12,
+                windows = {
+                    position = "right",
+                    wrap = true, -- similar to vim.o.wrap
+                    width = 40, -- default % based on available width in vertical layout
+                    input = {
+                        height = 12,
+                    },
+                    edit = {
+                        border = "rounded",
+                        start_insert = true, -- Start insert mode when opening the edit window
+                    },
+                    ask = {
+                        floating = false, -- Open the 'AvanteAsk' prompt in a floating window
+                        border = "rounded",
+                        start_insert = true, -- Start insert mode when opening the ask window
+                    },
                 },
-                edit = {
-                    border = "rounded",
-                    start_insert = true, -- Start insert mode when opening the edit window
-                },
-                ask = {
-                    floating = false, -- Open the 'AvanteAsk' prompt in a floating window
-                    border = "rounded",
-                    start_insert = true, -- Start insert mode when opening the ask window
-                },
-            },
             }
 
             return config
