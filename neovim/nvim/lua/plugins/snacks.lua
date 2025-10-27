@@ -498,7 +498,12 @@ local M = {
         {
             "gO",
             function()
-                Snacks.picker.lsp_symbols()
+                Snacks.picker.lsp_symbols({
+                    title = string.format(
+                        "LSP Document Symbols `%s`",
+                        vim.fn.expand("%:t")
+                    ),
+                })
             end,
             desc = "LSP Document Symbols - Snacks",
         },
@@ -559,10 +564,11 @@ local M = {
 
 ---@param state snacks.picker.resume.State
 local function make_history_item_text(state)
-    local prefix = state.opts.title or state.opts.source or "unknown source"
+    local prefix = state.opts.title or state.opts.source or "custom"
     local pattern = state.filter.pattern or ""
     local search = state.filter.search or ""
-    local text = prefix .. " | " .. pattern .. " > " .. search
+
+    local text = prefix .. " | " .. search .. " > " .. pattern
     return text
 end
 
@@ -648,7 +654,7 @@ function P.store_picker_in_history(state)
 
     local text = make_history_item_text(state)
 
-    -- Remove the old picker if canse a new one with the same parameters is run
+    -- Remove the old picker in case a new one with the same title is added
     for i, p in ipairs(P.Snacks_picker_hist) do
         local label = make_history_item_text(p)
 
