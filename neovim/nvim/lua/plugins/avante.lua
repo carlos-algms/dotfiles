@@ -23,16 +23,16 @@ local M = {
         -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
 
         opts = function(_, _maybeOpts)
-            ---@alias AvanteProviders "copilot" | "ollama" | "claude" | "claude-code" | "gemini" | "gemini-cli" | "openai" | "codex-acp" | "opencode-acp"
+            ---@alias AvanteProviders "copilot" | "ollama" | "openai" | "claude" | "claude-acp" | "gemini" | "gemini-acp" |  "codex-acp" | "opencode-acp"
             ---@type AvanteProviders
-            local provider = "claude-code"
+            local provider = "claude-acp"
 
             local claudeKeyName = "CARLOS_ANTHROPIC_API_KEY"
 
             if vim.g.is_ssh then
                 if os.getenv(claudeKeyName) then
                     if vim.fn.executable("claude-code-acp") == 1 then
-                        provider = "claude-code"
+                        provider = "claude-acp"
                     else
                         provider = "claude"
                     end
@@ -56,7 +56,7 @@ local M = {
 
                 -- https://github.com/yetone/avante.nvim?tab=readme-ov-file#acp-configuration
                 acp_providers = {
-                    ["gemini-cli"] = {
+                    ["gemini-acp"] = {
                         command = "gemini",
                         args = { "--experimental-acp" },
                         env = {
@@ -66,7 +66,7 @@ local M = {
                         },
                     },
 
-                    ["claude-code"] = {
+                    ["claude-acp"] = {
                         command = "claude-code-acp", -- I installed it globally with `pnpm i -g @zed-industries/claude-code-acp`, to avoid issues with projects using only npm
                         -- command = "pnpm",
                         -- args = {
