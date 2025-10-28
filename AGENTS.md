@@ -38,7 +38,7 @@ Modular alias files in `shell/common/`:
 
 - `aliases.sh` - Core aliases (ff/fdir for file search, v for nvim, custom
   rsync, zoxide integration)
-- `aliases_git.sh` - Git shortcuts (gbdg to delete "gone" branches)
+- `aliases_git.sh` - Git shortcuts
 - `aliases_ls.sh` - Directory listing (uses eza when available)
 - `aliases_docker.sh` - Docker shortcuts
 - `aliases_grep.sh` - Search aliases
@@ -51,66 +51,13 @@ Shell scripts check for modern alternatives:
 - `rg` over `grep` (faster, better defaults, also respects .gitignore)
 - `nvim` over `vim` over `vi`
 
-## Installation System
-
-The installation system should not be executed or changed by you, unless I ask
-you to do so.
-
-It's only mentioned here fore reference and documentation.
-
-### Main Bootstrap
-
-- **Entry point**: `./bootstrap.sh` - Orchestrates all installation scripts
-- **Architecture**: Iterates through subdirectories running individual
-  `install.sh` scripts
-- **Logging**: All scripts source `shell/common/01_logging.sh` for consistent
-  output (e_header, e_success, e_error, e_arrow)
-- **OS Detection**: Scripts source `shell/common/00_os.sh` which exports
-  `IS_WIN`, `IS_MAC`, `IS_LINUX` environment variables
-
-### Module Structure
-
-Each major component has its own `install.sh`:
-
-- `shell/install.sh` - Shell configuration (detects OS and delegates to
-  platform-specific installers)
-- `neovim/install.sh` - Neovim setup (installs via brew/apt, creates symlink
-  from `neovim/nvim` to `~/.config/nvim`)
-- `kitty/install.sh` - Kitty terminal (macOS only, symlinks config files)
-
-### Installation Pattern
-
-- Scripts create symlinks to this repository rather than copying files
-- Existing files are backed up with timestamp suffix before linking
-- Platform-specific installers in `shell/[linux|macos|windows]/install-*.sh`
-
-## Key Commands
-
-### Development Workflow
-
-Also not for you to execute, just for reference.
-
-```bash
-# Install/update all configurations
-./bootstrap.sh
-
-# Install individual components
-./shell/install.sh
-./neovim/install.sh
-./kitty/install.sh
-
-# Sync neovim config via SSH
-# Like a shared host like HostGator, GoDaddy, etc..
-./neovim/sync-via-ssh.sh
-```
-
 ## AI Configuration
 
-The repository includes shared AI assistant configurations in `AI-configs/`:
+Shared AI assistant configurations in `AI-configs/`:
 
 - `base-ai-instructions.md` - Shared instructions for all AI agents, it's either
   referenced by dedicated AI config file, or symlinked to AGENTS.md, or
-  GEMINI.md etc.
+  GEMINI.md, globally, not per project.
 - Platform-specific configs for Claude, Gemini, OpenCode, and Crush
 - Installation creates symlinks to
   - `~/.claude/`
