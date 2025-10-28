@@ -19,6 +19,16 @@ ln -s $(pwd)/AI-configs/gemini/settings.json ~/.gemini/settings.json
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.gemini/GEMINI.md
 ```
 
+## Github Copilot
+
+Only supported by copilot-cli and Copilot Chat in VSCode at the moment.
+
+```bash
+mkdir -p .github
+cd .github
+ln -s ../AI-configs/base-ai-instructions.md copilot-instructions.md
+```
+
 ## OpenCode
 
 https://opencode.ai/docs/config/
