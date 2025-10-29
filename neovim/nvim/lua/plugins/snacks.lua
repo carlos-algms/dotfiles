@@ -303,7 +303,7 @@ local M = {
         },
 
         {
-            "<leader>sp",
+            "<leader>sh",
             function()
                 P.history_picker()
             end,
@@ -679,12 +679,12 @@ function P.history_picker()
             finder = function()
                 local items = {} ---@type snacks.picker.finder.Item[]
 
-                for _, state in ipairs(P.Snacks_picker_hist) do
+                for i, state in ipairs(P.Snacks_picker_hist) do
                     local text = make_history_item_text(state)
 
                     table.insert(items, {
                         data = { state = state },
-                        text = text,
+                        text = string.format("%s. %s", i, text),
                     })
                 end
 
