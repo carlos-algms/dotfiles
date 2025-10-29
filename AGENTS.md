@@ -10,12 +10,12 @@ scripts.
 
 ## Neovim Configuration
 
-I use Neovim `v0.10+`, so I can use the most modern configuration options and
+I use Neovim `v0.11+`, so I can use the most modern configuration options and
 plugins, also newest Lua features. Make sure your answers are valid for this
 version or higher.
 
-Neovim documentation index is `https://neovim.io/doc/user/` from whre you should
-be able to find all other relevant documentation links.
+Neovim documentation index is `https://neovim.io/doc/user/` from where you
+should be able to find all other relevant documentation links.
 
 ### Architecture
 
