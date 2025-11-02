@@ -17,6 +17,9 @@
       "Bash(ls:*)",
       "Bash(fd:*)",
       "Bash(find:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
       "Skill"
     ],
     "deny": [],
@@ -27,5 +30,5 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": true
 }
