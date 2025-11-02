@@ -51,21 +51,25 @@ createUserCommand("CopyRelativePath", function()
     local path = vim.fn.expand("%:.")
     vim.fn.setreg("+", path)
     vim.notify('Copied "' .. path .. '" to the clipboard!')
-end, {})
+end, {
+    desc = "Copy relative path to the system clipboard",
+})
 
-createUserCommand("CopyFullPath", function()
+createUserCommand("CopyAbsolutePath", function()
     local path = vim.fn.expand("%:p")
     vim.fn.setreg("+", path)
     vim.notify('Copied "' .. path .. '" to the clipboard!')
-end, {})
+end, {
+    desc = "Copy absolute path to system clipboard",
+})
 
-vim.keymap.set({ "n" }, "<leader>yr", "<cmd>CopyRelativePath<CR>", {
-    desc = "Copy relative path",
+vim.keymap.set({ "n" }, "<D-c>r", "<cmd>CopyRelativePath<CR>", {
+    desc = "Copy relative path to system clipboard",
     silent = true,
 })
 
-vim.keymap.set({ "n" }, "<leader>yF", "<cmd>CopyFullPath<CR>", {
-    desc = "Copy full path",
+vim.keymap.set({ "n" }, "<D-c>a", "<cmd>CopyAbsolutePath<CR>", {
+    desc = "Copy absolute path to system clipboard",
     silent = true,
 })
 

@@ -85,30 +85,21 @@ setKeymap("n", "n", "nzzzv")
 setKeymap("n", "N", "Nzzzv")
 
 -- copy to system clipboard
-setKeymap(
-    { "n", "v" },
-    "<leader>y",
-    [["+y]],
-    { desc = "Copy to system clipboard" }
-)
+setKeymap({ "n" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" })
+setKeymap({ "v" }, "<D-c>", [["+y]], { desc = "Copy to system clipboard" })
 
-setKeymap(
-    { "n", "v" },
-    "<leader>Y",
-    [["+yy]],
-    { desc = "Copy entire line to system clipboard" }
-)
+--
 
 setKeymap("n", "Q", "<nop>")
 
 setKeymap({ "i" }, "<C-j>", "<C-o>o", { desc = "Insert a new line bellow" })
-
 setKeymap({ "i" }, "<C-k>", "<C-o>O", { desc = "Insert a new line above" })
 
 -- better indenting
 setKeymap("v", "<", "<gv")
 setKeymap("v", ">", ">gv")
 
+-- Resize windows
 setKeymap(
     { "n", "i" },
     "<C-S-Up>",
