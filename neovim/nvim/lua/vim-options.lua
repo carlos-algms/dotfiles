@@ -55,7 +55,7 @@ opt.updatetime = 50
 opt.fileencoding = "utf-8"
 opt.encoding = "utf-8"
 
-opt.diffopt = "iwhite,context:9999999,filler"
+opt.diffopt = "iwhite,iwhiteall,context:9999999,filler"
 opt.foldenable = true
 opt.foldmethod = "indent"
 opt.foldlevel = 99

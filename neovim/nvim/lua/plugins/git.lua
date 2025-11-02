@@ -40,14 +40,21 @@ return {
 
         event = "VeryLazy",
 
-        init = function()
-            local gitsigns = require("gitsigns")
+        keys = {
+            {
+                "<leader>gb",
+                "<CMD>Gitsigns blame<CR>",
+                mode = "n",
+                desc = "Git Blame",
+            },
+        },
 
+        init = function()
             local function jumpToNextHunk()
                 if vim.wo.diff then
                     vim.cmd.normal({ "]c", bang = true })
                 else
-                    gitsigns.nav_hunk("next")
+                    vim.cmd("Gitsigns next_hunk")
                 end
             end
 
@@ -55,7 +62,7 @@ return {
                 if vim.wo.diff then
                     vim.cmd.normal({ "[c", bang = true })
                 else
-                    gitsigns.nav_hunk("prev")
+                    vim.cmd("Gitsigns prev_hunk")
                 end
             end
 
@@ -84,8 +91,8 @@ return {
                 diff_opts = {
                     -- https://github.com/lewis6991/gitsigns.nvim/blob/main/doc/gitsigns.txt
                     internal = true,
-                    -- algorithm = "minimal",
-                    -- indent_heuristic = true,
+                    algorithm = "histogram",
+                    indent_heuristic = true,
                     ignore_whitespace = true,
                     ignore_whitespace_change = true,
                     ignore_whitespace_change_at_eol = true,
@@ -95,6 +102,8 @@ return {
                 current_line_blame_opts = {
                     ignore_whitespace = true,
                 },
+
+                -- word_diff = true,
 
                 ---@type vim.api.keyset.win_config
                 preview_config = {
@@ -329,12 +338,12 @@ return {
                 desc = "Show git diff for current file",
             },
 
-            {
-                "<leader>gb",
-                "<CMD>Git blame<CR>",
-                mode = "n",
-                desc = "Git Blame",
-            },
+            -- {
+            --     "<leader>gb",
+            --     "<CMD>Git blame<CR>",
+            --     mode = "n",
+            --     desc = "Git Blame",
+            -- },
 
             {
                 "<leader>gC",
