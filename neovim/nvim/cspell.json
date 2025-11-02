@@ -39,6 +39,7 @@
   "useGitignore": true,
   "version": "0.2",
   "words": [
+    "Agentic",
     "Brandkit",
     "Brandkits",
     "FIXIT",
@@ -47,6 +48,8 @@
     "Personio",
     "SDUI",
     "Selectables",
+    "Whitelabel",
+    "bufnr",
     "builtins",
     "codeigniter",
     "darcula",
@@ -71,6 +74,7 @@
     "opencode",
     "parloa",
     "portainer",
+    "posthog",
     "shada",
     "supabase",
     "testid",
@@ -80,6 +84,7 @@
     "veedstudio",
     "wekbit",
     "windscribe",
+    "winid",
     "wordpress",
     "zustand"
   ]
