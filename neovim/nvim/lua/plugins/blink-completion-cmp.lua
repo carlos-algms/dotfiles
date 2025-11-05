@@ -4,7 +4,7 @@ return {
         "saghen/blink.cmp", -- https://cmp.saghen.dev/installation
         version = "1.*", -- use a release tag to download pre-built binaries
 
-        event = "InsertEnter",
+        event = { "InsertEnter", "CmdlineEnter" },
 
         dependencies = {
             { "L3MON4D3/LuaSnip" },
