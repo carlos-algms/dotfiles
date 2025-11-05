@@ -85,8 +85,12 @@ setKeymap("n", "n", "nzzzv")
 setKeymap("n", "N", "Nzzzv")
 
 -- copy to system clipboard
-setKeymap({ "n" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" })
-setKeymap({ "v" }, "<D-c>", [["+y]], { desc = "Copy to system clipboard" })
+setKeymap(
+    { "n", "v" },
+    "<leader>y",
+    [["+y]],
+    { desc = "Copy to system clipboard" }
+)
 
 --
 

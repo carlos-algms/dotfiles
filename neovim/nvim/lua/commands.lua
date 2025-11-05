@@ -63,12 +63,12 @@ end, {
     desc = "Copy absolute path to system clipboard",
 })
 
-vim.keymap.set({ "n" }, "<D-c>r", "<cmd>CopyRelativePath<CR>", {
+vim.keymap.set({ "n" }, "<Leader>Yr", "<cmd>CopyRelativePath<CR>", {
     desc = "Copy relative path to system clipboard",
     silent = true,
 })
 
-vim.keymap.set({ "n" }, "<D-c>a", "<cmd>CopyAbsolutePath<CR>", {
+vim.keymap.set({ "n" }, "<Leader>Ya", "<cmd>CopyAbsolutePath<CR>", {
     desc = "Copy absolute path to system clipboard",
     silent = true,
 })
