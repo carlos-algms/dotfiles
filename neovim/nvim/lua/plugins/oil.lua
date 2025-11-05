@@ -22,17 +22,20 @@ return {
     ---@type oil.SetupOpts
     opts = {
         default_file_explorer = true,
+
         columns = {
             "icon",
             -- "permissions",
             -- "size",
             -- "mtime",
         },
+
         -- https://github.com/stevearc/oil.nvim?tab=readme-ov-file#options
         view_options = {
             show_hidden = true,
             case_insensitive = false,
         },
+
         keymaps = {
             ["q"] = "actions.close",
             ["<C-v>"] = {
@@ -46,12 +49,28 @@ return {
                 desc = "Open the entry in a horizontal split",
             },
             ["<C-h>"] = false,
-            ["_"] = false,
+            ["<C-l>"] = false,
+            ["R"] = "actions.refresh",
             ["`"] = false,
             ["~"] = false,
         },
+
+        confirmation = {
+            border = "rounded",
+        },
+
+        progress = {
+            border = "rounded",
+        },
+
+        -- Configuration for the floating SSH window
+        ssh = {
+            border = "rounded",
+        },
+
+        -- Configuration for the floating keymaps help window
+        keymaps_help = {
+            border = "rounded",
+        },
     },
-    config = function(_, opts)
-        require("oil").setup(opts)
-    end,
 }
