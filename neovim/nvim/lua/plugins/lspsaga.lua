@@ -122,7 +122,7 @@ return {
                     vim.diagnostic.severity.HINT, -- used by TypeScript LSP to show unused variables
                 },
             })
-        end, { desc = "Go to next problem" })
+        end, { desc = "Go to next diagnostic" })
 
         vim.keymap.set("n", "[d", function()
             diagnostic:goto_prev({
@@ -132,30 +132,42 @@ return {
                     vim.diagnostic.severity.HINT,
                 },
             })
-        end, { desc = "Go to previous problem" })
+        end, { desc = "Go to previous diagnostic" })
 
         vim.keymap.set({ "n", "v" }, "]e", function()
             diagnostic:goto_next({
                 severity = vim.diagnostic.severity.ERROR,
             })
-        end, { desc = "Go to next Error" })
+        end, { desc = "Go to next Error diagnostic" })
 
         vim.keymap.set({ "n", "v" }, "[e", function()
             diagnostic:goto_prev({
                 severity = vim.diagnostic.severity.ERROR,
             })
-        end, { desc = "Go to previous Error" })
+        end, { desc = "Go to previous Error diagnostic" })
+
+        vim.keymap.set({ "n", "v" }, "]w", function()
+            diagnostic:goto_next({
+                severity = vim.diagnostic.severity.WARN,
+            })
+        end, { desc = "Go to next Warn diagnostic" })
+
+        vim.keymap.set({ "n", "v" }, "[w", function()
+            diagnostic:goto_prev({
+                severity = vim.diagnostic.severity.WARN,
+            })
+        end, { desc = "Go to previous Warn diagnostic" })
 
         vim.keymap.set({ "n", "v" }, "]s", function()
             diagnostic:goto_next({
                 severity = vim.diagnostic.severity.INFO,
             })
-        end, { desc = "Go to next Spell/Info" })
+        end, { desc = "Go to next Spell/Info diagnostic" })
 
         vim.keymap.set({ "n", "v" }, "[s", function()
             diagnostic:goto_prev({
                 severity = vim.diagnostic.severity.INFO,
             })
-        end, { desc = "Go to previous Spell/Info" })
+        end, { desc = "Go to previous Spell/Info diagnostic" })
     end,
 }
