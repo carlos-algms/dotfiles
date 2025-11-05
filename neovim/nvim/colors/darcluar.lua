@@ -120,6 +120,7 @@ M.theme = {
         ["@lsp.type.type.terraform"] = "Keyword",
         ["@lsp.type.variable.dockerfile"] = "Constant",
         ["@lsp.type.variable"] = "@none",
+        ["@lsp.typemod.class.declaration.lua"] = "Type",
         ["@markup.heading.1.astro"] = "@none",
         ["@markup.heading.1.html"] = "@none",
         ["@markup.heading.1.tsx"] = "@none",
