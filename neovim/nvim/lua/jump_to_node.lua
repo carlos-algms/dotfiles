@@ -3,6 +3,8 @@ local function_node_types = {
     "function_declaration",
     "function_definition",
     "function_expression",
+    "method_definition",
+    "method_declaration",
 }
 
 local function is_function_node(node)
