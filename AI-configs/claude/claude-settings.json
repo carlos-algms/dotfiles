@@ -3,7 +3,7 @@
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "DISABLE_AUTOUPDATER": "1",
-    "DISABLE_ZOXIDE": "1"
+    "IS_AI_TERMINAL": "1"
   },
   "includeCoAuthoredBy": false,
   "permissions": {

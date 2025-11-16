@@ -44,6 +44,8 @@ local M = {
             --- @module "avante"
             --- @type avante.Config
             local config = {
+                -- debug = true,
+
                 -- https://www.reddit.com/r/neovim/comments/1lqc6ar/a_touch_up_on_avantenvim_that_make_it_awesome/
                 -- https://github.com/yetone/avante.nvim/blob/main/lua/avante/templates/agentic.avanterules
                 override_prompt_dir = vim.fn.stdpath("config")
@@ -61,7 +63,7 @@ local M = {
                         args = { "--experimental-acp" },
                         env = {
                             NODE_NO_WARNINGS = "1",
-                            DISABLE_ZOXIDE = "1",
+                            IS_AI_TERMINAL = "1",
                             -- GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
                         },
                     },
@@ -75,7 +77,7 @@ local M = {
                         -- },
                         env = {
                             NODE_NO_WARNINGS = "1",
-                            DISABLE_ZOXIDE = "1",
+                            IS_AI_TERMINAL = "1",
                             ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
@@ -86,7 +88,7 @@ local M = {
                         command = "codex-acp",
                         args = {},
                         env = {
-                            DISABLE_ZOXIDE = "1",
+                            IS_AI_TERMINAL = "1",
                         },
                     },
 
@@ -95,7 +97,7 @@ local M = {
                         args = { "acp" },
                         env = {
                             NODE_NO_WARNINGS = "1",
-                            DISABLE_ZOXIDE = "1",
+                            IS_AI_TERMINAL = "1",
                             CARLOS_ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
@@ -265,7 +267,7 @@ local M = {
             {
                 "<C-CR>",
                 function()
-                    require("avante.api").ask({
+                    require("avante.api").toggle({
                         ask = true,
                     })
                 end,

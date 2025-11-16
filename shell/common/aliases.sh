@@ -82,7 +82,7 @@ fi
 
 # Fix for the fuzzy cd auto completion
 # https://github.com/ajeetdsouza/zoxide/issues/513#issuecomment-2040488941
-if command -v zoxide >/dev/null 2>&1 && [ "$DISABLE_ZOXIDE" != "1" ]; then
+if command -v zoxide >/dev/null 2>&1 && [ "$IS_AI_TERMINAL" != "1" ]; then
   if [ -n "$ZSH_VERSION" ]; then
     eval "$(zoxide init zsh)"
   else
