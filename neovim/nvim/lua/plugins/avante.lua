@@ -302,6 +302,19 @@ local M = {
             },
 
             {
+                "<C-,>",
+                function()
+                    require("avante.api").ask({
+                        ask = true,
+                        new_chat = true,
+                    })
+                end,
+                desc = "Avante new Chat",
+                silent = true,
+                mode = { "n", "v", "i" },
+            },
+
+            {
                 "<A-i>c",
                 function()
                     -- I `edit()` with a prefilled text is crashing, leaving it as an example
