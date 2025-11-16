@@ -1,0 +1,10 @@
+{
+  "fixit": {
+    "prefix": "--f",
+    "body": ["-- FIXIT: $0"],
+    "description": "Fix it comment",
+    "luasnip": {
+      "autotrigger": true
+    }
+  }
+}

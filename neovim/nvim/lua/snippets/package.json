@@ -1,53 +1,57 @@
 {
-    "name": "Carlos-Snippets",
-    "engines": {
-        "vscode": "^1.11.0"
-    },
-    "contributes": {
-        "snippets": [
-            {
-                "language": [
-                    "plaintext",
-                    "markdown",
-                    "tex",
-                    "html",
-                    "global",
-                    "all"
-                ],
-                "path": "./global.json"
-            },
-            {
-                "language": [
-                    "javascript",
-                    "javascriptreact",
-                    "typescript",
-                    "typescriptreact"
-                ],
-                "path": "./javascript.json"
-            },
-            {
-                "language": [
-                    "typescript",
-                    "typescriptreact"
-                ],
-                "path": "./typescript.json"
-            },
-            {
-                "language": "typescriptreact",
-                "path": "./react-ts.json"
-            },
-            {
-                "language": "markdown",
-                "path": "./markdown.json"
-            },
-            {
-                "language": "php",
-                "path": "./php.json"
-            },
-            {
-                "laguage": "sh",
-                "path": "./shell.json"
-            }
-        ]
-    }
+  "name": "carlos-snippets",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "plaintext",
+          "markdown",
+          "tex",
+          "html",
+          "global",
+          "all"
+        ],
+        "path": "./global.json"
+      },
+      {
+        "language": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "path": "./javascript.json"
+      },
+      {
+        "language": [
+          "typescript",
+          "typescriptreact"
+        ],
+        "path": "./typescript.json"
+      },
+      {
+        "language": "typescriptreact",
+        "path": "./react-ts.json"
+      },
+      {
+        "language": "markdown",
+        "path": "./markdown.json"
+      },
+      {
+        "language": "php",
+        "path": "./php.json"
+      },
+      {
+        "language": "sh",
+        "path": "./shell.json"
+      },
+      {
+        "language": "lua",
+        "path": "./lua.json"
+      }
+    ]
+  }
 }
