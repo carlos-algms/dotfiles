@@ -2,12 +2,27 @@ local M = {
     {
         "folke/lazydev.nvim",
         ft = "lua", -- only load on lua files
+
+        -- enabled = false,
+
+        --- @module "lazydev"
+        --- @type lazydev.Config
         opts = {
             library = {
                 "lazy.nvim",
                 -- See the configuration section for more details
                 -- Load luvit types when the `vim.uv` word is found
-                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+                {
+                    path = "${3rd}/luv/library",
+                    words = { "vim%.uv", "vim%.loop" },
+                },
+                {
+                    path = "${3rd}/busted/library",
+                    words = { "describe", "it", "before_each", "after_each" },
+                },
+            },
+            integrations = {
+                -- cmp = false,
             },
         },
     },
