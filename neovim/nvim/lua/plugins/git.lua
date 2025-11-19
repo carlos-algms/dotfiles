@@ -159,9 +159,39 @@ return {
         keys = {
             {
                 "<leader>gcm",
-                "<cmd>DiffviewOpen origin/HEAD...HEAD --imply-local<CR>",
+                function()
+                    -- Try origin first (prefer remote), fallback to local main/master
+                    local branch = vim.fn
+                        .system(
+                            "(git rev-parse --verify --quiet origin/HEAD >/dev/null 2>&1 && "
+                                .. "git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@') || "
+                                .. "(git rev-parse --verify --quiet refs/heads/main >/dev/null 2>&1 && echo main) || "
+                                .. "(git rev-parse --verify --quiet refs/heads/master >/dev/null 2>&1 && echo master)"
+                        )
+                        :gsub("%s+", "")
+
+                    if branch == "" then
+                        vim.notify(
+                            "No main/master branch or origin remote found",
+                            vim.log.levels.ERROR
+                        )
+                        return
+                    end
+
+                    -- Check if origin/<branch> exists, use it; otherwise use local
+                    local origin_check = vim.fn.system(
+                        "git rev-parse --verify --quiet origin/"
+                            .. branch
+                            .. " 2>/dev/null"
+                    )
+
+                    local base = (origin_check ~= "") and ("origin/" .. branch)
+                        or branch
+
+                    vim.cmd("DiffviewOpen " .. base .. "...HEAD --imply-local")
+                end,
                 mode = { "n" },
-                desc = "Compare current branch to master",
+                desc = "Compare current branch to main/master",
                 silent = true,
             },
 
