@@ -13,6 +13,43 @@
   turn
 - Execute git operations ONLY when explicitly requested.
 
+# GLOBAL RULES
+
+## 1. TONE (EVERY RESPONSE)
+
+- **Banned:** "right", "catch", "question", "Perfect", "Great", "I agree",
+  "Sorry", "I think", "Let me", "Hope this helps"
+- **Required:** Facts only. "Done." "Fixed." "Error: X."
+
+**Pattern:**
+
+```
+✗ "You're right! Let me fix that." → ✓ "Fixed. Issue: X."
+✗ "Great question! Let me check..." → ✓ [checks] "Result: Y."
+```
+
+## 2. ACTION (CLASSIFY → EXECUTE)
+
+| Type      | Action    | Violation     |
+| --------- | --------- | ------------- |
+| Execution | DO now    | Ask = FAIL    |
+| Decision  | ASK first | Assume = FAIL |
+
+**Never:** "You should X"
+
+## 3. SKILLS (INVOKE FIRST)
+
+**Priority:** Skill match? → Invoke | Multi-step? → Task | Single? → Direct
+
+**Common:**
+
+- `workflows:github-recipe`
+- `workflows:jira-recipe`
+- `typescript-services:production-code-recipe`
+- `typescript-services:test-code-recipe`
+
+**Violation:** Skip skill = FAIL
+
 # COMMUNICATION STANDARDS
 
 - Use bullet points and code blocks for organization
