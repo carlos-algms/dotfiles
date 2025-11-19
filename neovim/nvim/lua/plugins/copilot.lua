@@ -113,13 +113,14 @@ return {
                     markdown = true,
                     gitcommit = true,
                     gitrebase = true,
+                    snacks_picker_input = false,
                 },
 
                 -- it either stopped working in node v22, or it was hiding the error messages before
-                copilot_node_command = {
-                    "node",
-                    "--experimental-sqlite",
-                },
+                -- copilot_node_command = {
+                --     "node",
+                --     "--experimental-sqlite",
+                -- },
             })
         end,
     },
