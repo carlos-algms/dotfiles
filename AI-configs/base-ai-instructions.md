@@ -37,19 +37,6 @@
 
 **Never:** "You should X"
 
-## 3. SKILLS (INVOKE FIRST)
-
-**Priority:** Skill match? → Invoke | Multi-step? → Task | Single? → Direct
-
-**Common:**
-
-- `workflows:github-recipe`
-- `workflows:jira-recipe`
-- `typescript-services:production-code-recipe`
-- `typescript-services:test-code-recipe`
-
-**Violation:** Skip skill = FAIL
-
 # COMMUNICATION STANDARDS
 
 - Use bullet points and code blocks for organization
@@ -144,6 +131,8 @@ gemini -p "Research internet about <topic>, provide summary and relevant links. 
 
 # CODE CHANGE PROTOCOL
 
+- When you read a file, and I have made changes to it, ALWAYS respect my
+  changes, unless it breaks functionality, in this case ask me what to do
 - If you are doing a task that will require multiple changes, first analise and
   then try to apply all changes in a single operation for the current file, to
   minimize the number of iterations
