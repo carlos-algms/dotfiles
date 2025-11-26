@@ -45,9 +45,9 @@ return {
 
         {
 
-            "<leader>ro",
+            "gro",
             "<cmd>Trouble symbols toggle focus=true win.position=right win.size=0.45 filter.buf=0<cr>",
-            desc = "LSP References (Trouble)",
+            desc = "LSP Get References Outline (Trouble)",
             silent = true,
         },
 
