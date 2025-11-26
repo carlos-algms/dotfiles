@@ -19,7 +19,8 @@
     "preferredEditor": "neovim",
     "vimMode": true,
     "disableAutoUpdate": true,
-    "enablePromptCompletion": true
+    "enablePromptCompletion": true,
+    "previewFeatures": true
   },
   "security": {
     "auth": {
@@ -34,6 +35,11 @@
     "showCitations": true,
     "accessibility": {
       "screenReader": false
-    }
+    },
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showMemoryUsage": true,
+    "showModelInfoInChat": true
   }
 }
