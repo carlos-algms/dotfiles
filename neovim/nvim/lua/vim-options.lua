@@ -37,7 +37,7 @@ opt.incsearch = true
 opt.ignorecase = true
 opt.smartcase = true
 -- Shows the preview of a command in a split window
--- opt.inccommand = "split"
+opt.inccommand = "split"
 
 opt.background = "dark"
 opt.termguicolors = true
@@ -100,3 +100,7 @@ vim.g.markdown_recommended_style = 0
 -- set interactive sheel for commands run with `:! ....` inside Neovim
 -- DISABLED as it was extremely slow in SSH sessions, and I don't use :! that much
 -- vim.opt.shellcmdflag = "-ic"
+
+-- Leave it to the formatter or editorconfig to manage end of line characters
+opt.fixendofline = false
+opt.endofline = false
