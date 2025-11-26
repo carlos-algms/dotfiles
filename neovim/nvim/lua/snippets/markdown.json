@@ -1,48 +1,54 @@
 {
-    "Text Block": {
-        "prefix": "text",
-        "body": ["```text", "$0", "```"],
-        "description": "Create a text block"
-    },
-    "HTML code": {
-        "prefix": "html",
-        "body": ["```html", "$0", "```"],
-        "description": "Create a html code snippet"
-    },
-    "JavaScript code": {
-        "prefix": "js",
-        "body": ["```javascript", "$0", "```"],
-        "description": "Create a JavaScript code snippet"
-    },
-    "TypeScript code": {
-        "prefix": "ts",
-        "body": ["```typescript", "$0", "```"],
-        "description": "Create a TypeScript code snippet"
-    },
-    "TypeScript React code": {
-        "prefix": "tsx",
-        "body": ["```tsx", "$0", "```"],
-        "description": "Create a TSX code snippet"
-    },
-    "Bash code": {
-        "prefix": "bash",
-        "body": ["```bash", "$0", "```"],
-        "description": "Create a Shell code snippet"
-    },
-    "Shell code": {
-        "prefix": "shell",
-        "body": ["```shell", "$0", "```"],
-        "description": "Create a Bash code snippet"
-    },
-    "Table": {
-        "prefix": "table",
-        "body": ["| $0 |    |", "|----|----|", "|    |    |"],
-        "description": "Create a TypeScript code snippet"
-    },
+  "Text Block": {
+    "prefix": "text",
+    "body": ["```text", "$0", "```"],
+    "description": "Create a text block"
+  },
+  "HTML code": {
+    "prefix": "html",
+    "body": ["```html", "$0", "```"],
+    "description": "Create a html code snippet"
+  },
+  "JavaScript code": {
+    "prefix": "js",
+    "body": ["```javascript", "$0", "```"],
+    "description": "Create a JavaScript code snippet"
+  },
+  "TypeScript code": {
+    "prefix": "ts",
+    "body": ["```typescript", "$0", "```"],
+    "description": "Create a TypeScript code snippet"
+  },
+  "TypeScript React code": {
+    "prefix": "tsx",
+    "body": ["```tsx", "$0", "```"],
+    "description": "Create a TSX code snippet"
+  },
+  "Bash code": {
+    "prefix": "bash",
+    "body": ["```bash", "$0", "```"],
+    "description": "Create a Shell code snippet"
+  },
+  "Shell code": {
+    "prefix": "shell",
+    "body": ["```shell", "$0", "```"],
+    "description": "Create a Bash code snippet"
+  },
+  "Table": {
+    "prefix": "table",
+    "body": ["| $0 |    |", "|----|----|", "|    |    |"],
+    "description": "Create a TypeScript code snippet"
+  },
 
-    "Code block": {
-        "prefix": "`",
-        "body": ["```", "$0", "```"],
-        "description": "Create a code snippet"
-    }
+  "Code block": {
+    "prefix": "`",
+    "body": ["```", "$0", "```"],
+    "description": "Create a code snippet"
+  },
+
+  "Auto Code block": {
+    "prefix": "``",
+    "body": ["```", "$0", "```"],
+    "description": "Create a code snippet on press back tick twice"
+  }
 }
