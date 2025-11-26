@@ -17,6 +17,8 @@
       "Bash(ls:*)",
       "Bash(fd:*)",
       "Bash(find:*)",
+      "Bash(realpath:*)",
+      "Bash(which:*)",
       "Bash(git rev-parse:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
@@ -25,7 +27,7 @@
     "deny": [],
     "ask": []
   },
-  "model": "sonnet[1m]",
+  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
