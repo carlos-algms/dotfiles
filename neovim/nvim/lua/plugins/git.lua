@@ -41,12 +41,13 @@ return {
         event = "VeryLazy",
 
         keys = {
-            {
-                "<leader>gb",
-                "<CMD>Gitsigns blame<CR>",
-                mode = "n",
-                desc = "Git Blame",
-            },
+            -- it's more modern, but less convenient than Fugitive's version
+            -- {
+            --     "<leader>gb",
+            --     "<CMD>Gitsigns blame<CR>",
+            --     mode = "n",
+            --     desc = "Git Blame",
+            -- },
         },
 
         init = function()
@@ -368,12 +369,12 @@ return {
                 desc = "Show git diff for current file",
             },
 
-            -- {
-            --     "<leader>gb",
-            --     "<CMD>Git blame<CR>",
-            --     mode = "n",
-            --     desc = "Git Blame",
-            -- },
+            {
+                "<leader>gb",
+                "<CMD>Git blame<CR>",
+                mode = "n",
+                desc = "Git Blame",
+            },
 
             {
                 "<leader>gC",
