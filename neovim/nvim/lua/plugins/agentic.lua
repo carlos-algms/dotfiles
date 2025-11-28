@@ -25,8 +25,6 @@ local M = {
                     ["claude-acp"] = {
                         command = "claude-code-acp",
                         env = {
-                            NODE_NO_WARNINGS = "1",
-                            IS_AI_TERMINAL = "1",
                             ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
                         },
                     },
