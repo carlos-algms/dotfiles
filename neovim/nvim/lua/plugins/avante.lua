@@ -1,12 +1,18 @@
 local M = {
     {
+        dir = vim.uv.os_homedir() .. "/projects/avante-nvim",
+        dev = true,
+        name = "avante.nvim",
+
         "yetone/avante.nvim",
 
         -- enabled = not vim.g.is_ssh,
 
+        enabled = false,
+
         -- it seems better to lazy load on event, as the generate template error doesn't happen
-        event = "VeryLazy",
-        -- lazy = false,
+        -- event = "VeryLazy",
+        lazy = true,
 
         cmd = {
             "AvanteAsk",
@@ -301,18 +307,18 @@ local M = {
                 mode = { "n", "v", "i" },
             },
 
-            {
-                "<C-,>",
-                function()
-                    require("avante.api").ask({
-                        ask = true,
-                        new_chat = true,
-                    })
-                end,
-                desc = "Avante new Chat",
-                silent = true,
-                mode = { "n", "v", "i" },
-            },
+            -- {
+            --     "<C-,>",
+            --     function()
+            --         require("avante.api").ask({
+            --             ask = true,
+            --             new_chat = true,
+            --         })
+            --     end,
+            --     desc = "Avante new Chat",
+            --     silent = true,
+            --     mode = { "n", "v", "i" },
+            -- },
 
             {
                 "<A-i>c",
@@ -432,12 +438,16 @@ local M = {
             {
                 -- Make sure to set this up properly if you have lazy=true
                 "MeanderingProgrammer/render-markdown.nvim",
+
+                enabled = false,
+
                 opts = {
                     file_types = {
                         -- "markdown",
                         "Avante",
                         "AvanteTodos",
                         "copilot-chat",
+                        -- "AgenticChat", (I'll rice it without this plugin)
                     },
                 },
                 ft = {
