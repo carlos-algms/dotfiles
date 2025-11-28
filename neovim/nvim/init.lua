@@ -32,6 +32,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("vim-options")
+require("shada-manager")
 require("remap")
 require("commands")
 require("autocmds")
