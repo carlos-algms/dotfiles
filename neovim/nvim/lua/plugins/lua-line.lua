@@ -40,6 +40,13 @@ local M = {
                         "DiffviewFileHistory",
                         "gitsigns-blame",
                         "kulala_ui",
+
+                        "AgenticChat",
+                        "AgenticInput",
+                        "AgenticFiles",
+                        "AgenticTodos",
+                        "AgenticFiles",
+                        "AgenticCode",
                     },
                 },
                 refresh = {
