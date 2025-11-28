@@ -109,10 +109,10 @@ local M = {
                 config = function(opts, _defaults)
                     -- it seems to be called twice, but I use it so little that I don't care, for now
                     -- I had to add this, because the config doesn't merge array like objects
-                    table.insert(
-                        opts.remote_patterns,
-                        { "^%S+-github:(.+)%.git$", "https://github.com/%1" }
-                    )
+                    vim.list_extend(opts.remote_patterns, {
+                        { "^%S+-github:(.+)%.git$", "https://github.com/%1" },
+                        { "^%S+-github:(.+)$", "https://github.com/%1" },
+                    })
                 end,
 
                 open = function(url)
