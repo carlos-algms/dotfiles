@@ -21,8 +21,24 @@ setKeymap(
     { desc = "Toggle relative line numbers globally" }
 )
 
+local wrap_state = {}
 setKeymap({ "n" }, "<leader>vw", function()
-    vim.wo.wrap = not vim.wo.wrap
+    local buf_win = vim.api.nvim_get_current_win()
+    if not vim.wo.wrap then
+        wrap_state[buf_win] = {
+            linebreak = vim.wo.linebreak,
+            breakindent = vim.wo.breakindent,
+        }
+        vim.wo.wrap = true
+        vim.wo.linebreak = true
+        vim.wo.breakindent = true
+    else
+        local state = wrap_state[buf_win] or {}
+        vim.wo.wrap = false
+        vim.wo.linebreak = state.linebreak or false
+        vim.wo.breakindent = state.breakindent or false
+        wrap_state[buf_win] = nil
+    end
 end, { desc = "Toggle line wrapping locally" })
 
 setKeymap("v", [[a"]], [[2i"]], { desc = "Select double quoted text" })
