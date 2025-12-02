@@ -7,23 +7,16 @@ local M = {
     version = false,
 
     opts = function(_, _maybeOpts)
-        local claudeKeyName = "CARLOS_ANTHROPIC_API_KEY"
-
         ---@module 'agentic'
         ---@type agentic.UserConfig
         local config = {
-            debug = true,
+            debug = false,
 
             --- @type agentic.UserConfig.ProviderName
             provider = "claude-acp",
 
-            acp_providers = {
-                ["claude-acp"] = {
-                    command = "claude-code-acp",
-                    env = {
-                        ANTHROPIC_API_KEY = os.getenv(claudeKeyName),
-                    },
-                },
+            windows = {
+                width = "40%",
             },
         }
 
