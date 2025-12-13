@@ -5,7 +5,7 @@ return {
 
     dir = not vim.g.is_ssh and "~/projects/vim-kitty-navigator" or nil,
 
-    enabled = true,
+    enabled = not vim.g.is_ssh,
 
     config = function()
         if vim.g.is_ssh then
