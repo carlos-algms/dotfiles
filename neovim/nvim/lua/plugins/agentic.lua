@@ -20,6 +20,18 @@ local M = {
             },
         }
 
+        if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
+            config.acp_providers = {
+                ["claude-acp"] = {
+                    env = {
+                        ANTHROPIC_API_KEY = os.getenv(
+                            "CARLOS_ANTHROPIC_API_KEY"
+                        ),
+                    },
+                },
+            }
+        end
+
         return config
     end,
 
