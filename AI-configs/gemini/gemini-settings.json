@@ -20,7 +20,7 @@
     "vimMode": true,
     "disableAutoUpdate": true,
     "enablePromptCompletion": true,
-    "previewFeatures": true
+    "previewFeatures": false
   },
   "security": {
     "auth": {
