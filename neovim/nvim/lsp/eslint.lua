@@ -24,6 +24,10 @@ return {
 
         local bufname = vim.api.nvim_buf_get_name(bufnr) or ""
 
+        if bufname == "" or vim.uv.fs_stat(bufname) == nil then
+            return
+        end
+
         for _, folder in ipairs(forbidden_folders) do
             if bufname:find(folder, 1, true) then
                 return
