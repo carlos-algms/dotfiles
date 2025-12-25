@@ -1,7 +1,4 @@
-local M = {}
-
----@class Palette
-M.pallet = {
+local pallet = {
     bg = "#1c1c1c",
     fg = "#bac4cf",
 
@@ -31,57 +28,56 @@ M.pallet = {
     uiBgInactive = "#353435",
 }
 
----@class Theme
----@field highlights table<string, vim.api.keyset.highlight>
----@field links table<string, string>
-M.theme = {
+local theme = {
+    ---@type table<string, vim.api.keyset.highlight>
     highlights = {
         ["@markup.strong.markdown_inline"] = {
             bold = true,
-            fg = M.pallet.keyword,
+            fg = pallet.keyword,
         },
         Bold = { bold = true },
-        Boolean = { fg = M.pallet.keyword },
-        Comment = { fg = M.pallet.comment },
-        Conceal = { fg = M.pallet.muted },
-        Constant = { fg = M.pallet.constant }, -- TODO: change this to identifier and add a Property highlight
-        Cursor = { fg = M.pallet.cursor },
-        CursorLine = { bg = M.pallet.gutter },
-        DiagnosticSignError = { fg = M.pallet.errorMsg, bg = M.pallet.gutter },
-        DiagnosticSignHint = { fg = M.pallet.fg, bg = M.pallet.gutter },
-        DiagnosticSignInfo = { fg = M.pallet.type, bg = M.pallet.gutter },
-        DiagnosticSignWarn = { fg = M.pallet.keyword, bg = M.pallet.gutter },
-        DiagnosticUnderlineError = { undercurl = true, sp = M.pallet.errorMsg },
-        DiagnosticUnderlineHint = { undercurl = true, sp = M.pallet.fg },
-        DiagnosticUnderlineInfo = { undercurl = true, sp = M.pallet.type },
-        DiagnosticUnderlineWarn = { undercurl = true, sp = M.pallet.keyword },
-        DiffAdd = { bg = M.pallet.diffAddBg },
-        DiffChange = { bg = M.pallet.diffChangeBg },
-        DiffDelete = { bg = M.pallet.diffDeleteBg },
-        DiffText = { bg = M.pallet.diffTextBg },
-        Error = { fg = M.pallet.error },
-        ErrorMsg = { fg = M.pallet.errorMsg },
-        -- FloatBorder = { fg = M.pallet.muted },
-        Function = { fg = M.pallet.callable },
-        Identifier = { fg = M.pallet.fg },
-        Keyword = { fg = M.pallet.keyword },
-        LineNr = { fg = M.pallet.lineNumber, bg = M.pallet.gutter },
-        MoreMsg = { fg = M.pallet.stdOutput },
-        NonText = { fg = M.pallet.muted },
-        Normal = { bg = M.pallet.bg },
-        Operator = { fg = M.pallet.keyword },
-        Pmenu = { bg = M.pallet.menu },
-        PreProc = { fg = M.pallet.preProc },
-        String = { fg = M.pallet.string },
-        TabLine = { fg = M.pallet.muted, bg = M.pallet.uiBgInactive }, -- the not current tab
-        TabLineFill = { bg = M.pallet.bg }, -- the entire tabline behind tabs
-        TabLineSel = { fg = M.pallet.fg, bg = M.pallet.uiBgActive }, -- the current tab
-        Title = { fg = M.pallet.keyword, bold = true },
-        Type = { fg = M.pallet.type },
-        Visual = { bg = M.pallet.selection },
-        WinSeparator = { fg = M.pallet.muted },
+        Boolean = { fg = pallet.keyword },
+        Comment = { fg = pallet.comment },
+        Conceal = { fg = pallet.muted },
+        Constant = { fg = pallet.constant }, -- TODO: change this to identifier and add a Property highlight
+        Cursor = { fg = pallet.cursor },
+        CursorLine = { bg = pallet.gutter },
+        DiagnosticSignError = { fg = pallet.errorMsg, bg = pallet.gutter },
+        DiagnosticSignHint = { fg = pallet.fg, bg = pallet.gutter },
+        DiagnosticSignInfo = { fg = pallet.type, bg = pallet.gutter },
+        DiagnosticSignWarn = { fg = pallet.keyword, bg = pallet.gutter },
+        DiagnosticUnderlineError = { undercurl = true, sp = pallet.errorMsg },
+        DiagnosticUnderlineHint = { undercurl = true, sp = pallet.fg },
+        DiagnosticUnderlineInfo = { undercurl = true, sp = pallet.type },
+        DiagnosticUnderlineWarn = { undercurl = true, sp = pallet.keyword },
+        DiffAdd = { bg = pallet.diffAddBg },
+        DiffChange = { bg = pallet.diffChangeBg },
+        DiffDelete = { bg = pallet.diffDeleteBg },
+        DiffText = { bg = pallet.diffTextBg },
+        Error = { fg = pallet.error },
+        ErrorMsg = { fg = pallet.errorMsg },
+        -- FloatBorder = { fg = pallet.muted },
+        Function = { fg = pallet.callable },
+        Identifier = { fg = pallet.fg },
+        Keyword = { fg = pallet.keyword },
+        LineNr = { fg = pallet.lineNumber, bg = pallet.gutter },
+        MoreMsg = { fg = pallet.stdOutput },
+        NonText = { fg = pallet.muted },
+        Normal = { fg = pallet.fg, bg = pallet.bg }, -- Normal NEEDs fg + bg
+        Operator = { fg = pallet.keyword },
+        Pmenu = { bg = pallet.menu },
+        PreProc = { fg = pallet.preProc },
+        String = { fg = pallet.string },
+        TabLine = { fg = pallet.muted, bg = pallet.uiBgInactive }, -- the not current tab
+        TabLineFill = { bg = pallet.bg }, -- the entire tabline behind tabs
+        TabLineSel = { fg = pallet.fg, bg = pallet.uiBgActive }, -- the current tab
+        Title = { fg = pallet.keyword, bold = true },
+        Type = { fg = pallet.type },
+        Visual = { bg = pallet.selection },
+        WinSeparator = { fg = pallet.muted },
     },
 
+    ---@type table<string, string>
     links = {
         ["@attribute.css"] = "@identifier",
         ["@attribute.diff"] = "Comment",
@@ -329,52 +325,29 @@ M.theme = {
     },
 }
 
-M.setup = function()
-    -- Clearing the colors make the sign column lose the background color
-    -- but otherwise, it doesn't work on nvim 0.9.x
-    if not vim.g.is_nvim_0_10 then
-        vim.cmd("hi clear")
-        vim.cmd("syntax reset")
-    end
-
-    vim.opt.termguicolors = true
-    vim.o.background = "dark"
-
-    for group, highlight in pairs(M.theme.highlights) do
-        if vim.g.is_nvim_0_10 then
-            highlight.force = true
-        end
-
-        vim.api.nvim_set_hl(0, group, highlight)
-    end
-
-    for group, link in pairs(M.theme.links) do
-        local hiLink = { link = link }
-        if vim.g.is_nvim_0_10 then
-            hiLink.force = true
-        end
-
-        vim.api.nvim_set_hl(0, group, hiLink)
-    end
+-- only needed to clear when not the default colorscheme
+if vim.g.colors_name then
+    vim.cmd("hi clear")
 end
 
-M.setup()
+vim.o.background = "dark"
+vim.o.termguicolors = true
 
--- These don't work, as I need to re-source the file
--- vim.api.nvim_create_user_command("ReloadDarculaTheme", function()
---     M.setup()
--- end, {
---     desc = "Reload the Darcula theme",
--- })
+vim.g.colors_name = "darcluar"
 
--- vim.api.nvim_create_autocmd("BufWritePost", {
---     group = vim.api.nvim_create_augroup(
---         "carlos_reload_theme",
---         { clear = true }
---     ),
---     pattern = "my-darcula-theme.lua",
---     callback = function()
---         vim.notify("Reloading Darcula theme")
---         M.setup()
---     end,
--- })
+for group, highlight in pairs(theme.highlights) do
+    if vim.g.is_nvim_0_10 then
+        highlight.force = true
+    end
+
+    vim.api.nvim_set_hl(0, group, highlight)
+end
+
+for group, link in pairs(theme.links) do
+    local hiLink = { link = link }
+    if vim.g.is_nvim_0_10 then
+        hiLink.force = true
+    end
+
+    vim.api.nvim_set_hl(0, group, hiLink)
+end
