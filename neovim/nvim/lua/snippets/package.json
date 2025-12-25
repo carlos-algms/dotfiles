@@ -37,19 +37,28 @@
         "path": "./react-ts.json"
       },
       {
-        "language": "markdown",
+        "language": [
+          "markdown",
+          "AgenticInput"
+        ],
         "path": "./markdown.json"
       },
       {
-        "language": "php",
+        "language": [
+          "php"
+        ],
         "path": "./php.json"
       },
       {
-        "language": "sh",
+        "language": [
+          "sh"
+        ],
         "path": "./shell.json"
       },
       {
-        "language": "lua",
+        "language": [
+          "lua"
+        ],
         "path": "./lua.json"
       }
     ]
