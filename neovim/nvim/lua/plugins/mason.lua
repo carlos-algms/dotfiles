@@ -22,6 +22,7 @@ local M = {
                 },
             },
             integrations = {
+                lspconfig = true,
                 -- cmp = false,
             },
         },
@@ -101,41 +102,31 @@ local M = {
                 -- },
             })
 
-            local tables = require("helpers.tables")
-
-            local ensureToolsInstalled = {
+            --- Using a single ensureInstalled list as mason-tool-installer supports it
+            local ensureInstalled = {
+                "cspell",
+                "lua_ls",
                 "stylua",
                 -- "black",
             }
 
-            local ensureLspInstalled = {
-                "lua_ls",
-            }
-
             if vim.g.has_node then
                 -- These need npm to be installed, not to run, most have a binary
-                tables.deep_extend(ensureToolsInstalled, {
-                    "shfmt",
-                    "prettier",
-                })
-
-                tables.deep_extend(ensureLspInstalled, {
+                vim.list_extend(ensureInstalled, {
                     "bashls",
-                    "dockerls",
                     "docker_compose_language_service",
+                    "dockerls",
                     "jsonls",
+                    "prettier",
+                    "shfmt",
                     "yamlls",
                 })
             end
 
             if not vim.g.is_ssh then
                 if vim.g.has_node then
-                    tables.deep_extend(
-                        ensureToolsInstalled,
-                        { "js-debug-adapter" }
-                    )
-
-                    tables.deep_extend(ensureLspInstalled, {
+                    vim.list_extend(ensureInstalled, {
+                        "js-debug-adapter",
                         "vtsls",
                         -- "phpactor", -- requires PHP in PATH, and doesn't seem as good as intelephense
                         "intelephense",
@@ -149,15 +140,15 @@ local M = {
             end
 
             if vim.fn.executable("go") == 1 then
-                tables.deep_extend(ensureLspInstalled, { "gopls" })
-                tables.deep_extend(ensureToolsInstalled, {
+                vim.list_extend(ensureInstalled, {
+                    "gopls",
                     "goimports",
                     -- "goimports-reviser", -- disabled as it requires go.mod to exist
                 })
             end
 
             require("mason-tool-installer").setup({
-                ensure_installed = ensureToolsInstalled,
+                ensure_installed = ensureInstalled,
             })
 
             require("lspconfig.configs").vtsls = require("vtsls").lspconfig
@@ -170,7 +161,7 @@ local M = {
             vim.lsp.set_log_level("error")
 
             require("mason-lspconfig").setup({
-                ensure_installed = ensureLspInstalled,
+                ensure_installed = nil,
                 automatic_enable = {
                     exclude = disabledLspServers,
                 },
