@@ -22,12 +22,12 @@ return {
         opts = function(_, maybeOpts)
             ---@type blink.cmp.Config
             local localOpts = {
+                snippets = {
+                    preset = "luasnip",
+                },
+
                 sources = {
                     default = { "lsp", "emoji", "path", "snippets", "buffer" },
-
-                    snippets = {
-                        preset = "luasnip",
-                    },
 
                     per_filetype = {
                         sql = { inherit_defaults = true, "dadbod" },
