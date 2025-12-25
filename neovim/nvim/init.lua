@@ -62,12 +62,18 @@ local function is_user_thread_limited()
     return false
 end
 
+-- https://lazy.folke.io/configuration
 require("lazy").setup("plugins", {
     change_detection = {
         notify = false,
     },
     rocks = {
-        enabled = false,
+        enabled = true,
+        -- use hererocks to install luarocks?
+        -- set to `nil` to use hererocks when luarocks is not found
+        -- set to `true` to always use hererocks
+        -- set to `false` to always use luarocks
+        hererocks = nil,
     },
     -- colorscheme that will be used when installing plugins.
     install = { colorscheme = { "darcluar" } },
