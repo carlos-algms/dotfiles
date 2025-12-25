@@ -14,7 +14,7 @@ return {
                 ft = { "sql", "mysql", "plsql" },
             },
 
-            { "Kaiser-Yang/blink-cmp-avante" },
+            { "moyiz/blink-emoji.nvim" },
         },
 
         ---@module 'blink.cmp'
@@ -23,11 +23,14 @@ return {
             ---@type blink.cmp.Config
             local localOpts = {
                 sources = {
-                    default = { "lsp", "path", "snippets", "buffer" },
+                    default = { "lsp", "emoji", "path", "snippets", "buffer" },
+
+                    snippets = {
+                        preset = "luasnip",
+                    },
 
                     per_filetype = {
                         sql = { inherit_defaults = true, "dadbod" },
-                        AvanteInput = { "avante" },
                         lua = { inherit_defaults = true, "lazydev" },
                     },
 
@@ -37,23 +40,47 @@ return {
                             module = "vim_dadbod_completion.blink",
                         },
 
-                        avante = {
-                            module = "blink-cmp-avante",
-                            name = "Avante",
-                            opts = {
-                                -- options for blink-cmp-avante
-                            },
-                        },
-
                         lazydev = {
                             name = "LazyDev",
                             module = "lazydev.integrations.blink",
                             score_offset = 100,
                         },
+
+                        path = {
+                            score_offset = 25,
+                            -- When typing a path, I would get snippets and text in the
+                            -- suggestions, I want those to show only if there are no path
+                            -- suggestions
+                            fallbacks = { "snippets", "buffer" },
+                            -- min_keyword_length = 2,
+                            opts = {
+                                trailing_slash = false,
+                                label_trailing_slash = true,
+                                show_hidden_files_by_default = true,
+                            },
+                        },
+
+                        --- this is the words in the current buffer
+                        buffer = {
+                            max_items = 4,
+                            min_keyword_length = 2,
+                            score_offset = 15, -- the higher the number, the higher the priority
+                        },
+
+                        emoji = {
+                            module = "blink-emoji",
+                            name = "Emoji",
+                            score_offset = 15,
+                            opts = {
+                                insert = true, -- Insert emoji (default) or complete its name
+                                ---@type string|table|fun():table
+                                trigger = function()
+                                    return { ":" }
+                                end,
+                            },
+                        },
                     },
                 },
-
-                snippets = { preset = "luasnip" },
 
                 -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
                 -- 'super-tab' for mappings similar to vscode (tab to accept)
