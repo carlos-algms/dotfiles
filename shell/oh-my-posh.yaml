@@ -4,14 +4,15 @@ blocks:
   - type: prompt
     alignment: left
     segments:
-      - template: "{{ if .SSHSession }}<b>{{ .UserName }}@{{ .HostName }} </b>{{ end }}"
+      - template:
+          '{{ if .SSHSession }}<b>{{ .UserName }}@{{ .HostName }} </b>{{ end }}'
         background: transparent
         type: session
         style: plain
         foreground_templates:
-          - "{{if .Root }}#f1184c{{end}}"
+          - '{{if .Root }}#f1184c{{end}}'
           - green
-      - properties:
+      - options:
           style: folder
         template: <b>{{ .PWD }}</b>
         foreground: blue
@@ -25,9 +26,12 @@ blocks:
     alignment: left
     overflow: break
     segments:
-      - properties:
+      - options:
           fetch_status: true
-        template: " {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }} <cyan>{{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end }}</>"
+        template:
+          ' {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end
+          }} <cyan>{{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end
+          }}</>'
         foreground: yellow
         background: transparent
         type: git
@@ -39,9 +43,9 @@ blocks:
         background: transparent
         type: status
         style: plain
-      - properties:
+      - options:
           threshold: 5000
-        template: " {{ .FormattedMs }}"
+        template: ' {{ .FormattedMs }}'
         foreground: yellow
         background: transparent
         type: executiontime
@@ -49,16 +53,16 @@ blocks:
   - type: prompt
     alignment: left
     segments:
-      - template: "λ "
+      - template: 'λ '
         background: transparent
         type: text
         style: plain
         foreground_templates:
-          - "{{if gt .Code 0}}red{{end}}"
-          - "{{if eq .Code 0}}white{{end}}"
+          - '{{if gt .Code 0}}red{{end}}'
+          - '{{if eq .Code 0}}white{{end}}'
     newline: true
 
 secondary_prompt:
-  template: "❯ "
+  template: '❯ '
   foreground: darkGray
   background: transparent
