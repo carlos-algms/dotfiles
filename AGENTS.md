@@ -14,8 +14,97 @@ I use Neovim `v0.11+`, so I can use the most modern configuration options and
 plugins, also newest Lua features. Make sure your answers are valid for this
 version or higher.
 
-Neovim documentation index is `https://neovim.io/doc/user/` from where you
-should be able to find all other relevant documentation links.
+**IMPORTANT**: For dealing with neovim native features and APIs, refer to the
+official docs. Common documentation files include:
+
+- api.txt - Neovim Lua API
+- autocmd.txt - Autocommands
+- change.txt - Changing text
+- channel.txt - Channels and jobs
+- cmdline.txt - Command-line editing
+- diagnostic.txt - Diagnostics
+- diff.txt - Diff mode
+- editing.txt - Editing files
+- fold.txt - Folding
+- indent.txt - Indentation
+- insert.txt - Insert mode
+- job_control.txt - Job control
+- lsp.txt - LSP client
+- lua.txt - Lua API
+- lua-guide.txt - Lua guide
+- map.txt - Key mapping
+- motion.txt - Motion commands
+- options.txt - Options
+- pattern.txt - Patterns and search
+- quickfix.txt - Quickfix and location lists
+- syntax.txt - Syntax highlighting
+- tabpage.txt - Tab pages
+- terminal.txt - Terminal emulator
+- treesitter.txt - Treesitter
+- ui.txt - UI
+- undo.txt - Undo and redo
+- windows.txt - Windows
+- various.txt - Various commands
+
+Use GitHub raw URLs or local paths (see section below) to access these files.
+
+### 🚨 NEVER Execute `nvim` to Read Help Manuals
+
+**CRITICAL**: Do NOT run `nvim --headless` or any other `nvim` command to read
+help documentation. Use direct file access instead.
+
+**Documentation Lookup Strategy:**
+
+Follow this priority order to locate Neovim documentation:
+
+1. **If OS and Neovim version are known from context:**
+   - **macOS (Homebrew assumed):** Compose path directly
+
+     ```
+     /opt/homebrew/Cellar/neovim/<version>/share/nvim/runtime/doc/<doc-name>.txt
+     ```
+
+     Example for v0.11.5:
+     `/opt/homebrew/Cellar/neovim/0.11.5/share/nvim/runtime/doc/api.txt`
+
+     **Note:** Homebrew may add revision suffixes like `_1`, `_2` to the version
+     directory (e.g., `0.11.5_1`) when the formula is updated without a version
+     bump (dependency updates, patches, rebuilds). If the exact version path
+     doesn't exist, check for version directories with suffixes.
+
+   - **Linux (Snap assumed):** Compose path directly
+
+     ```
+     /snap/nvim/current/usr/share/nvim/runtime/doc/<doc-name>.txt
+     ```
+
+2. **If OS or version unknown:** Run discovery commands to find Neovim path
+
+   Find Neovim installation:
+
+   ```bash
+   realpath $(which nvim)
+   ```
+
+   Then, use appropriate path pattern based on the result
+
+3. **If local lookup fails:** Use GitHub raw URLs (least preferred)
+
+   ```
+   https://raw.githubusercontent.com/neovim/neovim/refs/tags/v<version>/runtime/doc/<doc-name>.txt
+   ```
+
+**Why:** Running `nvim` commands can hang, cause race conditions, or interfere
+with development environment.
+
+**Tip:** Use grep on doc folder when unsure which file contains needed info.
+
+Example - search for `colors_name` in Neovim docs:
+```bash
+rg "colors_name" /opt/homebrew/Cellar/neovim/0.11.5*/share/nvim/runtime/doc/
+```
+
+**Note:** Use `rg` (ripgrep) if available, fallback to `grep -r` only if `rg` fails.
 
 ### Architecture
 
@@ -42,17 +131,26 @@ should be able to find all other relevant documentation links.
 You can use any fetch tool to read the code from GitHub, you must convert the
 url to the raw static content format to focus on the code only, not Github HTML.
 
+- **Agentic.nvim**
+  - Configured at `neovim/nvim/lua/plugins/agentic.lua`
+  - **Main chat interface** - My own plugin for interacting with AI models
+    through Claude Agent Coding Protocol (ACP)
+  - Provides chat interface with tool execution, file operations, and code
+    generation capabilities
+  - Supports multiple ACP providers: Claude, OpenCode, and others
+  - Repository: https://github.com/carlos-algms/agentic.nvim
+  - Local codebase: `~/projects/agentic.nvim` (development setup, when NOT on
+    ssh)
+  - Key bindings:
+    - `<C-\>` - Toggle Agentic window
+    - `<C-'>` - Add selection/file to context
+    - `<C-,>` - New session
+    - `<C-t>` - Stop generation
+
 - **Avante.nvim**
   - Configured at `neovim/nvim/lua/plugins/avante.lua`
-  - Provides a Chat interface to interact with AI models (like Copilot, GPT-5,
-    Gemini, Claude) and tool permissions and execution interface, like the
-    Cursor IDE.
-  - It's documentation page is:
-    https://github.com/yetone/avante.nvim/blob/main/README.md
-  - It's default configuration can be found at
-    https://github.com/yetone/avante.nvim/blob/main/lua/avante/config.lua
-  - If these URLs aren't enough, you can investigate the local codebase at
-    `~/.local/share/nvim/lazy/avante.nvim`
+  - Alternative AI chat interface (Cursor-like UI)
+  - Documentation: https://github.com/yetone/avante.nvim/blob/main/README.md
 
 - **Snacks.nvim**
   - Configured at `neovim/nvim/lua/plugins/snacks.lua`
