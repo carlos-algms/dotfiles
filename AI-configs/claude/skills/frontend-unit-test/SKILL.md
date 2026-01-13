@@ -1,5 +1,5 @@
 ---
-name: unit-test
+name: frontend-unit-test
 description:
   Writes unit tests for JavaScript/TypeScript and frontend projects using Vitest
   or Jest. Use when writing or running tests.
