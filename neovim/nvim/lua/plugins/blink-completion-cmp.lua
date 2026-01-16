@@ -78,6 +78,20 @@ return {
                                     return { ":" }
                                 end,
                             },
+                            transform_items = function(_, items)
+                                local allowed = {
+                                    [":flag-br:"] = true,
+                                    [":flag-de:"] = true,
+                                }
+                                return vim.tbl_filter(function(item)
+                                    local name = item.textEdit
+                                        and item.textEdit.newText
+                                    if name and name:match("^:flag%-") then
+                                        return allowed[name]
+                                    end
+                                    return true
+                                end, items)
+                            end,
                         },
                     },
                 },
