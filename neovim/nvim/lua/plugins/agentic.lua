@@ -1,10 +1,14 @@
 local M = {
-
     "carlos-algms/agentic.nvim",
 
-    event = "VeryLazy",
-
     version = false,
+
+    dependencies = {
+        {
+            "HakonHarnes/img-clip.nvim",
+            opts = {},
+        },
+    },
 
     opts = function(_, _maybeOpts)
         ---@module 'agentic'
@@ -20,14 +24,20 @@ local M = {
             },
         }
 
-        if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
             config.acp_providers = {
-                ["claude-acp"] = {
+            ["opencode-acp"] = {
                     env = {
-                        ANTHROPIC_API_KEY = os.getenv(
+                    CARLOS_ANTHROPIC_API_KEY = os.getenv(
                             "CARLOS_ANTHROPIC_API_KEY"
                         ),
                     },
+                },
+            }
+
+        if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
+            config.acp_providers["claude-acp"] = {
+                env = {
+                    ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
                 },
             }
         end
@@ -65,10 +75,16 @@ local M = {
             silent = true,
             mode = { "n", "v", "i" },
         },
-    },
 
-    dependencies = {
-        -- "nvim-tree/nvim-web-devicons",
+        {
+            "<C-t>",
+            function()
+                require("agentic").stop_generation()
+            end,
+            desc = "Agentic Stop current generation",
+            silent = true,
+            mode = { "n", "v", "i" },
+        },
     },
 }
 
