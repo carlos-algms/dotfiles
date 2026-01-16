@@ -20,9 +20,12 @@ return {
                 globals = { "vim", "get_args" },
             },
             workspace = {
-                library = {
-                    vim.api.nvim_get_runtime_file("", true),
-                },
+                -- Commented out to avoid conflicts with lazydev.nvim's automatic workspace management
+                -- lazydev handles workspace.library lazily and redundant paths can cause multiple lua_ls processes
+                -- See: https://github.com/LuaLS/lua-language-server/issues/1872
+                -- library = {
+                --     vim.api.nvim_get_runtime_file("", true),
+                -- },
                 checkThirdParty = false,
             },
             codeLens = {
