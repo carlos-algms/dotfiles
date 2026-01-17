@@ -1,114 +1,82 @@
 ---
 description: Review the current branch compared to main or master
-allowed-tools: >
-  Bash(ls:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Read,
-  Write(./review_result.md), Edit(./review_result.md),
-  MultiEdit(./review_result.md), Bash(pnpm dlx prettier --write
-  review_result.md)
 ---
 
-IMPORTANT: For this task You MUST ask the "code-reviewer" subagent for
-performing the actual code review! Do NOT perform code reviews yourself.
+Act as the orchestrator. Delegate actual code reviews to the "code-reviewer"
+subagent via the Task tool.
 
-You'll be the orchestrator of the review process.
+## Input Handling
 
-If I give you a specific file name, or a list of files, review only that,
-otherwise You should get the list of changed files.
+- If I provide specific files, review only those
+- Otherwise, get the full list of changed files (no output limits)
+- Default target branch: `origin/HEAD`
+- Always pass relative file paths to subagents
 
-If you need to get the list of changed files, don't limit the output, get the
-full list, even if it's long, I want a complete code review, unless I specify
-otherwise.
-
-If I don't give you a target branch, use `origin/HEAD` as the target branch,
-provide it and the relative file path to the subagent, never use absolute paths,
-always relative paths.
-
-Hide the output of the git commands and file reads to avoid noise in the chat
-history.
-
-## Shared Context Preparation
-
-To save some tokens, and read operations, before launching subagents, create a
-shared context file to simplify the investigation work of the subagents.
-
-This file must be named `review_context.md`.
-
-Run a preliminary analysis to build the context with these steps:
-
-- The type of the overall changes
-- Check if package.json, tsconfig.json, or similar config files changed
-- Package.json changes
-  - Don't include dependencies, dev or peer, so the subagents aren't confused if
-    they need to review them
-- Common typescript type definitions, that will be needed by multiple files
-  being reviewed, to save reads for the subagents
-- Renamed symbols across files
-- A minimal graph of which files import each other files, including non-changed
-  files importing the changed files
-- Don't include information about lock files, binary files, etc.
-
-Be smart and identify what's is going to be needed by the subagents when they
-are doing the code review, don't be limited to my list of step.
-
-Write a very brief summary of the changes, and your analysis to the file.
-
-Pass the file path to each subagent via the prompt: "Review context available
-at: <actual relative file path>"
+Process git diff/log internally; do not include raw output in responses.
 
 ## File Management
 
-Use 2 files:
+Three files are used:
 
-- `review_result.md` for the review results you get from the subagents
-- `review_files.md` for the list of files to review.
+| File                | Purpose                      |
+| ------------------- | ---------------------------- |
+| `review_context.md` | Shared context for subagents |
+| `review_files.md`   | Todo list of files to review |
+| `review_result.md`  | Aggregated review results    |
 
-IMPORTANT: If the file already exists, check for unchecked items and continue
-the review process only if there are any unchecked, otherwise ask the user if
-they want to start fresh and empty the file, not remove it. Give the user an
-yes/no prompt, with your default confirmation prompt, where they can press 1, 2,
-or enter to confirm, yes should be the default pre-selected option.
+If `review_files.md` exists with unchecked items, continue from where it left
+off. Otherwise, prompt the user to start fresh (yes = default).
 
-### The review results file
+## Shared Context Preparation
 
-- The very first header, should be  
-  "# Code Review [date] [current time] [branch name]"
-- If there are not suggestions for a file, don't add a section for it, so the
-  file is smaller.
+Before launching subagents, create `review_context.md` with:
 
-### The files list file
+- Type of overall changes
+- Brief summary of changes and the intended purpose of the branch
+- Config file changes (package.json, tsconfig.json, etc.) excluding dependencies
+- Common types, and interfaces, added or removed, and where to find them
+- Renamed symbols across files
+- Import graph: which files import changed files (including unchanged importers)
 
-- It should be a clean list with the Markdown todo list format, like this:
-  ```md
-  - [ ] relative/path/to/file1.ext
-  - [ ] relative/path/to/file2.ext
-  ```
-- Don't add anything else to the file.
-- Don't limit the number of characters per line, as the file names can be long
+Exclude: images, lock files, binary files, generated files.
+
+Include any additional context subagents will need. Pass the path to each
+subagent: "Review context available at: review_context.md"
+
+## Review Files List
+
+Format for `review_files.md`:
+
+```md
+- [ ] relative/path/to/file1.ext
+- [ ] relative/path/to/file2.ext
+```
+
+No additional content. No line length limits.
+
+## Review Results
+
+Format for `review_result.md`:
+
+- First header: `# Code Review [date] [time] [branch name]`
+- Only include sections for files with suggestions
 
 ## Review Process
 
-1. First, create the files if they don't exist
+1. Create files if they do not exist
 
-2. Before launching subagents, filter out:
+2. Filter out before review (mark as checked immediately):
    - Lock files (package-lock.json, pnpm-lock.yaml, etc.)
    - Generated files (dist/, build/, .next/)
-   - Files with only whitespace/formatting changes (check git diff
-     --ignore-all-space)
-   - Mark filtered files as reviewed with '✓' immediately
+   - Binary files, images
+   - Files with only whitespace changes (`git diff --ignore-all-space`)
 
-3. Do not review lock files, binary files, or images, immediately mark them as
-   reviewed without suggestions
+3. For each file:
+   - Launch subagent with target branch and relative file path
+   - Write received response to `review_result.md` immediately (no batching)
+   - Do not transform or clean subagent responses
+   - Mark item as checked: `- [x] path/to/file.ext`
 
-4. For each file reviewed:
-   - Write to the files immediately, don't batch writes
-   - Do not clean, or transform the responses you receive, just write to the
-     file as your received from the subagent
-   - **Ensure responses contain NO praise, positive comments, or benefits of the
-     changes**
-   - **Reviews should ONLY contain issues, problems, or suggestions for
-     improvement**
-   - Mark the todo item as checked
-     ```md
-     - [x] path/to/file.ext
-     - [x] path/to/another_file.ext
-     ```
+4. Response requirements:
+   - NO praise, positive comments, or benefits
+   - ONLY issues, problems, or suggestions for improvement

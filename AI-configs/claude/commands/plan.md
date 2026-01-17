@@ -1,8 +1,5 @@
 ---
 description: Create plans and analyse for summarizing, refactoring, or improving
-allowed-tools: >
-  Read, Bash(ls:*), Bash(git status:*), Bash(git diff:*), Bash(git rev-parse:*),
-  Write(./plan-*)
 ---
 
 You won't make any changes, just create a detailed plan with actionable steps.
