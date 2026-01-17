@@ -101,6 +101,10 @@ vim.g.markdown_recommended_style = 0
 -- DISABLED as it was extremely slow in SSH sessions, and I don't use :! that much
 -- vim.opt.shellcmdflag = "-ic"
 
--- Leave it to the formatter or editorconfig to manage end of line characters
-opt.fixendofline = false
-opt.endofline = false
+-- DISABLED: These settings conflict with EditorConfig's `insert_final_newline = true`.
+-- Neovim's native EditorConfig support (since 0.9) runs AFTER init.lua and overrides these,
+-- causing an oscillating fight where the final newline is added/removed intermittently on save.
+-- Let EditorConfig be the single source of truth for EOF newline handling.
+-- See: https://github.com/neovim/neovim/issues/21648
+-- opt.fixendofline = false
+-- opt.endofline = false
