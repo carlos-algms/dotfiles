@@ -14,25 +14,13 @@ MODEL_NAME=$(echo "$input" | jq -r '.model.display_name')
 # Context window data
 WINDOW_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
 
-# Check if current_usage exists and is not null
-CURRENT_USAGE=$(echo "$input" | jq -r '.context_window.current_usage')
+# Use pre-calculated percentage from Claude (most accurate)
+PERCENTAGE=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
 
-if [ "$CURRENT_USAGE" != "null" ]; then
-  # Use current_usage when available
-  INPUT_TOKENS=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // 0')
-  OUTPUT_TOKENS=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // 0')
-  CACHE_CREATE=$(echo "$input" | jq -r '.context_window.current_usage.cache_creation_input_tokens // 0')
-  CACHE_READ=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
-  TOTAL_TOKENS=$((INPUT_TOKENS + OUTPUT_TOKENS + CACHE_CREATE + CACHE_READ))
-else
-  # Fallback to totals when current_usage is null
-  TOTAL_INPUT=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
-  TOTAL_OUTPUT=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
-  TOTAL_TOKENS=$((TOTAL_INPUT + TOTAL_OUTPUT))
-fi
+# Calculate tokens from percentage (reverse calculation)
+TOTAL_TOKENS=$((WINDOW_SIZE * PERCENTAGE / 100))
 
-# Calculate percentage (0-100) with rounding, cap at 100
-PERCENTAGE=$(((TOTAL_TOKENS * 100 + WINDOW_SIZE / 2) / WINDOW_SIZE))
+# Cap percentage at 100
 if [ $PERCENTAGE -gt 100 ]; then
   PERCENTAGE=100
 fi
@@ -48,7 +36,20 @@ BAR=""
 for ((i = 0; i < FILLED; i++)); do BAR="${BAR}█"; done
 for ((i = 0; i < UNFILLED; i++)); do BAR="${BAR}░"; done
 
-echo "[$MODEL_NAME] 📁 ${DIR##*/} | $COST USD | $BAR ${PERCENTAGE}%"
+# Format tokens with K suffix for readability
+format_tokens() {
+  local tokens=$1
+  if [ $tokens -ge 1000 ]; then
+    echo "$((tokens / 1000))k"
+  else
+    echo "$tokens"
+  fi
+}
+
+TOKENS_FORMATTED=$(format_tokens $TOTAL_TOKENS)
+WINDOW_FORMATTED=$(format_tokens $WINDOW_SIZE)
+
+echo "[$MODEL_NAME] 📁 ${DIR##*/} | $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
 
 ### Don't change from here ###
 # https://code.claude.com/docs/en/statusline
