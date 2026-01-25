@@ -20,7 +20,7 @@
     "vimMode": true,
     "disableAutoUpdate": true,
     "enablePromptCompletion": true,
-    "previewFeatures": false
+    "previewFeatures": true
   },
   "security": {
     "auth": {
@@ -41,5 +41,8 @@
     },
     "showMemoryUsage": true,
     "showModelInfoInChat": true
+  },
+  "experimental": {
+    "skills": true
   }
 }

@@ -13,10 +13,16 @@ ln -s $(pwd)/AI-configs/claude/claude-statusline.sh ~/.claude/statusline.sh
 
 ## Gemini
 
+Gemini, only supports commands written in toml, not compatible with claude
+skills yet.
+
+For skills to work, it must be enabled after enabling preview mode
+
 ```bash
 mkdir -p ~/.gemini
 ln -s $(pwd)/AI-configs/gemini/settings.json ~/.gemini/settings.json
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.gemini/GEMINI.md
+ln -s $(pwd)/AI-configs/claude/skills ~/.gemini/skills
 ```
 
 ## Github Copilot
