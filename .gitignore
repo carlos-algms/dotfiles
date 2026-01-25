@@ -5,3 +5,8 @@
 *_compiled.lua
 lazy-lock.json
 .DS_Store
+
+## symlinks pointing to claude folder
+AI-configs/opencode/agents
+AI-configs/opencode/commands
+AI-configs/opencode/skills

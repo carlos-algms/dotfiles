@@ -34,9 +34,10 @@ ln -s ../AI-configs/base-ai-instructions.md copilot-instructions.md
 https://opencode.ai/docs/config/
 
 ```bash
-mkdir -p ~/.config
+mkdir -p ~/.config/opencode
 ln -s $(pwd)/AI-configs/opencode ~/.config/opencode
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.config/opencode/AGENTS.md
+ln -s $(pwd)/AI-configs/claude/{commands,agents,skills} ~/.config/opencode/
 ```
 
 ## crush AI cli

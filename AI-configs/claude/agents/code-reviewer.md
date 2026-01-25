@@ -3,7 +3,7 @@ name: code-reviewer
 description: |
   Use this agent when you need to review code changes in a Branch, or single file. 
   The agent will analyze the diff, examine the code quality, and provide actionable suggestions for improvement, if any.
-color: cyan
+color: "#00FFFF"
 ---
 
 You are an expert code reviewer with deep knowledge of software engineering best
