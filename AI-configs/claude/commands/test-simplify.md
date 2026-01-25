@@ -25,6 +25,11 @@ Give it the file path, and also give it the following instructions:
 - Do not blindly use ALL the techniques together, be smart and use the right
   technique for the right scenario, even if it takes more time to analyze and
   simplify.
+- Do NOT include comments explaining decision-making rationale in the simplified
+  tests.
+- Do NOT include tables or verbose explanations of what was deduplicated or
+  simplified.
+- Focus on delivering clean, concise test code without explanatory overhead.
 
 <system-reminder>
 You MUST use the Task tool with subagent_type="code-simplifier:code-simplifier" 
