@@ -6,7 +6,6 @@ return {
         -- event = "VeryLazy",
         dependencies = {
             "nvim-lua/plenary.nvim",
-            "nvim-telescope/telescope.nvim",
             "nvim-tree/nvim-web-devicons",
         },
         cmd = { "Octo" },
@@ -22,17 +21,20 @@ return {
                 desc = "Create a pull-request using Octo",
             },
         },
-        config = function()
-            require("octo").setup({
-                enable_builtin = true,
-                default_remote = { "origin", "upstream" },
-                picker = "telescope",
-                comment_icon = "󰆈 ",
-                suppress_missing_scope = {
-                    projects_v2 = true,
-                },
-            })
-        end,
+
+        --- @module 'octo'
+        --- @type OctoConfig
+        ---@diagnostic disable-next-line: missing-fields
+        opts = {
+            enable_builtin = true,
+            default_remote = { "origin", "upstream" },
+            --- @type OctoPickers
+            picker = "snacks",
+            comment_icon = "󰆈 ",
+            suppress_missing_scope = {
+                projects_v2 = true,
+            },
+        },
     },
 
     {

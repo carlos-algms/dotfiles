@@ -5,7 +5,6 @@ return {
         enabled = not vim.g.is_ssh,
         dependencies = {
             {
-                "nvim-telescope/telescope.nvim",
                 {
                     "rcarriga/nvim-dap-ui",
                     dependencies = {
