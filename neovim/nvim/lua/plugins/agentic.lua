@@ -49,7 +49,7 @@ local M = {
         {
             "<C-\\>",
             function()
-                require("agentic").toggle()
+                require("agentic").toggle({ auto_add_to_context = false })
             end,
             desc = "Agentic Open",
             silent = true,
