@@ -30,6 +30,11 @@ local M = {
                     CARLOS_ANTHROPIC_API_KEY = os.getenv(
                             "CARLOS_ANTHROPIC_API_KEY"
                         ),
+                    COREPACK_NPM_REGISTRY = os.getenv("COREPACK_NPM_REGISTRY"),
+                    COREPACK_NPM_TOKEN = os.getenv("COREPACK_NPM_TOKEN"),
+                    COREPACK_INTEGRITY_KEYS = os.getenv(
+                        "COREPACK_INTEGRITY_KEYS"
+                    ),
                     },
                 },
             }
