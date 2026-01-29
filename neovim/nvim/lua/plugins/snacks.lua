@@ -153,6 +153,27 @@ local M = {
                 },
             },
 
+            scratch = {
+                filekey = {
+                    branch = false,
+                },
+                win = {
+                    keys = {
+                        new_scratch = {
+                            "<localLeader>n",
+                            function(self)
+                                self:close()
+                                vim.schedule(function()
+                                    Snacks.scratch.open()
+                                end)
+                            end,
+                            mode = { "n" },
+                            desc = "New Scratch Buffer",
+                        },
+                    },
+                },
+            },
+
             picker = {
                 ui_select = true, -- replace `vim.ui.select` with the snacks picker
 
@@ -227,7 +248,7 @@ local M = {
                 win = {
                     input = {
                         keys = {
-                            ["<a-r>"] = { -- not docummented, but works
+                            ["<a-r>"] = { -- not documented, but works
                                 "toggle_regex",
                                 mode = { "i", "n" },
                                 desc = "Toggle Regex",
@@ -250,6 +271,21 @@ local M = {
                         },
                     },
                 },
+
+                sources = {
+                    scratch = {
+                        win = {
+                            input = {
+                                keys = {
+                                    ["<c-n>"] = {
+                                        "list_down",
+                                        mode = { "i", "n" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
 
             styles = {
@@ -266,6 +302,13 @@ local M = {
                 },
                 notification_history = {
                     relative = "editor",
+                    wo = {
+                        wrap = true,
+                    },
+                },
+                scratch = {
+                    width = 0.8,
+                    height = 0.6,
                     wo = {
                         wrap = true,
                     },
@@ -522,6 +565,26 @@ local M = {
                 P.file_type_picker()
             end,
             desc = "Change current buffer filetype - Snacks",
+        },
+
+        {
+            "<leader>zo",
+            function()
+                Snacks.scratch({
+                    filekey = {
+                        branch = false,
+                        count = false,
+                    },
+                })
+            end,
+            desc = "Toggle Scratch Buffer",
+        },
+        {
+            "<leader>zl",
+            function()
+                Snacks.scratch.select()
+            end,
+            desc = "Select Scratch Buffer",
         },
     },
 
