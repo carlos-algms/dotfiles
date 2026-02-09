@@ -12,13 +12,17 @@
       "Bash(find:*)",
       "Bash(gh issue view:*)",
       "Bash(gh run view:*)",
+      "Bash(git config --get remote.origin.url:*)",
       "Bash(git diff:*)",
       "Bash(git rev-parse:*)",
       "Bash(git status:*)",
+      "Bash(head:*)",
       "Bash(ls:*)",
       "Bash(nvim:*)",
       "Bash(realpath:*)",
       "Bash(rg:*)",
+      "Bash(tail:*)",
+      "Bash(wc -l:*)",
       "Bash(which:*)",
       "Glob",
       "Grep",
@@ -31,7 +35,7 @@
     "deny": [],
     "ask": []
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
