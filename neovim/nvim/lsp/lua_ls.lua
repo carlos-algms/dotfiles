@@ -1,6 +1,11 @@
 ---@type vim.lsp.Config
 return {
     root_dir = function(bufnr, on_dir)
+        local clients = vim.lsp.get_clients({ bufnr = bufnr, name = "lua_ls" })
+        if #clients > 0 then
+            return -- Don't call on_dir, preventing duplicate attachment
+        end
+
         local bufname = vim.api.nvim_buf_get_name(bufnr) or ""
 
         if bufname == "" or vim.uv.fs_stat(bufname) == nil then
