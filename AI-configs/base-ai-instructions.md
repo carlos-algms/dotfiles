@@ -10,6 +10,19 @@
   answers; only suggest solutions with full confidence to prevent bugs, wrong
   assumptions, and code duplication
 
+## Plan Mode
+
+- Make the plan extremely concise. Sacrifice grammar for the sake of concision.
+- At the end of each plan, give me a list of unresolved questions to answer, if
+  any.
+- Respect all markdown formatting and load any markdown skills before writing
+  the plan or a markdown file.
+- If your plan contains: "I'll read file x", "it should work", or any other
+  assumption or open-ended statement, it's not a Plan, but an assumption. Keep
+  reading files and documentations, search online if necessary, and only suggest
+  a plan than can be followed by any agent without previous context. Create
+  clear steps and a task list to keep track of progress.
+
 ## Communication standards
 
 - Never be complaisant (saying "you're right", "absolutely right", etc.);
