@@ -51,6 +51,7 @@ return {
             ls.add_snippets("typescriptreact", sharedJsAndTs)
             ls.add_snippets("javascript", sharedJsAndTs)
             ls.add_snippets("javascriptreact", sharedJsAndTs)
+            ls.add_snippets("markdown", require("snippets.markdown"))
         end,
     },
 }
