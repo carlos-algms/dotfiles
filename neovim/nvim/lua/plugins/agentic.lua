@@ -20,6 +20,7 @@ local M = {
             provider = "claude-acp",
 
             windows = {
+                position = "right",
                 width = "40%",
             },
         }
@@ -87,6 +88,25 @@ local M = {
                 require("agentic").stop_generation()
             end,
             desc = "Agentic Stop current generation",
+            silent = true,
+            mode = { "n", "v", "i" },
+        },
+
+        {
+            "<A-i>r",
+            function()
+                require("agentic").restore_session()
+            end,
+            desc = "Agentic Restore session",
+            silent = true,
+            mode = { "n", "v", "i" },
+        },
+        {
+            "<A-i>l",
+            function()
+                require("agentic").rotate_layout({ "right", "bottom" })
+            end,
+            desc = "Agentic rotate layout",
             silent = true,
             mode = { "n", "v", "i" },
         },
