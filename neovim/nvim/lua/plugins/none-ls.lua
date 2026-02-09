@@ -18,7 +18,14 @@ local M = {
     config = function()
         local nullLs = require("null-ls")
 
-        local sources = {}
+        local sources = {
+            nullLs.builtins.diagnostics.selene.with({
+                condition = function(utils)
+                    -- Only enable selene if selene.toml exists in project
+                    return utils.root_has_file({ "selene.toml" })
+                end,
+            }),
+        }
 
         -- vim.list_extend(sources, P.make_phpstan_sources())
         vim.list_extend(sources, P.make_cspell_sources())
