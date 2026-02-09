@@ -28,6 +28,9 @@ return {
         opts = {
             enable_builtin = true,
             default_remote = { "origin", "upstream" },
+            ssh_aliases = {
+                ["carlos-github"] = "github.com",
+            },
             --- @type OctoPickers
             picker = "snacks",
             comment_icon = "󰆈 ",
