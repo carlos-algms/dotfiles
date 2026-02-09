@@ -5,6 +5,9 @@ description: Review the current branch compared to main or master
 Act as the orchestrator. Delegate actual code reviews to the "code-reviewer"
 subagent via the Task tool.
 
+You'll write to markdown files, so make sure to load markdown skills, so you
+write them with the right formatting.
+
 ## Input Handling
 
 - If I provide specific files, review only those
