@@ -37,7 +37,8 @@ Before launching subagents, create `review_context.md` with:
 - Type of overall changes
 - Brief summary of changes and the intended purpose of the branch
 - Config file changes (package.json, tsconfig.json, etc.) excluding dependencies
-- Common types, and interfaces, added or removed, and where to find them
+- Common types/interfaces changed: list file paths where they're defined (not
+  the types themselves) so subagents can read them directly
 - Renamed symbols across files
 - Import graph: which files import changed files (including unchanged importers)
 
