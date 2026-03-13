@@ -21,7 +21,12 @@
     "disableAutoUpdate": true,
     "enablePromptCompletion": true,
     "previewFeatures": true,
-    "enableAutoUpdate": false
+    "enableAutoUpdate": false,
+    "sessionRetention": {
+      "warningAcknowledged": true,
+      "enabled": true,
+      "maxAge": "30d"
+    }
   },
   "security": {
     "auth": {
