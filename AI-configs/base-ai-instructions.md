@@ -145,6 +145,26 @@ Before running pnpm, npm, or npx, follow this sequence:
 ## Git protocol
 
 - Never execute git commits without explicit request or confirmation
+- **CRITICAL**: `git commit` message visibility protocol:
+  1. Output the full commit message as a markdown code block in normal
+     conversation text (not inside a tool call) so the user can read it
+  2. Immediately after sending the message, proceed to call `git commit` with
+     that exact message — do NOT end your turn prematurely, do NOT wait for user
+     input, do NOT stop between showing the message and calling the tool
+  - **NEVER** call `git commit` without showing the message as text first
+  - **NEVER** show the message and then end your turn without committing —
+    always follow through with the `git commit` tool call right after
+  - Expected format:
+
+    ```md
+    fix(scope): subject
+
+    [optional body if user asks for it]
+
+    - item 1
+    - item 2
+    ```
+
 - **ABSOLUTELY FORBIDDEN**: Never use `git checkout`, `git revert`, or
   `git reset` commands - they may undo unintended changes beyond your edits
   (files may have been modified before you started working)

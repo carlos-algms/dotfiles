@@ -65,6 +65,13 @@ Format for `review_result.md`:
 - First header: `# Code Review [date] [time] [branch name]`
 - Only include sections for files with suggestions
 
+## Subagent Execution
+
+Launch subagents via the Task tool in the **foreground**, never in the
+background, otherwise there'll be no notification they finished. To review
+multiple files concurrently, send multiple Task calls in a single response —
+they run in parallel and all return results before you continue.
+
 ## Review Process
 
 1. Create files if they do not exist

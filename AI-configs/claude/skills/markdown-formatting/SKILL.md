@@ -117,6 +117,21 @@ export function Button({ label }: { label: string }) {
 - Use `---` (three dashes) on its own line
 - Blank line before and after
 
+### Tables
+
+- **Align all columns**: every `|` in the same column must be
+  vertically aligned across all rows
+- **Column width**: each column width is determined by its
+  widest cell content (header or data), not by the header alone
+  - Scan all rows to find the longest content per column, then
+    size every cell in that column to match
+- Pad every cell with exactly one space on each side
+- Separator dashes fill the full column width
+- Left-alignment by default; use `:---:` for center, `---:` for
+  right only when needed
+- Leading and trailing `|` required on every row
+- One blank line before and after tables
+
 ## Content Guidelines
 
 ### Clarity and Conciseness
