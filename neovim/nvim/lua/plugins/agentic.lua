@@ -17,11 +17,12 @@ local M = {
             debug = false,
 
             --- @type agentic.UserConfig.ProviderName
-            provider = "claude-acp",
+            provider = "claude-agent-acp",
 
             windows = {
                 position = "right",
                 width = "40%",
+                height = "25%",
             },
         }
 
@@ -42,6 +43,11 @@ local M = {
 
         if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
             config.acp_providers["claude-acp"] = {
+                env = {
+                    ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
+                },
+            }
+            config.acp_providers["claude-agent-acp"] = {
                 env = {
                     ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
                 },
@@ -75,9 +81,29 @@ local M = {
         {
             "<C-,>",
             function()
+                require("agentic").new_session({ auto_add_to_context = false })
+            end,
+            desc = "Agentic New Session",
+            silent = true,
+            mode = { "n", "v", "i" },
+        },
+
+        {
+            "<C-S-,>",
+            function()
                 require("agentic").new_session()
             end,
             desc = "Agentic New Session",
+            silent = true,
+            mode = { "n", "v", "i" },
+        },
+
+        {
+            "<C-A-n>",
+            function()
+                require("agentic").new_session_with_provider()
+            end,
+            desc = "Agentic New Session with provider selection",
             silent = true,
             mode = { "n", "v", "i" },
         },
