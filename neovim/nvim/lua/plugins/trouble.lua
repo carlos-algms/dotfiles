@@ -71,7 +71,7 @@ return {
     },
 
     init = function()
-        vim.keymap.set("n", "<leader>q", function()
+        vim.keymap.set("n", "<leader>qa", function()
             local line = vim.fn.getline(".")
             local trimmed = vim.trim(line)
 
