@@ -47,6 +47,7 @@ local M = {
                         "AgenticTodos",
                         "AgenticFiles",
                         "AgenticCode",
+                        "AgenticDiagnostics",
                     },
                 },
                 refresh = {
