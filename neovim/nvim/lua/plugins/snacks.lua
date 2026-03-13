@@ -482,7 +482,7 @@ local M = {
         },
 
         {
-            "gr",
+            "grr",
             function()
                 local current_word = vim.fn.expand("<cword>")
                 Snacks.picker.lsp_references({
