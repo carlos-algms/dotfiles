@@ -12,7 +12,6 @@ return {
 
         config = function()
             local ls = require("luasnip")
-            local sharedJsAndTs = require("snippets.js_and_ts")
 
             -- borrowed from
             -- https://github.com/garcia5/dotfiles/blob/92621b3fc552744253f90c285caa5ba0790c6bb8/files/nvim/lua/ag/plugins/luasnip.lua
@@ -47,11 +46,18 @@ return {
                 paths = "./lua/snippets",
             })
 
-            ls.add_snippets("typescript", sharedJsAndTs)
-            ls.add_snippets("typescriptreact", sharedJsAndTs)
-            ls.add_snippets("javascript", sharedJsAndTs)
-            ls.add_snippets("javascriptreact", sharedJsAndTs)
-            ls.add_snippets("markdown", require("snippets.markdown"))
+            require("luasnip.loaders.from_lua").lazy_load({
+                paths = "./lua/snippets",
+            })
+
+            -- js_and_ts.lua snippets shared across JS/TS filetypes
+            ls.filetype_extend("typescript", { "js_and_ts" })
+            ls.filetype_extend("typescriptreact", { "js_and_ts" })
+            ls.filetype_extend("javascript", { "js_and_ts" })
+            ls.filetype_extend("javascriptreact", { "js_and_ts" })
+
+            -- AgenticNvim buffers use markdown snippets
+            ls.filetype_extend("AgenticInput", { "markdown" })
         end,
     },
 }
