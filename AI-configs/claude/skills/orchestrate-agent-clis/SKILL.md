@@ -48,13 +48,15 @@ cursor-agent --model=MODEL -p "<prompt>"
 
 Available models:
 
-- `composer-1` (preferred for multi-file edits, also fast)
-- `gemini-3-pro` (better for code investigation, planning and web research)
-- `gemini-3-flash` (faster, good for simple tasks)
-- `grok` (creative solutions, unconventional approaches)
-- `gpt-5.2-codex` (code-focused)
+- `composer-2` preferred for multi-file edits, also fast
+- `gemini-3.1-pro` better for code investigation, planning and web research
+- `gemini-3-flash` faster, good for simple tasks
+- `grok` creative solutions, unconventional approaches
+- `gpt-5.4-xhigh` High reasoning
 
-Note: If these models fail, you can get the list of available models by running:
+Note: If these models fail, you can get the list of available models by running
+this command, but don't use head or tail, otherwise you'll cut out important
+models out:
 
 ```bash
 cursor-agent models
@@ -67,7 +69,7 @@ Reference files using `@` prefix with relative paths:
 ```bash
 codex exec "Review @src/components/Button.tsx"
 gemini -p "Create tests for @src/utils/helpers.ts"
-cursor-agent --model=composer-1 -p "Refactor @src/api/client.ts"
+cursor-agent --model=composer-2 -p "Refactor @src/api/client.ts"
 ```
 
 ## Task Guidelines
@@ -78,7 +80,7 @@ For questions, plans, reviews, or analysis, instruct agents not to make file
 changes:
 
 ```bash
-cursor-agent --model=gemini-3-pro -p "Analyze the architecture in @src/core/ - explain only, do not modify files"
+cursor-agent --model=gemini-3.1-pro -p "Analyze the architecture in @src/core/ - explain only, do not modify files"
 ```
 
 ### Comparison Workflows

@@ -18,7 +18,6 @@
   "general": {
     "preferredEditor": "neovim",
     "vimMode": true,
-    "disableAutoUpdate": true,
     "enablePromptCompletion": true,
     "previewFeatures": true,
     "enableAutoUpdate": false,

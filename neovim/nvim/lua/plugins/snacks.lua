@@ -586,6 +586,42 @@ local M = {
             end,
             desc = "Select Scratch Buffer",
         },
+
+        {
+            "<leader>zf",
+            function()
+                local config =
+                    vim.tbl_deep_extend("force", {}, customGrepOptions)
+                config.cwd = os.getenv("SECOND_BRAIN_PATH")
+                Snacks.picker.grep(config)
+            end,
+            desc = "Second brain grep 🧠 - Snacks",
+        },
+
+        {
+            "<leader>zp",
+            function()
+                Snacks.picker.files({
+                    hidden = false,
+                    cwd = os.getenv("SECOND_BRAIN_PATH"),
+                })
+            end,
+            desc = "Second brain files 🧠 - Snacks",
+        },
+
+        {
+            "<leader>zn",
+            function()
+                vim.cmd(
+                    string.format(
+                        "e %s/%s.md",
+                        os.getenv("SECOND_BRAIN_PATH"),
+                        os.date("%Y-%m-%d_%H-%M")
+                    )
+                )
+            end,
+            desc = "Second brain new file 🧠 - Snacks",
+        },
     },
 
     init = function()
