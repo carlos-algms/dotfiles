@@ -1,9 +1,10 @@
 return {
     "stevearc/oil.nvim",
     enabled = true,
-    -- Optional dependencies
+
     dependencies = {
         "nvim-tree/nvim-web-devicons",
+        "HakonHarnes/img-clip.nvim",
     },
 
     cmd = {
@@ -53,6 +54,43 @@ return {
             ["R"] = "actions.refresh",
             ["`"] = false,
             ["~"] = false,
+            ["gp"] = {
+                callback = function()
+                    local oil = require("oil")
+                    local actions = require("oil.actions")
+                    local ok, ImgClipClipboard =
+                        pcall(require, "img-clip.clipboard")
+
+                    if not ok then
+                        vim.notify(
+                            "img-cip not installed",
+                            vim.log.levels.ERROR
+                        )
+                    else
+                        local dir = oil.get_current_dir()
+
+                        local file_path = dir
+                            .. "pasted_image_"
+                            .. vim.fn.strftime("%Y%m%d_%H%M%S")
+                            .. ".png"
+
+                        local pasted =
+                            pcall(ImgClipClipboard.save_image, file_path)
+
+                        if pasted then
+                            require("oil.view").render_buffer_async(0, { refetch = true })
+                            return nil
+                        end
+                    end
+
+                    if actions.paste_from_system_clipboard then
+                        actions.paste_from_system_clipboard.callback()
+                    else
+                        vim.api.nvim_feedkeys("gp", "n", false)
+                    end
+                end,
+                desc = "Paste from system clipboard",
+            },
         },
 
         confirmation = {
