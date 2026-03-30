@@ -17,7 +17,7 @@ memory.
 **Fallback:** Direct file operations via Read/Write/Edit tools against
 `$SECOND_BRAIN_PATH`.
 
-**Related skills:** `obsidian:obsidian-cli` (full CLI reference),
+**MANDATORY Related skills:** `obsidian:obsidian-cli` (full CLI reference),
 `obsidian:obsidian-markdown` (Obsidian-flavored Markdown syntax).
 
 ## Prerequisites
