@@ -107,6 +107,7 @@ local M = {
                 "cspell",
                 "lua_ls",
                 "stylua",
+                "tree-sitter-cli",
                 -- "black",
             }
 
@@ -158,7 +159,7 @@ local M = {
                 "tsserver",
             }
 
-            vim.lsp.set_log_level("error")
+            vim.lsp.log.set_level("error")
 
             require("mason-lspconfig").setup({
                 ensure_installed = nil,

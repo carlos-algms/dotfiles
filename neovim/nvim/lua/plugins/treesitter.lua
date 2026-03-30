@@ -1,141 +1,67 @@
 return {
     "nvim-treesitter/nvim-treesitter",
-    -- tag = "v0.9.1",
+    branch = "main",
 
-    dependencies = {
-        "nvim-treesitter/nvim-treesitter-context",
-        "nvim-treesitter/nvim-treesitter-textobjects",
-        "windwp/nvim-ts-autotag",
-    },
+    -- main branch does NOT support lazy-loading
+    lazy = false,
 
     build = ":TSUpdate",
 
-    event = "VeryLazy",
+    dependencies = {
+        {
+            "nvim-treesitter/nvim-treesitter-textobjects",
+            branch = "main",
+        },
+        {
+            "nvim-treesitter/nvim-treesitter-context",
+            opts = {
+                max_lines = 6,
+                multiline_threshold = 3,
+            },
+        },
+        {
+            "windwp/nvim-ts-autotag",
+            opts = {
+                opts = {
+                    enable_close_on_slash = true,
+                },
+            },
+        },
+    },
 
     config = function()
-        require("nvim-treesitter.configs").setup({
-            -- A list of parser names, or "all" (the five listed parsers should always be installed)
-            ensure_installed = {
-                "css",
-                -- "dap_repl", -- it seems to doesn't exist
-                "html",
-                "javascript",
-                "jsdoc",
-                "json",
-                "jsonc",
-                "lua",
-                "markdown_inline",
-                "markdown",
-                "php",
-                "phpdoc",
-                "python",
-                "regex",
-                "rust",
-                "scss",
-                "styled",
-                "tsx",
-                "typescript",
-                "vim",
-                "vimdoc",
-            },
+        -- Parser installation (replaces ensure_installed)
+        require("nvim-treesitter").install({
+            "css",
+            "html",
+            "javascript",
+            "jsdoc",
+            "json",
+            "lua",
+            "markdown_inline",
+            "markdown",
+            "php",
+            "phpdoc",
+            "python",
+            "regex",
+            "rust",
+            "scss",
+            "styled",
+            "tsx",
+            "typescript",
+            "vim",
+            "vimdoc",
+            "yaml",
+        })
 
-            -- Install parsers synchronously (only applied to `ensure_installed`)
-            sync_install = false,
-
-            -- Automatically install missing parsers when entering buffer
-            -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-            auto_install = true,
-
-            highlight = {
-                enable = true,
-
-                -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-                -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-                -- Using this option may slow down your editor, and you may see some duplicate highlights.
-                -- Instead of true it can also be a list of languages
-                additional_vim_regex_highlighting = false,
-            },
-            indent = {
-                enable = true,
-            },
-            ignore_install = {},
-            modules = {},
-
-            textobjects = {
-                select = {
-                    enable = true,
-
-                    -- Automatically jump forward to textobj, similar to targets.vim
-                    lookahead = true,
-
-                    include_surrounding_whitespace = false,
-
-                    keymaps = {
-                        -- You can use the capture groups defined in textobjects.scm
-                        ["af"] = "@function.outer",
-                        ["if"] = "@function.inner",
-
-                        ["ac"] = "@class.outer",
-
-                        ["ic"] = "@class.inner",
-
-                        -- You can also use captures from other query groups like `locals.scm`
-                        ["as"] = {
-                            query = "@local.scope",
-                            query_group = "locals",
-                            desc = "Select language scope",
-                        },
-
-                        ["ab"] = "@block.outer",
-                        ["ib"] = "@block.inner",
-
-                        ["ii"] = "@conditional.inner",
-                        ["ai"] = "@conditional.outer",
-                    },
-                },
-
-                move = {
-                    enable = true,
-                    set_jumps = true, -- whether to set jumps in the jumplist
-                    goto_next_start = {
-                        ["]m"] = "@function.outer",
-                        -- ["]b"] = {
-                        --     query = "@fold",
-                        --     query_group = "folds",
-                        --     desc = "Next fold",
-                        -- },
-                    },
-                    goto_next_end = {
-                        ["]M"] = "@function.outer",
-                    },
-                    goto_previous_start = {
-                        ["[m"] = "@function.outer",
-                        -- ["[b"] = {
-                        --     query = "@fold",
-                        --     query_group = "folds",
-                        --     desc = "Previous fold",
-                        -- },
-                    },
-                    goto_previous_end = {
-                        ["[M"] = "@function.outer",
-                    },
-                },
-            },
+        -- Treesitter highlighting is NOT automatic in 0.12, enable it globally
+        vim.api.nvim_create_autocmd("FileType", {
+            callback = function()
+                pcall(vim.treesitter.start)
+            end,
         })
 
         vim.treesitter.language.register("markdown", "mdx")
-
-        -- https://github.com/nvim-treesitter/nvim-treesitter-context?tab=readme-ov-file#configuration
-        require("treesitter-context").setup({
-            max_lines = 6,
-            multiline_threshold = 3, -- Maximum number of lines to show for a single context
-        })
-
-        require("nvim-ts-autotag").setup({
-            opts = {
-                enable_close_on_slash = true,
-            },
-        })
 
         vim.opt.foldmethod = "expr"
         vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
@@ -190,5 +116,62 @@ return {
         end
 
         vim.opt.foldtext = "v:lua.custom_foldtext()"
+
+        -- Textobjects setup
+        require("nvim-treesitter-textobjects").setup({
+            select = {
+                lookahead = true,
+                include_surrounding_whitespace = false,
+            },
+            move = {
+                set_jumps = true,
+            },
+        })
+
+        local select = require("nvim-treesitter-textobjects.select")
+        local move = require("nvim-treesitter-textobjects.move")
+
+        -- Select keymaps
+        vim.keymap.set({ "x", "o" }, "af", function()
+            select.select_textobject("@function.outer", "textobjects")
+        end, { desc = "Select outer function" })
+        vim.keymap.set({ "x", "o" }, "if", function()
+            select.select_textobject("@function.inner", "textobjects")
+        end, { desc = "Select inner function" })
+        vim.keymap.set({ "x", "o" }, "ac", function()
+            select.select_textobject("@class.outer", "textobjects")
+        end, { desc = "Select outer class" })
+        vim.keymap.set({ "x", "o" }, "ic", function()
+            select.select_textobject("@class.inner", "textobjects")
+        end, { desc = "Select inner class" })
+        vim.keymap.set({ "x", "o" }, "as", function()
+            select.select_textobject("@local.scope", "locals")
+        end, { desc = "Select language scope" })
+        vim.keymap.set({ "x", "o" }, "ab", function()
+            select.select_textobject("@block.outer", "textobjects")
+        end, { desc = "Select outer block" })
+        vim.keymap.set({ "x", "o" }, "ib", function()
+            select.select_textobject("@block.inner", "textobjects")
+        end, { desc = "Select inner block" })
+        vim.keymap.set({ "x", "o" }, "ai", function()
+            select.select_textobject("@conditional.outer", "textobjects")
+        end, { desc = "Select outer conditional" })
+        vim.keymap.set({ "x", "o" }, "ii", function()
+            select.select_textobject("@conditional.inner", "textobjects")
+        end, { desc = "Select inner conditional" })
+
+        -- Move keymaps
+        vim.keymap.set({ "n", "x", "o" }, "]m", function()
+            move.goto_next_start("@function.outer", "textobjects")
+        end, { desc = "Next function start" })
+        vim.keymap.set({ "n", "x", "o" }, "]M", function()
+            move.goto_next_end("@function.outer", "textobjects")
+        end, { desc = "Next function end" })
+        vim.keymap.set({ "n", "x", "o" }, "[m", function()
+            move.goto_previous_start("@function.outer", "textobjects")
+        end, { desc = "Previous function start" })
+        vim.keymap.set({ "n", "x", "o" }, "[M", function()
+            move.goto_previous_end("@function.outer", "textobjects")
+        end, { desc = "Previous function end" })
     end,
 }
