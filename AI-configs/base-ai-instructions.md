@@ -70,7 +70,17 @@ Your Knowledge cutoff is in the past. Research internet for current information
   use `head` or `tail` to limit output, it could omit relevant results, always
   evaluate full results, unless explicitly requested otherwise
 - Use Grep tool for content search (not `cat` + `grep`)
-- When find/grep tools unavailable: use `fd` (not `find`), `rg` (not `grep`)
+- **ABSOLUTELY FORBIDDEN** shell commands for file discovery and search:
+  - **NEVER** use `find` — use `fd --hidden` instead
+  - **NEVER** use `grep`, `grep -l`, `grep -r` — use `rg --hidden` instead
+  - **NEVER** use `ls` or `tree` for exploration — use `fd --hidden` instead
+    - `fd --hidden -d 2` replaces `tree -L 2`; `fd --hidden -d 1` replaces `ls`
+  - **NEVER** use `xargs grep` or pipe chains like `find | xargs grep` — use
+    `rg --hidden` with glob filters or `fd --hidden --exec rg --hidden`
+  - These commands are banned even in pipe chains and subshells
+- When dedicated tools (Glob, Grep, Read) are available, prefer them over `fd`
+  and `rg`
+- When dedicated tools are unavailable: use `fd` and `rg` exclusively
   - They're faster, have better defaults, respect .gitignore
   - Extension filter syntax: `fd -e ts` includes `tsx`; adding `tsx` explicitly
     fails
