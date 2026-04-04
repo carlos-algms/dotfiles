@@ -11,23 +11,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
--- resize splits if window got resized
--- Disabled as it was causing weird behavior with some windows
--- vim.api.nvim_create_autocmd({ "VimResized" }, {
---     group = augroup("resize_splits"),
---     callback = function()
---         local current_tab = vim.fn.tabpagenr()
---         vim.cmd("tabdo wincmd =")
---         vim.cmd("tabnext " .. current_tab)
---     end,
--- })
-
--- vim.defer_fn(function()
---     vim.cmd(
---         [[ au TextYankPost * silent! lua vim.highlight.on_yank({ higroup="DiffText", timeout=350 }) ]]
---     )
--- end, 100)
-
 -- close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("close_with_q"),
@@ -62,14 +45,4 @@ vim.api.nvim_create_autocmd("FileType", {
             { buffer = event.buf, silent = true }
         )
     end,
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = { "docker-compose.yml", "docker-compose.yaml" },
-    command = "set filetype=yaml.docker-compose",
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = { "*.njk" },
-    command = "set filetype=htmldjango",
 })

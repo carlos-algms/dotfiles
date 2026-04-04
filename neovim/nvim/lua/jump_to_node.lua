@@ -33,11 +33,6 @@ local function jump_to_node(current_node, to_end)
         return
     end
 
-    local function test_node(node)
-        --
-        --
-    end
-
     --- @type TSNode|nil
     local function_node
 

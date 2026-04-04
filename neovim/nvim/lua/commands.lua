@@ -73,15 +73,6 @@ vim.keymap.set({ "n" }, "<Leader>Ya", "<cmd>CopyAbsolutePath<CR>", {
     silent = true,
 })
 
-createUserCommand("CloseAllOtherBuffers", function()
-    local current = vim.fn.bufnr()
-    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        if buf ~= current then
-            vim.api.nvim_buf_delete(buf, { force = false })
-        end
-    end
-end, {})
-
 createUserCommand("RevelInExplorer", function()
     local filepath = vim.fn.expand("%:p")
     if filepath == "" then
