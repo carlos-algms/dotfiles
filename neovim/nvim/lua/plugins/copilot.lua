@@ -6,7 +6,7 @@ return {
 
         event = "VeryLazy",
 
-        enabled = vim.g.has_node,
+        enabled = false, -- vim.g.has_node,
 
         dependencies = {
             -- {

@@ -33,6 +33,7 @@ return {
         -- Parser installation (replaces ensure_installed)
         require("nvim-treesitter").install({
             "css",
+            "diff",
             "html",
             "javascript",
             "jsdoc",
