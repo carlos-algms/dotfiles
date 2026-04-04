@@ -38,17 +38,22 @@ local function load_agentic()
         acp_providers = {
             ["opencode-acp"] = {
                 env = {
-                    CARLOS_ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
+                    CARLOS_ANTHROPIC_API_KEY = os.getenv(
+                        "CARLOS_ANTHROPIC_API_KEY"
+                    ),
                     COREPACK_NPM_REGISTRY = os.getenv("COREPACK_NPM_REGISTRY"),
                     COREPACK_NPM_TOKEN = os.getenv("COREPACK_NPM_TOKEN"),
-                    COREPACK_INTEGRITY_KEYS = os.getenv("COREPACK_INTEGRITY_KEYS"),
+                    COREPACK_INTEGRITY_KEYS = os.getenv(
+                        "COREPACK_INTEGRITY_KEYS"
+                    ),
                 },
             },
         },
     }
 
     if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
-        local key = { ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY") }
+        local key =
+            { ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY") }
         config.acp_providers["claude-acp"] = { env = key }
         config.acp_providers["claude-agent-acp"] = { env = key }
     end

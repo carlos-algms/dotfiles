@@ -361,37 +361,125 @@ local function grep_opts(extra)
     return vim.tbl_deep_extend("force", {}, customGrepOptions, extra or {})
 end
 
-set("n", "<leader>vn", function() Snacks.notifier.show_history() end, { desc = "Notification History with Snacks" })
-set(nv, "<leader>gy", function() Snacks.gitbrowse.open() end, { desc = "Copy git remote URL to clipboard with Snacks" })
-set("n", "<leader>sr", function() Snacks.picker.resume() end, { desc = "Resume last Snacks picker" })
-set("n", "<leader>sh", function() P.history_picker() end, { desc = "List Snacks pickers history" })
-set("n", "<C-p>", function() Snacks.picker.files({ hidden = true }) end, { desc = "Find files by name in the current folder" })
-set("n", "<leader>o", function() Snacks.picker.recent({ filter = { cwd = vim.fn.getcwd() } }) end, { desc = "Find files by name in the current folder" })
-set("n", "<leader>O", function() Snacks.picker.recent({ title = "Recent files anywhere" }) end, { desc = "Find files by name anywhere" })
-set("n", "<leader>bo", function() Snacks.picker.buffers({ current = false, unloaded = false, matcher = { history_bonus = true, frecency = true } }) end, { desc = "List open buffers" })
-set("n", "<leader>/", function() Snacks.picker.lines() end, { desc = "Fuzzy search in current file" })
-set("n", "<leader>gB", function() Snacks.picker.git_branches() end, { desc = "List git branches" })
-set("n", "<leader>gl", function() Snacks.picker.git_status() end, { desc = "List git status" })
-set("n", "<leader>f", function() Snacks.picker.grep(grep_opts()) end, { desc = "Live Grep all files - Snacks" })
-set({ "v", "x" }, "<leader>f", function() Snacks.picker.grep_word(grep_opts()) end, { desc = "Live Grep all files - Snacks" })
-set("n", "<leader>vh", function() Snacks.picker.help() end, { desc = "Neovim Help - Snacks" })
-set("n", "<leader>vk", function() Snacks.picker.keymaps() end, { desc = "Keymaps - Snacks" })
-set("n", "<leader>sd", function() P.grep_on_dir() end, { desc = "Grep on directory - Snacks" })
+set("n", "<leader>vn", function()
+    Snacks.notifier.show_history()
+end, { desc = "Notification History with Snacks" })
+set(nv, "<leader>gy", function()
+    Snacks.gitbrowse.open()
+end, { desc = "Copy git remote URL to clipboard with Snacks" })
+set("n", "<leader>sr", function()
+    Snacks.picker.resume()
+end, { desc = "Resume last Snacks picker" })
+set("n", "<leader>sh", function()
+    P.history_picker()
+end, { desc = "List Snacks pickers history" })
+set("n", "<C-p>", function()
+    Snacks.picker.files({ hidden = true })
+end, { desc = "Find files by name in the current folder" })
+set("n", "<leader>o", function()
+    Snacks.picker.recent({ filter = { cwd = vim.fn.getcwd() } })
+end, { desc = "Find files by name in the current folder" })
+set("n", "<leader>O", function()
+    Snacks.picker.recent({ title = "Recent files anywhere" })
+end, { desc = "Find files by name anywhere" })
+set("n", "<leader>bo", function()
+    Snacks.picker.buffers({
+        current = false,
+        unloaded = false,
+        matcher = { history_bonus = true, frecency = true },
+    })
+end, { desc = "List open buffers" })
+set("n", "<leader>/", function()
+    Snacks.picker.lines()
+end, { desc = "Fuzzy search in current file" })
+set("n", "<leader>gB", function()
+    Snacks.picker.git_branches()
+end, { desc = "List git branches" })
+set("n", "<leader>gl", function()
+    Snacks.picker.git_status()
+end, { desc = "List git status" })
+set("n", "<leader>f", function()
+    Snacks.picker.grep(grep_opts())
+end, { desc = "Live Grep all files - Snacks" })
+set({ "v", "x" }, "<leader>f", function()
+    Snacks.picker.grep_word(grep_opts())
+end, { desc = "Live Grep all files - Snacks" })
+set("n", "<leader>vh", function()
+    Snacks.picker.help()
+end, { desc = "Neovim Help - Snacks" })
+set("n", "<leader>vk", function()
+    Snacks.picker.keymaps()
+end, { desc = "Keymaps - Snacks" })
+set("n", "<leader>sd", function()
+    P.grep_on_dir()
+end, { desc = "Grep on directory - Snacks" })
 
-set(nv, "gd", lsp_pick("lsp_definitions", "Definitions"), { desc = "Go to definition or list all - Snacks" })
-set(nv, "grr", lsp_pick("lsp_references", "References"), { desc = "Go to reference or list all - Snacks" })
-set(nv, "gi", lsp_pick("lsp_implementations", "Implementations"), { desc = "Go to implementation or list all - Snacks" })
-set(nv, "gD", lsp_pick("lsp_declarations", "Declarations"), { desc = "Go to declaration or list all - Snacks" })
-set(nv, "go", lsp_pick("lsp_type_definitions", "Type Definitions"), { desc = "Go to type definition or list all - Snacks" })
-set("n", "gO", function() Snacks.picker.lsp_symbols({ title = string.format("LSP Document Symbols `%s`", vim.fn.expand("%:t")) }) end, { desc = "LSP Document Symbols - Snacks" })
-set("n", "gW", function() Snacks.picker.lsp_workspace_symbols() end, { desc = "LSP Workspace Symbols - Snacks" })
+set(
+    nv,
+    "gd",
+    lsp_pick("lsp_definitions", "Definitions"),
+    { desc = "Go to definition or list all - Snacks" }
+)
+set(
+    nv,
+    "grr",
+    lsp_pick("lsp_references", "References"),
+    { desc = "Go to reference or list all - Snacks" }
+)
+set(
+    nv,
+    "gi",
+    lsp_pick("lsp_implementations", "Implementations"),
+    { desc = "Go to implementation or list all - Snacks" }
+)
+set(
+    nv,
+    "gD",
+    lsp_pick("lsp_declarations", "Declarations"),
+    { desc = "Go to declaration or list all - Snacks" }
+)
+set(
+    nv,
+    "go",
+    lsp_pick("lsp_type_definitions", "Type Definitions"),
+    { desc = "Go to type definition or list all - Snacks" }
+)
+set("n", "gO", function()
+    Snacks.picker.lsp_symbols({
+        title = string.format(
+            "LSP Document Symbols `%s`",
+            vim.fn.expand("%:t")
+        ),
+    })
+end, { desc = "LSP Document Symbols - Snacks" })
+set("n", "gW", function()
+    Snacks.picker.lsp_workspace_symbols()
+end, { desc = "LSP Workspace Symbols - Snacks" })
 
-set("n", "<leader>cm", function() P.file_type_picker() end, { desc = "Change current buffer filetype - Snacks" })
-set("n", "<leader>zo", function() Snacks.scratch({ filekey = { branch = false, count = false } }) end, { desc = "Toggle Scratch Buffer" })
-set("n", "<leader>zl", function() Snacks.scratch.select() end, { desc = "Select Scratch Buffer" })
-set("n", "<leader>zf", function() Snacks.picker.grep(grep_opts({ cwd = os.getenv("SECOND_BRAIN_PATH") })) end, { desc = "Second brain grep - Snacks" })
-set("n", "<leader>zp", function() Snacks.picker.files({ hidden = false, cwd = os.getenv("SECOND_BRAIN_PATH") }) end, { desc = "Second brain files - Snacks" })
-set("n", "<leader>zn", function() vim.cmd(string.format("e %s/%s.md", os.getenv("SECOND_BRAIN_PATH"), os.date("%Y-%m-%d_%H-%M"))) end, { desc = "Second brain new file - Snacks" })
+set("n", "<leader>cm", function()
+    P.file_type_picker()
+end, { desc = "Change current buffer filetype - Snacks" })
+set("n", "<leader>zo", function()
+    Snacks.scratch({ filekey = { branch = false, count = false } })
+end, { desc = "Toggle Scratch Buffer" })
+set("n", "<leader>zl", function()
+    Snacks.scratch.select()
+end, { desc = "Select Scratch Buffer" })
+set("n", "<leader>zf", function()
+    Snacks.picker.grep(grep_opts({ cwd = os.getenv("SECOND_BRAIN_PATH") }))
+end, { desc = "Second brain grep - Snacks" })
+set("n", "<leader>zp", function()
+    Snacks.picker.files({ hidden = false, cwd = os.getenv("SECOND_BRAIN_PATH") })
+end, { desc = "Second brain files - Snacks" })
+set("n", "<leader>zn", function()
+    vim.cmd(
+        string.format(
+            "e %s/%s.md",
+            os.getenv("SECOND_BRAIN_PATH"),
+            os.date("%Y-%m-%d_%H-%M")
+        )
+    )
+end, { desc = "Second brain new file - Snacks" })
 
 -- Helper functions
 

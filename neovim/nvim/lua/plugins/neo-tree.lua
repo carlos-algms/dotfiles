@@ -10,7 +10,10 @@ local function load_neotree()
     vim.pack.add({
         "https://github.com/nvim-lua/plenary.nvim",
         "https://github.com/MunifTanjim/nui.nvim",
-        { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = "v3.x" },
+        {
+            src = "https://github.com/nvim-neo-tree/neo-tree.nvim",
+            version = "v3.x",
+        },
     })
 
     require("neo-tree").setup({
@@ -80,11 +83,25 @@ local function load_neotree()
             },
             ["tsx"] = {
                 pattern = "(.+)%.tsx$",
-                files = { "%1.tsx.map", "%1.*.ts", "%1.*.tsx", "%1.*.css", "%1.*.scss", "%1.*.mdx" },
+                files = {
+                    "%1.tsx.map",
+                    "%1.*.ts",
+                    "%1.*.tsx",
+                    "%1.*.css",
+                    "%1.*.scss",
+                    "%1.*.mdx",
+                },
             },
             ["ts"] = {
                 pattern = "(.+)%.ts$",
-                files = { "%1.ts.map", "%1.*.ts", "%1.*.tsx", "%1.*.css", "%1.*.scss", "%1.*.mdx" },
+                files = {
+                    "%1.ts.map",
+                    "%1.*.ts",
+                    "%1.*.tsx",
+                    "%1.*.css",
+                    "%1.*.scss",
+                    "%1.*.mdx",
+                },
             },
             ["js"] = {
                 pattern = "(.+)%.js$",
@@ -103,10 +120,15 @@ local function load_neotree()
     })
 
     -- Replace the bootstrap keymap with the actual command
-    set({ "n", "v", "x" }, "<C-S-n>", "<cmd>Neotree filesystem reveal left<CR>", {
-        desc = "Reveal current file in NeoTree",
-        silent = true,
-    })
+    set(
+        { "n", "v", "x" },
+        "<C-S-n>",
+        "<cmd>Neotree filesystem reveal left<CR>",
+        {
+            desc = "Reveal current file in NeoTree",
+            silent = true,
+        }
+    )
 end
 
 -- Bootstrap keymap: loads the plugin on first press, then opens NeoTree

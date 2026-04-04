@@ -6,32 +6,48 @@ vim.pack.add({
 
 require("codediff").setup({
     explorer = {
-      position = "bottom",
-      initial_focus = "modified",  -- Initial focus: "explorer", "original", or "modified"
-  },
+        position = "bottom",
+        initial_focus = "modified", -- Initial focus: "explorer", "original", or "modified"
+    },
 
-   -- Keymaps in diff view
+    -- Keymaps in diff view
     keymaps = {
-      view = {
-        next_hunk = ")",
-        prev_hunk = "(",
-        next_file = "J",
-        prev_file = "K",
-        stage_hunk = "=",
-        unstage_hunk = "-",
-        toggle_stage = ";",
-    }
-},
+        view = {
+            next_hunk = ")",
+            prev_hunk = "(",
+            next_file = "J",
+            prev_file = "K",
+            stage_hunk = "=",
+            unstage_hunk = "-",
+            toggle_stage = ";",
+        },
+    },
 })
 
-
-
-
-set("n", "<leader>gs", ":CodeDiff<CR>", { desc = "Git status - code-diff.nvim", silent = true })
-set("n", "<leader>gcm", ":CodeDiff origin/HEAD...<CR>", { desc = "Git compare to main - code-diff.nvim", silent = true })
-set("n", "<leader>gh", ":CodeDiff history HEAD~20 %<CR>", { desc = "Git history current file - code-diff.nvim", silent = true })
-set("n", "<leader>gH", ":CodeDiff history<CR>", { desc = "Git commit history- code-diff.nvim", silent = true })
-
+set(
+    "n",
+    "<leader>gs",
+    ":CodeDiff<CR>",
+    { desc = "Git status - code-diff.nvim", silent = true }
+)
+set(
+    "n",
+    "<leader>gcm",
+    ":CodeDiff origin/HEAD...<CR>",
+    { desc = "Git compare to main - code-diff.nvim", silent = true }
+)
+set(
+    "n",
+    "<leader>gh",
+    ":CodeDiff history HEAD~20 %<CR>",
+    { desc = "Git history current file - code-diff.nvim", silent = true }
+)
+set(
+    "n",
+    "<leader>gH",
+    ":CodeDiff history<CR>",
+    { desc = "Git commit history- code-diff.nvim", silent = true }
+)
 
 vim.api.nvim_create_autocmd("User", {
     pattern = "CodeDiffOpen",

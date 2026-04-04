@@ -31,10 +31,25 @@ local function lazy(cmd)
 end
 
 set("n", "<leader>g<C-p>", lazy("Git push -u"), { desc = "Git Push" })
-set("n", "<leader>g<C-l>", lazy("Git pull --rebase --autostash"), { desc = "Git pull --rebase --autostash" })
-set("n", "<leader>gd", lazy("Gvdiffsplit!"), { desc = "Show git diff for current file" })
+set(
+    "n",
+    "<leader>g<C-l>",
+    lazy("Git pull --rebase --autostash"),
+    { desc = "Git pull --rebase --autostash" }
+)
+set(
+    "n",
+    "<leader>gd",
+    lazy("Gvdiffsplit!"),
+    { desc = "Show git diff for current file" }
+)
 set("n", "<leader>gb", lazy("Git blame"), { desc = "Git Blame" })
-set("n", "<leader>gU", lazy("UndoLastCommit"), { desc = "Git Undo last commit" })
+set(
+    "n",
+    "<leader>gU",
+    lazy("UndoLastCommit"),
+    { desc = "Git Undo last commit" }
+)
 
 set({ "n", "v" }, "<leader>gC", function()
     load_fugitive()

@@ -65,9 +65,24 @@ local function load_gitsigns()
                 set(mode, l, r, opts)
             end
 
-            map("n", "<leader>gv", ":Gitsigns preview_hunk<CR>", { desc = "Show hunk preview", silent = true })
-            map({ "n", "v" }, "<leader>g-", ":Gitsigns reset_hunk<CR>", { desc = "Reset hunk", silent = true })
-            map({ "n", "v" }, "<leader>g=", "<cmd>Gitsigns stage_hunk<CR>", { desc = "Stage hunk", silent = true })
+            map(
+                "n",
+                "<leader>gv",
+                ":Gitsigns preview_hunk<CR>",
+                { desc = "Show hunk preview", silent = true }
+            )
+            map(
+                { "n", "v" },
+                "<leader>g-",
+                ":Gitsigns reset_hunk<CR>",
+                { desc = "Reset hunk", silent = true }
+            )
+            map(
+                { "n", "v" },
+                "<leader>g=",
+                "<cmd>Gitsigns stage_hunk<CR>",
+                { desc = "Stage hunk", silent = true }
+            )
         end,
     })
 end

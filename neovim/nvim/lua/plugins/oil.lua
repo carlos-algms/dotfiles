@@ -43,10 +43,7 @@ require("oil").setup({
                     pcall(require, "img-clip.clipboard")
 
                 if not ok then
-                    vim.notify(
-                        "img-cip not installed",
-                        vim.log.levels.ERROR
-                    )
+                    vim.notify("img-cip not installed", vim.log.levels.ERROR)
                 else
                     local dir = oil.get_current_dir()
 
@@ -55,11 +52,13 @@ require("oil").setup({
                         .. vim.fn.strftime("%Y%m%d_%H%M%S")
                         .. ".png"
 
-                    local pasted =
-                        pcall(ImgClipClipboard.save_image, file_path)
+                    local pasted = pcall(ImgClipClipboard.save_image, file_path)
 
                     if pasted then
-                        require("oil.view").render_buffer_async(0, { refetch = true })
+                        require("oil.view").render_buffer_async(
+                            0,
+                            { refetch = true }
+                        )
                         return nil
                     end
                 end
@@ -93,4 +92,9 @@ require("oil").setup({
     },
 })
 
-vim.keymap.set("n", "-", "<cmd>Oil<CR>", { desc = "Reveal current file in Oil" })
+vim.keymap.set(
+    "n",
+    "-",
+    "<cmd>Oil<CR>",
+    { desc = "Reveal current file in Oil" }
+)
