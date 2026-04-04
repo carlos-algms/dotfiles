@@ -1,4 +1,0 @@
-;; extends
-; inherits: typescript
-
-

@@ -1,148 +1,104 @@
-local M = {
-    "carlos-algms/agentic.nvim",
+local set = vim.keymap.set
+local loaded = false
 
-    version = false,
+local function load_agentic()
+    if loaded then
+        return
+    end
+    loaded = true
 
-    dependencies = {
-        {
-            "HakonHarnes/img-clip.nvim",
-            opts = {},
+    local spec = {
+        src = "https://github.com/carlos-algms/agentic.nvim",
+    }
+
+    if not vim.g.is_ssh then
+        local local_path = vim.uv.os_homedir() .. "/projects/agentic.nvim"
+
+        if vim.uv.fs_stat(local_path) then
+            spec = {
+                src = local_path,
+                name = "agentic.nvim",
+            }
+        end
+    end
+
+    vim.pack.add({ spec })
+
+    --- @module 'agentic'
+    --- @type agentic.PartialUserConfig
+    local config = {
+        debug = false,
+        provider = "claude-agent-acp",
+        ---@diagnostic disable-next-line: missing-fields
+        windows = {
+            position = "right",
+            width = "40%",
+            height = "25%",
         },
-    },
-
-    opts = function(_, _maybeOpts)
-        ---@module 'agentic'
-        ---@type agentic.UserConfig
-        local config = {
-            debug = false,
-
-            --- @type agentic.UserConfig.ProviderName
-            provider = "claude-agent-acp",
-
-            windows = {
-                position = "right",
-                width = "40%",
-                height = "25%",
-            },
-        }
-
-            config.acp_providers = {
+        acp_providers = {
             ["opencode-acp"] = {
-                    env = {
+                env = {
                     CARLOS_ANTHROPIC_API_KEY = os.getenv(
-                            "CARLOS_ANTHROPIC_API_KEY"
-                        ),
+                        "CARLOS_ANTHROPIC_API_KEY"
+                    ),
                     COREPACK_NPM_REGISTRY = os.getenv("COREPACK_NPM_REGISTRY"),
                     COREPACK_NPM_TOKEN = os.getenv("COREPACK_NPM_TOKEN"),
                     COREPACK_INTEGRITY_KEYS = os.getenv(
                         "COREPACK_INTEGRITY_KEYS"
                     ),
-                    },
                 },
-            }
-
-        if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
-            config.acp_providers["claude-acp"] = {
-                env = {
-                    ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
-                },
-            }
-            config.acp_providers["claude-agent-acp"] = {
-                env = {
-                    ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY"),
-                },
-            }
-        end
-
-        return config
-    end,
-
-    keys = {
-        {
-            "<C-\\>",
-            function()
-                require("agentic").toggle({ auto_add_to_context = false })
-            end,
-            desc = "Agentic Open",
-            silent = true,
-            mode = { "n", "v", "i" },
+            },
         },
+    }
 
-        {
-            "<C-'>",
-            function()
-                require("agentic").add_selection_or_file_to_context()
-            end,
-            desc = "Agentic Add Selection to context",
-            silent = true,
-            mode = { "n", "v" },
-        },
+    if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
+        local key =
+            { ANTHROPIC_API_KEY = os.getenv("CARLOS_ANTHROPIC_API_KEY") }
+        config.acp_providers["claude-acp"] = { env = key }
+        config.acp_providers["claude-agent-acp"] = { env = key }
+    end
 
-        {
-            "<C-,>",
-            function()
-                require("agentic").new_session({ auto_add_to_context = false })
-            end,
-            desc = "Agentic New Session",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-
-        {
-            "<C-S-,>",
-            function()
-                require("agentic").new_session()
-            end,
-            desc = "Agentic New Session",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-
-        {
-            "<C-A-n>",
-            function()
-                require("agentic").new_session_with_provider()
-            end,
-            desc = "Agentic New Session with provider selection",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-
-        {
-            "<C-t>",
-            function()
-                require("agentic").stop_generation()
-            end,
-            desc = "Agentic Stop current generation",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-
-        {
-            "<A-i>r",
-            function()
-                require("agentic").restore_session()
-            end,
-            desc = "Agentic Restore session",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-        {
-            "<A-i>l",
-            function()
-                require("agentic").rotate_layout({ "right", "bottom" })
-            end,
-            desc = "Agentic rotate layout",
-            silent = true,
-            mode = { "n", "v", "i" },
-        },
-    },
-}
-
-if not vim.g.is_ssh then
-    M.dir = vim.uv.os_homedir() .. "/projects/agentic.nvim"
-    M.dev = true
-    M.name = "agentic.nvim"
+    require("agentic").setup(config)
 end
 
-return M
+local nvi = { "n", "v", "i" }
+
+set(nvi, "<C-\\>", function()
+    load_agentic()
+    require("agentic").toggle({ auto_add_to_context = false })
+end, { desc = "Agentic Open" })
+
+set({ "n", "v" }, "<C-'>", function()
+    load_agentic()
+    require("agentic").add_selection_or_file_to_context()
+end, { desc = "Agentic Add Selection to context" })
+
+set(nvi, "<C-,>", function()
+    load_agentic()
+    require("agentic").new_session({ auto_add_to_context = false })
+end, { desc = "Agentic New Session" })
+
+set(nvi, "<C-S-,>", function()
+    load_agentic()
+    require("agentic").new_session()
+end, { desc = "Agentic New Session" })
+
+set(nvi, "<C-A-n>", function()
+    load_agentic()
+    require("agentic").new_session_with_provider()
+end, { desc = "Agentic New Session with provider selection" })
+
+set(nvi, "<C-t>", function()
+    load_agentic()
+    require("agentic").stop_generation()
+end, { desc = "Agentic Stop current generation" })
+
+set(nvi, "<A-i>r", function()
+    load_agentic()
+    require("agentic").restore_session()
+end, { desc = "Agentic Restore session" })
+
+set(nvi, "<A-i>l", function()
+    load_agentic()
+    require("agentic").rotate_layout({ "right", "bottom" })
+end, { desc = "Agentic rotate layout" })
