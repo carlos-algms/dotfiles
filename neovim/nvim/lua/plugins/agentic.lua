@@ -14,7 +14,7 @@ local M = {
         ---@module 'agentic'
         ---@type agentic.PartialUserConfig
         local config = {
-            debug = true,
+            debug = false,
 
             provider = "claude-agent-acp",
 
