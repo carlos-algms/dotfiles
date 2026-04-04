@@ -1,0 +1,4 @@
+require("plugins.nvim-web-devicons")
+require("plugins.img-clip")
+require("plugins.snacks")
+require("plugins.oil")

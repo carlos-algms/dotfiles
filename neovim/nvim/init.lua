@@ -14,3 +14,5 @@ require("commands")
 require("autocmds")
 require("jump_to_node")
 require("eslint")
+
+require("plugins")
