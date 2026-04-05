@@ -148,6 +148,41 @@ obsidian create path="<path>" content="$CONTENT" overwrite
 **Warning:** `create` without `overwrite` on an existing file creates a
 duplicate (e.g. `file 1.md`). Always use `overwrite` when replacing.
 
+## Links
+
+Obsidian resolves wikilinks **by filename only** — not by `title`, `aliases`, or
+headings. Aliases only help with autocomplete suggestions.
+
+### Internal links (wikilinks)
+
+```md
+[[filename-without-ext]] Link by filename [[filename-without-ext|Display Text]]
+Link with display text (pipe syntax) [[filename-without-ext#Heading]] Link to a
+heading [[#Heading in same note]] Same-note heading link
+```
+
+### Rules
+
+- **Always use pipe syntax for `related` frontmatter** —
+  `"[[filename|Display Title]]"` so the link resolves correctly and the display
+  text stays human-readable.
+- **Use `[[wikilinks]]`** for internal vault links — Obsidian tracks renames
+  automatically.
+- **Use `[text](url)`** only for external URLs.
+- **No colons in wikilink display text** — Obsidian creates files from these;
+  macOS/Windows forbid `:` in filenames.
+
+### Example
+
+```yaml
+related:
+  - '[[2026-03-17-my-note|My Note Title]]'
+```
+
+```md
+See [[2026-03-17-my-note|My Note Title]] for details.
+```
+
 ## Fallback: Direct File Operations
 
 Use when Obsidian CLI fails (GUI not running, CLI error, etc.):
