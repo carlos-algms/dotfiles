@@ -1,5 +1,8 @@
 local opt = vim.opt
 
+opt.background = "dark"
+opt.termguicolors = true
+
 local ok, _ = pcall(vim.cmd, "colorscheme darcluar")
 if not ok then
     vim.cmd("colorscheme default") -- if the above fails, then use default
@@ -39,9 +42,6 @@ opt.smartcase = true
 -- Shows the preview of a command in a split window
 opt.inccommand = "split"
 
-opt.background = "dark"
-opt.termguicolors = true
-
 -- opt.colorcolumn = "80"
 opt.scrolloff = 8 -- usually I use 10, I'm trying with 8 to have more lines visible
 opt.signcolumn = "yes"
@@ -71,11 +71,7 @@ opt.fillchars = {
     eob = " ",
 }
 
-opt.spelllang = { "en" }
 opt.spell = false
-
-opt.spelloptions = "camel,noplainbuffer"
-opt.spellcapcheck = "" -- disable first letter capitalization check
 
 opt.list = true
 opt.listchars = {
