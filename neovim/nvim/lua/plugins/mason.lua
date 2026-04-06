@@ -47,7 +47,6 @@ local M = {
                     alloy = "hcl", -- Grafana Alloy language, not perfect, better than no highlighting
                     mdx = "markdown",
                     mdc = "markdown", -- Cursor AI markdown instructions
-                    avanterules = "markdown",
                 },
                 filename = {
                     [".zshrc"] = "sh",
@@ -64,14 +63,6 @@ local M = {
                     -- it doesn't seem the gh-lsp requires it
                     -- [".*/%.github[%w/]+workflows[%w/]+.*%.ya?ml"] = "yaml.github",
                 },
-            })
-
-            -- vim.treesitter.language.register("markdown", "jinja")
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-                pattern = { "*.avanterules" },
-                callback = function()
-                    vim.cmd("setlocal syntax=markdown")
-                end,
             })
 
             vim.keymap.set(

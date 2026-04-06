@@ -80,7 +80,6 @@ local M = {
                         "eslint: -32603", -- no eslint config found
                         "Could not find config file",
                         "Content is not an image",
-                        -- ACP from Avante
                         "Spawning Claude Code process",
                         "ACP stderr: Error: The provided `old_string` does not appear in the file",
                         "ACP stderr: Progress",

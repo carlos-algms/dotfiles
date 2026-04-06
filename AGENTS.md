@@ -100,11 +100,13 @@ with development environment.
 **Tip:** Use grep on doc folder when unsure which file contains needed info.
 
 Example - search for `colors_name` in Neovim docs:
+
 ```bash
 rg "colors_name" /opt/homebrew/Cellar/neovim/0.11.5*/share/nvim/runtime/doc/
 ```
 
-**Note:** Use `rg` (ripgrep) if available, fallback to `grep -r` only if `rg` fails.
+**Note:** Use `rg` (ripgrep) if available, fallback to `grep -r` only if `rg`
+fails.
 
 ### Architecture
 
@@ -146,11 +148,6 @@ url to the raw static content format to focus on the code only, not Github HTML.
     - `<C-'>` - Add selection/file to context
     - `<C-,>` - New session
     - `<C-t>` - Stop generation
-
-- **Avante.nvim**
-  - Configured at `neovim/nvim/lua/plugins/avante.lua`
-  - Alternative AI chat interface (Cursor-like UI)
-  - Documentation: https://github.com/yetone/avante.nvim/blob/main/README.md
 
 - **Snacks.nvim**
   - Configured at `neovim/nvim/lua/plugins/snacks.lua`
@@ -226,3 +223,4 @@ Shared AI assistant configurations in `AI-configs/`:
 - Use `vim.keymap.set` for keymaps (see `remap.lua` for patterns)
 - Document keymaps with `desc` parameter
 - Follow existing require() pattern for module imports
+

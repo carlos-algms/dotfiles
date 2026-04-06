@@ -13,13 +13,6 @@
     {
       "files": ["*.svg"],
       "options": { "parser": "html" }
-    },
-    {
-      "files": ["*.avanterules"],
-      "options": {
-        "parser": "markdown",
-        "proseWrap": "preserve"
-      }
     }
   ]
 }
