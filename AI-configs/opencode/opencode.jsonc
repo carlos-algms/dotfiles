@@ -1,6 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "theme": "opencode",
   "autoupdate": false,
   "permission": {
     "read": "allow",
@@ -40,6 +39,32 @@
     "opencode-copilot-auth@latest",
     "opencode-openai-codex-auth",
   ],
+
+  "default_agent": "build",
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "Default agent - asks permission for edits and commands",
+      "color": "#034cff",
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "Read-only planning agent - no edits or commands allowed",
+      "color": "#12c905",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+      },
+    },
+    "yolo": {
+      "mode": "primary",
+      "description": "Full auto-approve - no permission prompts",
+      "color": "#e03c1f",
+      "permission": {
+        "*": "allow",
+      },
+    },
+  },
 
   "model": "anthropic/claude-sonnet-4-6",
 
