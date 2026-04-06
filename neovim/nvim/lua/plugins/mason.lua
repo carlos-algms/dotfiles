@@ -95,10 +95,10 @@ local M = {
 
             --- Using a single ensureInstalled list as mason-tool-installer supports it
             local ensureInstalled = {
-                "cspell",
                 "lua_ls",
                 "stylua",
                 "tree-sitter-cli",
+                "codebook",
                 -- "black",
             }
 
