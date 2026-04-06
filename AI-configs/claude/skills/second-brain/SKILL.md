@@ -17,8 +17,14 @@ memory.
 **Fallback:** Direct file operations via Read/Write/Edit tools against
 `$SECOND_BRAIN_PATH`.
 
-**MANDATORY Related skills:** `obsidian:obsidian-cli` (full CLI reference),
-`obsidian:obsidian-markdown` (Obsidian-flavored Markdown syntax).
+**MANDATORY:** Related skills:
+
+You should load these skills when working with the second brain md files,
+Obsidian notes, creating or editing existing markdown files
+
+- `markdown-formatting` (personal formatting rules)
+- `obsidian:obsidian-cli` (full CLI reference)
+- `obsidian:obsidian-markdown` (Obsidian-flavored Markdown syntax)
 
 ## Prerequisites
 
@@ -64,6 +70,40 @@ User says "save" / "store" (no explicit destination)?
     (folders are auto-created by obsidian create)
 ```
 
+## Frontmatter standard
+
+Every note must have YAML frontmatter. Required fields:
+
+```yaml
+---
+title: Note Title Here
+date: 2026-03-17
+tags:
+  - project/project-name
+  - topic-tag
+type: project | research | reference | fleeting
+status: active | completed | archived
+aliases:
+  - Alternate Name
+related:
+  - '[[filename-without-ext|Display Title]]'
+---
+```
+
+### Frontmatter rules
+
+- **No colons in `title` or `aliases`** — Obsidian uses these as filenames;
+  macOS/Windows forbid `\` `/` `:` in filenames. Use `-` (space-dash-space)
+  instead of `:` in titles.
+- **No `sources` in frontmatter** — keep source URLs in a `## Sources` section
+  at the end of the note with labeled markdown links. Frontmatter `sources`
+  strips context and duplicates what's already inline.
+- **Tags use nested hierarchy** — `project/platform-fe`, `testing/e2e`, not flat
+  tags.
+- **`related` uses pipe wikilinks** — see [Links](#links) section below.
+- **`date` from file creation date** — use filesystem birthtime or filename date
+  prefix (e.g., `2026-03-17-note-name.md`).
+
 ## Creating New Files
 
 ```bash
@@ -83,38 +123,32 @@ obsidian create \
 ## Long or Complex Content
 
 The CLI does **not** support piping/stdin. For short content, use `\n` inline.
-For long content, use a **heredoc with command substitution**:
+For long content, **write to a temp file first** and reference it — avoids
+extremely long commands and shell escaping issues.
 
 **Short content** — inline `\n`:
 
 ```bash
 obsidian create path="ai-memory/Researches/2026-03-27-topic.md" \
-  content="# Title\n\nParagraph one.\n\n## Section\n\n- item 1\n- item 2"
+  content="# Title\n\nParagraph one.\n\n## Section\n\n- item 1"
 ```
 
-**Long content** — heredoc via `content="$(cat <<'EOF' ... EOF)"`:
-
-````bash
-obsidian create path="ai-memory/Researches/2026-03-27-topic.md" \
-  content="$(cat <<'EOF'
-# Research Title
-
-## Context
-
-Long explanation with **bold**, `code`, and $variables preserved.
-
-## Findings
-
-- Finding 1
-- Finding 2
+**Long content** — write to a temp file, then reference it:
 
 ```bash
-echo "code blocks work too"
+# 1. Write content to a temp file using the Write tool
+#    (path: /tmp/obsidian-note.md)
+
+# 2. Create the note from the temp file
+obsidian create path="ai-memory/Researches/2026-03-27-topic.md" \
+  content="$(cat /tmp/obsidian-note.md)"
+
+# 3. Clean up
+rm /tmp/obsidian-note.md
 ```
 
-EOF )"
-
-````
+Use the `Write` tool to create the temp file — this keeps the markdown readable,
+avoids heredoc/escaping pitfalls, and lets you review content before publishing.
 
 This also works with `append` and `prepend`.
 
@@ -135,18 +169,38 @@ obsidian append \
 
 ## Editing Existing Files
 
-1. **Append/prepend**: `obsidian append` or `obsidian prepend`
-2. **Full replace**: `obsidian create path="<path>" content="..." overwrite`
-3. **Mid-file edit** (read → modify → write back):
+Once a file exists on disk, **prefer `Read`/`Edit`/`Write` tools
+directly** — they give better diffs, user review, and avoid shell
+escaping issues.
+
+The absolute path is `$SECOND_BRAIN_PATH/<vault-relative-path>`.
+`obsidian create` returns the vault-relative path on success
+(e.g., `Created: ai-memory/Projects/dotfiles/note.md`).
+
+**Preferred approach** — direct file tools:
 
 ```bash
-CONTENT=$(obsidian read path="<path>")
-# modify $CONTENT with sed, variable substitution, etc.
-obsidian create path="<path>" content="$CONTENT" overwrite
+# Read
+Read $SECOND_BRAIN_PATH/ai-memory/Projects/dotfiles/note.md
+
+# Edit a section
+Edit $SECOND_BRAIN_PATH/ai-memory/Projects/dotfiles/note.md
+
+# Full rewrite
+Write $SECOND_BRAIN_PATH/ai-memory/Projects/dotfiles/note.md
 ```
 
-**Warning:** `create` without `overwrite` on an existing file creates a
-duplicate (e.g. `file 1.md`). Always use `overwrite` when replacing.
+**Alternative** — CLI for quick append/prepend:
+
+```bash
+obsidian append \
+  path="ai-memory/Projects/dotfiles/note.md" \
+  content="\n## New Section\n\nContent here"
+```
+
+**Warning:** `obsidian create` without `overwrite` on an existing
+file creates a duplicate (e.g. `file 1.md`). Always use `overwrite`
+when replacing via CLI.
 
 ## Links
 
@@ -177,10 +231,153 @@ heading [[#Heading in same note]] Same-note heading link
 ```yaml
 related:
   - '[[2026-03-17-my-note|My Note Title]]'
+  - '[anthropics/claude-code#100](https://github.com/anthropics/claude-code/issues/100)'
+  - '[RFC discussion](https://github.com/org/repo/discussions/42)'
 ```
 
 ```md
 See [[2026-03-17-my-note|My Note Title]] for details.
+Related: [anthropics/claude-code#100](https://github.com/anthropics/claude-code/issues/100)
+```
+
+## File operations
+
+### Move and rename
+
+`rename` is preferred over `move` when only changing the name —
+Obsidian auto-updates all wikilinks pointing to the file.
+
+```bash
+# Rename (updates all wikilinks automatically)
+obsidian rename path="ai-memory/Researches/old-name.md" \
+  name="new-name.md"
+
+# Move to a different folder
+obsidian move path="ai-memory/Researches/note.md" \
+  to="ai-memory/Projects/dotfiles/"
+
+# Move and rename (to= is full destination path)
+obsidian move path="ai-memory/Researches/note.md" \
+  to="ai-memory/Projects/dotfiles/new-name.md"
+```
+
+### Delete
+
+```bash
+# Soft delete (moves to Obsidian trash)
+obsidian delete path="ai-memory/Researches/old-note.md"
+
+# Permanent delete (skips trash)
+obsidian delete path="ai-memory/Researches/old-note.md" permanent
+```
+
+## Property management
+
+Set, read, or remove individual frontmatter properties without
+editing the whole file. Useful for updating `status`, `tags`,
+etc.
+
+```bash
+# Read a property
+obsidian property:read name="status" \
+  path="ai-memory/Researches/2026-03-27-topic.md"
+
+# Set a property
+obsidian property:set name="status" value="completed" \
+  path="ai-memory/Researches/2026-03-27-topic.md"
+
+# Set with explicit type
+obsidian property:set name="tags" value="neovim,research" \
+  type=list path="ai-memory/Researches/2026-03-27-topic.md"
+
+# Remove a property
+obsidian property:remove name="aliases" \
+  path="ai-memory/Researches/2026-03-27-topic.md"
+```
+
+Supported types: `text`, `list`, `number`, `checkbox`, `date`,
+`datetime`.
+
+## Navigation and linking
+
+### Backlinks and outgoing links
+
+```bash
+# List what links TO a note
+obsidian backlinks path="ai-memory/Researches/topic.md"
+
+# With link counts
+obsidian backlinks path="ai-memory/Researches/topic.md" counts
+
+# List outgoing links FROM a note
+obsidian links path="ai-memory/Researches/topic.md"
+```
+
+### Outline
+
+Show heading structure of a note — useful before appending to
+find the right section.
+
+```bash
+obsidian outline path="ai-memory/Researches/topic.md"
+# format: tree (default), md, json
+obsidian outline path="ai-memory/Researches/topic.md" format=md
+```
+
+### Tags
+
+```bash
+# List all tags in vault with counts
+obsidian tags counts sort=count
+
+# Get files for a specific tag
+obsidian tag name="neovim" verbose
+
+# List tags for a specific file
+obsidian tags path="ai-memory/Researches/topic.md"
+```
+
+## Vault hygiene
+
+Find broken links, orphaned notes, and dead-end files.
+
+```bash
+# Files with no incoming links (orphans)
+obsidian orphans
+
+# Files with no outgoing links (dead ends)
+obsidian deadends
+
+# Broken/unresolved wikilinks
+obsidian unresolved
+
+# With source file info
+obsidian unresolved verbose
+```
+
+## Version history
+
+Safety net for accidental overwrites. Obsidian tracks local file
+versions automatically.
+
+```bash
+# List files that have history
+obsidian history:list
+
+# List versions for a file
+obsidian history path="ai-memory/Researches/topic.md"
+
+# Read a specific version (1 = most recent)
+obsidian history:read path="ai-memory/Researches/topic.md" \
+  version=1
+
+# Diff between versions
+obsidian diff path="ai-memory/Researches/topic.md" \
+  from=1 to=2
+
+# Restore a version
+obsidian history:restore path="ai-memory/Researches/topic.md" \
+  version=1
 ```
 
 ## Fallback: Direct File Operations
