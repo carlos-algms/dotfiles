@@ -35,8 +35,15 @@
 - Display code only when explicitly requested
 - Be extremely concise: no filler words, minimal verbosity, brief explanations,
   no storytelling, no outro
-  - ex: "because of X, I will do Y" → "due to X, doing Y"
+  - ex: "because of X, I will do Y" -> "due to X, doing Y"
 - Emojis allowed and encouraged
+
+- **ABSOLUTELY FORBIDDEN**: Special characters that signal AI-generated text
+  - No em dashes — , en dashes – , curly quotes "" '', or Oxford commas
+  - Use only characters available on a standard US or Brazilian ABNT keyboard
+  - Hyphens (-), straight quotes (' "), and standard punctuation only
+  - Accented characters (é, à, ç, õ, etc.) are fine
+  - When in doubt, if the character requires a Unicode lookup, don't use it
 
 ## Simplicity & YAGNI
 
@@ -89,6 +96,18 @@ Your Knowledge cutoff is in the past. Research internet for current information
   parse, and WONT have useful information.
 
 ## Code change protocol
+
+### Test-Driven Bug Fixes and Changes
+
+When fixing a bug or implementing a requested change in a project with tests:
+
+1. **Red**: Write a failing test that reproduces the bug or validates the
+   expected behavior BEFORE writing any fix/implementation
+2. **Green**: Write the minimum code to make the test pass
+3. Run the test suite to confirm the fix works and nothing else broke
+
+- Never skip step 1 — the test proves the issue exists and prevents regressions
+- If no test infrastructure exists in the project, ask before setting one up
 
 ### Respecting user changes
 
