@@ -1,0 +1,393 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# ==============================================================================
+# convert-video — Convert video files to web-friendly formats
+# ==============================================================================
+
+# Valid formats and input extensions
+readonly VALID_FORMATS="gif webm mp4"
+readonly VALID_INPUT_EXTENSIONS="mov mp4 avi mkv webm flv"
+
+# --- Quality Presets ----------------------------------------------------------
+# Shared: width
+# GIF-only: fps, bayer_scale
+# Format-specific: quality values set per format in apply_format_settings
+
+preset_width_low=480
+preset_width_medium=800
+preset_width_high=1280
+
+preset_gif_fps_low=10
+preset_gif_fps_medium=15
+preset_gif_fps_high=30
+
+preset_gif_bayer_low=5
+preset_gif_bayer_medium=3
+preset_gif_bayer_high=2
+
+# --- Codec Mappings -----------------------------------------------------------
+
+declare -A CODEC_MAP=(
+  [webm]="libvpx-vp9"
+  [mp4]="libx264"
+)
+
+declare -A QUALITY_FLAG_MAP=(
+  [webm]="-q:v"
+  [mp4]="-crf"
+)
+
+declare -A QUALITY_VALUE_MAP=(
+  [webm_low]=40
+  [webm_medium]=30
+  [webm_high]=20
+  [mp4_low]=28
+  [mp4_medium]=23
+  [mp4_high]=18
+)
+
+# --- Shared Variables (set by parse_args / apply_format_settings) -------------
+
+INPUT=""
+OUTPUT=""
+FORMAT="webm"
+QUALITY="medium"
+WIDTH=""
+HEIGHT=""
+FPS=""
+SCALE_FILTER=""
+HWACCEL_FLAGS=""
+CODEC=""
+QUALITY_FLAG=""
+QUALITY_VALUE=""
+BAYER_SCALE=""
+NO_AUDIO=""
+
+# ==============================================================================
+# Helpers
+# ==============================================================================
+
+show_help() {
+  cat <<'HELP'
+Usage: convert-video <input-file> [options]
+
+Convert video files to web-friendly formats (webm, mp4, gif).
+Output is saved to the same directory as the input file.
+If the output file already exists, a version suffix is added (-v2, -v3, ...).
+
+Options:
+  --format <ext>      Output format: gif, webm, mp4 (default: webm)
+  --quality <preset>  Quality preset: low, medium, high (default: medium)
+  --width <px>        Max width (auto height). Mutually exclusive with --height
+  --height <px>       Max height (auto width). Mutually exclusive with --width
+  --fps <n>           Target frame rate (default: from preset)
+  --no-audio          Strip audio track from output
+  --help              Show this help message
+
+Examples:
+  # Convert to webm (default format and quality)
+  convert-video recording.mov
+
+  # Convert to gif
+  convert-video recording.mov --format gif
+
+  # High quality mp4
+  convert-video recording.mov --format mp4 --quality high
+
+  # Custom dimensions - constrain by height
+  convert-video recording.mov --format gif --height 400
+
+  # Low quality, small file for quick sharing
+  convert-video recording.mov --quality low --fps 10
+
+  # Override preset width
+  convert-video recording.mov --format webm --quality high --width 1920
+
+  # Strip audio for a silent screen recording
+  convert-video recording.mov --no-audio
+
+Quality Presets:
+  low       480px wide (gif: 10 fps)
+  medium    800px wide (gif: 15 fps) [default]
+  high      1280px wide (gif: 30 fps)
+
+  Video formats (webm, mp4) keep original frame rate unless --fps is set.
+HELP
+}
+
+parse_args() {
+  local user_fps=""
+  local user_width=""
+  local user_height=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --format)
+      FORMAT="$2"
+      shift 2
+      ;;
+    --quality)
+      QUALITY="$2"
+      shift 2
+      ;;
+    --width)
+      user_width="$2"
+      shift 2
+      ;;
+    --height)
+      user_height="$2"
+      shift 2
+      ;;
+    --fps)
+      user_fps="$2"
+      shift 2
+      ;;
+    --no-audio)
+      NO_AUDIO="-an"
+      shift
+      ;;
+    --help)
+      show_help
+      exit 0
+      ;;
+    -*)
+      echo "Error: Unknown option '$1'"
+      echo "Run 'convert-video --help' for usage."
+      exit 1
+      ;;
+    *)
+      if [[ -z "$INPUT" ]]; then
+        INPUT="$1"
+      else
+        echo "Error: Unexpected argument '$1'"
+        echo "Run 'convert-video --help' for usage."
+        exit 1
+      fi
+      shift
+      ;;
+    esac
+  done
+
+  # Apply preset defaults
+  local width_var="preset_width_${QUALITY}"
+  WIDTH="${user_width:-${!width_var}}"
+
+  if [[ -n "$user_height" ]]; then
+    HEIGHT="$user_height"
+    WIDTH=""
+  fi
+
+  # FPS: for GIF use preset, for video formats leave empty (keep original)
+  if [[ -n "$user_fps" ]]; then
+    FPS="$user_fps"
+  elif [[ "$FORMAT" == "gif" ]]; then
+    local fps_var="preset_gif_fps_${QUALITY}"
+    FPS="${!fps_var}"
+  fi
+}
+
+validate() {
+  if ! command -v ffmpeg &>/dev/null; then
+    echo "Error: ffmpeg is not installed."
+    echo "Install it with: brew install ffmpeg (macOS) or apt install ffmpeg (Linux)"
+    exit 1
+  fi
+
+  if [[ -z "$INPUT" ]]; then
+    echo "Error: No input file provided."
+    echo "Run 'convert-video --help' for usage."
+    exit 1
+  fi
+
+  if [[ ! -f "$INPUT" ]]; then
+    echo "Error: Input file not found: $INPUT"
+    exit 1
+  fi
+
+  local ext="${INPUT##*.}"
+  ext="${ext,,}"
+  if [[ ! " $VALID_INPUT_EXTENSIONS " =~ [[:space:]]${ext}[[:space:]] ]]; then
+    echo "Error: Unsupported input format '.$ext'"
+    echo "Supported: $VALID_INPUT_EXTENSIONS"
+    exit 1
+  fi
+
+  if [[ ! " $VALID_FORMATS " =~ [[:space:]]${FORMAT}[[:space:]] ]]; then
+    echo "Error: Invalid format '$FORMAT'"
+    echo "Valid formats: $VALID_FORMATS"
+    exit 1
+  fi
+
+  if [[ "$QUALITY" != "low" && "$QUALITY" != "medium" && "$QUALITY" != "high" ]]; then
+    echo "Error: Invalid quality '$QUALITY'"
+    echo "Valid presets: low, medium, high"
+    exit 1
+  fi
+
+  if [[ -n "$WIDTH" && -n "$HEIGHT" ]]; then
+    echo "Error: --width and --height are mutually exclusive"
+    exit 1
+  fi
+}
+
+resolve_output_path() {
+  local dir="$(dirname "$INPUT")"
+  local base="$(basename "$INPUT")"
+  local name="${base%.*}"
+
+  local candidate="${dir}/${name}.${FORMAT}"
+
+  if [[ ! -e "$candidate" ]]; then
+    OUTPUT="$candidate"
+    return
+  fi
+
+  local version=2
+  while true; do
+    candidate="${dir}/${name}-v${version}.${FORMAT}"
+    if [[ ! -e "$candidate" ]]; then
+      OUTPUT="$candidate"
+      return
+    fi
+    ((version++))
+  done
+}
+
+build_scale_filter() {
+  if [[ -n "$WIDTH" ]]; then
+    SCALE_FILTER="scale=${WIDTH}:-1:flags=lanczos"
+  elif [[ -n "$HEIGHT" ]]; then
+    SCALE_FILTER="scale=-1:${HEIGHT}:flags=lanczos"
+  else
+    SCALE_FILTER="scale=-1:-1:flags=lanczos"
+  fi
+}
+
+detect_hwaccel() {
+  local available="$(ffmpeg -hwaccels 2>/dev/null | tail -n +2 | tr -d '[:space:]')"
+
+  if [[ "$available" == *"videotoolbox"* ]]; then
+    HWACCEL_FLAGS="-hwaccel videotoolbox"
+  elif [[ "$available" == *"cuda"* ]]; then
+    HWACCEL_FLAGS="-hwaccel cuda"
+  elif [[ "$available" == *"vaapi"* ]]; then
+    HWACCEL_FLAGS="-hwaccel vaapi"
+  fi
+}
+
+apply_format_settings() {
+  if [[ "$FORMAT" == "gif" ]]; then
+    local bayer_var="preset_gif_bayer_${QUALITY}"
+    BAYER_SCALE="${!bayer_var}"
+    return
+  fi
+
+  CODEC="${CODEC_MAP[$FORMAT]}"
+  QUALITY_FLAG="${QUALITY_FLAG_MAP[$FORMAT]}"
+  QUALITY_VALUE="${QUALITY_VALUE_MAP[${FORMAT}_${QUALITY}]}"
+}
+
+print_summary() {
+  local input_size="$(du -h "$INPUT" | cut -f1)"
+  local output_size="$(du -h "$OUTPUT" | cut -f1)"
+
+  echo ""
+  echo "Done!"
+  echo "  Input:  ${input_size}  ${INPUT}"
+  echo "  Output: ${output_size}  ${OUTPUT}"
+}
+
+# ==============================================================================
+# Encode Functions
+# ==============================================================================
+
+encode_video() {
+  local fps_flags=""
+  if [[ -n "$FPS" ]]; then
+    fps_flags="-r $FPS"
+  fi
+
+  echo "Encoding ${FORMAT} (${CODEC})..."
+
+  # shellcheck disable=SC2086
+  ffmpeg \
+    $HWACCEL_FLAGS \
+    -i "$INPUT" \
+    -c:v "$CODEC" \
+    $QUALITY_FLAG $QUALITY_VALUE \
+    -vf "$SCALE_FILTER" \
+    $fps_flags \
+    $NO_AUDIO \
+    -y "$OUTPUT"
+}
+
+encode_gif() {
+  local palette="/tmp/convert-video-palette_$$.png"
+  trap "rm -f '$palette'" EXIT
+
+  local fps_filter=""
+  if [[ -n "$FPS" ]]; then
+    fps_filter="fps=${FPS},"
+  fi
+
+  echo "Pass 1/2: Generating color palette..."
+
+  # shellcheck disable=SC2086
+  ffmpeg \
+    $HWACCEL_FLAGS \
+    -i "$INPUT" \
+    -vf "${fps_filter}${SCALE_FILTER},palettegen=stats_mode=diff:reserve_transparent=0" \
+    -y "$palette"
+
+  if [[ ! -f "$palette" ]]; then
+    echo "Error: Palette generation failed"
+    exit 1
+  fi
+
+  echo "Pass 2/2: Encoding GIF with palette..."
+
+  # shellcheck disable=SC2086
+  ffmpeg \
+    $HWACCEL_FLAGS \
+    -i "$INPUT" \
+    -i "$palette" \
+    -lavfi "${fps_filter}${SCALE_FILTER}[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=${BAYER_SCALE}:diff_mode=rectangle" \
+    -loop 0 \
+    -y "$OUTPUT"
+}
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+main() {
+  parse_args "$@"
+  validate
+  detect_hwaccel
+  apply_format_settings
+  build_scale_filter
+  resolve_output_path
+
+  echo "Converting: $(basename "$INPUT") -> $(basename "$OUTPUT")"
+  echo "  Format: $FORMAT | Quality: $QUALITY | Scale: $SCALE_FILTER"
+
+  if [[ -n "$FPS" ]]; then
+    echo "  FPS: $FPS"
+  fi
+  if [[ -n "$HWACCEL_FLAGS" ]]; then
+    echo "  HW Accel: $HWACCEL_FLAGS"
+  fi
+  echo ""
+
+  if [[ "$FORMAT" == "gif" ]]; then
+    encode_gif
+  else
+    encode_video
+  fi
+
+  print_summary
+}
+
+main "$@"
