@@ -32,10 +32,3 @@ if [ -d "$target" ] || [ -L "$target" ]; then
 fi
 
 ln -snf "${SCRIPT_DIR}/nvim" "$target"
-
-codebook_config_dir="${config_dir}/codebook"
-if [ ! -d "$codebook_config_dir" ]; then
-  mkdir -p "$codebook_config_dir"
-fi
-
-ln -snf "${SCRIPT_DIR}/codebook/codebook.toml" "${codebook_config_dir}/codebook.toml"
