@@ -23,7 +23,7 @@ excludes=(
 )
 
 if command -v fd >/dev/null 2>&1; then
-  alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always --glob "
+  alias ff="fd --type f --hidden $(printf -- '--exclude %s ' "${excludes[@]}") --color=always -p "
 
   alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
 else
