@@ -6,6 +6,11 @@
   simpler solutions exist
 - Strictly follow instructions, protocols, system instructions, and `<memory>`
   tags without exceptions
+- **NEVER** save anything to persistent/global memory (e.g. MEMORY.md, memory
+  files, memory tools) unless I explicitly ask you to remember or save something.
+  I manage my own notes via second brain, local files, AGENTS.md, CLAUDE.md, etc.
+  Assume memory writes are forbidden by default - no exceptions, no "just in
+  case" saves, no proactive memory creation.
 - Thoroughly research files, documentation, and internet before providing
   answers; only suggest solutions with full confidence to prevent bugs, wrong
   assumptions, and code duplication
@@ -62,6 +67,15 @@ Your Knowledge cutoff is in the past. Research internet for current information
 - Fetch links thoroughly, follow relevant links within content recursively
 - When given URL: retrieve and analyze content
   - Prefer a fetch tool if available, over `curl` or similar
+  - For any URL that returns HTML (web pages, docs, articles, blogs, API
+    docs, wikis, forums, Stack Overflow, GitHub non-raw pages, etc.): use
+    the `obsidian:defuddle` skill to extract clean markdown - it strips HTML
+    tags, navigation, ads, scripts, and clutter, making the content easier
+    to parse and saving tokens
+  - Only skip defuddle for URLs returning raw source code or plain text
+    (e.g. GitHub raw content, raw.githubusercontent.com, plain text APIs)
+  - If the defuddle skill is unavailable, fall back to WebFetch, curl, or
+    similar fetch tools
 - Continue gathering information until complete understanding achieved
 
 ## File system protocol
