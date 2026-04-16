@@ -2,10 +2,11 @@
 name: second-brain
 description: >
   Use when the user asks to save, store, document, or record research results,
-  investigation findings, project notes, or technical discoveries to their
-  second brain. Triggers on: "save this", "store this", "document this", "save
-  my research", "save to second brain", "log this investigation", "save
-  findings".
+  investigation findings, project notes, technical discoveries, or wiki
+  knowledge to their second brain. Triggers on: "save this", "store this",
+  "document this", "save my research", "save to second brain", "log this
+  investigation", "save findings", "save to wiki", "add to wiki",
+  "wiki this", "turn this into knowledge", "save as knowledge".
 ---
 
 # Second Brain Memory
@@ -61,6 +62,10 @@ obsidian read path="ai-memory/Projects/dotfiles/2026-03-17-research.md"
 ## Decision: Where to Save
 
 ```
+User says "wiki" / "knowledge" / "add to wiki" / "save to wiki"?
+  → Save under 100-wiki/<category>/
+  → See "Wiki workflow" section below
+
 User says "save research" / "store research"?
   → Save under ai-memory/Researches/
 
@@ -70,9 +75,64 @@ User says "save" / "store" (no explicit destination)?
     (folders are auto-created by obsidian create)
 ```
 
-## Frontmatter standard
+## Wiki workflow
 
-Every note must have YAML frontmatter. Required fields:
+**MANDATORY:** Before writing any wiki content, you MUST know
+the conventions in `CLAUDE.md` from the vault root. It contains
+the frontmatter spec, folder structure, file naming,
+cross-reference rules and markdown conventions. Without it you
+will produce incorrect output and the task will fail.
+
+**How to get it:** If `CLAUDE.md` is already in your context
+(check your conversation - it's auto-loaded when cwd is the
+vault, including for subagents), do NOT re-read it. Only fetch
+it manually when it's not in your context:
+
+```bash
+obsidian read path="CLAUDE.md"
+```
+
+This section only covers the **ingest workflow steps**.
+
+### Wiki ingest workflow
+
+When the user asks to save knowledge to the wiki:
+
+1. Identify key knowledge from the conversation context
+2. Choose or create the category folder (lowercase-kebab)
+3. Write the page: frontmatter + body + changelog
+4. Check existing wiki pages for cross-references - update them
+   with wikilinks to the new page (and update their changelogs
+   and `updated` date)
+5. Append an entry to the current month's log file at
+   `100-wiki/log/<year>/<MM>-wiki-ingestion.md`
+6. Report what was created and what was updated
+
+**Do not ask for confirmation** - just create. The user will
+request changes if needed.
+
+### Wiki log entries
+
+Monthly log at `100-wiki/log/<year>/<MM>-wiki-ingestion.md`:
+
+```md
+## [YYYY-MM-DD] ingest | Page Title
+
+- **Created:** [[slug|Page Title]] in `<category>/`
+- **Updated:** [[other-slug|Other Page]] - added cross-reference
+- **Source:** brief description or URL
+```
+
+Entries are append-only. Each entry starts with `##` for
+parseability with grep.
+
+## ai-memory frontmatter (NOT for wiki)
+
+**This section applies ONLY to ai-memory/ notes.** For wiki
+pages (100-wiki/), use the frontmatter spec in `CLAUDE.md`.
+The two formats are different - do not mix them.
+
+Every ai-memory note must have YAML frontmatter. Required fields:
 
 ```yaml
 ---
@@ -120,43 +180,58 @@ obsidian create \
 
 **Note:** `obsidian create` creates parent folders automatically.
 
-## Long or Complex Content
+## Creating content
 
-The CLI does **not** support piping/stdin. For short content, use `\n` inline.
-For long content, **write to a temp file first** and reference it — avoids
-extremely long commands and shell escaping issues.
-
-**Short content** — inline `\n`:
+Use a **heredoc with single-quoted delimiter** (`<<'EOF'`) to pass
+content to `obsidian create`. This prevents shell expansion and
+lets you write readable markdown with real line breaks.
 
 ```bash
-obsidian create path="ai-memory/Researches/2026-03-27-topic.md" \
-  content="# Title\n\nParagraph one.\n\n## Section\n\n- item 1"
+obsidian create \
+  path="ai-memory/Researches/2026-04-14-topic.md" \
+  content="$(cat <<'EOF'
+---
+title: Topic Title Here
+date: 2026-04-14
+tags:
+  - topic-tag
+type: research
+status: active
+---
+
+# Topic title here
+
+Content with $variables, "quotes", tables, and code blocks
+all work without escaping.
+
+| Column A | Column B |
+|----------|----------|
+| value    | $100     |
+
+> [!tip] Callouts work too
+> No special handling needed.
+EOF
+)"
 ```
 
-**Long content** — write to a temp file, then reference it:
+### Why `<<'EOF'` (single-quoted delimiter)
+
+- **No shell expansion** — `$HOME`, `$100` stay literal
+- **Real line breaks** — no `\n` needed, write markdown naturally
+- **All quotes safe** — double quotes, single quotes, backticks
+- **Single step** — no temp files to create and clean up
+
+### Known limitation
+
+The obsidian CLI interprets `\t`, `\n`, and `\r` as escape
+sequences in the `content=` value. This means a literal
+`path\to\file` becomes `path<tab>o\file`. This rarely occurs in
+normal markdown — only when backslash precedes `t`, `n`, or `r`.
+
+If you hit this, use the `Write` tool directly as a fallback:
 
 ```bash
-# 1. Write content to a temp file using the Write tool
-#    (path: /tmp/obsidian-note.md)
-
-# 2. Create the note from the temp file
-obsidian create path="ai-memory/Researches/2026-03-27-topic.md" \
-  content="$(cat /tmp/obsidian-note.md)"
-
-# 3. Clean up
-rm /tmp/obsidian-note.md
-```
-
-Use the `Write` tool to create the temp file — this keeps the markdown readable,
-avoids heredoc/escaping pitfalls, and lets you review content before publishing.
-
-This also works with `append` and `prepend`.
-
-**From an existing file** — use `$(cat ...)`:
-
-```bash
-obsidian create path="ai-memory/Researches/2026-03-27-copy.md" \
-  content="$(cat /path/to/source.md)"
+Write $SECOND_BRAIN_PATH/ai-memory/Researches/2026-04-14-topic.md
 ```
 
 ## Appending to Existing Files
