@@ -3,9 +3,11 @@ name: markdown-formatting
 description: >
   Enforces strict Markdown formatting standards for ALL Markdown file
   operations. Use when creating, writing, or editing ANY Markdown file (.md),
-  regardless of purpose (plans, documentation, README, notes, etc.). Ensures
-  consistent formatting with 80-character line limit, proper spacing, correct
-  list syntax, and clean hierarchical structure.
+  regardless of purpose. Triggers include: implementation plans, plan-mode
+  output written to disk, plan files, design docs, specs, RFCs, ADRs,
+  documentation, READMEs, notes, reports, changelogs, or any agent-authored
+  `.md` content. Ensures consistent formatting with 80-character line limit,
+  proper spacing, correct list syntax, and clean hierarchical structure.
 ---
 
 # Markdown Formatting Standards
