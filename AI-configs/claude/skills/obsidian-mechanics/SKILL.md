@@ -111,8 +111,8 @@ The obsidian CLI interprets `\t`, `\n`, and `\r` as escape sequences in the
 rarely occurs in normal markdown - only when backslash precedes `t`, `n`, or
 `r`.
 
-If you hit this, use the `Write` tool directly as a fallback (see
-[Direct file fallback](#direct-file-fallback)).
+If you hit this, use the `Write` tool directly (see
+[Working without the Obsidian CLI](#working-without-the-obsidian-cli)).
 
 ## Appending to Existing Files
 
@@ -122,16 +122,20 @@ obsidian append \
   content="\n## New Section\n\nAdditional findings here"
 ```
 
-## Editing Existing Files
+## Editing and reading existing files
 
-Once a file exists on disk, **prefer `Read`/`Edit`/`Write` tools directly** -
-they give better diffs, user review, and avoid shell escaping issues.
+**Default to direct file tools (`Read`, `Edit`, `Write`) for any file already
+on disk.** They give better diffs, user review, no shell escaping, and work
+whether Obsidian GUI is running or not.
 
-The absolute path is `$SECOND_BRAIN_PATH/<vault-relative-path>`.
-`obsidian create` returns the vault-relative path on success (e.g.,
-`Created: <folder>/note.md`).
+Reserve the `obsidian` CLI for what it uniquely offers: creating notes with
+rich frontmatter via heredoc, wikilink-aware rename/move, vault-wide search,
+property edits, backlinks, history, and hygiene commands.
 
-**Preferred approach** - direct file tools:
+Absolute path: `$SECOND_BRAIN_PATH/<vault-relative-path>`. `obsidian create`
+returns the vault-relative path on success (e.g.,
+`Created: <folder>/note.md`) - prepend `$SECOND_BRAIN_PATH/` to use it with
+direct tools.
 
 ```bash
 # Read
@@ -144,13 +148,18 @@ Edit $SECOND_BRAIN_PATH/<folder>/<note>.md
 Write $SECOND_BRAIN_PATH/<folder>/<note>.md
 ```
 
-**Alternative** - CLI for quick append/prepend:
+### When to use `obsidian append` instead
+
+Only when you need fire-and-forget append without reading context first:
 
 ```bash
 obsidian append \
   path="<folder>/<note>.md" \
   content="\n## New Section\n\nContent here"
 ```
+
+For anything structural (inserting mid-file, replacing a section, reordering),
+use `Read` then `Edit`.
 
 ## Links
 
@@ -159,7 +168,7 @@ headings. Aliases only help with autocomplete suggestions.
 
 ### Internal links (wikilinks)
 
-```md
+```markdown
 [[filename-without-ext]] [[filename-without-ext|Display Text]]
 [[filename-without-ext#Heading]] [[#Heading in same note]]
 ```
@@ -184,7 +193,7 @@ related:
   - '[RFC discussion](https://github.com/org/repo/discussions/42)'
 ```
 
-```md
+```markdown
 See [[2026-03-17-my-note|My Note Title]] for details. Related:
 [anthropics/claude-code#100](https://github.com/anthropics/claude-code/issues/100)
 ```
@@ -327,17 +336,31 @@ obsidian history:restore path="<folder>/<note>.md" \
   version=1
 ```
 
-## Direct file fallback
+## Working without the Obsidian CLI
 
-Use when Obsidian CLI fails (GUI not running, CLI error, heredoc escape
-limitation, etc.):
+Direct file tools are a superset of what the CLI can do for single-file
+operations. Use them:
 
-1. Base path: `$SECOND_BRAIN_PATH` (no trailing slash) - env var pointing to the
-   active vault root, set per user.
-2. Use `Write` tool to create files, `Edit` tool to modify
-3. Use `Glob`/`Grep` to search within `$SECOND_BRAIN_PATH/`
+- As the **default** for reading and editing existing files (see [Editing
+  and reading existing files](#editing-and-reading-existing-files))
+- When **creating** a file if the heredoc `\t`/`\n`/`\r` escape limitation
+  hits
+- When Obsidian GUI is not running (CLI errors)
+- In subagents or CI contexts where launching Obsidian is undesirable
+- For bulk operations where `Glob`/`Grep` over `$SECOND_BRAIN_PATH/` is
+  faster than vault search
+
+What you lose by skipping the CLI:
+
+- `rename`/`move` wikilink auto-update (manual find-replace needed)
+- Property-level edits via `property:set`
+- Version history tracking
+- Vault-aware search (backlinks, orphans, unresolved)
 
 ```bash
+# Base path: $SECOND_BRAIN_PATH (no trailing slash) - env var pointing
+# to the active vault root, set per user.
+
 # Create
 Write $SECOND_BRAIN_PATH/<folder>/2026-04-14-topic.md
 
@@ -346,4 +369,8 @@ Edit $SECOND_BRAIN_PATH/<folder>/<note>.md
 
 # Read
 Read $SECOND_BRAIN_PATH/<folder>/<note>.md
+
+# Search
+Glob $SECOND_BRAIN_PATH/**/*.md
+Grep "auth middleware" $SECOND_BRAIN_PATH/
 ```

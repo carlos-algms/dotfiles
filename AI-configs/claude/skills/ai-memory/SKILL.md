@@ -22,6 +22,25 @@ long-lasting memory under `ai-memory/Projects/<project-name>/`.
 
 For saving to the wiki instead, use the `personal-wiki` skill.
 
+## Vault conventions
+
+**MANDATORY:** Before writing any ai-memory note, you MUST know the conventions
+in `CLAUDE.md` from the vault root. It is the single source of truth for the
+`## Sources convention`, markdown conventions, and vault structure. If you write
+a note without having read it, the note will violate the spec and the task will
+fail.
+
+**How to get it:** If `CLAUDE.md` is already in your context (check your
+conversation - it's auto-loaded when cwd is the `secondBrain` folder, including
+for subagents), do NOT re-read it. If it is NOT in your context, you MUST fetch
+it before writing anything:
+
+```bash
+obsidian read path="CLAUDE.md"
+```
+
+Do not proceed without it.
+
 ## Where to save
 
 ```
@@ -63,9 +82,8 @@ related:
 - **No colons in `title` or `aliases`** - Obsidian uses these as filenames;
   macOS/Windows forbid `\` `/` `:` in filenames. Use `-` (space-dash-space)
   instead of `:` in titles.
-- **No `sources` in frontmatter** - keep source URLs in a `## Sources` section
-  at the end of the note with labeled markdown links. Frontmatter `sources`
-  strips context and duplicates what's already inline.
+- **No `sources` in frontmatter** - see `## Sources convention` in the vault
+  `CLAUDE.md` for the canonical format.
 - **Tags use nested hierarchy** - `project/platform-fe`, `testing/e2e`, not flat
   tags.
 - **`related` uses pipe wikilinks** - `"[[filename|Display Title]]"`. See link
@@ -112,9 +130,7 @@ available in Neovim 0.11+.
 - Per-server config files moved to `neovim/nvim/lsp/`
 - `mason-lspconfig.nvim` auto-enables configs, no manual setup needed
 
-## Sources
-
-- [Neovim 0.11 release notes](https://neovim.io/doc/user/news-0.11.html)
+<!-- Append a `## Sources` section per the `## Sources convention` in CLAUDE.md -->
 EOF
 )"
 ```

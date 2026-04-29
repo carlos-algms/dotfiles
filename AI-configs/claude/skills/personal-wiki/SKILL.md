@@ -21,18 +21,22 @@ Ingest durable, reusable knowledge to the Obsidian vault wiki at
 ## Vault conventions
 
 **MANDATORY:** Before writing any wiki content, you MUST know the conventions in
-`CLAUDE.md` from the vault root. It contains the frontmatter spec, folder
-structure, file naming, cross-reference rules, and markdown conventions. Without
-it you will produce incorrect output and the task will fail.
+`CLAUDE.md` from the vault root. It is the single source of truth for the
+frontmatter spec, the `## Sources convention`, the wiki page body template,
+folder structure, file naming, cross-reference rules, and markdown conventions.
+If you write a page without having read it, the page will violate the spec and
+the task will fail.
 
 **How to get it:** If `CLAUDE.md` is already in your context (check your
 conversation - it's auto-loaded when cwd is the `secondBrain` folder, including
-for subagents), do NOT re-read it. Only fetch it manually when it's not in your
-context:
+for subagents), do NOT re-read it. If it is NOT in your context, you MUST fetch
+it before writing anything:
 
 ```bash
 obsidian read path="CLAUDE.md"
 ```
+
+Do not proceed without it.
 
 ## Ingest workflow
 
@@ -52,17 +56,28 @@ needed.
 
 ## Wiki log entries
 
-Monthly log at `100-wiki/log/<year>/<MM>-wiki-ingestion.md`:
+Monthly log at `100-wiki/log/<year>/<MM>-wiki-ingestion.md`.
 
-```md
-## [YYYY-MM-DD] ingest | Page Title
+Format: `## YYYY-MM-DD - Weekday` as date heading, then `### action | title` for
+each entry. Group all entries on the same day under one date heading.
 
-- **Created:** [[slug|Page Title]] in `<category>/`
+Actions: `ingest`, `update`, `setup`, `lint`, etc.
+
+```markdown
+## 2026-04-18 - Saturday
+
+### ingest | Page Title
+
+- **Created:** [[slug|Page Title]] in `<category>/<topic>/`
+- **Source:** brief description or URL
+
+### update | Another page
+
 - **Updated:** [[other-slug|Other Page]] - added cross-reference
 - **Source:** brief description or URL
 ```
 
-Entries are append-only. Each entry starts with `##` for parseability with grep.
+Entries are append-only.
 
 ## Related skills
 
