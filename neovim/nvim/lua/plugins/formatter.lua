@@ -20,6 +20,60 @@ vim.g.format_on_save_exclude = {
 -- Individually disable format on save by file type
 vim.g.format_on_save_disabled = {}
 
+local prettier_config_files = {
+    ".prettierrc",
+    ".prettierrc.json",
+    ".prettierrc.yml",
+    ".prettierrc.yaml",
+    ".prettierrc.json5",
+    ".prettierrc.js",
+    "prettier.config.js",
+    ".prettierrc.ts",
+    "prettier.config.ts",
+    ".prettierrc.mjs",
+    "prettier.config.mjs",
+    ".prettierrc.mts",
+    "prettier.config.mts",
+    ".prettierrc.cjs",
+    "prettier.config.cjs",
+    ".prettierrc.cts",
+    "prettier.config.cts",
+    ".prettierrc.toml",
+}
+
+-- https://oxc.rs/docs/guide/usage/formatter/config
+local oxfmt_config_files = {
+    ".oxfmtrc.json",
+    ".oxfmtrc.jsonc",
+    "oxfmt.config.ts",
+    "oxfmt.config.mts",
+    "oxfmt.config.cts",
+    "oxfmt.config.js",
+    "oxfmt.config.mjs",
+    "oxfmt.config.cjs",
+}
+
+--- Cache: project root path → "oxfmt" | "prettier"
+---@type table<string, string>
+local formatter_cache = {}
+
+---@param bufnr integer
+---@return string
+local function pick_formatter(bufnr)
+    local root = vim.fs.root(bufnr, { ".git", "package.json" })
+        or vim.fn.getcwd()
+
+    if formatter_cache[root] == nil then
+        if vim.fs.root(bufnr, oxfmt_config_files) then
+            formatter_cache[root] = "oxfmt"
+        else
+            formatter_cache[root] = "prettier"
+        end
+    end
+
+    return formatter_cache[root]
+end
+
 local function shouldFormat()
     -- disabled globally for all file types
     if not vim.g.format_on_save then
@@ -95,29 +149,16 @@ return {
                 -- ["goimports-reviser"] = {
                 --     prepend_args = { "-rm-unused", "-set-alias" },
                 -- },
+                oxfmt = {
+                    command = "oxfmt",
+                    args = { "--stdin-filepath", "$FILENAME" },
+                    stdin = true,
+                },
+
                 prettier = {
                     args = function(self, ctx)
-                        -- https://prettier.io/docs/configuration.html
-                        local has_cwd = vim.fs.root(ctx.buf or 0, {
-                            ".prettierrc",
-                            ".prettierrc.json",
-                            ".prettierrc.yml",
-                            ".prettierrc.yaml",
-                            ".prettierrc.json5",
-                            ".prettierrc.js",
-                            "prettier.config.js",
-                            ".prettierrc.ts",
-                            "prettier.config.ts",
-                            ".prettierrc.mjs",
-                            "prettier.config.mjs",
-                            ".prettierrc.mts",
-                            "prettier.config.mts",
-                            ".prettierrc.cjs",
-                            "prettier.config.cjs",
-                            ".prettierrc.cts",
-                            "prettier.config.cts",
-                            ".prettierrc.toml",
-                        })
+                        local has_cwd =
+                            vim.fs.root(ctx.buf or 0, prettier_config_files)
 
                         if has_cwd then
                             return { "--stdin-filepath", "$FILENAME" }
@@ -185,15 +226,17 @@ return {
                 "scss",
                 "markdown",
                 "yaml",
-                "php",
-                "svg",
             }) do
+                formatters_by_ft[language] = function(bufnr)
+                    return { pick_formatter(bufnr), stop_after_first = true }
+                end
+            end
+
+            -- oxfmt has no php or svg support, always use prettier
+            for _, language in ipairs({ "php", "svg" }) do
                 formatters_by_ft[language] = {
-                    stop_after_first = true,
-                    -- I tested a second time and it is still leaving zombies processes after closing nvim 2024-09-27
-                    -- https://github.com/fsouza/prettierd/issues/645
-                    -- "prettierd",
                     "prettier",
+                    stop_after_first = true,
                 }
             end
 
