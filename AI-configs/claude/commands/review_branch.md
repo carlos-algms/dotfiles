@@ -51,7 +51,7 @@ subagent: "Review context available at: review_context.md"
 
 Format for `review_files.md`:
 
-```md
+```markdown
 - [ ] relative/path/to/file1.ext
 - [ ] relative/path/to/file2.ext
 ```

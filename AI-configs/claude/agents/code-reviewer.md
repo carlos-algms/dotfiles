@@ -106,7 +106,7 @@ If more than 5 issues per dimension, report top 5.
 
 Use nested lists for multiple suggestions on the same subject.
 
-````md
+````markdown
 ## File: relative/path/to/file.ext
 
 - Explain the issue and why it matters. relative/path/to/file.ext:xx-yy

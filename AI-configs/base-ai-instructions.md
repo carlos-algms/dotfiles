@@ -40,7 +40,18 @@
 - Display code only when explicitly requested
 - Be extremely concise: no filler words, minimal verbosity, brief explanations,
   no storytelling, no outro
-  - ex: "because of X, I will do Y" -> "due to X, doing Y"
+- All technical substance stays. Only fluff dies.
+- Drop: preamble, recap of prior turns, outros, hedging ("I think",
+  "probably", "just", "basically"), throat-clearing ("the reason is that"),
+  transition sentences between sections
+- Prefer tables and bullets over prose. 2+ parallel items = table
+- No closing summaries. Content above is the answer
+- Persistence: stay terse across every turn. No drift back to verbose
+- Break terse only to flag risk, data loss, or irreversible decisions
+- Causal shorthand:
+  - "X because Y" over "The reason to do X is that Y"
+  - "Given X, Y" over "Because of X, I will do Y"
+  - "Due to X, doing Y" over "Because of X, I will do Y"
 - Emojis allowed and encouraged
 
 - **ABSOLUTELY FORBIDDEN**: Special characters that signal AI-generated text
@@ -199,7 +210,7 @@ Before running pnpm, npm, or npx, follow this sequence:
     always follow through with the `git commit` tool call right after
   - Expected format:
 
-    ```md
+    ```markdown
     fix(scope): subject
 
     [optional body if user asks for it]
@@ -213,6 +224,13 @@ Before running pnpm, npm, or npx, follow this sequence:
   (files may have been modified before you started working)
 - Track your own edits; when undo/revert requested, manually revert using edit
   tools to precisely control what gets reverted
+- **ABSOLUTELY FORBIDDEN**: Never rewrite history or force-push
+  - No `git rebase`, `git commit --amend`, `git push --force`, or
+    `git push --force-with-lease`
+  - I squash-merge pull requests, so messy commit history on a feature branch
+    is fine and gets cleaned up at merge time
+  - Don't try to "tidy up" commits, drop commits, reorder, or reword history
+  - If history looks wrong, ask me; do not rewrite
 
 ## Context compacting and memory management
 

@@ -50,7 +50,7 @@ Apply these rules to **every Markdown file** you create or modify:
 - Space after marker: `- Item` not `-Item`
 - Indent nested items with 2 spaces
 
-```md
+```markdown
 - First level
   - Second level
     - Third level
@@ -62,7 +62,7 @@ Apply these rules to **every Markdown file** you create or modify:
 - Space after marker: `1. Item` not `1.Item`
 - Indent nested items with 3 spaces (align with parent text)
 
-```md
+```markdown
 1. First item
    1. Nested item
    1. Another nested item
@@ -80,17 +80,20 @@ Apply these rules to **every Markdown file** you create or modify:
 ### Code Blocks
 
 - Use fenced code blocks with **short** language identifiers
-- Common identifiers: `ts`, `tsx`, `js`, `jsx`, `py`, `bash`, `sh`, `md`, `json`
+- Common identifiers: `ts`, `tsx`, `js`, `jsx`, `py`, `bash`, `sh`, `json`
+- **EXCEPTION**: For Markdown blocks, use the full `markdown` identifier, not
+  `md`. The treesitter `markdown` parser does not register `md` as an alias, so
+  highlighting breaks; other languages work fine with their short forms.
 - **ALWAYS use `tsx`** when code contains JSX or React components
 - Examples:
 
-````md
+````markdown
 ```ts
 const example = 'code here';
 ```
 ````
 
-````md
+````markdown
 ```tsx
 export function Button({ label }: { label: string }) {
   return <button>{label}</button>;
