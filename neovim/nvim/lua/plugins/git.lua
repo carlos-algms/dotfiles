@@ -1,7 +1,7 @@
 return {
     {
         "pwntester/octo.nvim",
-        -- dir = "/Users/carlos/projects/octo.nvim",
+        dir = "/Users/carlos.gomes/projects/octo.nvim",
         enabled = not vim.g.is_ssh,
         -- event = "VeryLazy",
         dependencies = {
@@ -28,14 +28,39 @@ return {
         opts = {
             enable_builtin = true,
             default_remote = { "origin", "upstream" },
+            default_merge_method = "squash",
+
             ssh_aliases = {
                 ["carlos-github"] = "github.com",
             },
-            --- @type OctoPickers
+
             picker = "snacks",
             comment_icon = "󰆈 ",
+
             suppress_missing_scope = {
                 projects_v2 = true,
+            },
+
+            reviews = {
+                auto_show_threads = false, -- default: true
+                focus = "right",
+            },
+
+            mappings = {
+                review_diff = {
+                    select_next_entry = {
+                        lhs = "J",
+                        desc = "move to next changed file",
+                    },
+                    select_prev_entry = {
+                        lhs = "K",
+                        desc = "move to previous changed file",
+                    },
+                    show_review_threads = {
+                        lhs = "<localleader>t",
+                        desc = "show review threads at cursor",
+                    },
+                },
             },
         },
     },
