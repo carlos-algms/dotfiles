@@ -2,30 +2,34 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
-    "DISABLE_AUTOUPDATER": "1",
     "IS_AI_TERMINAL": "1"
   },
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
+      "Bash(cat:*)",
+      "Bash(cd:*)",
       "Bash(fd:*)",
       "Bash(find:*)",
       "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
       "Bash(gh run view:*)",
       "Bash(git config --get remote.origin.url:*)",
       "Bash(git diff:*)",
+      "Bash(git log:*)",
       "Bash(git rev-parse:*)",
       "Bash(git status:*)",
       "Bash(head:*)",
       "Bash(ls:*)",
       "Bash(nvim:*)",
-      "Bash(obsidian search:*)",
       "Bash(obsidian files:*)",
       "Bash(obsidian read:*)",
+      "Bash(obsidian search:*)",
+      "Bash(pwd)",
       "Bash(realpath:*)",
       "Bash(rg:*)",
       "Bash(tail:*)",
-      "Bash(wc -l:*)",
+      "Bash(wc:*)",
       "Bash(which:*)",
       "Glob",
       "Grep",
@@ -36,7 +40,8 @@
       "WebSearch"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "default"
   },
   "model": "opus[1m]",
   "statusLine": {
@@ -44,6 +49,12 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
+    "slack@claude-plugins-official": true,
+    "gateway@claudes-kitchen": false,
+    "operational-excellence@claudes-kitchen": false,
+    "skills-development@claudes-kitchen": false,
+    "typescript-services@claudes-kitchen": false,
+    "workflows@claudes-kitchen": false,
     "typescript-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
@@ -60,6 +71,8 @@
     }
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "medium",
-  "skipDangerousModePermissionPrompt": true
+  "effortLevel": "xhigh",
+  "skipDangerousModePermissionPrompt": true,
+  "editorMode": "vim",
+  "preferredNotifChannel": "notifications_disabled"
 }
