@@ -8,6 +8,15 @@ configuration.
 Supports Linux, macOS, and Windows environments with automated installation
 scripts.
 
+`bootstrap.sh` / `bootstrap.bat` orchestrate per-tool installers
+(`<tool>/install.sh`, e.g. `shell/`, `neovim/`, `kitty/`, `nodejs/`). Add new
+tools by creating their own `install.sh` and wiring it into bootstrap.
+
+Formatting governed by `.editorconfig`, `.prettierrc.json`, `.stylua.toml` at
+repo root. Respect them when editing.
+
+`vim/` is deprecated; kept for history until removal. Do not edit.
+
 ## Neovim Configuration
 
 I use Neovim `v0.11+`, so I can use the most modern configuration options and
@@ -110,23 +119,15 @@ fails.
 
 ### Architecture
 
-- **Plugin manager**: lazy.nvim (auto-bootstrapped in `init.lua`)
-- **Configuration layout**: Modular Lua structure
-  - `neovim/nvim/init.lua` - Entry point, sets leader keys (`<space>` and `,`),
-    loads lazy.nvim
-  - `neovim/nvim/lua/` - All configuration modules
-  - `neovim/nvim/lua/plugins/` - 36+ plugin configuration files (one file per
-    plugin/feature, with possible many plugins per file)
-  - `neovim/nvim/lua/helpers/` - Utility functions created by me
-  - `neovim/nvim/lua/snippets/` - Custom code snippets for many languages
-
-### Plugin Management
-
-- Plugins are organized by feature (e.g., `git.lua`, `lspsaga.lua`, `dap.lua`)
-- No centralized plugin list - each file in `plugins/` is auto-loaded by
-  lazy.nvim automatically
-- Thread limiting: Configuration includes fallback for shared hosting
-  environments (checks `THREAD_LIMITED_USERS` env var)
+- Entry: `neovim/nvim/init.lua` (leader `<space>` and `,`, bootstraps
+  lazy.nvim).
+- Plugin configs: `neovim/nvim/lua/plugins/<name>.lua`, one file per
+  plugin/feature.
+- Helpers: `neovim/nvim/lua/helpers/`. Snippets: `neovim/nvim/lua/snippets/`.
+- LSP custom configs: `neovim/nvim/lsp/` (merged on top of `mason-lspconfig`
+  defaults, not overrides).
+- Thread limiting: fallback for shared hosting via `THREAD_LIMITED_USERS` env
+  var.
 
 ### Most important plugins
 
@@ -174,16 +175,17 @@ url to the raw static content format to focus on the code only, not Github HTML.
 
 ## Shell Configuration
 
-### Aliases System
+### Layout
 
-Modular alias files in `shell/common/`:
-
-- `aliases.sh` - Core aliases (ff/fdir for file search, v for nvim, custom
-  rsync, zoxide integration)
-- `aliases_git.sh` - Git shortcuts
-- `aliases_ls.sh` - Directory listing (uses eza when available)
-- `aliases_docker.sh` - Docker shortcuts
-- `aliases_grep.sh` - Search aliases
+- Aliases: `shell/common/aliases_*.sh`, one file per topic (git, docker, ls,
+  grep, ai, etc). Core aliases (ff/fdir, v=nvim, rsync, zoxide) in
+  `shell/common/aliases.sh`.
+- Other shared pieces in `shell/common/`: logging (`01_logging.sh`), OS
+  detection (`00_os.sh`), zsh settings, gpg agent, pnpm setup, generic
+  functions.
+- OS-specific overrides in `shell/{linux,macos,windows}/`, mirroring
+  `common/`. Each has its own `install-*.sh`.
+- User scripts in `shell/bin/` (added to PATH).
 
 ### Tool Detection Pattern
 
@@ -193,19 +195,31 @@ Shell scripts check for modern alternatives:
 - `rg` over `grep` (faster, better defaults, also respects .gitignore)
 - `nvim` over `vim` over `vi`
 
+## Terminal (Kitty)
+
+I use kitty as terminal, no tmux.
+
+- `kitty/kitty.conf` - local config (macOS daily driver).
+- `kitty/kitty-ssh.conf` - SSH-kitten profile for host `hp`, forwards
+  `ANTHROPIC_API_KEY` to the remote shell.
+- `clear_all_shortcuts yes` is set, so any new keybinding must be added
+  explicitly.
+
 ## AI Configuration
 
-Shared AI assistant configurations in `AI-configs/`:
+Shared AI assistant configurations in `AI-configs/`. Each agent (claude,
+gemini, opencode, crush) has its own subdir following that platform's layout.
 
-- `base-ai-instructions.md` - Shared instructions for all AI agents, it's either
-  referenced by dedicated AI config file, or symlinked to AGENTS.md, or
-  GEMINI.md, globally, not per project.
-- Platform-specific configs for Claude, Gemini, OpenCode, and Crush
-- Installation creates symlinks to
-  - `~/.claude/`
-  - `~/.gemini/`
-  - `~/.config/opencode`
-  - etc.
+- `base-ai-instructions.md` - shared instructions, symlinked globally as the
+  main instructions file for each agent:
+  - `~/.claude/CLAUDE.md`
+  - `~/.gemini/GEMINI.md`
+  - `~/.config/opencode/AGENTS.md`
+  - `.github/copilot-instructions.md` (per-repo, for Copilot)
+- Skills, commands, and agents live under `AI-configs/claude/` and are
+  symlinked into other agents (gemini, opencode) per
+  @AI-configs/AI-Config-README.md.
+- See @AI-configs/AI-Config-README.md for the exact symlink commands per agent.
 
 ## File Operations Protocol
 
