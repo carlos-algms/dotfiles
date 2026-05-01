@@ -19,6 +19,34 @@ version history, vault hygiene, direct-file fallback).
 **MANDATORY:** Load `obsidian:obsidian-cli` for the base CLI reference (syntax,
 file targeting, common patterns).
 
+## Vault context
+
+Personal vault is a second-brain / Zettelkasten in Obsidian Flavored Markdown.
+
+- **OneDrive sync, NO git.** Recovering from bad edits is hard. Be careful with
+  edits and deletions. Track your changes so you can restore manually.
+- **No build, no tests, no package manager.**
+- Strict line breaks enabled.
+- New files created in the current folder by default.
+- Attachments live in `999-system/Attachments/`.
+- Community plugins listed in `.obsidian/community-plugins.json`.
+
+### Folder layout
+
+```
+001-Quick-Notes/    Fleeting notes, inbox
+010-Daily/          Daily notes (Obsidian daily notes plugin)
+100-wiki/           LLM-maintained personal wiki - see personal-wiki skill
+  <category>/<topic>/  - dynamic folders, kebab-case
+  log/<year>/          - monthly ingestion logs
+999-system/         Obsidian internals (Archive, Attachments, Templates, ai-agents)
+ai-memory/          AI investigation notes - see ai-memory skill
+  Projects/<name>/     - per-project, date-prefixed files
+  Researches/          - FROZEN, do NOT add new notes
+```
+
+Run `tree -d -L 3` over the vault path for the live layout.
+
 ## Prerequisites
 
 Obsidian GUI must be open for the CLI to work. Assume it's running, and only try
@@ -50,69 +78,47 @@ obsidian files folder="<folder>"
 obsidian read path="<folder>/<note>.md"
 ```
 
-## Creating New Files
+## Resolving the vault path
+
+Default: `obsidian vault info=path` returns the active vault's absolute path.
+Cache the result per session - don't re-shell every time.
 
 ```bash
-obsidian create \
-  path="<folder>/YYYY-MM-DD-<topic-slug>.md" \
-  content="# Title\n\nContent here"
+VAULT=$(obsidian vault info=path)
 ```
 
-**Note:** `obsidian create` creates parent folders automatically.
+Fallback: `$SECOND_BRAIN_PATH` env var. Use when CLI calls fail (Obsidian GUI
+not running, subagent context, etc.).
 
-**Warning:** `obsidian create` without `overwrite` on an existing file creates a
-duplicate (e.g. `file 1.md`). Always use `overwrite` when replacing via CLI.
+## Creating new files
 
-## Creating content with heredoc
+**Default: `Write` tool, not `obsidian create`.**
 
-Use a **heredoc with single-quoted delimiter** (`<<'EOF'`) to pass content to
-`obsidian create`. This prevents shell expansion and lets you write readable
-markdown with real line breaks.
-
-```bash
-obsidian create \
-  path="<folder>/2026-04-14-topic.md" \
-  content="$(cat <<'EOF'
----
-title: Topic Title Here
-date: 2026-04-14
-tags:
-  - topic-tag
-type: project
-status: active
----
-
-# Topic title here
-
-Content with $variables, "quotes", tables, and code blocks
-all work without escaping.
-
-| Column A | Column B |
-|----------|----------|
-| value    | $100     |
-
-> [!tip] Callouts work too
-> No special handling needed.
-EOF
-)"
+```
+Write <vault>/<folder>/<slug>.md
 ```
 
-### Why `<<'EOF'` (single-quoted delimiter)
+Why default to `Write`:
 
-- **No shell expansion** - `$HOME`, `$100` stay literal
-- **Real line breaks** - no `\n` needed, write markdown naturally
-- **All quotes safe** - double quotes, single quotes, backticks
-- **Single step** - no temp files to create and clean up
+- Native diff in chat. Reviewable.
+- No shell escaping, no heredoc, no `\t`/`\n`/`\r` bug.
+- One tool call, not a 100-line bash invocation.
+- Works whether Obsidian GUI is running or not.
 
-### Known limitation
+Tradeoff: Obsidian indexes the file on its next vault scan (seconds). Wikilinks
+resolve fine - they're filename-based, not index-based.
 
-The obsidian CLI interprets `\t`, `\n`, and `\r` as escape sequences in the
-`content=` value. A literal `path\to\file` becomes `path<tab>o\file`. This
-rarely occurs in normal markdown - only when backslash precedes `t`, `n`, or
-`r`.
+### When to use `obsidian create` instead
 
-If you hit this, use the `Write` tool directly (see
-[Working without the Obsidian CLI](#working-without-the-obsidian-cli)).
+- You explicitly need its `template=<name>` flag.
+- You want the file opened in the GUI immediately (`open`, `newtab`).
+- Otherwise: prefer `Write`.
+
+If you do use it, pass `content=` via heredoc (`<<'EOF'`) and remember:
+
+- Without `overwrite`, an existing path creates a duplicate (`file 1.md`).
+- The CLI interprets `\t`/`\n`/`\r` as escape sequences in `content=`. A literal
+  `path\to\file` becomes `path<tab>o\file`. Fall back to `Write` when this hits.
 
 ## Appending to Existing Files
 
@@ -124,28 +130,27 @@ obsidian append \
 
 ## Editing and reading existing files
 
-**Default to direct file tools (`Read`, `Edit`, `Write`) for any file already
-on disk.** They give better diffs, user review, no shell escaping, and work
-whether Obsidian GUI is running or not.
+**Default to direct file tools (`Read`, `Edit`, `Write`) for any file already on
+disk.** They give better diffs, user review, no shell escaping, and work whether
+Obsidian GUI is running or not.
 
-Reserve the `obsidian` CLI for what it uniquely offers: creating notes with
-rich frontmatter via heredoc, wikilink-aware rename/move, vault-wide search,
-property edits, backlinks, history, and hygiene commands.
+Reserve the `obsidian` CLI for what it uniquely offers: wikilink-aware
+rename/move, vault-wide search, property edits, backlinks, history, and hygiene
+commands.
 
-Absolute path: `$SECOND_BRAIN_PATH/<vault-relative-path>`. `obsidian create`
-returns the vault-relative path on success (e.g.,
-`Created: <folder>/note.md`) - prepend `$SECOND_BRAIN_PATH/` to use it with
-direct tools.
+Absolute path: prepend the vault path (see
+[Resolving the vault path](#resolving-the-vault-path)) to any vault-relative
+path returned by the CLI (e.g. `Created: <folder>/note.md`).
 
 ```bash
 # Read
-Read $SECOND_BRAIN_PATH/<folder>/<note>.md
+Read <vault>/<folder>/<note>.md
 
 # Edit a section
-Edit $SECOND_BRAIN_PATH/<folder>/<note>.md
+Edit <vault>/<folder>/<note>.md
 
 # Full rewrite
-Write $SECOND_BRAIN_PATH/<folder>/<note>.md
+Write <vault>/<folder>/<note>.md
 ```
 
 ### When to use `obsidian append` instead
@@ -341,14 +346,12 @@ obsidian history:restore path="<folder>/<note>.md" \
 Direct file tools are a superset of what the CLI can do for single-file
 operations. Use them:
 
-- As the **default** for reading and editing existing files (see [Editing
-  and reading existing files](#editing-and-reading-existing-files))
-- When **creating** a file if the heredoc `\t`/`\n`/`\r` escape limitation
-  hits
+- As the **default** for creating, reading, and editing files (see
+  [Creating new files](#creating-new-files) and
+  [Editing and reading existing files](#editing-and-reading-existing-files))
 - When Obsidian GUI is not running (CLI errors)
 - In subagents or CI contexts where launching Obsidian is undesirable
-- For bulk operations where `Glob`/`Grep` over `$SECOND_BRAIN_PATH/` is
-  faster than vault search
+- For bulk operations where `Glob`/`Grep` is faster than vault search
 
 What you lose by skipping the CLI:
 
@@ -358,19 +361,82 @@ What you lose by skipping the CLI:
 - Vault-aware search (backlinks, orphans, unresolved)
 
 ```bash
-# Base path: $SECOND_BRAIN_PATH (no trailing slash) - env var pointing
-# to the active vault root, set per user.
+# Resolve vault path once (see Resolving the vault path section)
+VAULT=$(obsidian vault info=path)   # primary
+VAULT=${VAULT:-$SECOND_BRAIN_PATH}   # env var fallback
 
 # Create
-Write $SECOND_BRAIN_PATH/<folder>/2026-04-14-topic.md
+Write $VAULT/<folder>/<slug>.md
 
 # Edit
-Edit $SECOND_BRAIN_PATH/<folder>/<note>.md
+Edit $VAULT/<folder>/<note>.md
 
 # Read
-Read $SECOND_BRAIN_PATH/<folder>/<note>.md
+Read $VAULT/<folder>/<note>.md
 
 # Search
-Glob $SECOND_BRAIN_PATH/**/*.md
-Grep "auth middleware" $SECOND_BRAIN_PATH/
+Glob $VAULT/**/*.md
+Grep "auth middleware" $VAULT/
+```
+
+## Vault writing conventions
+
+Apply to every note written into this vault (wiki, ai-memory, quick notes,
+daily, etc.). Per-skill rules layer on top.
+
+- Obsidian callouts (`> [!type]`) for highlighted info.
+- 80-char line width. Unordered lists use `-` (dash).
+- Code fences use short language identifiers (`md`, `ts`, `tsx`, `py`, `bash`).
+- No em-dashes (`—`) or en-dashes (`–`) - use `-`.
+- British English. No Oxford comma.
+- For OFM syntax (wikilinks, embeds, callouts, properties), see
+  `obsidian:obsidian-markdown` skill.
+- For general formatting (headings, tables, line spacing), see
+  `markdown-formatting` skill.
+
+## Sources convention
+
+Applies to any note that cites sources (wiki pages, ai-memory notes, any
+long-form note). Goal: investigations stay reproducible. The note itself is the
+comparison point if a source changes - `retrieved` dates anchor when the claims
+were true.
+
+Rules:
+
+- `## Sources` section at end of note, just above `## Changelog` if one exists.
+- Both `## Sources` and any following `## Changelog` heading must be preceded by
+  `---` on its own line.
+- Never put sources in frontmatter.
+- External links (`[Title](https://...)`) and internal wikilinks
+  (`[[clipped-article|Title]]`) both valid.
+- Empty section is fine - keep the heading.
+
+For new entries (any source cited while writing or updating today):
+
+- Append ` - retrieved YYYY-MM-DD` to the parent bullet, today's date.
+- Add a nested bullet with a one-line note on what the source covers. No
+  `Extracted:` prefix.
+
+If a pre-existing entry lacks the `retrieved` suffix or the nested note, add
+them next time the source is re-consulted.
+
+Example:
+
+```markdown
+...
+
+---
+
+## Sources
+
+- [Article Title](https://example.com/article) - retrieved 2026-04-21
+  - core tradeoff between X and Y
+- [[clipped-article|Local Clipping]] - retrieved 2026-04-21
+  - full article preserved in vault
+- [Legacy page](https://example.com/old)
+  - summary of what was used
+
+---
+
+## Changelog
 ```

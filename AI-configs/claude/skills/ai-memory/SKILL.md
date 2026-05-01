@@ -11,35 +11,17 @@ description: >
 
 # AI Memory
 
-Save project notes, findings, and investigations to the Obsidian vault as
-long-lasting memory under `ai-memory/Projects/<project-name>/`.
+Save project notes, findings, and investigations as long-lasting memory under
+`ai-memory/Projects/<project-name>/`.
+
+For reusable wiki-style knowledge, use `personal-wiki` instead.
 
 **MANDATORY:** Load these skills before any operation:
 
-- `obsidian-mechanics` (CLI patterns, heredoc, file ops, fallback)
-- `markdown-formatting` (personal formatting rules)
-- `obsidian:obsidian-markdown` (Obsidian-flavored Markdown syntax)
-
-For saving to the wiki instead, use the `personal-wiki` skill.
-
-## Vault conventions
-
-**MANDATORY:** Before writing any ai-memory note, you MUST know the conventions
-in `CLAUDE.md` from the vault root. It is the single source of truth for the
-`## Sources convention`, markdown conventions, and vault structure. If you write
-a note without having read it, the note will violate the spec and the task will
-fail.
-
-**How to get it:** If `CLAUDE.md` is already in your context (check your
-conversation - it's auto-loaded when cwd is the `secondBrain` folder, including
-for subagents), do NOT re-read it. If it is NOT in your context, you MUST fetch
-it before writing anything:
-
-```bash
-obsidian read path="CLAUDE.md"
-```
-
-Do not proceed without it.
+- `obsidian-mechanics` - vault context, file ops, sources convention, vault
+  writing conventions.
+- `markdown-formatting` - personal markdown formatting rules.
+- `obsidian:obsidian-markdown` - OFM syntax (wikilinks, callouts, etc.).
 
 ## Where to save
 
@@ -47,19 +29,17 @@ Do not proceed without it.
 ai-memory/Projects/<project-name>/YYYY-MM-DD-<topic-slug>.md
 ```
 
-Derive `<project-name>` from the current working directory basename or
-conversation context. Folders are auto-created by `obsidian create`.
-
-**Note:** `ai-memory/Researches/` is a frozen historical folder. Do NOT save new
-notes there - everything new goes under `Projects/`.
+- Derive `<project-name>` from the current working directory basename or
+  conversation context.
+- Folders are auto-created by `Write` (and by `obsidian create`).
+- `ai-memory/Researches/` is a frozen historical folder. **Do NOT save new notes
+  there** - everything new goes under `Projects/`.
 
 ## File naming
 
-Format: `YYYY-MM-DD-<topic-slug>.md` (date-first for filesystem sort order).
+`YYYY-MM-DD-<topic-slug>.md` (date-first for filesystem sort order).
 
 ## Frontmatter
-
-Every ai-memory note must have YAML frontmatter. Required fields:
 
 ```yaml
 ---
@@ -77,38 +57,45 @@ related:
 ---
 ```
 
-### Frontmatter rules
+Rules:
 
 - **No colons in `title` or `aliases`** - Obsidian uses these as filenames;
-  macOS/Windows forbid `\` `/` `:` in filenames. Use `-` (space-dash-space)
-  instead of `:` in titles.
-- **No `sources` in frontmatter** - see `## Sources convention` in the vault
-  `CLAUDE.md` for the canonical format.
-- **Tags use nested hierarchy** - `project/platform-fe`, `testing/e2e`, not flat
+  macOS/Windows forbid `:` in filenames. Use `-` instead.
+- **No `sources` in frontmatter** - see Sources convention in
+  `obsidian-mechanics`.
+- **Tags use nested hierarchy** - `project/dotfiles`, `testing/e2e`. Not flat
   tags.
-- **`related` uses pipe wikilinks** - `"[[filename|Display Title]]"`. See link
-  rules in `obsidian-mechanics`.
-- **`date` from file creation date** - use filesystem birthtime or filename date
-  prefix (e.g., `2026-03-17-note-name.md`).
-- **`type`** - use `project` for project notes, `reference` for reusable
-  knowledge snippets, `fleeting` for temporary captures.
+- **`related` uses pipe wikilinks** - `"[[filename|Display Title]]"`.
+- **`date`** from file creation date (filesystem birthtime or filename date
+  prefix).
+- **`type`**: `project` for project notes, `reference` for reusable snippets,
+  `fleeting` for temporary captures.
 
-## Content guidelines
+## Content
 
-- Title: H1 heading, concise and descriptive
-- Body: include findings, key decisions, links, code snippets as needed
-- Include the date (`2026-03-17` format) in the H1 or first paragraph
-- Use Obsidian-flavored Markdown (wikilinks, callouts OK - see
-  `obsidian:obsidian-markdown`)
-- Reference links and file links with line numbers when available (GitHub, etc.)
-- Investigations must be reproducible: include queries, scripts, commands, steps
+- Title as H1, concise and descriptive.
+- Include the date (`2026-03-17` format) in the H1 or first paragraph.
+- Body: findings, key decisions, links, code snippets as needed.
+- Use OFM (wikilinks, callouts) per `obsidian:obsidian-markdown`.
+- Reference links and file links with line numbers when available (GitHub,
+  etc.).
+- Investigations must be reproducible: include queries, scripts, commands,
+  steps.
+- Append a `## Sources` section per the Sources convention in
+  `obsidian-mechanics`.
 
 ## Example
 
-```bash
-obsidian create \
-  path="ai-memory/Projects/dotfiles/2026-04-14-neovim-lsp-config.md" \
-  content="$(cat <<'EOF'
+Default tool is `Write` (see `obsidian-mechanics`). Resolve the vault path once
+with `obsidian vault info=path` (fallback `$SECOND_BRAIN_PATH`).
+
+```
+Write <vault>/ai-memory/Projects/dotfiles/2026-04-14-neovim-lsp-config.md
+```
+
+Content:
+
+```markdown
 ---
 title: Neovim LSP configuration migration
 date: 2026-04-14
@@ -122,20 +109,30 @@ status: active
 
 # Neovim LSP configuration migration - 2026-04-14
 
-Migrated from `lspconfig` setup calls to `vim.lsp.config(...)` API
-available in Neovim 0.11+.
+Migrated from `lspconfig` setup calls to `vim.lsp.config(...)` API available in
+Neovim 0.11+.
 
 ## Key changes
 
 - Per-server config files moved to `neovim/nvim/lsp/`
 - `mason-lspconfig.nvim` auto-enables configs, no manual setup needed
 
-<!-- Append a `## Sources` section per the `## Sources convention` in CLAUDE.md -->
-EOF
-)"
+---
+
+## Sources
+
+- [neovim 0.11 lsp.txt](...) - retrieved 2026-04-14
+  - canonical reference for vim.lsp.config
+
+---
+
+## Changelog
+
+- **2026-04-14**
+  - Created during migration of dotfiles repo.
 ```
 
 ## Related skills
 
-- `personal-wiki` - for saving reusable knowledge to the wiki
-- `obsidian-mechanics` - CLI mechanics, file ops, direct file fallback
+- `personal-wiki` - reusable wiki-style knowledge (different folder, rules).
+- `obsidian-mechanics` - vault context, file ops, sources convention.
