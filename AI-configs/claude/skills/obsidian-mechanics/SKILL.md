@@ -316,6 +316,64 @@ obsidian unresolved
 obsidian unresolved verbose
 ```
 
+## Graph queries
+
+The vault is a graph: notes are nodes, edges are wikilinks, tags, and
+frontmatter properties. The CLI exposes one-hop traversal natively. Multi-hop
+is composed via shell loops or via Bases.
+
+### Edges
+
+- **Wikilinks:** `obsidian backlinks` (incoming), `obsidian links` (outgoing).
+- **Tags:** `obsidian tag name="<tag>" verbose` lists all files carrying that
+  tag (tag = many-to-many edge).
+- **Properties:** `obsidian properties name="<name>" counts` for frequency,
+  `obsidian property:read` to read one cell.
+
+Wikilinks resolve by **filename only**. `aliases` and `title` are autocomplete
+sugar, not edges.
+
+### Multi-hop traversal
+
+Compose shell loops. Output formats are `tsv` (default), `csv`, `json`.
+
+```bash
+# 2-hop: notes that link to anything `<note>` links to
+for f in $(obsidian links file="<note>" | tail -n +2); do
+  obsidian backlinks file="$f" | tail -n +2
+done | sort -u
+
+# Notes sharing at least one tag with `<note>`
+for t in $(obsidian tags file="<note>" | cut -f1); do
+  obsidian tag name="${t#\#}" verbose | tail -n +2
+done | sort -u
+```
+
+### Bases (saved queries)
+
+`.base` files are Obsidian's database-views feature. They filter and group on
+properties, tags, and link relations. Closest the CLI gets to a real query
+layer.
+
+```bash
+# List all base files
+obsidian bases
+
+# Run a saved view, get JSON
+obsidian base:query file="<base>" view="<view>" format=json
+```
+
+Use a Base when a query is reused often (e.g. "all `type: comparison` notes
+tagged `agent-memory`"). For one-offs, shell loops are lighter.
+
+See `obsidian:obsidian-bases` for authoring `.base` files.
+
+### Limits
+
+- No native path / shortest-path / weighted edges.
+- No transitive closure built in - compose with loops.
+- Edges are edited by editing markdown, not by a graph API.
+
 ## Version history
 
 Safety net for accidental overwrites. Obsidian tracks local file versions
