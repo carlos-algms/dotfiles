@@ -105,6 +105,14 @@ export function Button({ label }: { label: string }) {
 
 - Inline code uses single backticks: `variable` or `function()`
 - No language identifier for plain text blocks
+- **Nested fences**: outer fence uses 4 backticks when inner block uses 3.
+  Never escape inner backticks with `\`.
+
+````markdown
+```tasks
+not done
+```
+````
 
 ### Links and References
 
