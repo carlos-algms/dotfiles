@@ -6,41 +6,45 @@ description:
   to stress-test a plan, get grilled on their design, or mentions "grill me".
 ---
 
-Interview me relentlessly about every aspect of this plan until we reach a
-shared understanding. Walk down each branch of the design tree, resolving
-dependencies between decisions one-by-one.
+Interview me on every branch of the design tree, or the decision making,
+resolving dependencies one-by-one. If a question is answerable from the
+codebase, explore instead of asking.
 
-If a question can be answered by exploring the codebase, explore the codebase
-instead of asking.
+## Opener
+
+Before starting the grill session, emit a flat list of branches to grill. No
+numbers yet - just topics, one line each. Lets the user spot missing branches up
+front.
+
+`Branches to grill:`
+
+- `<topic>`
+- `<topic>`
+
+Wait for confirm/extend, then proceed to the first question.
 
 ## Format
 
-One question per turn, numbered **Q1**, **Q2**... sequentially across the
-session. Never reuse or skip numbers. Always render `Q<n>` references in bold
-(`**Q1**`, `**Q<n>**`) anywhere they appear in output - prose, bullets, ack
-lines, the status block.
+One question per turn, numbered **Q1**, **Q2**... sequentially. Never reuse,
+skip, or reorder - even after revisits, drifts, or merges. Render `Q<n>` bold
+everywhere (prose, bullets, ack lines, status block).
 
-Prepend a `---` divider before every **Q<n>** (including **Q1**) to reset the
-markdown parser between turns.
+Prepend `---` before every **Q<n>** to reset the markdown parser between turns
+and create visual dividers.
 
-Each turn has maximum 4 blocks, rendered back-to-back with no section labels,
-headers, or bold prefixes like `**Options**` / `**Recommendation**` between
-them. The bullet list and final sentence speak for themselves.
+Max 4 blocks per turn, back-to-back, no section labels or bold prefixes:
 
 1. **Q<n>** line - the decision being grilled
-2. An optional description, when necessary. Only if the options are not
-   self-sufficient
-3. Bulleted list of options A, B, ... directly after the question, no header
-   above it. Label bolded, blank line between items, one-line tradeoff each.
-   Skip only on true binaries (yes/no, exists/doesn't) where a third option
-   would be invented filler:
+2. Optional description, only if options aren't self-sufficient
+3. Options. Never invent filler to hit a number. Two cases:
+   - 1 real path: ask yes/no (`Apply X? (y/n)`). No labels, no recommendation.
+   - 2+ real paths: bulleted, no header. Bold label, blank line between,
+     one-line tradeoff each.
 
    ```markdown
    ---
 
    #### Q3: should we cache responses?
-
-   short description, if necessary
 
    - **A**: in-memory, 5min TTL - simplest, lost on restart
 
@@ -49,31 +53,67 @@ them. The bullet list and final sentence speak for themselves.
    Recommendation: **A**, restart loss is acceptable for this path.
    ```
 
-4. One-sentence recommendation prefixed with `Recommendation:` (the only inline
-   label permitted) - which option and why
+4. One-sentence `Recommendation:` line - the only inline label permitted
 
-Gather context first: read code, check docs, search web. Surface options the
-user hasn't considered. If only one path visible, look harder or state
-explicitly why none exists.
+Gather context first: read code, docs, web. Surface options the user hasn't
+considered. If only one path visible, look harder or state why none exists.
+
+## Answers found in code
+
+Code resolves the question: do NOT lock silently. Ask one yes/no first.
+
+`**Q<n>** found: <answer> - source: <path:line>. Confirm? (y/n)`
+
+## Revisits
+
+User asks to go back to **Q<m>**:
+
+1. Stash current open **Q<n>** as resume target.
+2. Reopen **Q<m>**, ack new answer.
+3. `Resuming **Q<n>**:` then re-render the question block.
+
+Downstream questions reopen only if the new answer invalidates them - list in
+count-change block as `+` re-added or `⊘` moot.
+
+## New questions from findings
+
+Any finding that grows the open count must be announced before the next
+question. Header line + terse bulleted list of every new branch (no counts
+alone - the user needs to see what's being added).
+
+- Blocks the next top **Q**: sub-questions `Q<n>.1`, `Q<n>.2`, ... resolved
+  depth-first. Nest on further drift (`Q3.1.1`).
+- Independent: appended as new top **Q**s after the last. Never insert
+  mid-sequence.
+
+Format:
+
+```markdown
+**Q<n>** answer opens new branches:
+
+- **Q<n>.1**: <one-line question>
+- **Q<n>.2**: <one-line question>
+- **Q<m>**: <one-line question> (appended)
+```
+
+One line per branch. Mark appended top-level entries with `(appended)`.
 
 ## Acknowledging answers
 
-After the user answers a question, acknowledge with a single line before moving
-to the next **Q<n>**:
+After the user answers, single line before the next **Q<n>**:
 
 ```markdown
-**Q<n>** ✓ <one-sentence summary of what was recorded>
+**Q<n>** ✓ <one-sentence summary>
 ```
 
-No status block, no totals. Just the line.
+No status block, no totals.
 
 ## Question count (only on count change)
 
-Show the block below ONLY when the open-question count changes (questions added,
-made moot, or merged). A normal answer that closes one question and moves to the
-next is NOT a count change - the ack line above is enough.
+Show ONLY when open count changes (added, moot, merged). A normal answer that
+closes one and moves on is NOT a count change.
 
-Icons: `✓` answered, `⊘` moot, `⇢` merged, `+` new.
+Icons: `✓` retroactively closed by prior answer, `⊘` moot, `⇢` merged, `+` new.
 
 ```markdown
 Resolved:
@@ -89,46 +129,83 @@ Added:
 Still open: <N>
 ```
 
-`✓` here is reserved for questions retroactively closed by a prior answer (not
-the user's direct answer to the current **Q<n>** - that uses the ack line).
+Omit empty sections. Skip the block on no-change turns.
 
-Omit empty sections. Skip the block entirely on no-change turns.
+## Target file vs. in-memory
 
-## Target file vs. in-memory grilling
+Detect at session start. If unsure, ask once then commit.
 
-Detect the mode at the start of the session:
+- **Target file**: user points at a file. Apply each answer immediately via
+  Edit, never batch. Ack: `**Q<n>** ✓ updated <path> - <summary>`.
 
-- **Target file mode**: user points at an existing file (plan, design doc,
-  markdown spec, code). After every user answer, apply the change to the file
-  immediately using Edit - do not batch updates for the end. The ack line
-  references the file path: `**Q<n>** ✓ updated <path> - <summary>`. Never hold
-  pending edits across questions.
+- **In-memory**: no file. Conversation only. Do NOT re-summarize the running
+  plan after each answer - the ack line is the only persistence.
 
-- **In-memory mode**: no file specified, the grilling is a conversation only. Do
-  NOT re-summarize the running plan after each answer - keep the ack line to one
-  sentence and move straight to the next **Q<n>**. The ack line itself is the
-  only persistence; the user reads back the transcript if they need the full
-  picture.
+## Closing the session
 
-If unsure which mode applies, ask once at the start, then commit to it.
+When you think the tree is resolved, do NOT ask the user "any open branches?" -
+detecting open branches is your job, not theirs.
+
+Self-audit the transcript before closing:
+
+- Assumptions made without confirmation
+- Claims not verified against code or docs
+- Deferred decisions ("we'll revisit", "later")
+- Sub-questions that opened but never got asked
+- Recommendations the user accepted with caveats
+
+If anything surfaces, list every open branch (one line each) and keep grilling:
+
+```markdown
+Open branches found:
+
+- **Q<n>**: <one-line question or uncertainty>
+- **Q<m>**: <one-line question or uncertainty>
+```
+
+Only when the audit comes back empty.
+
+Default - no flagged topic, ask yes/no:
+
+```markdown
+---
+
+Audit clean: no open branches, assumptions, or deferred items.
+
+Draft now? (y/n)
+```
+
+Only if you found a low-priority topic worth flagging but not worth blocking on,
+use the A/B form:
+
+```markdown
+---
+
+Audit clean: no open branches, assumptions, or deferred items.
+
+- **A**: draft now
+
+- **B**: continue grilling on <topic> - <one-line reason>
+
+Recommendation: **A**.
+```
+
+Never render `B` as "none surfaced" or any empty placeholder. If no real B
+exists, use the yes/no form.
 
 ## Style
 
-All technical substance stays. Only fluff dies.
+Stay terse every turn, keep verbosity and word count low.
 
-- Drop articles when meaning survives. Fragments fine. Short synonyms over long
+- Drop articles when meaning survives. Fragments fine.
 - No preamble ("Great question", "Let me think", "Based on X...")
-- No recap of prior answers, no restating the plan
+- No recap, no restating the plan
 - No outro ("let me know", "does that work", "next we'll cover")
 - No hedging: "I think", "it seems", "probably", "just", "basically", "in order
   to", "make sure to", "it's worth noting"
-- No throat-clearing. "X because Y" over "The reason we should do X is that Y"
-- If you explored to answer your own question, state finding and move on - do
-  not ask the user to confirm what code already shows
+- "X because Y" over "The reason we should do X is that Y"
+- Explored to answer your own question: state finding and move on
 
-Persistence: stay terse across every turn. No drift back to verbose.
-
-Break terse mode only to flag security issues, data-loss risk, or irreversible
-decisions. Warnings take priority over brevity.
+Break terse only for security, data-loss, or irreversible-decision warnings.
 
 Stop when branches resolved. No end-summary unless asked.
