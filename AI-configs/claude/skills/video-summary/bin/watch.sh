@@ -57,15 +57,36 @@ CACHE_ROOT="${HOME}/.cache/video-summary"
 
 is_url() { [[ "$1" =~ ^https?:// ]]; }
 
+extract_youtube_id() {
+  # YouTube IDs are exactly 11 chars from [A-Za-z0-9_-].
+  # Regex stored in vars per bash recommendation (no quoting inside [[ =~ ]]).
+  local src="$1" id=""
+  local re_short='youtu\.be/([A-Za-z0-9_-]{11})'
+  local re_query='[?&]v=([A-Za-z0-9_-]{11})'
+  local re_path='youtube\.com/(shorts|embed|live|v)/([A-Za-z0-9_-]{11})'
+  if [[ "${src}" =~ $re_short ]]; then
+    id="${BASH_REMATCH[1]}"
+  elif [[ "${src}" =~ $re_query ]]; then
+    id="${BASH_REMATCH[1]}"
+  elif [[ "${src}" =~ $re_path ]]; then
+    id="${BASH_REMATCH[2]}"
+  fi
+  printf '%s' "${id}"
+}
+
 derive_id() {
   local src="$1"
   if is_url "${src}"; then
-    if ! command -v yt-dlp >/dev/null 2>&1; then
-      echo "[video-summary] yt-dlp missing - run setup.sh" >&2
-      exit 1
-    fi
     local raw_id
-    raw_id="$(yt-dlp --get-id --no-playlist --no-warnings "${src}" 2>/dev/null | head -n1 || true)"
+    raw_id="$(extract_youtube_id "${src}")"
+    if [[ -z "${raw_id}" ]]; then
+      # Non-YouTube URL: fall back to yt-dlp for the canonical ID.
+      if ! command -v yt-dlp >/dev/null 2>&1; then
+        echo "[video-summary] yt-dlp missing - run setup.sh" >&2
+        exit 1
+      fi
+      raw_id="$(yt-dlp --get-id --no-playlist --no-warnings "${src}" 2>/dev/null | head -n1 || true)"
+    fi
     if [[ -z "${raw_id}" ]]; then
       raw_id="$(printf '%s' "${src}" | shasum -a 1 | cut -c1-12)"
     fi

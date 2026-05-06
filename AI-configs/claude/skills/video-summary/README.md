@@ -1,7 +1,7 @@
 # video-summary
 
 Local-first video summarizer. Pastes a URL or local path, gets a structured
-summary back: TLDR, Verdict, Summary, Key moments, Caveats.
+summary back: TLDR, Verdict, Summary, Key moments, Caveats, Pacing.
 
 ## What it ships
 
@@ -10,20 +10,25 @@ summary back: TLDR, Verdict, Summary, Key moments, Caveats.
 - whisperkit-cli (CoreML, ANE-accelerated) transcribes locally when no manual
   subs exist
 - watch.sh orchestrates and prints a markdown report
-- A haiku subagent reads frames + transcript and produces the summary
+- summarize.sh pipes the report into a `claude -p` haiku subprocess that reads
+  frames + transcript and produces the structured summary
 
 No external API, no Python venv, macOS / Apple Silicon only.
 
 ## Layout
 
 - `SKILL.md` instructions for the agent
+- `video-summary-prompt.md` haiku subprocess prompt template
 - `setup.sh` one-time installer + model pre-download
-- `bin/` orchestrator and helpers
+- `bin/watch.sh` orchestrator (download → frames → transcript → report)
+- `bin/summarize.sh` pipes report into `claude -p` haiku subprocess
+- `bin/download.sh`, `bin/extract-frames.py`, `bin/transcribe.{py,sh}` helpers
 - `~/.cache/video-summary/<id>/` cached working dirs (one per video)
 - `~/.cache/whisperkit/` model bundles
 
-See `SKILL.md` for the full subagent prompt and report shape. See `setup.sh` for
-what brew packages and model files land where.
+See `SKILL.md` for orchestration. See `video-summary-prompt.md` for the summary
+template the subprocess executes. See `setup.sh` for what brew packages and
+model files land where.
 
 ## Execution flow
 
@@ -84,12 +89,14 @@ what brew packages and model files land where.
                           │
                           ▼
                ┌──────────────────────┐
-               │   haiku subagent     │ ◀── reads frames + thumbnail
-               │   (6-check prompt)   │     + transcript
+               │    summarize.sh      │
+               │  (claude -p haiku    │ ◀── reads frames + thumbnail
+               │   subprocess, 7-check│     + transcript via Read tool
+               │   prompt template)   │
                └──────────┬───────────┘
                           │
                           ▼
-        TLDR / Verdict / Summary / Key moments / Caveats
+   TLDR / Verdict / Summary / Key moments / Caveats / Pacing
 ```
 
 ## Edge cases observed or expected
@@ -113,27 +120,40 @@ what brew packages and model files land where.
 - **Transcription hallucinations on very quiet or noisy audio.** Whisperkit may
   emit empty or repeated segments. Output passes through as-is; agent may flag
   in Caveats.
-- **Vendor-marketing videos without explicit sponsor signals.** Subagent
-  classifies as `Uncertain` per the publisher rule, not affiliated.
+- **Vendor-marketing videos.** Publisher rule classifies between Owner/employee,
+  Affiliated (paid), Channel-marketing, Uncertain, and Independent.
+  Channel-marketing is the typical fit for a company channel covering
+  third-party tools as part of its content strategy. Affiliated requires a
+  quoted signal (sponsor card, promo code, "#ad", etc).
 - **Visual-heavy content (slides, code, dense UI).** Haiku vision is weaker than
   opus on fine text. Working dir stays on disk - rerun an opus subagent on the
   same artifacts for higher fidelity.
 
 ## Replacing Claude
 
-Pipeline is provider-agnostic. Only the subagent dispatch in SKILL.md Step 3 is
-harness-specific. To swap:
+Pipeline is provider-agnostic. The only Claude-specific seam is the body of
+`bin/summarize.sh`. To swap:
 
-- Other agent CLI (Codex, Gemini, OpenCode) - rewrite Step 3 in that CLI's
-  subagent syntax. The bin/ scripts and report shape do not change.
-- Direct API or local model (LM Studio etc.) - write a wrapper script that loads
-  SKILL.md as the system prompt, sends the report + base64 frames, and parses
-  the response.
+- Other agent CLI (Codex, Gemini, OpenCode) - edit `bin/summarize.sh` to invoke
+  that CLI instead of `claude -p`. Pass it the prompt template as context
+  (system prompt, file ref, or inline) and the report on stdin. The other bin/
+  scripts and report shape do not change.
+- Direct API or local model (LM Studio etc.) - same edit. Replace the `claude`
+  invocation with curl + the chosen API, base64-encode the frames yourself, and
+  parse the response.
+
+`video-summary-prompt.md` works as-is across providers; it has no
+Claude-specific syntax beyond the `Read` tool reference, which any multimodal
+client can map to its own image-loading mechanism.
 
 ## Cost and latency
 
 - Pipeline (download + frames + transcribe): seconds to ~1 min depending on
   network.
-- Haiku subagent: ~25-40s for a 5-min video, ~50k tokens, around $0.05-0.07 per
-  call.
-- Cache hit: instant, $0.
+- Summarize subprocess (haiku): ~25-40s for a 5-min video. Token usage is
+  dominated by frames (~50k for 50 frames at 480px, around $0.05-0.07 per call).
+  Roughly an order of magnitude cheaper than running the same prompt on opus on
+  the same artifacts.
+- Cache hit on watch.sh: instant, $0. Re-running summarize.sh on a cached report
+  still costs an LLM call - the cache is on the pipeline side, not the summary
+  side.
