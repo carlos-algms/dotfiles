@@ -20,6 +20,16 @@ return {
         ---@module 'blink.cmp'
         ---@param maybeOpts blink.cmp.Config
         opts = function(_, maybeOpts)
+            -- True when keyword is `:` followed by emoji-name chars.
+            -- Used by non-emoji providers to bow out, so the menu only
+            -- shows emoji suggestions while picking one.
+            local function not_picking_emoji()
+                local col = vim.api.nvim_win_get_cursor(0)[2]
+                local before =
+                    vim.api.nvim_get_current_line():sub(1, col)
+                return not before:match(":[%w_+-]*$")
+            end
+
             ---@type blink.cmp.Config
             local localOpts = {
                 snippets = {
@@ -46,7 +56,13 @@ return {
                             score_offset = 100,
                         },
 
+                        -- When picking an emoji (`:foo`), silence non-emoji
+                        -- providers so the menu shows emoji suggestions only.
+                        lsp = { enabled = not_picking_emoji },
+                        snippets = { enabled = not_picking_emoji },
+
                         path = {
+                            enabled = not_picking_emoji,
                             score_offset = 25,
                             -- When typing a path, I would get snippets and text in the
                             -- suggestions, I want those to show only if there are no path
@@ -62,6 +78,7 @@ return {
 
                         --- this is the words in the current buffer
                         buffer = {
+                            enabled = not_picking_emoji,
                             max_items = 4,
                             min_keyword_length = 2,
                             score_offset = 15, -- the higher the number, the higher the priority
