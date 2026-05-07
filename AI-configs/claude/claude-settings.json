@@ -60,15 +60,29 @@
     "frontend-design@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "obsidian@obsidian-skills": true
+    "obsidian@obsidian-skills": true,
+    "claude-md-management@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "obsidian-skills": {
       "source": {
         "source": "github",
         "repo": "kepano/obsidian-skills"
-      }
+      },
+      "autoUpdate": true
     }
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/terse-nudge.sh"
+          }
+        ]
+      }
+    ]
   },
   "alwaysThinkingEnabled": false,
   "effortLevel": "xhigh",

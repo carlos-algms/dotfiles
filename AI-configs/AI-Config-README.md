@@ -5,7 +5,7 @@
 ```bash
 mkdir -p ~/.claude
 ln -s $(pwd)/AI-configs/claude/claude-settings.json ~/.claude/settings.json
-ln -s $(pwd)/AI-configs/claude/{commands,agents,skills} ~/.claude/
+ln -s $(pwd)/AI-configs/claude/{commands,agents,skills,hooks} ~/.claude/
 
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.claude/CLAUDE.md
 ln -s $(pwd)/AI-configs/claude/claude-statusline.sh ~/.claude/statusline.sh
