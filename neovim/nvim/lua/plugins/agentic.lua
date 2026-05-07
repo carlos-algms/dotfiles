@@ -12,7 +12,7 @@ local M = {
 
     opts = function(_, _maybeOpts)
         ---@module 'agentic'
-        ---@type agentic.UserConfig
+        ---@type agentic.PartialUserConfig
         local config = {
             debug = false,
 
@@ -26,20 +26,20 @@ local M = {
             },
         }
 
-            config.acp_providers = {
+        config.acp_providers = {
             ["opencode-acp"] = {
-                    env = {
+                env = {
                     CARLOS_ANTHROPIC_API_KEY = os.getenv(
-                            "CARLOS_ANTHROPIC_API_KEY"
-                        ),
+                        "CARLOS_ANTHROPIC_API_KEY"
+                    ),
                     COREPACK_NPM_REGISTRY = os.getenv("COREPACK_NPM_REGISTRY"),
                     COREPACK_NPM_TOKEN = os.getenv("COREPACK_NPM_TOKEN"),
                     COREPACK_INTEGRITY_KEYS = os.getenv(
                         "COREPACK_INTEGRITY_KEYS"
                     ),
-                    },
                 },
-            }
+            },
+        }
 
         if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
             config.acp_providers["claude-acp"] = {
