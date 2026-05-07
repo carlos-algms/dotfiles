@@ -570,6 +570,7 @@ local M = {
             "<leader>zo",
             function()
                 Snacks.scratch({
+                    ft = "markdown",
                     filekey = {
                         branch = false,
                         count = false,
