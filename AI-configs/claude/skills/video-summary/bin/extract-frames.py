@@ -5,7 +5,7 @@ Usage: extract-frames.py <video> <out-dir> [options]
 
 Options:
   --max-frames N    override the duration-based budget (still capped at 100)
-  --resolution W    frame width in px (default 480)
+  --height H        frame height in px (omit / 0 = native, no scaling)
   --fps F           override auto-fps (still capped at 2)
   --start T         seconds (or MM:SS / HH:MM:SS)
   --end T           seconds (or MM:SS / HH:MM:SS)
@@ -94,7 +94,7 @@ def main() -> int:
     ap.add_argument("video")
     ap.add_argument("out_dir")
     ap.add_argument("--max-frames", type=int, default=None)
-    ap.add_argument("--resolution", type=int, default=480)
+    ap.add_argument("--height", type=int, default=0)
     ap.add_argument("--fps", type=float, default=None)
     ap.add_argument("--start", default=None)
     ap.add_argument("--end", default=None)
@@ -134,9 +134,12 @@ def main() -> int:
         cmd += ["-ss", f"{start_sec:.3f}"]
     if end_sec is not None:
         cmd += ["-to", f"{end_sec:.3f}"]
+    vf = f"fps={fps}"
+    if args.height and args.height > 0:
+        vf += f",scale=-2:{args.height}"
     cmd += [
         "-i", args.video,
-        "-vf", f"fps={fps},scale={args.resolution}:-2",
+        "-vf", vf,
         "-frames:v", str(target),
         "-q:v", "4",
         str(out_dir / "frame_%04d.jpg"),

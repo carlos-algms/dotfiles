@@ -67,6 +67,7 @@ if is_url "${SOURCE}"; then
     exit 1
   fi
 
+  YTDLP_LOG="${OUT}/yt-dlp.log"
   set +e
   yt-dlp \
     -N 8 \
@@ -82,7 +83,7 @@ if is_url "${SOURCE}"; then
     --no-playlist \
     --ignore-errors \
     -o "${OUT}/video.%(ext)s" \
-    "${SOURCE}" >&2
+    "${SOURCE}" >"${YTDLP_LOG}" 2>&1
   ytdlp_exit=$?
   set -e
 
@@ -96,6 +97,8 @@ if is_url "${SOURCE}"; then
 
   if [[ -z "${video_path}" ]]; then
     echo "[video-summary] yt-dlp did not produce a video file (exit ${ytdlp_exit})" >&2
+    echo "[video-summary] yt-dlp log: ${YTDLP_LOG}" >&2
+    tail -n 40 "${YTDLP_LOG}" >&2 || true
     install_age_days=$((($(date +%s) - $(stat -f %m "$(command -v yt-dlp)")) / 86400))
     if ((install_age_days > 14)); then
       echo "[video-summary] yt-dlp install is ${install_age_days} days old - try: brew upgrade yt-dlp" >&2

@@ -5,7 +5,7 @@
 #
 # Options:
 #   --max-frames N    override frame budget (cap 100)
-#   --resolution W    frame width in px (default 480)
+#   --height H        frame height in px (omit / 0 = native, no scaling)
 #   --fps F           override auto-fps (cap 2)
 #   --start T         seconds or MM:SS or HH:MM:SS
 #   --end T           seconds or MM:SS or HH:MM:SS
@@ -42,7 +42,7 @@ while (($# > 0)); do
     REFRESH=1
     shift
     ;;
-  --max-frames | --resolution | --fps | --start | --end)
+  --max-frames | --height | --fps | --start | --end)
     PASS_THROUGH+=("$1" "$2")
     shift 2
     ;;
@@ -124,7 +124,9 @@ echo "[video-summary] working dir: ${OUT_DIR}" >&2
 
 # 1. Download.
 DL_JSON="${OUT_DIR}/download.json"
+T0_DL="${SECONDS}"
 "${SCRIPT_DIR}/download.sh" "${SOURCE}" "${OUT_DIR}/download" >"${DL_JSON}"
+T_DOWNLOAD=$((SECONDS - T0_DL))
 
 video_path="$(jq -r '.video_path // ""' "${DL_JSON}")"
 subtitle_path="$(jq -r '.subtitle_path // ""' "${DL_JSON}")"
@@ -148,13 +150,16 @@ DURATION="$(ffprobe -v quiet -print_format json -show_format "${video_path}" |
 
 # 3. Extract frames.
 FRAMES_TSV="${OUT_DIR}/frames.tsv"
+T0_FR="${SECONDS}"
 python3 "${SCRIPT_DIR}/extract-frames.py" "${video_path}" "${OUT_DIR}/frames" "${PASS_THROUGH[@]}" >"${FRAMES_TSV}"
+T_FRAMES=$((SECONDS - T0_FR))
 FRAME_COUNT="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
 
 # 4. Transcript: prefer manual VTT subs, else whisperkit-cli.
 TRANSCRIPT_JSON="${OUT_DIR}/transcript.json"
 TRANSCRIPT_SOURCE=""
 
+T0_TR="${SECONDS}"
 if [[ -n "${subtitle_path}" && -f "${subtitle_path}" ]]; then
   if python3 "${SCRIPT_DIR}/transcribe.py" "${subtitle_path}" "${TRANSCRIPT_JSON}"; then
     TRANSCRIPT_SOURCE="manual captions"
@@ -168,6 +173,7 @@ if [[ -z "${TRANSCRIPT_SOURCE}" ]]; then
   "${SCRIPT_DIR}/transcribe.sh" "${AUDIO_WAV}" "${TRANSCRIPT_JSON}" "${LANGUAGE}"
   TRANSCRIPT_SOURCE="whisperkit (large-v3-turbo)"
 fi
+T_TRANSCRIBE=$((SECONDS - T0_TR))
 
 # 5. Apply --start/--end filter to transcript if set, by scanning PASS_THROUGH.
 START_SEC=""
@@ -282,6 +288,22 @@ format_ts_simple() {
   echo "---"
   echo "_Work dir: \`${OUT_DIR}\` — cached. Re-runs on this source replay this report. Use \`--refresh\` to force re-process._"
 } >"${REPORT}"
+
+jq -n \
+  --arg duration "${DURATION:-}" \
+  --arg transcript_source "${TRANSCRIPT_SOURCE}" \
+  --argjson frame_count "${FRAME_COUNT:-0}" \
+  --argjson t_download "${T_DOWNLOAD:-0}" \
+  --argjson t_frames "${T_FRAMES:-0}" \
+  --argjson t_transcribe "${T_TRANSCRIBE:-0}" \
+  '{
+    video_duration_s: ($duration | if . == "" then null else tonumber end),
+    transcript_source: $transcript_source,
+    frame_count: $frame_count,
+    download_s: $t_download,
+    frames_s: $t_frames,
+    transcribe_s: $t_transcribe
+  }' >"${OUT_DIR}/metrics.json"
 
 touch "${MARKER}"
 cat "${REPORT}"

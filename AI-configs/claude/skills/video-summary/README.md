@@ -151,9 +151,10 @@ client can map to its own image-loading mechanism.
 - Pipeline (download + frames + transcribe): seconds to ~1 min depending on
   network.
 - Summarize subprocess (haiku): ~25-40s for a 5-min video. Token usage is
-  dominated by frames (~50k for 50 frames at 480px, around $0.05-0.07 per call).
-  Roughly an order of magnitude cheaper than running the same prompt on opus on
-  the same artifacts.
+  dominated by frames. At native source resolution (480p source = 854x480,
+  ~550 tokens/frame) expect ~30-40k tokens for 50-70 frames, around
+  $0.03-0.10 per call. Roughly an order of magnitude cheaper than running
+  the same prompt on opus on the same artifacts.
 - Cache hit on watch.sh: instant, $0. Re-running summarize.sh on a cached report
   still costs an LLM call - the cache is on the pipeline side, not the summary
   side.

@@ -41,13 +41,17 @@ run_backend() {
   if [[ -n "${LANG}" ]]; then
     args+=(--language "${LANG}")
   fi
-  whisperkit-cli "${args[@]}" >&2
+  whisperkit-cli "${args[@]}" >"${report_dir}/whisperkit.log" 2>&1
 }
 
 REPORT_DIR="$(mktemp -d -t whisperkit-report-XXXXXX)"
 trap 'rm -rf "${REPORT_DIR}"' EXIT
 
-run_backend "${AUDIO}" "${REPORT_DIR}"
+if ! run_backend "${AUDIO}" "${REPORT_DIR}"; then
+  echo "[video-summary] whisperkit-cli failed - log:" >&2
+  cat "${REPORT_DIR}/whisperkit.log" >&2
+  exit 1
+fi
 
 REPORT_JSON="$(find "${REPORT_DIR}" -maxdepth 2 -name '*.json' -print -quit)"
 if [[ -z "${REPORT_JSON}" ]]; then

@@ -65,7 +65,7 @@ live inside the subprocess.
 Optional flags forwarded to `watch.sh`:
 
 - `--max-frames N` lower the budget (default tier curve, hard cap 100)
-- `--resolution W` frame width in px (default 480)
+- `--height H` frame height in px (default native; pass to downscale)
 - `--start T` / `--end T` focus on a section
 - `--fps F` override auto-fps (cap 2)
 - `--language LANG` force whisperkit language (`en`, `pt`, `es`, ...)
