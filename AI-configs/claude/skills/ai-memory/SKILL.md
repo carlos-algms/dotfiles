@@ -132,6 +132,48 @@ Neovim 0.11+.
   - Created during migration of dotfiles repo.
 ```
 
+## Templates for coding-agent memory
+
+When the note captures a **coding lesson** (test failure, tool quirk, repo trap
+that the agent recovered from), use this body shape inside the date-prefixed
+file:
+
+```markdown
+## YYYY-MM-DD - <one-line symptom>
+
+- Tool/cmd: `<command that failed>`
+- Error: <verbatim error>
+- Cause: <real root cause>
+- Fix: <what worked>
+- Lesson: <generalised rule for next time>
+- Tags: [test-runner, vitest, monorepo]
+```
+
+Multiple lessons in one project: append H2 entries to a single
+`<project>-lessons.md` file rather than one file per lesson.
+
+When the note captures a **decision** (option A vs B, framework choice,
+architecture pivot), use the MADR-derived shape:
+
+```markdown
+## YYYY-MM-DD - <decision title>
+
+- Status: accepted | superseded | deprecated
+- Context: <constraint or trigger>
+- Options: A) <...> B) <...>
+- Decision: <chosen option>
+- Rationale: <why this option over the alternatives>
+- Consequences: <what this commits us to>
+- Revisit-when: <signal that would invalidate this>
+```
+
+Append decisions to a single `<project>-decisions.md` file. Never edit past
+entries - status changes flow forward (mark old as `superseded`, add a new
+entry).
+
+Both templates are append-only. The Lesson and Decision lines are what re-enter
+context next session - the rest is provenance.
+
 ## Related skills
 
 - `personal-wiki` - reusable wiki-style knowledge (different folder, rules).

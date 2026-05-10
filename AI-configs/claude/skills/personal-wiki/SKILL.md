@@ -66,7 +66,7 @@ playthrough, or randomized per save.
 title: Page Title
 aliases:
   - Alternate Name
-type: concept | person | event | comparison | guide | reference
+type: concept | person | event | comparison | guide | reference | decision | pattern | playbook
 tags:
   - category-tag
   - subtopic-tag
@@ -83,6 +83,15 @@ Rules:
 - **No `sources` in frontmatter** - see Sources convention in
   `obsidian-mechanics`.
 - **`type`** describes the shape of knowledge, not the topic.
+  - `concept` - idea, theory, mental model.
+  - `person` - biography, profile.
+  - `event` - dated happening.
+  - `comparison` - A vs B, alternatives.
+  - `guide` - conceptual how-to, principles ("how to think about X").
+  - `reference` - lookup info, facts, specs.
+  - `decision` - choice + rationale (MADR-shaped).
+  - `pattern` - recurring solution shape.
+  - `playbook` - procedural how-to, steps to run ("how to do X").
 - **No colons in `title` or `aliases`** - use `-`.
 
 ## Page body template
