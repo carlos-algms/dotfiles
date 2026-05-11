@@ -20,7 +20,8 @@ No external API, no Python venv, macOS / Apple Silicon only.
 - `SKILL.md` instructions for the agent
 - `video-summary-prompt.md` haiku subprocess prompt template
 - `setup.sh` one-time installer + model pre-download
-- `bin/watch.sh` orchestrator (download → frames → transcript → report)
+- `bin/run.sh` cache-aware orchestrator (entry point, two-layer cache)
+- `bin/watch.sh` pipeline (download → frames → transcript → report)
 - `bin/summarize.sh` pipes report into `claude -p` haiku subprocess
 - `bin/download.sh`, `bin/extract-frames.py`, `bin/transcribe.{py,sh}` helpers
 - `~/.cache/video-summary/<id>/` cached working dirs (one per video)
@@ -37,8 +38,14 @@ model files land where.
                                     │
                                     ▼
                           ┌──────────────────┐
+                          │      run.sh      │
+                          │  (entry point)   │
+                          └─────────┬────────┘
+                                    │
+                                    ▼
+                          ┌──────────────────┐
                           │     watch.sh     │
-                          │  (orchestrator)  │
+                          │ (pipeline cache) │
                           └─────────┬────────┘
                                     │
                 ┌───────────────────┴───────────────────┐
@@ -48,6 +55,9 @@ model files land where.
                 ▼                                       ▼
         replay report.md                       ┌──────────────────┐
             (instant)                          │   download.sh    │
+                                               │  (av01>vp9>avc1, │
+                                               │   --sub-langs    │
+                                               │   all, HEIGHT)   │
                                                └─────────┬────────┘
                                                          │
                           ┌──────────────────┬───────────┤
@@ -63,6 +73,7 @@ model files land where.
                           ▼
                 ┌──────────────────┐
                 │  extract-frames  │ ── ffprobe + ffmpeg ──▶ frames/*.jpg
+                │  (--duration)    │      (mjpeg q4)
                 └─────────┬────────┘
                           │
                           ▼
@@ -89,14 +100,27 @@ model files land where.
                           │
                           ▼
                ┌──────────────────────┐
-               │    summarize.sh      │
-               │  (claude -p haiku    │ ◀── reads frames + thumbnail
-               │   subprocess, 7-check│     + transcript via Read tool
-               │   prompt template)   │
+               │ run.sh: summary cache│
                └──────────┬───────────┘
                           │
-                          ▼
+              ┌───────────┴───────────┐
+              │                       │
+          cache hit               cache miss
+              │                       │
+              ▼                       ▼
+       replay summary.md     ┌──────────────────────┐
+          (instant, $0)      │    summarize.sh      │
+                             │  (claude -p haiku    │ ◀── reads frames +
+                             │   subprocess, 7-check│     thumbnail +
+                             │   prompt template)   │     transcript via Read
+                             └──────────┬───────────┘
+                                        │
+                                        ▼
+                          summary.md written + cached
+                                        │
+                                        ▼
    TLDR / Verdict / Summary / Key moments / Caveats / Pacing
+       + FRAMES_UNREADABLE on stderr if frames too low-res
 ```
 
 ## Edge cases observed or expected
@@ -149,12 +173,15 @@ client can map to its own image-loading mechanism.
 ## Cost and latency
 
 - Pipeline (download + frames + transcribe): seconds to ~1 min depending on
-  network.
+  network. Codec preference (av01 > vp9 > avc1) cuts download size 2-3x vs
+  earlier any-codec selection.
 - Summarize subprocess (haiku): ~25-40s for a 5-min video. Token usage is
-  dominated by frames. At native source resolution (480p source = 854x480,
-  ~550 tokens/frame) expect ~30-40k tokens for 50-70 frames, around
-  $0.03-0.10 per call. Roughly an order of magnitude cheaper than running
-  the same prompt on opus on the same artifacts.
-- Cache hit on watch.sh: instant, $0. Re-running summarize.sh on a cached report
-  still costs an LLM call - the cache is on the pipeline side, not the summary
-  side.
+  dominated by frames. At default 480p (854x480, JPEG q4, ~550 tokens/frame)
+  expect ~30-40k tokens for 50-70 frames, around $0.03-0.10 per call. Roughly
+  an order of magnitude cheaper than opus on the same artifacts.
+- Two-layer cache:
+  - Pipeline cache (watch.sh): replay `report.md`, instant, $0.
+  - Summary cache (run.sh): replay `summary.md`, instant, $0. No LLM call.
+  - `--refresh` invalidates pipeline (and implicitly summary).
+  - `--refresh-summary` invalidates summary only (re-runs haiku on same
+    report; useful after editing the prompt template).

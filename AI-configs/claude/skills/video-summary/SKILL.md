@@ -9,8 +9,8 @@ description:
   this", URLs ending in /watch, /shorts, common video extensions
   (.mp4/.mov/.mkv/.webm).
 allowed-tools:
-  Bash(bash ~/.claude/skills/video-summary/bin/run.sh:*) Bash(bash
-  ~/.claude/skills/video-summary/setup.sh:*)
+  - Bash(bash ~/.claude/skills/video-summary/bin/run.sh *)
+  - Bash(bash ~/.claude/skills/video-summary/setup.sh *)
 ---
 
 # video-summary
@@ -64,34 +64,113 @@ live inside the subprocess.
 
 Optional flags forwarded to `watch.sh`:
 
-- `--max-frames N` lower the budget (default tier curve, hard cap 100)
-- `--height H` frame height in px (default native; pass to downscale)
+- `--max-frames N` soft cap on frames; default 100. Tiered curve scales by
+  duration. Raise for long or visually-dense content. Short videos (<=60s)
+  already auto-bump to 60-80 frames since rapid demos pack visual info.
+- `--height H` caps download resolution AND frame scale (default 480p). Raise to
+  escalate (see "Unreadable frames" below).
 - `--start T` / `--end T` focus on a section
 - `--fps F` override auto-fps (cap 2)
 - `--language LANG` force whisperkit language (`en`, `pt`, `es`, ...)
-- `--refresh` ignore the pipeline cache (re-download, re-transcribe)
+- `--refresh` wipe the whole work dir (download, frames, transcript, report,
+  summary)
+- `--refresh-download` re-download (cascades to frames + transcript + report +
+  summary)
+- `--refresh-frames` re-extract frames (cascades to report + summary)
+- `--refresh-transcript` re-transcribe (cascades to report + summary)
+
+### Unreadable frames
+
+Frames default to 480p. Do NOT lower this default - past runs at 240p caused VLM
+OCR failures (couldn't read code/slides/captions).
+
+The summarizer subagent flags unreadable frames in its output via a
+`FRAMES_UNREADABLE:` line, and `run.sh` echoes the same signal to stderr:
+
+```
+[video-summary] FRAMES_UNREADABLE: <path1>, <path2>, ...
+[video-summary] re-run with --refresh --height 720 (or 1080) to escalate
+```
+
+When you see this signal, do NOT silently accept the summary. Tell the user
+which frames were unreadable and offer to re-run at higher resolution:
+
+```bash
+bash ~/.claude/skills/video-summary/bin/run.sh "<source>" --refresh --height 720
+```
+
+Higher tiers: 720 -> 1080. Network cost roughly 2-3x per step. The cached video
+is invalidated by `--refresh` and re-downloaded at the new cap.
 
 Local flag handled by `run.sh`:
 
 - `--refresh-summary` ignore the summary cache only (re-run the haiku pass;
   useful after editing `video-summary-prompt.md`)
 
-Two cache layers under `~/.cache/video-summary/<id>/`:
+### Resume points
 
-- pipeline cache: `report.md`, `frames/`, `transcript.json`
-- summary cache: `summary.md`
+Pipeline is composable. Each stage is gated by its own artifact under
+`~/.cache/video-summary/<id>/`:
 
-Both replay instantly on re-run. `--refresh` invalidates pipeline (which
-implicitly invalidates summary). `--refresh-summary` only invalidates the haiku
-pass.
+| Stage      | Artifact                      | Refresh flag           |
+| ---------- | ----------------------------- | ---------------------- |
+| download   | `download.json` + `download/` | `--refresh-download`   |
+| frames     | `frames.tsv` + `frames/`      | `--refresh-frames`     |
+| transcribe | `transcript.json`             | `--refresh-transcript` |
+| summarize  | `summary.md`                  | `--refresh-summary`    |
 
-Stdout of `run.sh` is the structured summary (TLDR / Verdict / Summary / Key
-moments / Caveats / Pacing) plus a final `WORK_DIR:` line. Strip the `WORK_DIR:`
-line from the user-facing reply but remember the path for follow-ups.
+Cascade rule: each `--refresh-*` wipes its own stage and everything downstream.
+Re-running on the same source replays cached stages instantly. Delete any
+artifact directly (e.g. `rm transcript.json`) to redo that stage without passing
+a flag.
+
+Decision tree (pick the matching flag for the user's intent):
+
+- "Re-summarize, transcript is fine" -> `--refresh-summary`
+- You edited `video-summary-prompt.md` -> `--refresh-summary`
+- "Transcript is bad, re-transcribe and re-summarize" -> `--refresh-transcript`
+- "Frames are unreadable" -> `--refresh-frames --height 720` (or 1080)
+- "Re-download at higher resolution" -> `--refresh-download --height 720`
+- "Wipe everything" -> `--refresh`
+
+Stdout of `run.sh` is the clean structured summary (TLDR / Verdict / Summary /
+Key moments / Caveats / Pacing) plus a `## Run metrics` block. The
+`FRAMES_UNREADABLE:` and `WORK_DIR:` subagent lines are stripped before output.
+
+The work dir path is in the footer of `pre-summary-context.md` earlier in the
+pipeline. To recover it for follow-ups, parse `Work dir:` from that file or use
+the cache root `~/.cache/video-summary/<id>/` where `<id>` is derived from the
+source URL/path.
 
 The legacy alternative if `claude` CLI is unavailable: use the Agent tool with
 `subagent_type: general-purpose` and `model: haiku`, and pass the contents of
-`video-summary-prompt.md` plus `report.md` as the prompt body.
+`video-summary-prompt.md` plus `pre-summary-context.md` as the prompt body.
+
+### Artifacts
+
+After a complete run, `~/.cache/video-summary/<id>/` contains:
+
+- `download/video.mp4` - source video. Input to frames + audio.
+- `download/video.info.json` - full yt-dlp metadata dump.
+- `download/video.<lang>.vtt` - manual captions, when available.
+- `download/thumbnail.<ext>` - thumbnail image.
+- `download.json` - manifest with paths + title/channel/chapters/description.
+- `frames/frame_NNNN.jpg` - extracted frames at the chosen height/fps.
+- `frames.tsv` - `<seconds>\t<absolute path>` per frame. Use this to map a frame
+  to its timestamp - do NOT estimate from `frame_NNNN` indices.
+- `audio.wav` - 16kHz mono PCM. Only present when no manual captions (whisper
+  fallback input).
+- `transcript.json` - `[{start, end, text}]`. Canonical transcript for the
+  video. Read directly for transcript follow-ups.
+- `pre-summary-context.md` - assembled markdown (metadata + frame list +
+  transcript) consumed by the haiku subagent.
+- `summary.md` - final structured output served as-is on cache hit.
+- `download.metrics.json` / `frames.metrics.json` / `transcribe.metrics.json` -
+  per-stage `{seconds, cached, ...}`.
+- `metrics.json` - merged per-stage view for `run.sh`.
+- `claude_metrics.json` - haiku subprocess cost / tokens / duration.
+- `frames_unreadable.txt` - sidecar; present only when the subagent flagged
+  unreadable frames on the last run.
 
 ## Step 3: handle follow-ups
 

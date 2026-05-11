@@ -27,6 +27,7 @@ if [[ ! -f "${PROMPT_FILE}" ]]; then
   exit 1
 fi
 
+set +e
 RESPONSE_JSON="$({
   printf '@%s\n\nReport:\n\n' "${PROMPT_FILE}"
   cat
@@ -35,8 +36,30 @@ RESPONSE_JSON="$({
     --output-format json \
     --disable-slash-commands \
     --allowedTools Read)"
+claude_exit=$?
+set -e
 
-jq -r '.result' <<<"${RESPONSE_JSON}"
+if ((claude_exit != 0)); then
+  echo "[video-summary] claude -p exited ${claude_exit}" >&2
+  printf '%s\n' "${RESPONSE_JSON}" >&2
+  exit "${claude_exit}"
+fi
+
+# Check JSON-level error flag even when exit was 0.
+is_error="$(jq -r '.is_error // false' <<<"${RESPONSE_JSON}" 2>/dev/null || echo true)"
+if [[ "${is_error}" == "true" ]]; then
+  echo "[video-summary] claude returned is_error=true" >&2
+  jq -r '.result // .error // "no error detail"' <<<"${RESPONSE_JSON}" >&2 || true
+  exit 1
+fi
+
+# Guard against null .result (CLI succeeded but produced no body).
+result="$(jq -r '.result // empty' <<<"${RESPONSE_JSON}")"
+if [[ -z "${result}" ]]; then
+  echo "[video-summary] claude returned empty result" >&2
+  exit 1
+fi
+printf '%s\n' "${result}"
 
 jq '{
   cost_usd: .total_cost_usd,

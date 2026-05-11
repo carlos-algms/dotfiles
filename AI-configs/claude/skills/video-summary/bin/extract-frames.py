@@ -4,18 +4,32 @@
 Usage: extract-frames.py <video> <out-dir> [options]
 
 Options:
-  --max-frames N    override the duration-based budget (still capped at 100)
+  --max-frames N    soft cap on frames; default DEFAULT_CAP (100)
   --height H        frame height in px (omit / 0 = native, no scaling)
   --fps F           override auto-fps (still capped at 2)
   --start T         seconds (or MM:SS / HH:MM:SS)
   --end T           seconds (or MM:SS / HH:MM:SS)
+  --duration F      seconds; if given, skip ffprobe duration call
+
+Frames are written as JPEG q4 (Homebrew ffmpeg ships without libwebp).
 
 Stdout: one line per frame "<timestamp_seconds>\\t<path>", chronological.
 Stderr: progress (duration, fps, target).
 
-Tiered curve (full mode): 20/25/35/50/70/100 by duration buckets.
-Focused mode (--start or --end set): denser curve.
-2 fps ceiling enforced everywhere.
+Unified tiered curve (short videos get denser sampling - rapid demos and visual
+gags would be lost with sparse frames):
+
+  <=5s:    10-30
+  <=15s:   30-60
+  <=30s:   60
+  <=60s:   80
+  <=180s:  35
+  <=600s:  50
+  <=1800s: 70
+  >1800s:  cap (default 100)
+
+2 fps ceiling enforced everywhere. User can raise the cap via --max-frames
+for long or visually-dense content.
 """
 from __future__ import annotations
 
@@ -27,7 +41,7 @@ from pathlib import Path
 
 
 MAX_FPS = 2.0
-HARD_CAP = 100
+DEFAULT_CAP = 100
 
 
 def parse_time(value: str | None) -> float | None:
@@ -61,27 +75,23 @@ def probe_duration(video: str) -> float:
     raise SystemExit("[video-summary] ffprobe could not read duration")
 
 
-def tiered_target(duration: float, focused: bool, cap: int) -> int:
+def tiered_target(duration: float, cap: int) -> int:
     if duration <= 0:
         return 1
-    if focused:
-        if duration <= 5:    return min(cap, max(10, int(duration * 6)))
-        if duration <= 15:   return min(cap, max(30, int(duration * 4)))
-        if duration <= 30:   return min(cap, 60)
-        if duration <= 60:   return min(cap, 80)
-        return cap
-    if duration <= 30:   return min(cap, max(1, min(20, round(duration))))
-    if duration <= 60:   return min(cap, 25)
+    if duration <= 5:    return min(cap, max(10, int(duration * 6)))
+    if duration <= 15:   return min(cap, max(30, int(duration * 4)))
+    if duration <= 30:   return min(cap, 60)
+    if duration <= 60:   return min(cap, 80)
     if duration <= 180:  return min(cap, 35)
     if duration <= 600:  return min(cap, 50)
     if duration <= 1800: return min(cap, 70)
     return cap
 
 
-def auto_fps(duration: float, focused: bool, cap: int) -> tuple[float, int]:
+def auto_fps(duration: float, cap: int) -> tuple[float, int]:
     if duration <= 0:
         return 1.0, 1
-    target = tiered_target(duration, focused, cap)
+    target = tiered_target(duration, cap)
     fps = target / duration
     if fps > MAX_FPS:
         fps = MAX_FPS
@@ -98,6 +108,7 @@ def main() -> int:
     ap.add_argument("--fps", type=float, default=None)
     ap.add_argument("--start", default=None)
     ap.add_argument("--end", default=None)
+    ap.add_argument("--duration", type=float, default=None)
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -105,27 +116,25 @@ def main() -> int:
     for old in out_dir.glob("frame_*.jpg"):
         old.unlink()
 
-    full_duration = probe_duration(args.video)
+    full_duration = args.duration if args.duration is not None else probe_duration(args.video)
     start_sec = parse_time(args.start)
     end_sec = parse_time(args.end)
-    focused = start_sec is not None or end_sec is not None
 
     effective_start = start_sec if start_sec is not None else 0.0
     effective_end = end_sec if end_sec is not None else full_duration
     effective_dur = max(0.0, effective_end - effective_start)
 
-    cap = args.max_frames if args.max_frames is not None else HARD_CAP
+    cap = args.max_frames if args.max_frames is not None else DEFAULT_CAP
 
     if args.fps is not None:
         fps = min(args.fps, MAX_FPS)
         target = max(1, min(cap, round(fps * effective_dur)))
     else:
-        fps, target = auto_fps(effective_dur, focused, cap)
+        fps, target = auto_fps(effective_dur, cap)
 
-    mode = "focused" if focused else "full"
     print(
-        f"[video-summary] duration {effective_dur:.3f}s, {mode} mode, "
-        f"target {target} frames @ {fps:.4f} fps",
+        f"[video-summary] duration {effective_dur:.3f}s, "
+        f"target {target} frames @ {fps:.4f} fps (cap {cap})",
         file=sys.stderr,
     )
 
@@ -146,8 +155,15 @@ def main() -> int:
     ]
     subprocess.run(cmd, check=True, stderr=sys.stderr)
 
+    frames = sorted(out_dir.glob("frame_*.jpg"))
+    if not frames:
+        raise SystemExit(
+            "[video-summary] ffmpeg produced zero frames - check --start/--end "
+            "range, codec support, or source integrity"
+        )
+
     offset = start_sec or 0.0
-    for i, frame in enumerate(sorted(out_dir.glob("frame_*.jpg"))):
+    for i, frame in enumerate(frames):
         ts = offset + (i / fps if fps > 0 else 0.0)
         print(f"{ts:.2f}\t{frame}")
 

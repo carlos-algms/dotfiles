@@ -5,6 +5,41 @@ metadata, chapters, and a transcript.
 **Read every frame path and the thumbnail (if present) in parallel using the
 Read tool.**
 
+**Frame legibility check.** Frames are extracted at 480p by default. If any
+frame is too low-resolution to read text that matters for the summary (code,
+slides, terminal output, captions, on-screen UI), you MUST flag it. Do not
+silently skip the frame or guess at its content. Track unreadable frames as you
+read them.
+
+If one or more frames are unreadable, end your response with a `FRAMES_UNREADABLE`
+line BEFORE the final `WORK_DIR` line, listing the frame paths (one per line, or
+comma-separated on one line):
+
+```
+FRAMES_UNREADABLE: <path1>, <path2>, ...
+```
+
+This tells the orchestrator that re-running with a higher `--height` (720 or
+1080) is needed. Still produce the best summary you can from readable frames
+plus transcript - the flag is additive.
+
+Do NOT emit `FRAMES_UNREADABLE` for frames that are simply blank, transitional,
+or content-light. Only flag frames where higher resolution would unlock real
+content (text, diagrams, code) that the summary needs.
+
+**Thin transcript check.** The transcript may be very short, silent, or missing
+entire stretches (silent demos, ambient-music-only videos, audio capture
+failures). When this happens you still produce a summary from frames + the
+thumbnail, BUT you MUST add a Caveats bullet stating the audio was thin or
+silent. Heuristic: less than ~50 spoken words for a >30s video, or empty
+transcript, qualifies as thin. Example caveat:
+
+```
+- [00:00] Audio is silent or near-silent; summary inferred from frames only.
+```
+
+Do not invent dialog or claims that require audio. State only what is visible.
+
 Before writing the summary, run these explicit checks against the transcript and
 frames. Caveats can hide anywhere - intro hook, mid-demo aside, comparison
 section, "but here's the thing" reversal, outro. Scan the whole transcript, not
@@ -42,54 +77,76 @@ timestamp each, not a range. Sizing is content-driven, not length-driven:
   restating chapter section headers as bullets - those are a section index, not
   a moment.
 
-1. **Publisher relationship.** The report contains a `## Channel and metadata`
-   section with channel name, categories, tags, and a truncated description.
-   Read these as evidence alongside the transcript and frames.
+1. **Credibility risk.** The point is not to hunt sponsorships - it is to
+   tell the viewer how much to trust the review. Pick one: **low**,
+   **medium**, **high**, or **inconclusive**. Evidence must be quoted
+   verbatim from transcript, description, or an on-screen element.
 
-   Decide between four classifications. Each requires concrete cited evidence:
-   - **Owner/employee** - host states they built the product or work for the
-     company that makes it. Signals: "we built X", "our team at X", description
-     links go to the same company that makes the reviewed product. Quote
-     required in your Verdict.
-   - **Affiliated (paid)** - one of these is present in transcript, frames, or
-     description:
-     - "Sponsored by", "thanks to X for sponsoring", "brought to you by"
-     - Promo code, discount, affiliate link with tracking
-     - On-screen "paid partnership", "#ad", "#sponsored" Quote the signal
-       verbatim in your Verdict.
-   - **Channel-marketing** - the channel is owned by a commercial entity (its
-     description points to the publisher's own paid products, separate from the
-     product reviewed). The video covers a third-party tool as part of the
-     channel's content strategy. The host is not paid by the reviewed product,
-     but the channel itself is a marketing surface for the publisher's separate
-     business. Cite the description links to the publisher's own product as
-     evidence.
-   - **Uncertain** - default when no signals are visible. State: "publisher
-     relationship to product unclear from video; check the channel's recent
-     uploads if it matters."
-   - **Independent** - host explicitly disclaims commercial link ("not
-     sponsored", "not affiliated", "I bought this myself"), or the channel is
-     clearly a personal/independent reviewer (no commercial entity behind the
-     channel name, no paid products in description).
+   - **High** - the video's **main topic** IS the sponsored product.
+     Both must be true:
+     1. Quoted paid-placement signal: "sponsored by X", promo code,
+        affiliate link, "#ad", on-screen "paid partnership".
+     2. The sponsor X **is** the product being reviewed or demoed for
+        most of the body.
+     Why high: paid placement directly shapes the review; major caveats
+     get buried or omitted.
+   - **Medium** - host received the reviewed product for free, got early
+     access, or has an ongoing vendor relationship - **even if they
+     explicitly disclaim "not paid, honest opinion"**. Evidence: "X sent
+     me this", "they gave me early access", "review unit from X", "thanks
+     to X for the unit".
+     Why medium: the disclaimer does not fix the incentive. Reviewer
+     depends on future products from the vendor, so major flaws get
+     softened or omitted.
+   - **Low** - no paid placement, no review unit, no early-access
+     relationship. Independent reviews, vendor-owned channels reviewing
+     third-party tools (Better Stack reviewing Lightpanda), creator
+     economy (host's description plugs own course/Patreon/Discord), host
+     reviewing their own product unpaid by anyone else.
 
-   **Verification rule:** before classifying as Affiliated or Channel-marketing,
-   you MUST be able to **quote** the specific signal verbatim from the
-   transcript, description, or describe an on-screen element you observed in a
-   frame. If you cannot quote it, downgrade the classification to Uncertain.
+     **Do NOT assume paid/medium just because:**
+     - Description links to the reviewed product's site, blog, funding
+       announcement, GitHub, or docs. That is normal review hygiene.
+     - The video is enthusiastic / positive about the product.
+     - The channel is owned by a company in the same space.
+     - The video aligns with the channel's content strategy.
+     Assume **free review** unless there is quoted evidence of payment,
+     review unit, or early-access. Add a context note instead of bumping
+     the risk.
+   - **Inconclusive** - signals are absent, ambiguous, or contradictory.
+     State **why** in one short clause (e.g. "no description text and
+     transcript covers only the demo, source unclear").
 
-   **NOT signals of affiliation:**
-   - Host plugging their own channel ("subscribe to my channel", "hit the
-     bell"). Self-promotion is orthogonal to the product.
-   - Channel name being a company name. By itself, that is Channel-marketing at
-     most, not Affiliated with the product.
-   - Marketing-style chapter titles ("Why developers are switching to X").
-     Editorial framing, not affiliation evidence.
-   - Enthusiastic walkthroughs of the product's strengths.
-   - Host's own production polish, branding, or pacing choices.
+   **Scope rule for sponsor segments:**
 
-   Cite your evidence in the Verdict. Quote signals verbatim. Do not use hedge
-   language about "promotional feel" or "ecosystem partner" - those are
-   projections, not observations.
+   A mid-video sponsor for an **unrelated** product does NOT change
+   credibility risk. Capture as a Caveat with timestamp. Example: a
+   shampoo review with a 90-second car-brand mid-roll stays **low** on
+   the main topic; caveat notes the unrelated car sponsor.
+
+   A sponsor is "related" only if it IS the reviewed product or a direct
+   competitor that biases the comparison.
+
+   **Optional context note** (1 line, when relevant - never omit silently
+   if context exists, attach it):
+   - "Channel owned by <vendor>" - Better Stack reviewing Lightpanda.
+   - "Host built the reviewed product" - Theo on T3 Stack.
+   - "Host received review unit free from <vendor>" - feeds the medium
+     classification but worth restating in the note.
+
+   Worked examples:
+   - WebDevCody reviews a Reddit post on Claude effort levels; description
+     plugs his course; no sponsor or review unit. **Low.**
+   - Better Stack reviews Lightpanda; no sponsor, no review unit, body
+     stays on-topic. **Low.** Note: channel owned by Better Stack
+     (observability vendor).
+   - Tech reviewer: "this video is sponsored by Squarespace" at 02:00,
+     rest is a phone review unrelated to Squarespace. **Low.** Caveat
+     notes the unrelated Squarespace sponsor.
+   - Tech reviewer reviewing the new iPhone after Apple sent it free
+     ("Apple sent this to me, not paid, my honest opinion"). **Medium.**
+   - "This video is sponsored by Brilliant.org and today I'm teaching
+     you Brilliant's calculus course." **High** (sponsor IS the topic).
 
 2. **Title vs delivery.** Does the body literally deliver the claim in the
    title? Where does it stop short, and where does it overstate?
@@ -124,9 +181,78 @@ timestamp each, not a range. Sizing is content-driven, not length-driven:
    - **Bloated** - large portions of runtime add no information. Cite timestamp
      ranges.
 
+**Speaker inference.** Identify the speaker(s) by following this order:
+
+1. **Self-introduction in transcript.** Scan for "I'm <name>", "my name is
+   <name>", "this is <name>", "<name> here". Capture all distinct names.
+2. **On-screen banners / lower-thirds.** Read frames for nameplates, intro
+   cards, Zoom/Meet participant tiles, or any text bearing a person's name
+   (often with a role/title underneath). Capture all distinct names.
+3. **Channel as personal brand.** If the channel name looks like a personal
+   brand (single person, e.g. "Web Dev Cody", "Theo - t3.gg") and no other
+   names were detected, treat the channel name as the speaker.
+4. **Multi-speaker recordings.** All-hands, panels, podcasts, interviews: emit
+   every speaker you can identify from steps 1 and 2. Do not collapse to a
+   single name. No cap - list all detected speakers.
+5. **Faceless / anonymous narration.** If no name surfaces from any source
+   (slide decks with VO, no banner, no self-intro, channel is not a personal
+   brand), **omit the Speaker / Speakers line entirely**. Do not emit
+   placeholder text like "(unknown)", "(narrator)", "(channel
+   representative)", "(presenter not introduced)" - just leave the line
+   out of the Source block.
+
+Attach role/title (e.g. "CEO", "Engineering Manager") only when a banner or
+explicit self-introduction provides it. Do not infer roles.
+
 Then produce a summary in this exact shape:
 
 ```markdown
+## Source
+
+- Title: <title from report>
+- Channel: <channel from report; omit line if missing - local file with no
+  channel>
+- Speaker: <ACTUAL PERSON NAME, optionally with " - <role>">
+  OR
+- Speakers:
+  - <name> - <role/title if known>
+  - <name>
+
+  **STRICT:** the Speaker / Speakers line carries a real human name only.
+  - Use inline `Speaker:` for one named person.
+  - Use the `Speakers:` list for 2+ named people.
+  - If no human name was identified from self-introduction or on-screen
+    banner, **omit the line entirely**. Do NOT write things like
+    "Speaker: channel representative", "Speaker: Better Stack",
+    "Speaker: unknown", "Speaker: presenter not introduced",
+    "Speaker: (not introduced by name)", "Speaker: narrator". A channel
+    name is NOT a person name (exception: personal-brand channels per
+    step 3 of the inference rules above).
+
+  Concrete refusal example for an anonymous-narration video:
+
+  Correct (line is absent):
+
+  ```
+  - Title: Lightpanda overview
+  - Channel: Better Stack
+  - URL: https://...
+  - Published: 2026-04-28
+  - Duration: 05:35
+  ```
+
+  Wrong (placeholder inserted):
+
+  ```
+  - Title: Lightpanda overview
+  - Channel: Better Stack
+  - Speaker: (not introduced by name)   <- DO NOT WRITE THIS
+  - URL: https://...
+  ```
+- URL: <Video URL from report if present, else the local file path from Source>
+- Published: <YYYY-MM-DD from report; omit if missing - local file>
+- Duration: <duration from report>
+
 ## TLDR
 
 <one sentence, the answer the viewer came for>
@@ -134,8 +260,9 @@ Then produce a summary in this exact shape:
 ## Verdict
 
 <honest read vs the title; for comparisons, state the winner and why; flag
-clickbait or buried caveats. Required: state the publisher relationship
-classification from check 1 - one short clause is enough.>
+clickbait or buried caveats. Required: state the **credibility risk**
+(low/medium/high/inconclusive) from check 1 with one-clause justification,
+plus the optional context note if applicable.>
 
 ## Summary
 

@@ -2,7 +2,7 @@
 # Cache-aware orchestrator: download → frames → transcribe → summarize.
 #
 # Composes bin/watch.sh + bin/summarize.sh. Two layers of cache:
-#   - pipeline cache (watch.sh): report.md, frames, transcript, metrics.json
+#   - pipeline cache (watch.sh): pre-summary-context.md, frames, transcript, metrics.json
 #   - summary cache (this script): summary.md (includes timings/cost table)
 # Re-running on the same source replays summary.md with no LLM call.
 #
@@ -10,7 +10,8 @@
 #   bash run.sh <url-or-path> [watch.sh flags] [--refresh-summary]
 #
 # Flags forwarded to watch.sh: --max-frames, --height, --fps,
-#   --start, --end, --language, --refresh
+#   --start, --end, --language, --refresh, --refresh-download,
+#   --refresh-frames, --refresh-transcript
 # Local flag:
 #   --refresh-summary    re-run summarize.sh, ignore cached summary.md
 #                        (use when video-summary-prompt.md changed)
@@ -54,20 +55,46 @@ if [[ -z "${WORK_DIR}" || ! -d "${WORK_DIR}" ]]; then
 fi
 
 SUMMARY="${WORK_DIR}/summary.md"
+UNREADABLE_FILE="${WORK_DIR}/frames_unreadable.txt"
+
+# Surface FRAMES_UNREADABLE on stderr so the parent agent can detect escalation.
+# Signal is persisted in a sidecar file (not in summary.md) so it survives
+# cache replay without bleeding into user-facing output.
+emit_unreadable_signal() {
+  if [[ -s "${UNREADABLE_FILE}" ]]; then
+    echo "[video-summary] $(cat "${UNREADABLE_FILE}")" >&2
+    echo "[video-summary] re-run with --refresh --height 720 (or 1080) to escalate" >&2
+  fi
+}
 
 # Summary cache hit: replay unchanged.
 if [[ "${REFRESH_SUMMARY}" -eq 0 && -f "${SUMMARY}" ]]; then
   echo "[video-summary] summary cache hit: ${SUMMARY}" >&2
+  emit_unreadable_signal
   cat "${SUMMARY}"
   exit 0
 fi
 
 # Cache miss: run summarize.sh, then assemble summary.md with metrics table.
-SUMMARY_TEXT="$(printf '%s\n' "${REPORT}" |
+SUMMARY_RAW="$(printf '%s\n' "${REPORT}" |
   bash "${SCRIPT_DIR}/summarize.sh" "${WORK_DIR}")"
+
+# Extract the FRAMES_UNREADABLE line into a sidecar (escalation signal) and
+# strip both that line and the WORK_DIR line from user-facing summary output.
+rm -f "${UNREADABLE_FILE}"
+unreadable_line="$(printf '%s\n' "${SUMMARY_RAW}" | grep -E '^FRAMES_UNREADABLE:' | head -n1 || true)"
+if [[ -n "${unreadable_line}" ]]; then
+  printf '%s\n' "${unreadable_line}" >"${UNREADABLE_FILE}"
+fi
+SUMMARY_TEXT="$(printf '%s\n' "${SUMMARY_RAW}" | grep -vE '^(FRAMES_UNREADABLE:|WORK_DIR:)' || true)"
 
 METRICS="${WORK_DIR}/metrics.json"
 CLAUDE_METRICS="${WORK_DIR}/claude_metrics.json"
+
+if [[ ! -f "${METRICS}" || ! -f "${CLAUDE_METRICS}" ]]; then
+  echo "[video-summary] metrics missing - stale cache dir (re-run with --refresh)" >&2
+  exit 1
+fi
 
 format_secs() {
   awk -v s="$1" 'BEGIN {
@@ -77,21 +104,33 @@ format_secs() {
   }'
 }
 
+format_stage() {
+  # format_stage <seconds> <cached:true|false>
+  if [[ "$2" == "true" ]]; then
+    printf 'cached'
+  else
+    format_secs "$1"
+  fi
+}
+
 PIPE_DOWNLOAD_S="$(jq -r '.download_s' "${METRICS}")"
+PIPE_DOWNLOAD_CACHED="$(jq -r '.download_cached // false' "${METRICS}")"
 PIPE_FRAMES_S="$(jq -r '.frames_s' "${METRICS}")"
+PIPE_FRAMES_CACHED="$(jq -r '.frames_cached // false' "${METRICS}")"
 PIPE_TRANSCRIBE_S="$(jq -r '.transcribe_s' "${METRICS}")"
+PIPE_TRANSCRIBE_CACHED="$(jq -r '.transcribe_cached // false' "${METRICS}")"
 PIPE_FRAMES="$(jq -r '.frame_count' "${METRICS}")"
 PIPE_VIDEO_S="$(jq -r '.video_duration_s // empty' "${METRICS}")"
 PIPE_TR_SOURCE="$(jq -r '.transcript_source' "${METRICS}")"
 
-CLAUDE_COST="$(jq -r '.cost_usd' "${CLAUDE_METRICS}")"
-CLAUDE_IN="$(jq -r '.input_tokens' "${CLAUDE_METRICS}")"
-CLAUDE_OUT="$(jq -r '.output_tokens' "${CLAUDE_METRICS}")"
-CLAUDE_CR="$(jq -r '.cache_read_tokens' "${CLAUDE_METRICS}")"
-CLAUDE_CC="$(jq -r '.cache_create_tokens' "${CLAUDE_METRICS}")"
-CLAUDE_MS="$(jq -r '.duration_ms' "${CLAUDE_METRICS}")"
+CLAUDE_COST="$(jq -r '.cost_usd // 0' "${CLAUDE_METRICS}")"
+CLAUDE_IN="$(jq -r '.input_tokens // 0' "${CLAUDE_METRICS}")"
+CLAUDE_OUT="$(jq -r '.output_tokens // 0' "${CLAUDE_METRICS}")"
+CLAUDE_CR="$(jq -r '.cache_read_tokens // 0' "${CLAUDE_METRICS}")"
+CLAUDE_CC="$(jq -r '.cache_create_tokens // 0' "${CLAUDE_METRICS}")"
+CLAUDE_MS="$(jq -r '.duration_ms // 0' "${CLAUDE_METRICS}")"
 CLAUDE_S=$((CLAUDE_MS / 1000))
-CLAUDE_TURNS="$(jq -r '.num_turns' "${CLAUDE_METRICS}")"
+CLAUDE_TURNS="$(jq -r '.num_turns // 0' "${CLAUDE_METRICS}")"
 
 T_TOTAL=$((T_PIPELINE + CLAUDE_S))
 
@@ -119,10 +158,11 @@ T_TOTAL=$((T_PIPELINE + CLAUDE_S))
   [[ -n "${PIPE_VIDEO_S}" ]] && echo "- Video duration: $(format_secs "${PIPE_VIDEO_S}")"
   echo "- Total wall time: $(format_secs "${T_TOTAL}")"
   echo "- Pipeline (watch.sh): $(format_secs "${T_PIPELINE}")"
-  echo "  - Download: $(format_secs "${PIPE_DOWNLOAD_S}")"
-  echo "  - Frame extraction: $(format_secs "${PIPE_FRAMES_S}") (${PIPE_FRAMES} frames)"
-  echo "  - Transcribe (${PIPE_TR_SOURCE}): $(format_secs "${PIPE_TRANSCRIBE_S}")"
+  echo "  - Download: $(format_stage "${PIPE_DOWNLOAD_S}" "${PIPE_DOWNLOAD_CACHED}")"
+  echo "  - Frame extraction: $(format_stage "${PIPE_FRAMES_S}" "${PIPE_FRAMES_CACHED}") (${PIPE_FRAMES} frames)"
+  echo "  - Transcribe (${PIPE_TR_SOURCE}): $(format_stage "${PIPE_TRANSCRIBE_S}" "${PIPE_TRANSCRIBE_CACHED}")"
   echo "- Summarize (claude haiku): $(format_secs "${CLAUDE_S}")"
 } >"${SUMMARY}"
 
+emit_unreadable_signal "${SUMMARY}"
 cat "${SUMMARY}"
