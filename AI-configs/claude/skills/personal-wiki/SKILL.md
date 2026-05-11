@@ -37,27 +37,32 @@ Examples:
 - `health/nutrition/`
 - `culture/books/`
 
-### Media and entertainment
+### Nested entities
 
-Games, books, movies, shows, music, etc. add a franchise/series level when
-multiple titles exist:
+When a topic contains a parent entity with multiple sibling pages (a product,
+franchise, series, person, tool), add a subfolder for the entity:
 
 ```
-<media-type>/<franchise-or-series>/<title-slug>/<title-slug>-<topic>.md
+<category>/<topic>/<entity>/<slug>.md
 ```
 
-Topic files prefix the title slug so filenames are unique vault-wide (Obsidian
-wikilinks resolve by filename only). Examples:
+- `<entity>` is the shared parent: `claude-code`, `resident-evil-4-remake`,
+  `andrej-karpathy`, `neovim-lsp`.
+- `<slug>` must be globally unique vault-wide on its own. Research-style slugs
+  usually are already (`claude-opus-4-7-effort-levels`, not `effort-levels`).
+- Do not repeat the entity in the slug.
+- Flatten when only one entity exists under the topic. Promote to nested form
+  later when siblings appear.
 
-- `games/resident-evil/resident-evil-2-remake/resident-evil-2-remake-cheat-sheet.md`
-- `shows/breaking-bad/breaking-bad/breaking-bad-characters.md`
+Examples:
 
-Flatten when only one title exists (e.g. `movies/oppenheimer/`). Promote to
-franchise-nested form later if siblings appear.
+- `technology/ai-coding-agents/claude-code/claude-opus-4-7-effort-levels.md`
+- `games/resident-evil/resident-evil-4-remake/resident-evil-4-remake-cheat-sheet.md`
+- `shows/breaking-bad/walter-white.md`
 
 For ordered content (puzzles, episodes, chapters), list entries in
-in-game/in-story order. Use tables when values differ by difficulty,
-playthrough, or randomized per save.
+in-story order. Use tables when values differ by difficulty, playthrough, or
+randomised per save.
 
 ## Frontmatter
 
