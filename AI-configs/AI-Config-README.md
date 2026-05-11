@@ -67,6 +67,56 @@ Notes:
   `~/.codex/skills` is a symlink into the repo, that folder lands inside
   `AI-configs/claude/skills/.system/` and is gitignored.
 
+## pi
+
+Pi reads `AGENTS.md` natively. Slash commands live in `~/.pi/agent/prompts/`
+(filename = command name). Skills reused from the Claude tree. Pi-specific
+config (settings, mcp, extensions) lives under `AI-configs/pi/`.
+
+Install:
+
+```bash
+pnpm add -g @earendil-works/pi-coding-agent
+pi install npm:pi-mcp-adapter
+pnpm add -g pi-acp
+```
+
+Symlink:
+
+```bash
+mkdir -p ~/.pi/agent/extensions
+
+ln -s $(pwd)/AI-configs/base-ai-instructions.md     ~/.pi/agent/AGENTS.md
+ln -s $(pwd)/AI-configs/claude/skills               ~/.pi/agent/skills
+ln -s $(pwd)/AI-configs/claude/commands             ~/.pi/agent/prompts
+
+ln -s $(pwd)/AI-configs/pi/agent/settings.json      ~/.pi/agent/settings.json
+ln -s $(pwd)/AI-configs/pi/agent/mcp.json           ~/.pi/agent/mcp.json
+ln -s $(pwd)/AI-configs/pi/agent/mcp-work.json      ~/.pi/agent/mcp-work.json
+ln -s $(pwd)/AI-configs/pi/agent/mcp-personal.json  ~/.pi/agent/mcp-personal.json
+```
+
+Auth lives outside dotfiles (OAuth tokens written by `/login`, not git-safe).
+Symlink from the private OneDrive vault:
+
+```bash
+ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-auth.json \
+  ~/.pi/agent/auth.json
+ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-mcp-oauth \
+  ~/.pi/agent/mcp-oauth
+```
+
+Notes:
+
+- `scoped-mcp.ts` exists in the repo but is left unlinked. Picks `mcp-work.json`
+  under `~/work/*` and `mcp-personal.json` under `~/projects/*`, writes a
+  `.pi/mcp.json` symlink in the project. Enable only when per-folder MCP scoping
+  is needed; add `.pi/` to global gitignore first.
+- `terse-nudge.ts` exists in the repo but is left unlinked. Enable only if drift
+  appears in long sessions.
+- Pi rewrites `settings.json` (e.g., `lastChangelogVersion`) at runtime; expect
+  occasional staged diffs.
+
 ## crush AI cli
 
 https://github.com/charmbracelet/crush

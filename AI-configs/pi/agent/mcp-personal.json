@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "notion-personal": {
+      "url": "https://mcp.notion.com/mcp",
+      "auth": "oauth"
+    }
+  }
+}
