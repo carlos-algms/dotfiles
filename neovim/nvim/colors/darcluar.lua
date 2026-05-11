@@ -31,6 +31,10 @@ local pallet = {
 local theme = {
     ---@type table<string, vim.api.keyset.highlight>
     highlights = {
+        ["@markup.raw.markdown_inline"] = {
+            bg = pallet.gutter,
+            fg = pallet.fg,
+        },
         ["@markup.strong.markdown_inline"] = {
             bold = true,
             fg = pallet.keyword,
@@ -93,7 +97,7 @@ local theme = {
         ["@constructor.lua"] = "Identifier",
         ["@constructor.php"] = "@function",
         ["@constructor"] = "@function",
-        ["@delimiter.markdown_inline"] = "@keyword",
+        ["@delimiter.markdown_inline"] = "Comment",
         ["@fenced_code_block.markdown"] = "Keyword", -- the ``` blocks
         ["@function.builtin.php"] = "@keyword",
         ["@function.builtin"] = "@function",
@@ -134,7 +138,6 @@ local theme = {
         ["@markup.quote.markdown"] = "@none",
         ["@markup.raw.block.markdown"] = "@none",
         ["@markup.raw.delimiter.markdown"] = "Keyword",
-        ["@markup.raw.markdown_inline"] = "Bold",
         ["@markup.strong"] = "@none",
         ["@module.builtin.lua"] = "@identifier",
         ["@property.css"] = "@identifier",
