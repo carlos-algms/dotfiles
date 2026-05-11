@@ -23,6 +23,24 @@ front.
 
 Wait for confirm/extend, then proceed to the first question.
 
+## Subset selection
+
+User invokes grill-me on a specific subset of items ("grill me on 2, 3, 5",
+"only items 1 and 4", "skip the rest"): ack the subset on the first turn,
+state the locked items inline, and ONLY open branches for the requested
+items. Do not silently grill the full list.
+
+Ack format:
+
+```markdown
+Locked (no grilling): <list of accepted items with one-line summary each>.
+
+Branches to grill: <subset topics>
+```
+
+If the user mixes "agree" / "lock" / "yes" with specific numbers in their
+trigger message, treat unmentioned items as locked-accepted, not pending.
+
 ## Format
 
 One question per turn, numbered **Q1**, **Q2**... sequentially. Never reuse,
@@ -57,6 +75,40 @@ Max 4 blocks per turn, back-to-back, no section labels or bold prefixes:
 
 Gather context first: read code, docs, web. Surface options the user hasn't
 considered. If only one path visible, look harder or state why none exists.
+
+### Pre-emit option gate
+
+Before emitting an A/B/C block, run this check on each option:
+
+1. Is there a plausible reader for whom this option is the best choice?
+2. Does it dominate (or is dominated by) another option on every axis?
+3. Was it added because the count "should" be 2-3, or because it's real?
+
+Drop any option that fails #1 or is dominated on every axis per #2. Better
+to ask a yes/no than to pad with strictly-worse alternatives.
+
+Red flags during generation: "skip - already working", "padding item", "for
+completeness", "marginal gain". If the rationale for an option includes
+those, the option is filler. Cut it.
+
+### Verify-before-recommend for external tools
+
+When a recommendation references external CLI behavior, file-format
+specifics, library semantics, or any claim that depends on a fact outside
+the conversation, the recommendation MUST be backed by an actual tool
+invocation in the same turn - not training-data recall.
+
+Verification target depends on the claim type:
+
+- Claim about a CLI flag or option: invoke the CLI's help or run it with
+  the flag.
+- Claim about file naming or output format: produce a sample output and
+  inspect it.
+- Claim about library behavior or version: read the relevant source or
+  doc, or write a probe.
+
+If verification is impractical (slow, network-dependent, destructive), say
+so in the recommendation: `Recommendation: A (assumed; verify with X)`.
 
 ## Answers found in code
 
@@ -108,6 +160,20 @@ After the user answers, single line before the next **Q<n>**:
 
 No status block, no totals.
 
+### Cascade check after every answer
+
+After every ack (not only user-triggered revisits), scan all still-open
+questions. For each, ask: "does the just-locked answer make this question
+moot, redundant, or invalidate its premise?"
+
+If yes, emit the count-change block (see "Question count" section) marking
+those questions `⊘` BEFORE asking the next question. Do not silently grill
+a question whose premise was just removed.
+
+A common trigger: a question closes by rejecting an entire feature or
+component. Any later question whose premise depends on that component now
+needs to be marked moot.
+
 ## Question count (only on count change)
 
 Show ONLY when open count changes (added, moot, merged). A normal answer that
@@ -146,7 +212,9 @@ Detect at session start. If unsure, ask once then commit.
 When you think the tree is resolved, do NOT ask the user "any open branches?" -
 detecting open branches is your job, not theirs.
 
-Self-audit the transcript before closing:
+Self-audit before closing - TWO passes:
+
+**Pass 1: transcript-internal**
 
 - Assumptions made without confirmation
 - Claims not verified against code or docs
@@ -154,7 +222,41 @@ Self-audit the transcript before closing:
 - Sub-questions that opened but never got asked
 - Recommendations the user accepted with caveats
 
-If anything surfaces, list every open branch (one line each) and keep grilling:
+**Pass 2: cross-check locked decisions against current code/docs**
+
+For each locked decision that names a file, function, flag, format, or
+external CLI behavior, verify it still holds NOW:
+
+- File / line cited: confirm the file exists and the content matches.
+- Flag / option named: grep for the flag in the relevant tool's help or
+  source.
+- External behavior assumed: same rule as the pre-emit verify gate -
+  invoke the actual tool if practical.
+
+**Pass 3: pairwise cross-check between locked decisions**
+
+Iterate every pair of locked decisions (Q<i>, Q<j>) and ask:
+
+- **Conflict**: do they contradict each other? One forbids what the other
+  requires, or sets incompatible defaults.
+- **Invalidation**: does one make the other moot or unnecessary? If
+  caught here, the earlier moot detection failed - flag it.
+- **New branch**: does the combination of both decisions open a question
+  neither addresses alone? Composition creates emergent behavior the
+  pieces did not anticipate.
+- **Shared surface**: do both touch the same file/function/state and
+  require coordinated edits? Confirm the integration plan is explicit.
+
+For every conflict, invalidation, or new branch found, do NOT silently
+adjust. Surface it as a new question, reopen the affected Q, and grill
+the resolution before closing.
+
+A decision that LOOKED right when locked may have been invalidated by a
+later answer or by interaction with another decision. Pass 3 is your last
+chance to catch it before the user implements.
+
+If any pass surfaces anything, list every open branch (one line each) and
+keep grilling:
 
 ```markdown
 Open branches found:
