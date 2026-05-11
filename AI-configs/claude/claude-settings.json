@@ -20,6 +20,7 @@
       "Bash(git rev-parse:*)",
       "Bash(git status:*)",
       "Bash(head:*)",
+      "Bash(jq:*)",
       "Bash(ls:*)",
       "Bash(nvim:*)",
       "Bash(obsidian files:*)",
@@ -44,6 +45,18 @@
     "defaultMode": "default"
   },
   "model": "opus[1m]",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/terse-nudge.sh"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
@@ -72,21 +85,10 @@
       "autoUpdate": true
     }
   },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/terse-nudge.sh"
-          }
-        ]
-      }
-    ]
-  },
   "alwaysThinkingEnabled": false,
   "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim",
-  "preferredNotifChannel": "notifications_disabled"
+  "preferredNotifChannel": "notifications_disabled",
+  "skipAutoPermissionPrompt": true
 }
