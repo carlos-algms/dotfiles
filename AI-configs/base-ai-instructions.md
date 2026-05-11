@@ -345,6 +345,9 @@ In projects with tests:
 - **On commit, stage, or message intent**:
   1. Load `git-commit-message` skill.
   2. Apply its format, staging flow, and show-then-commit visibility gate.
+- Multiple `gh` accounts (work + personal). Before any `gh` write
+  (PR/comment/review/issue), run `gh auth status`, switch with
+  `gh auth switch --user <login>` if wrong. No restore.
 
 # Package manager
 
