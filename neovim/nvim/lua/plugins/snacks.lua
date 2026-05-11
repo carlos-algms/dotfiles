@@ -146,8 +146,8 @@ local M = {
                     "webp",
                 },
                 doc = {
-                    enabled = false,
-                    inline = false,
+                    enabled = true,
+                    inline = true,
                     float = true,
                 },
             },
