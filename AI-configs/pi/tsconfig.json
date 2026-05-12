@@ -17,15 +17,18 @@
     "noEmit": true,
     "isolatedModules": true,
     "types": ["node"],
-    "typeRoots": ["../../../../../.local/share/pnpm/global/5/node_modules/@types"],
+    "typeRoots": ["../../../../.local/share/pnpm/global/5/node_modules/@types"],
     "paths": {
       "@earendil-works/pi-coding-agent": [
-        "../../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent"
+        "../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent"
       ],
       "@earendil-works/pi-coding-agent/*": [
-        "../../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent/*"
+        "../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent/*"
+      ],
+      "typebox": [
+        "../../../../.local/share/pnpm/global/5/.pnpm/typebox@1.1.38/node_modules/typebox"
       ]
     }
   },
-  "include": ["**/*.ts"]
+  "include": ["extensions/**/*.ts", "extensions-disabled/**/*.ts"]
 }
