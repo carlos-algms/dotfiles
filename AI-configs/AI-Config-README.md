@@ -84,7 +84,7 @@ pnpm add -g pi-acp
 Symlink:
 
 ```bash
-mkdir -p ~/.pi/agent/extensions
+mkdir -p ~/.pi/agent
 
 ln -s $(pwd)/AI-configs/base-ai-instructions.md     ~/.pi/agent/AGENTS.md
 ln -s $(pwd)/AI-configs/claude/skills               ~/.pi/agent/skills
@@ -94,6 +94,18 @@ ln -s $(pwd)/AI-configs/pi/agent/settings.json      ~/.pi/agent/settings.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp.json           ~/.pi/agent/mcp.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp-work.json      ~/.pi/agent/mcp-work.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp-personal.json  ~/.pi/agent/mcp-personal.json
+
+ln -s $(pwd)/AI-configs/pi/extensions               ~/.pi/agent/extensions
+```
+
+The whole `extensions/` dir is linked, so every extension in it auto-loads.
+Extensions kept in the repo but intentionally inactive live in
+`AI-configs/pi/extensions-disabled/` (not symlinked, invisible to pi).
+
+`web_fetch` needs `defuddle` on `PATH`:
+
+```bash
+pnpm install -g defuddle
 ```
 
 Auth lives outside dotfiles (OAuth tokens written by `/login`, not git-safe).
@@ -108,12 +120,6 @@ ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-mcp-oauth \
 
 Notes:
 
-- `scoped-mcp.ts` exists in the repo but is left unlinked. Picks `mcp-work.json`
-  under `~/work/*` and `mcp-personal.json` under `~/projects/*`, writes a
-  `.pi/mcp.json` symlink in the project. Enable only when per-folder MCP scoping
-  is needed; add `.pi/` to global gitignore first.
-- `terse-nudge.ts` exists in the repo but is left unlinked. Enable only if drift
-  appears in long sessions.
 - Pi rewrites `settings.json` (e.g., `lastChangelogVersion`) at runtime; expect
   occasional staged diffs.
 
