@@ -8,7 +8,7 @@ export default function (pi: ExtensionAPI) {
     const messages = event.messages;
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i];
-      if (m.role !== 'user') continue;
+      if (!m || m.role !== 'user') continue;
 
       const tag = `\n\n<system-reminder>\n${REMINDER}\n</system-reminder>`;
 
