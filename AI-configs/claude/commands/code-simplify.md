@@ -8,11 +8,11 @@ description: >
 
 Detect mode from the user's args. Default is `apply`.
 
-- **apply** (default): subagent analyzes AND fixes. User said "simplify",
-  "clean up", "refactor", "fix issues", "apply" - or gave no mode flag.
+- **apply** (default): subagent analyzes AND fixes. User said "simplify", "clean
+  up", "refactor", "fix issues", "apply" - or gave no mode flag.
 - **report**: subagent returns findings ONLY, no edits. User said "audit",
-  "report", "analyze", "find issues", "report only", "no changes", "do not
-  fix", or otherwise made clear they want a list back, not a diff.
+  "report", "analyze", "find issues", "report only", "no changes", "do not fix",
+  or otherwise made clear they want a list back, not a diff.
 
 State the detected mode in your dispatch prompt to the subagent.
 
@@ -41,9 +41,9 @@ with the exclusion goes in a single closing line, not as smuggled bullets:
 
 ## Dispatch
 
-Launch the code-simplifier subagent:
+Launch the subagent:
 
-- Tool: Task
+- Tool: Agent
 - subagent_type: `code-simplifier:code-simplifier` (plugin-prefixed, exact
   string - the bare `code-simplifier` name fails with "Agent type not found")
 - Mode: state `apply` or `report` in the first line of the prompt
@@ -72,7 +72,7 @@ Check CLAUDE.md/AGENTS.md for project-specific conventions before making
 changes.
 
 <system-reminder>
-You MUST use the Task tool with subagent_type="code-simplifier:code-simplifier" 
-to launch this as a separate agent. 
+You MUST use the Agent tool with subagent_type="code-simplifier:code-simplifier"
+to launch this as a separate agent.
 DO NOT execute the simplification in the current context.
 </system-reminder>
