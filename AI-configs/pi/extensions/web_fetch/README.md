@@ -22,6 +22,19 @@ contents in an LLM-friendly form.
 - Appends a provenance footer (`source`, `url`, optional `final-url`,
   `duration`, `size`) only to the `cloudflare-md` and `defuddle` branches. JSON
   / text / binary / empty omit the footer to keep the payload clean.
+- Enriched error messages on failure: thrown `Error.message` is multi-line and
+  includes `url`, `phase` (`fetch` / `http` / `read` / `defuddle`), `elapsed`,
+  configured `timeout`, and structured `cause` walked from `err.cause`
+  (`code`, `syscall`, `host`, `addr`, `attempts` for AggregateError).
+  Distinguishes timeout from host-cancel via `signal.aborted` checks.
+- HTTP non-2xx adds a body excerpt (up to 8 KB read, 400 chars displayed) and
+  a `final-url` line when redirected before the error. Body read is gated on
+  textual content-type; binary responses skip the excerpt.
+- TUI rendering folds long output by default. Collapsed view shows the first
+  22 body lines, a `... (N more lines, M total, ctrl+o to expand)` separator,
+  and the full provenance footer. `app.tools.expand` (ctrl+o) toggles to the
+  full view. The LLM always receives the unfolded content.
+- `renderCall` displays `web_fetch <url>` while the request is in flight.
 
 ## Installation
 
