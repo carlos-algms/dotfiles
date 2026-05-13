@@ -1,11 +1,20 @@
 ---
 name: typescript-and-javascript
-description:
-  Writes TypeScript and JavaScript code following best practices and style
-  rules. Use when writing TS/JS code or reviewing code style.
+description: >
+  Enforces strict TypeScript and JavaScript style policies for ALL
+  .ts/.tsx/.js/.jsx file operations. Use when creating, writing, or editing ANY
+  TS/JS code. Triggers include: components, hooks, services, utilities, classes,
+  interfaces, types, schemas, tests, scripts, configuration files, or any
+  agent-authored TS/JS content.
 ---
 
 # TypeScript/JavaScript Protocol
+
+General typescript and javascript rules, lower priority over project's local
+rules.
+
+If possible merge rules and follow all of them, if conflicting, prefer project's
+local rules.
 
 ## Type Checking
 
@@ -32,7 +41,10 @@ pnpm tsc --noEmit
 - `import type` for type-only imports
 - Always use curly braces for `if`
 - Never barrel exports in index.ts (harms tree-shaking)
-- Never write code in index.ts(x) — use specific names
+- Never write code in index.ts(x) — use specific names. Exception:
+  framework-dictated entry-points that requires `index.ts`, but in this case try
+  to use it as a coordinator and delegate to other files to increase
+  discoverability
 - `satisfies never` in switch default for exhaustiveness
 - `satisfies <Type>` over type casting for traceability
 
