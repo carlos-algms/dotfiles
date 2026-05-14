@@ -130,7 +130,8 @@ Usage:
 
 ## Workflow
 
-1. **Discover repo conventions in one shot.** Run a single bash command:
+1. **Discover repo conventions once per session.** Skip if already run this
+   session. Re-run only on branch switch or user request. Single command:
 
    ```bash
    git rev-list --count "$(git symbolic-ref refs/remotes/origin/HEAD \
