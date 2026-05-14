@@ -230,10 +230,17 @@ Four-line summary. Concrete rules live in the sections referenced.
 
 1. **Think before coding.** State assumptions, ask when unclear, push back with
    evidence. Detail: Persona, Question vs. order, composition rule 1.
-2. **Simplicity first.** Minimum code, no speculative features. Detail: YAGNI.
+2. **Simplicity first.** Minimum code, no speculative features. Detail: YAGNI,
+   sub-rules below.
 3. **Surgical changes.** Touch only what the request demands. Sub-rules below.
 4. **Goal-driven execution.** Define verifiable success, loop until met. Detail:
    Code changes / TDD. Multi-step tasks: sub-rules below.
+
+## Simplicity first (sub-rules)
+
+- Before writing a helper or repeating a pattern, search the codebase for
+  existing functionality. Reuse beats reinvent, even when the existing helper
+  needs a small extension.
 
 ## Goal-driven execution (sub-rules)
 
@@ -263,6 +270,10 @@ constant clarification.
 - Your changes orphan an import/var/fn: remove it. Pre-existing dead code: ask
   before removing.
 - Test: every changed line traces to the user request.
+- After a surgical edit, scan peer methods in the same class for ordering parity
+  on shared collaborators (state mutation + render/callback/emit). Mismatch =
+  bug, or needs a comment justifying the asymmetry. Surgical scope hides
+  cross-sibling contracts; this check restores them.
 
 # Internet research
 
@@ -289,7 +300,7 @@ sources. Never guess, never assume - fact-check before answering.
 - Don't read lock files (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`,
   `bun.lock`). Huge, useless.
 
-# Search and discovery
+# Search, Exploration and Discovery
 
 - **FORBIDDEN** discovery/search shell commands:
   - **NEVER** `find`. Use `fd --hidden`.
@@ -309,11 +320,24 @@ sources. Never guess, never assume - fact-check before answering.
 
 In projects with tests:
 
-1. **Red**: write failing test reproducing bug or validating behavior.
-2. **Green**: minimum code to pass.
-3. Run full suite. Confirm fix and no regressions.
+1. **Bootstrap**: before writing the test, create everything the test needs to
+   run without runtime/compile errors:
+   - Target function, method, class, module, or component exists (empty/stub
+     body is fine, return type matches signature).
+   - Imports resolve. Types compile. Files exist at expected paths.
+   - Fixtures, factories, mocks, test IDs, DOM nodes, routes, env vars in place.
+2. **Red (loop)**: write the assertion. Run. Inspect failure reason.
+   - Wrong reason (`ReferenceError`, `TypeError`, `ModuleNotFound`, syntax
+     error, missing file, "element not found", null ref before assertion,
+     compile error): fix bootstrap or test setup. Re-run. Repeat.
+   - Right reason (value mismatch, event not fired, UI didn't change, state
+     wrong): proceed.
+   - Never patch the assertion to dodge a wrong-reason failure.
+3. **Green**: minimum code to pass.
+4. Run full suite. Confirm fix and no regressions.
 
-- Never skip step 1.
+- Never skip step 1 or 2. Stay in the red loop until failure reason is the
+  expectation, not infra/runtime/types.
 - No test infra: ask before adding.
 
 ## Respect user changes
@@ -369,3 +393,6 @@ Before `pnpm`/`npm`/`npx`:
 - Data/text processing (not file editing): prefer `sed`, `awk`, `jq`, bash over
   python/node.
 - Individual commands over `&&` chains. Per-command output tracking.
+- **NEVER** run `cd` prefix when already in target cwd. Each bash call inherits
+  the current cwd; prepending `cd /path && cmd` adds noise without effect. Only
+  `cd` when actually changing directory for that command.
