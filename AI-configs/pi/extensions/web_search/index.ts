@@ -15,7 +15,7 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
     name: 'web_search',
     label: 'Web Search',
     description:
-      'Search the web across multiple providers (LangSearch, Tavily, Exa, Marginalia) ' +
+      'Search the web across multiple providers (LangSearch, Tavily, Exa, Brave, Marginalia) ' +
       'in parallel, dedupe by URL, and return markdown-formatted results with per-result ' +
       'source tags. Runs the top 2 priority backends by default; falls through to lower ' +
       'priority on quota exhaustion or failure. Provide `provider` to force a single ' +
@@ -27,7 +27,7 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
       'Set `provider` on web_search only when comparing a known backend or when one backend uniquely suits the query (e.g. Marginalia for indie blogs, Exa for semantic / find-similar). Default fan-out covers most queries.',
       'Read result snippets before calling web_fetch. Skip web_fetch when the snippet answers the query.',
       'Use `gh` for github.com lookups. web_search is for open-ended web research, not direct-source fetches.',
-      'Provider overrides: `tavily` general web + RAG retrieval; `exa` semantic, find-similar, example URL; `langsearch` Bing-derived broad search; `marginalia` indie web and small blogs, skip for news.',
+      'Provider overrides: `tavily` general web + RAG retrieval; `exa` semantic, find-similar, example URL; `brave` independent (non-Google/Bing) index, mainstream English queries; `langsearch` Bing-derived broad search; `marginalia` indie web and small blogs, skip for news.',
     ],
     parameters: Type.Object({
       query: Type.String({

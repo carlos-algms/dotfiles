@@ -1,3 +1,4 @@
+import { brave } from './backends/brave';
 import { exa } from './backends/exa';
 import { langsearch } from './backends/langsearch';
 import { marginalia } from './backends/marginalia';
@@ -7,6 +8,7 @@ import type { BackendName, SearchBackend } from './types';
 export const PRIORITY_ORDER: BackendName[] = [
   'exa',
   'tavily',
+  'brave',
   'langsearch',
   'marginalia',
 ];
@@ -17,6 +19,7 @@ const ALL: Record<BackendName, SearchBackend> = {
   langsearch,
   tavily,
   exa,
+  brave,
   marginalia,
 };
 

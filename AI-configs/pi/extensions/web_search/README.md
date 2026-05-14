@@ -5,14 +5,17 @@ post-pass, returns markdown + provenance footer.
 
 ## Behaviour
 
-- `PRIORITY_ORDER = [exa, tavily, langsearch, marginalia]` (`registry.ts`).
+- `PRIORITY_ORDER = [exa, tavily, brave, langsearch, marginalia]`
+  (`registry.ts`).
 - `DEFAULT_PARALLEL = 2`. Quota-blocked/errored backends auto-promote next in
   queue until 2 OK or queue empty.
 - `provider` param forces single backend; on failure falls through to queue,
   footer reports bypass.
 - Dedupe normalises URL: strip `utm_*`/`gclid`/`fbclid`, sort remaining params,
   drop fragment, trim trailing `/`. Scheme/host NOT normalised. Same URL from 2
-  backends -> `sources: [exa, tavily]`.
+  backends -> `sources: [exa, tavily]`. Snippets concatenated with `\n\n---\n\n`
+  (skip if already a substring of existing). Haiku post-pass dedupes overlapping
+  prose.
 - ai-summary: Haiku 4.5 pass filters, ranks, rewrites bodies. On failure -> raw
   `formatResults`. Footer: `ai-summary: ok | fallback (raw results)`.
 - Output: `## Result N: <title>` + `- URL:` + `- provider:` + blank + body.
@@ -23,18 +26,22 @@ post-pass, returns markdown + provenance footer.
 
 ## Backends and quotas
 
-| Backend    | Endpoint                                | Auth              | Code quotas (`usage.ts`)                |
-| ---------- | --------------------------------------- | ----------------- | --------------------------------------- |
-| Exa        | `POST api.exa.ai/search`                | `x-api-key`       | monthly 1000, RPM 600                   |
-| Tavily     | `POST api.tavily.com/search`            | `api_key` in body | monthly 500, RPM 100 (advanced=2cr/req) |
-| LangSearch | `POST api.langsearch.com/v1/web-search` | `Bearer`          | daily 1000, RPM 60                      |
-| Marginalia | `GET api2.marginalia-search.com/search` | `API-Key`         | RPM 60 (vendor: unmetered shared pool)  |
+| Backend    | Endpoint                                     | Auth                   | Code quotas (`usage.ts`)                |
+| ---------- | -------------------------------------------- | ---------------------- | --------------------------------------- |
+| Exa        | `POST api.exa.ai/search`                     | `x-api-key`            | monthly 1000, RPM 600                   |
+| Tavily     | `POST api.tavily.com/search`                 | `api_key` in body      | monthly 500, RPM 100 (advanced=2cr/req) |
+| Brave      | `GET api.search.brave.com/res/v1/web/search` | `X-Subscription-Token` | monthly 1000, RPM 60 (Free $5 cap)      |
+| LangSearch | `POST api.langsearch.com/v1/web-search`      | `Bearer`               | daily 1000, RPM 60                      |
+| Marginalia | `GET api2.marginalia-search.com/search`      | `API-Key`              | RPM 60 (vendor: unmetered shared pool)  |
 
 Ordering rationale:
 
 - exa: semantic, query-aware summary + highlights + 2000-char text in one call.
   Best on technical/niche.
 - tavily: general/current events, freshness. Loses to exa on niche.
+- brave: independent ~30B-page index (not Google/Bing). Mainstream English. Free
+  cap pauses at $5/mo (~1000 req). Above langsearch since not Bing-derived;
+  diversifies the pool.
 - langsearch: Bing-derived, 10/call, big daily pool. Spillover.
 - marginalia: BM25, downranks commercial. Force via `provider="marginalia"` for
   indie/long-tail.
@@ -52,7 +59,7 @@ Ordering rationale:
 
 - Auth: `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json`. Override via
   `WEB_SEARCH_AUTH_PATH`. Shape:
-  `{langsearch:{apiKey},tavily:{apiKey},exa:{apiKey},marginalia:{apiKey}}`.
+  `{langsearch:{apiKey},tavily:{apiKey},exa:{apiKey},brave:{apiKey},marginalia:{apiKey}}`.
   Marginalia defaults to `public`.
 - Usage counter: `~/.pi/web-search-usage.json`. Shape per backend:
   `{day, monthKey, today, month}`. Lazy reset on stale day/monthKey. Per-minute
@@ -88,6 +95,21 @@ pages. See `../../decisions/web_search/2026-05-14-langsearch-summary-kept.md`.
 
 ### ai-summary uses Haiku 4.5, `--thinking off`
 
+Three reasons the Haiku post-pass exists, not just "rewrite bodies":
+
+- Token reduction: exa returns ~2000 chars text + summary + highlights per
+  result; 10 results = ~25-40k chars raw. Haiku rewrites to ~200-400 chars each.
+  ~5-10x reduction before the main agent sees it. Pays for itself once caller is
+  on Sonnet/Opus input pricing.
+- Relevance filter: Haiku ranks by query fit and drops off-topic results.
+  Pre-pass 10 -> post-pass often 4-7.
+- Normalization: salvages langsearch (tokenization noise, HTML residue,
+  non-English duplicates) into the same shape as exa/tavily/brave. Main agent
+  sees uniform "Result N: title + URL + body" regardless of backend. Without the
+  Haiku pass langsearch is unusable as a primary backend.
+
+Model + flags:
+
 - Haiku: ~16s for 10 results, ~$0.01-0.02/call. Sonnet adds latency, no quality
   delta on this task.
 - `--thinking off`: tested off/low/medium. off matches low; medium is 2x slower.
@@ -97,7 +119,8 @@ pages. See `../../decisions/web_search/2026-05-14-langsearch-summary-kept.md`.
 - Failure modes: blank output, child error, 60s timeout -> raw `formatResults`
   fallback.
 - `--system-prompt` takes string only. Prompt loaded with `readFileSync` and
-  passed inline. See `../../decisions/web_search/2026-05-14-ai-summary-prompt-loading.md`.
+  passed inline. See
+  `../../decisions/web_search/2026-05-14-ai-summary-prompt-loading.md`.
 - Requires `pi` on PATH + Anthropic key in pi auth
   (`~/.pi/agent/auth.json -> anthropic.key`). Missing -> fallback.
 
@@ -105,6 +128,15 @@ pages. See `../../decisions/web_search/2026-05-14-langsearch-summary-kept.md`.
 
 Strip `utm_*`/`gclid`/`fbclid`, fragment, trailing `/`. Skip scheme/host
 normalisation: too aggressive vs cost.
+
+### Dedupe concatenates snippets
+
+Same URL from N backends -> one row, `sources: [exa, tavily, ...]`, snippets
+joined with `\n\n---\n\n` (skip if substring of existing). No length/priority
+heuristic to pick "best" snippet. Each backend often complements the others
+(exa semantic summary, tavily chunk picks, brave description); merging
+preserves all angles. Haiku post-pass dedupes overlapping prose. Worst-case
+cost ~3-5k extra chars in Haiku input on 1-3 overlaps per call.
 
 ### Auth in OneDrive JSON
 

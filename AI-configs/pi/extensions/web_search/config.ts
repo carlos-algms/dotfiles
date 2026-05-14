@@ -19,6 +19,7 @@ export interface AuthConfig {
   langsearch: { apiKey: string };
   tavily: { apiKey: string };
   exa: { apiKey: string };
+  brave: { apiKey: string };
   marginalia: { apiKey: string };
 }
 
@@ -54,6 +55,7 @@ export async function loadAuth(): Promise<AuthConfig> {
     langsearch: { apiKey: asString(asObject(root.langsearch).apiKey) },
     tavily: { apiKey: asString(asObject(root.tavily).apiKey) },
     exa: { apiKey: asString(asObject(root.exa).apiKey) },
+    brave: { apiKey: asString(asObject(root.brave).apiKey) },
     marginalia: { apiKey: asString(asObject(root.marginalia).apiKey, 'public') },
   };
   return cached;

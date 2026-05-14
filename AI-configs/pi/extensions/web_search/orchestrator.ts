@@ -52,8 +52,10 @@ function dedupe(batches: SearchResult[][]): SearchResult[] {
             existing.sources.push(src);
           }
         }
-        if (!existing.snippet && r.snippet) {
-          existing.snippet = r.snippet;
+        if (r.snippet && !existing.snippet.includes(r.snippet)) {
+          existing.snippet = existing.snippet
+            ? `${existing.snippet}\n\n---\n\n${r.snippet}`
+            : r.snippet;
         }
         if (!existing.title && r.title) {
           existing.title = r.title;

@@ -1,4 +1,9 @@
-export type BackendName = 'langsearch' | 'tavily' | 'exa' | 'marginalia';
+export type BackendName =
+  | 'langsearch'
+  | 'tavily'
+  | 'exa'
+  | 'brave'
+  | 'marginalia';
 
 export interface SearchResult {
   title: string;

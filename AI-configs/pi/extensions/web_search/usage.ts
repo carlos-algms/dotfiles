@@ -16,6 +16,7 @@ export const QUOTAS: Record<BackendName, BackendQuota> = {
   langsearch: { dailyCap: 1000, perMinuteCap: 60 },
   tavily: { monthlyCap: 500, perMinuteCap: 100 },
   exa: { monthlyCap: 1000, perMinuteCap: 600 },
+  brave: { monthlyCap: 1000, perMinuteCap: 60 },
   marginalia: { perMinuteCap: 60 },
 };
 
