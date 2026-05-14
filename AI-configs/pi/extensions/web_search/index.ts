@@ -118,21 +118,20 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         return comp;
       }
 
-      const UNIT_BUDGET = 5;
       const lines = text.split('\n');
       const footerStart = findFooterStart(lines);
 
       let bodyLines: string[];
-      let footer: string;
+      let footerText: string;
       if (footerStart === -1) {
         bodyLines = lines;
-        footer = '';
+        footerText = '';
       } else {
         bodyLines = lines.slice(0, footerStart);
         while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
           bodyLines.pop();
         }
-        footer = lines.slice(footerStart).join('\n');
+        footerText = lines.slice(footerStart).join('\n');
       }
 
       const bodyText = bodyLines.join('\n').trim();
@@ -141,21 +140,37 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         return comp;
       }
 
+      const SNIPPET_CHAR_LIMIT = 200;
       const results = bodyText
         .split(/\n\n+/)
         .filter((r) => r.trim().length > 0);
-      if (results.length <= UNIT_BUDGET) {
-        comp.setText(text);
-        return comp;
-      }
+      const ellipsis = theme.fg('muted', '...');
+      const folded = results.map((r) => {
+        const rLines = r.split('\n');
+        const header = rLines[0];
+        const snippet = rLines
+          .slice(1)
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .join(' ');
+        const short =
+          snippet.length > SNIPPET_CHAR_LIMIT
+            ? snippet.slice(0, SNIPPET_CHAR_LIMIT).trimEnd()
+            : snippet;
+        const out = [header];
+        if (short) out.push(`  ${short}`);
+        out.push(ellipsis);
+        return out.join('\n');
+      });
 
-      const head = results.slice(0, UNIT_BUDGET).join('\n\n');
-      const hidden = results.length - UNIT_BUDGET;
-      const hint = `... (${hidden} more results, ${results.length} total, ${keyHint('app.tools.expand', 'to expand')})`;
-      const rendered = footer
-        ? `${head}\n\n${theme.fg('muted', hint)}\n\n${footer}`
-        : `${head}\n\n${theme.fg('muted', hint)}`;
-      comp.setText(rendered);
+      const hint = theme.fg(
+        'muted',
+        keyHint('app.tools.expand', 'to expand'),
+      );
+      const parts: string[] = [folded.join('\n\n')];
+      if (footerText) parts.push(footerText);
+      parts.push(hint);
+      comp.setText(parts.join('\n\n'));
       return comp;
     },
   });
