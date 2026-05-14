@@ -55,6 +55,16 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/terse-nudge.sh"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
