@@ -12,3 +12,48 @@ opencode, crush) has its own subdir following that platform's layout.
 - Skills, commands, and agents live under `AI-configs/claude/` and are symlinked
   into other agents (gemini, opencode) per @AI-Config-README.md.
 - See @AI-Config-README.md for the exact symlink commands per agent.
+
+## Pi (`pi/`)
+
+Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
+
+- `pi/agent/settings.json` - pi user settings (provider defaults, theme, etc).
+- `pi/agent/mcp.json` - MCP servers wired into pi.
+- `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
+  that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
+  build step). Current extensions: `web_search`, `web_fetch`, `vim-mode`.
+- `pi/extensions-disabled/` - extensions kept around but not loaded.
+- `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
+  `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox`
+  to the pnpm global install. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
+  from any directory to type-check all extensions.
+
+Per-extension docs (read on demand, don't pre-emptively load):
+
+- `pi/extensions/<name>/README.md` - what the extension does, parameters, flow
+  diagram, ADRs, limitations. Load when editing that specific extension or
+  debugging its behaviour.
+- Other extension-local files (`*-prompt.md`, etc) - referenced from the
+  extension's source. Load when editing the source that consumes them.
+
+Auth and runtime config live OUTSIDE the repo:
+
+- `~/.pi/agent/auth.json` - provider API keys (Anthropic etc). Resolved by env
+  var name; pi inherits env from the parent shell.
+- `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API
+  keys for `web_search` (override path via `WEB_SEARCH_AUTH_PATH`).
+- `~/.pi/web-search-usage.json` - per-backend daily/monthly counters (managed
+  by the `web_search` extension).
+
+Pi CLI flags worth knowing when scripting extensions:
+
+- `--print` / `-p` - non-interactive, exit after one turn.
+- `--system-prompt <str>` - takes a STRING, not a path. Pi's `@/path` expansion
+  only applies to positional message args. Read prompt files in your code and
+  pass the contents inline.
+- `--no-tools --no-extensions --no-session --no-skills` - isolate a single-shot
+  LLM call from the wider pi runtime (useful when one extension shells out to
+  pi for a sub-task).
+- `--thinking <off|minimal|low|medium|high|xhigh>` - reasoning budget on
+  thinking-capable models. `off` is fastest; raise only when format adherence
+  or task complexity demands it.

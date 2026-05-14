@@ -2,12 +2,13 @@ import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { keyHint } from '@earendil-works/pi-coding-agent';
 import { Text } from '@earendil-works/pi-tui';
 import { Type } from 'typebox';
+import { summarizeResults } from './ai-summary';
 import { orchestrate } from './orchestrator';
 import { PRIORITY_ORDER } from './registry';
 import type { BackendName, BackendOutcome, SearchResult } from './types';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_NUM_RESULTS = 3;
+const DEFAULT_NUM_RESULTS = 10;
 
 export default function piWebSearchTool(pi: ExtensionAPI) {
   pi.registerTool({
@@ -24,6 +25,9 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
     promptGuidelines: [
       'Use web_search for any open-ended web lookup instead of bash curl or guessing URLs. The tool already runs 2 providers in parallel and dedupes - do not call it repeatedly with rephrased queries to "compare backends".',
       'Set `provider` on web_search only when comparing a known backend or when one backend uniquely suits the query (e.g. Marginalia for indie blogs, Exa for semantic / find-similar). Default fan-out covers most queries.',
+      'Read result snippets before calling web_fetch. Skip web_fetch when the snippet answers the query.',
+      'Use `gh` for github.com lookups. web_search is for open-ended web research, not direct-source fetches.',
+      'Provider overrides: `tavily` general web + RAG retrieval; `exa` semantic, find-similar, example URL; `langsearch` Bing-derived broad search; `marginalia` indie web and small blogs, skip for news.',
     ],
     parameters: Type.Object({
       query: Type.String({
@@ -68,15 +72,21 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         provider: params.provider as BackendName | undefined,
         signal: combinedSignal,
       });
+      const aiBody = await summarizeResults(
+        query,
+        outcome.results,
+        combinedSignal,
+      );
+      const body = aiBody ?? formatResults(outcome.results);
       const durationMs = Date.now() - startedAt;
 
-      const body = formatResults(outcome.results);
       const footer = formatFooter(
         query,
         outcome.outcomes,
         durationMs,
         outcome.results.length,
         outcome.providerBypassed,
+        aiBody !== null,
       );
 
       return {
@@ -142,14 +152,26 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
 
       const SNIPPET_CHAR_LIMIT = 200;
       const results = bodyText
-        .split(/\n\n+/)
-        .filter((r) => r.trim().length > 0);
+        .split(/\n========\n/)
+        .map((r) => r.trim())
+        .filter((r) => r.length > 0);
       const ellipsis = theme.fg('muted', '...');
       const folded = results.map((r) => {
         const rLines = r.split('\n');
-        const header = rLines[0];
+        const header = rLines[0] ?? '';
+        const meta: string[] = [];
+        let bodyStart = 1;
+        for (let i = 1; i < rLines.length; i++) {
+          const line = rLines[i] ?? '';
+          if (line.startsWith('- ')) {
+            meta.push(line);
+            continue;
+          }
+          bodyStart = i;
+          break;
+        }
         const snippet = rLines
-          .slice(1)
+          .slice(bodyStart)
           .map((l) => l.trim())
           .filter(Boolean)
           .join(' ');
@@ -157,8 +179,10 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
           snippet.length > SNIPPET_CHAR_LIMIT
             ? snippet.slice(0, SNIPPET_CHAR_LIMIT).trimEnd()
             : snippet;
-        const out = [header];
-        if (short) out.push(`  ${short}`);
+        const out = [header, ...meta];
+        if (short) {
+          out.push(`  ${short}`);
+        }
         out.push(ellipsis);
         return out.join('\n');
       });
@@ -176,21 +200,27 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
   });
 }
 
+const RESULT_SEPARATOR = '\n\n========\n\n';
+
 function formatResults(results: SearchResult[]): string {
   if (results.length === 0) {
     return '(no results)';
   }
   return results
-    .map((r) => {
-      const tag = r.sources.join(', ');
+    .map((r, idx) => {
       const title = r.title || r.url;
-      const lines = [`- [${title}](${r.url}) (${tag})`];
+      const provider = r.sources.join(', ');
+      const lines = [
+        `## Result ${idx + 1}: ${title}`,
+        `- URL: ${r.url}`,
+        `- provider: ${provider}`,
+      ];
       if (r.snippet) {
-        lines.push(`  ${r.snippet.replace(/\s+/g, ' ').trim()}`);
+        lines.push('', r.snippet.trim());
       }
       return lines.join('\n');
     })
-    .join('\n\n');
+    .join(RESULT_SEPARATOR);
 }
 
 function formatFooter(
@@ -199,6 +229,7 @@ function formatFooter(
   durationMs: number,
   resultCount: number,
   providerBypassed: BackendName | null,
+  aiSummarised: boolean,
 ): string {
   const summary = outcomes
     .map((o) => {
@@ -214,6 +245,7 @@ function formatFooter(
     '',
     `query: ${query}`,
     `results: ${resultCount} after dedupe`,
+    `ai-summary: ${aiSummarised ? 'ok' : 'fallback (raw results)'}`,
     `total duration: ${durationMs}ms`,
     `backends:`,
     summary || '  (none)',

@@ -5,9 +5,9 @@ import { tavily } from './backends/tavily';
 import type { BackendName, SearchBackend } from './types';
 
 export const PRIORITY_ORDER: BackendName[] = [
-  'langsearch',
-  'tavily',
   'exa',
+  'tavily',
+  'langsearch',
   'marginalia',
 ];
 

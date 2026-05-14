@@ -1,185 +1,153 @@
 # web_search
 
-Pi extension. Registers a `web_search` tool that fans out across multiple search
-backends in parallel, dedupes results by URL, and returns markdown-formatted
-output with per-result source tags.
+Pi extension. Fans out to N backends in parallel, dedupes by URL, runs Haiku
+post-pass, returns markdown + provenance footer.
 
-## What it does
+## Behaviour
 
-- Default priority queue: `langsearch -> tavily -> exa -> marginalia`.
-- Default fan-out: top 2 backends in parallel per call.
-- Quota-exhausted or failing backends are skipped; the queue auto-promotes the
-  next backend until 2 succeed or the queue is empty.
-- Dedupes by URL with normalisation (strip `utm_*`, `gclid`, `fbclid`, trailing
-  slashes, fragments). When the same URL is returned by both backends, the
-  source tag becomes `(langsearch, marginalia)`.
-- Optional `provider` param forces a single backend; if that backend is
-  unavailable (quota / rate / error), falls through to the queue and the footer
-  reports the bypass.
-- Provenance footer per call: query, dedupe result count, total duration,
-  per-backend status with count and ms.
-- TUI rendering folds long result lists by default. Collapsed view shows the
-  first 5 results, a `... (N more results, M total, ctrl+o to expand)`
-  separator, and the full provenance footer. Cut is result-boundary aware (never
-  mid-result). `app.tools.expand` (ctrl+o) toggles to the full view. The LLM
-  always receives the unfolded content.
-- `renderCall` displays `web_search "<query>"` plus `(provider: <name>)` when a
-  backend override is set.
+- `PRIORITY_ORDER = [exa, tavily, langsearch, marginalia]` (`registry.ts`).
+- `DEFAULT_PARALLEL = 2`. Quota-blocked/errored backends auto-promote next in
+  queue until 2 OK or queue empty.
+- `provider` param forces single backend; on failure falls through to queue,
+  footer reports bypass.
+- Dedupe normalises URL: strip `utm_*`/`gclid`/`fbclid`, sort remaining params,
+  drop fragment, trim trailing `/`. Scheme/host NOT normalised. Same URL from 2
+  backends -> `sources: [exa, tavily]`.
+- ai-summary: Haiku 4.5 pass filters, ranks, rewrites bodies. On failure -> raw
+  `formatResults`. Footer: `ai-summary: ok | fallback (raw results)`.
+- Output: `## Result N: <title>` + `- URL:` + `- provider:` + blank + body.
+  Blocks joined by `\n========\n`. Footer prefixed `---`.
+- TUI fold: snippet preview per result, footer + expand hint shown.
+  `app.tools.expand` (ctrl+o) toggles. LLM always gets unfolded text.
+- `renderCall`: `web_search "<query>" (provider: <name>)` when override set.
 
-## Flow
+## Backends and quotas
 
-```mermaid
-flowchart TD
-    A[agent calls web_search] --> B{provider param set?}
+| Backend    | Endpoint                                | Auth              | Code quotas (`usage.ts`)                |
+| ---------- | --------------------------------------- | ----------------- | --------------------------------------- |
+| Exa        | `POST api.exa.ai/search`                | `x-api-key`       | monthly 1000, RPM 600                   |
+| Tavily     | `POST api.tavily.com/search`            | `api_key` in body | monthly 500, RPM 100 (advanced=2cr/req) |
+| LangSearch | `POST api.langsearch.com/v1/web-search` | `Bearer`          | daily 1000, RPM 60                      |
+| Marginalia | `GET api2.marginalia-search.com/search` | `API-Key`         | RPM 60 (vendor: unmetered shared pool)  |
 
-    B -- yes --> C[run that single backend]
-    C --> D{ok?}
-    D -- yes --> M[dedupe + format]
-    D -- no --> E[mark providerBypassed, fall through to queue]
+Ordering rationale:
 
-    B -- no --> F[init queue from PRIORITY_ORDER<br/>langsearch, tavily, exa, marginalia]
-    E --> F
-
-    F --> G[pop next N from queue<br/>N = slots remaining to fill]
-    G --> H[reserve quota per backend<br/>daily / monthly / per-minute]
-
-    H --> I{any backend OK<br/>after parallel run?}
-    I -- some failed/skipped --> J{queue empty<br/>OR slots filled?}
-    J -- no --> G
-    J -- yes --> M
-
-    I -- all OK --> M
-
-    M --> N[normalise URLs, merge sources tag<br/>e.g. langsearch, tavily]
-    N --> O[build markdown body + footer]
-    O --> P[return to agent]
-```
-
-## Backends and free-tier quotas
-
-| Backend    | Endpoint                                | Auth                    | Free quota              |
-| ---------- | --------------------------------------- | ----------------------- | ----------------------- |
-| LangSearch | `POST api.langsearch.com/v1/web-search` | `Authorization: Bearer` | 1,000/day, 60 RPM       |
-| Tavily     | `POST api.tavily.com/search`            | `api_key` in body       | 1,000/month             |
-| Exa        | `POST api.exa.ai/search`                | `x-api-key` header      | 1,000/month, 600 RPM    |
-| Marginalia | `GET api2.marginalia-search.com/search` | `API-Key` header        | unmetered (shared pool) |
-
-LangSearch is the workhorse (largest renewable daily pool). Tavily is the second
-default for agent-tuned snippets. Exa sits in the spillover tail. Marginalia is
-last in priority because its BM25 keyword index downranks commercial /
-mainstream pages by design - useless for "Star Wars APIs" or "Datadog pricing"
-style queries, valuable for indie tech blogs. Force it explicitly with
-`provider="marginalia"` when the answer lives in indie / long-tail content.
-
-## Installation
-
-1. Drop API keys into the auth file (defaults to
-   `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json`):
-
-   ```json
-   {
-     "langsearch": { "apiKey": "..." },
-     "tavily": { "apiKey": "..." },
-     "exa": { "apiKey": "..." },
-     "marginalia": { "apiKey": "public" }
-   }
-   ```
-
-   Override the location with `WEB_SEARCH_AUTH_PATH=<file>` if needed.
-
-2. The extension is symlinked into pi via the whole-dir symlink set up in
-   `AI-Config-README.md`. Reload pi or restart.
+- exa: semantic, query-aware summary + highlights + 2000-char text in one call.
+  Best on technical/niche.
+- tavily: general/current events, freshness. Loses to exa on niche.
+- langsearch: Bing-derived, 10/call, big daily pool. Spillover.
+- marginalia: BM25, downranks commercial. Force via `provider="marginalia"` for
+  indie/long-tail.
 
 ## Parameters
 
-| Name         | Type                      | Default | Notes                                       |
-| ------------ | ------------------------- | ------- | ------------------------------------------- |
-| `query`      | string                    | -       | Plain English or keywords.                  |
-| `numResults` | integer (opt., 1-20)      | 3       | Per backend; total before dedupe is 2x.     |
-| `provider`   | enum of backends (opt.)   | -       | Force one backend; bypassed if unavailable. |
-| `timeoutMs`  | integer (opt., 1000-300k) | 30000   | Per-request timeout.                        |
+| Name         | Type        | Default | Notes                                           |
+| ------------ | ----------- | ------- | ----------------------------------------------- |
+| `query`      | string      | -       | required                                        |
+| `numResults` | int 1-20    | 10      | per backend; total pre-dedupe = N x parallel    |
+| `provider`   | enum        | -       | force single backend; bypasses to queue on fail |
+| `timeoutMs`  | int 1k-300k | 30000   | backend fetch only; ai-summary has own 60s      |
 
-## ADRs
+## File layout
 
-### Priority queue with auto-fallback over user-selected pair
+- Auth: `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json`. Override via
+  `WEB_SEARCH_AUTH_PATH`. Shape:
+  `{langsearch:{apiKey},tavily:{apiKey},exa:{apiKey},marginalia:{apiKey}}`.
+  Marginalia defaults to `public`.
+- Usage counter: `~/.pi/web-search-usage.json`. Shape per backend:
+  `{day, monthKey, today, month}`. Lazy reset on stale day/monthKey. Per-minute
+  window in-memory only.
+- ai-summary prompt: `ai-summary-prompt.md` read at module load via
+  `readFileSync`, passed inline through `--system-prompt`.
 
-A single ordered list of backends collapses three earlier proposals (quality
-preset, parallel-fixed-pair, manual spillover) into one mental model. Top N run
-in parallel; failure or quota promotes the next backend. Same code handles the
-common case, the failure case, and the quota-exhausted case.
+## ADRs (load-bearing why)
 
-### `provider` override bypasses to queue on failure
+### numResults default 10
 
-Allows targeted backend selection (e.g. "Marginalia for indie blogs") without
-hard-failing the tool when that one backend is quota-exhausted. The footer notes
-the bypass so the agent can see what actually ran.
+Backend quotas are request-based, not result-count-based. 10 costs same API
+as 3. Canonical answer often at rank 4-8. Token cost paid downstream to cheap
+Haiku pass.
 
-### Auth in OneDrive JSON, not env vars
+### Tavily `search_depth: advanced` + `chunks_per_source: 3`
 
-JSON keeps the structure clean for future per-backend options (caps, custom
-endpoints, multiple keys per backend if we ever add them). Lives outside the
-git-tracked dotfiles repo (`~/OneDrive/work/mac-pro/dotfiles/...`) so secrets
-sync across machines without being committed.
+Basic returns ~250-char synth blob; advanced returns 3 x 500-char chunks from
+relevant sections. 2cr/req halves monthly free to 500. Worth it for content
+density; `usage.ts` reflects halved cap.
 
-### Single counter file, per-day + per-month tracked together
+### Exa max content
 
-`~/.pi/web-search-usage.json` holds `{day, monthKey, today, month}` per backend.
-Lazy reset on read: if the stored day != today, today resets to 0; same for
-monthKey. Per-minute is in-memory only (resets on pi restart, fine because a
-60-second window restarts every minute anyway).
+`contents: { summary:true, highlights:{numSentences:3, highlightsPerUrl:1}, text:{maxCharacters:2000} }`.
+Multi-axis coverage in one call.
 
-### URL normalisation for dedupe
+### ai-summary uses Haiku 4.5, `--thinking off`
 
-Strip `utm_*`, `gclid`, `fbclid` query params; strip trailing slash from path;
-drop URL fragment. Catches the common case where two backends return the same
-article under different tracking parameters. Does NOT normalise scheme or host
-(`http`/`https`, `www`/non-`www`) - too aggressive for the cost.
+- Haiku: ~16s for 10 results, ~$0.01-0.02/call. Sonnet adds latency, no quality
+  delta on this task.
+- `--thinking off`: tested off/low/medium. off is 47% faster than low; identical
+  format adherence + ranking on post-processing task.
+- Flags used:
+  `--no-tools --no-extensions --no-session --no-skills --provider anthropic --print`.
+- Failure modes: blank output, child error, 60s timeout -> raw `formatResults`
+  fallback.
+- `--system-prompt` takes string only (pi's `@/path` expansion is
+  positional-only). Prompt loaded with `readFileSync` and passed inline.
+- Requires `pi` on PATH + Anthropic key in pi auth
+  (`~/.pi/agent/auth.json -> anthropic.key`). Missing -> fallback.
 
-### Use `summary` over `snippet` from LangSearch and Exa
+### URL normalisation scope
 
-Snippets are 100-200 chars and rarely answer agent queries. `summary` fields are
-1-3KB but query-aware. Token budget per call (numResults=3, 2 backends) is
-~2,100 tokens - trivial on 1M context, tolerable on 200K. Raise `numResults` up
-to 20 per call when more breadth is needed.
+Strip `utm_*`/`gclid`/`fbclid`, fragment, trailing `/`. Skip scheme/host
+normalisation: too aggressive vs cost.
+
+### Auth in OneDrive JSON
+
+Outside git repo. Syncs across machines without committing. JSON enables future
+per-backend options.
+
+### Single counter file + per-minute in-memory
+
+`~/.pi/web-search-usage.json` for day/month (lazy reset). Per-minute lives in
+process (60s window resets every minute anyway). Per-backend commit chain
+serialises writes to avoid lost-increment race.
+
+### Provider override falls through to queue
+
+Hard-failing on quota-exhausted single backend is worse than fallback. Footer
+notes the bypass.
 
 ### Marginalia defaults to `public` key
 
-The public sample key works without signup and matches the docs' recommended
-prototyping pattern. Often returns 503 under load (shared rate-limit pool).
-Replace with a real free key via email to `contact@marginalia-search.com` once
-503s become routine.
+Public sample key works without signup. Often 503 under load. Replace via
+`contact@marginalia-search.com` if 503s become routine.
 
-### `typebox` over hand-written JSON Schema
+### typebox over hand-written JSON Schema
 
-Pi bundles `typebox` (per the official Available Imports list). Gives typed
-parameters and pi-recognised schema. No install. The `provider` enum uses
-`Type.Union(Type.Literal(...))` - skips the Google-compat `StringEnum` helper
-from `@earendil-works/pi-ai` since we are not driving the agent with Gemini.
-Switch to `StringEnum` later if Gemini becomes the driver.
+Bundled with pi. `provider` enum uses `Type.Union(Type.Literal(...))` not
+`StringEnum` (no Gemini driver).
 
-### Treat all backend response fields as untrusted
+### Untrusted response fields
 
-Each adapter validates fields via `asString` / `asArray` / `asObject` helpers in
-`http.ts`. A result without a `url` is dropped, not crashed-on. Vendors change
-response shapes silently; this isolates the blast radius to "fewer results"
-rather than "tool throws".
+Each adapter validates via `asString`/`asArray`/`asObject` (`http.ts`). Missing
+`url` -> drop result, not crash. Vendor shape changes isolated to "fewer
+results".
 
-### Provenance footer on every call
+### Output separators: `========` blocks, `---` footer
 
-Mirrors `web_fetch`'s footer pattern. Lets the LLM (and any future log reader)
-see which backends ran, which were skipped, which errored, and how long the
-whole thing took. The `details` object on the tool result holds the same data
-structurally for pi's UI.
+Different separators avoid collision when bodies contain markdown `---` rules or
+`##` headings. TUI splits body on `\n========\n` for fold.
+
+### Provenance footer every call
+
+Mirrors `web_fetch`. Reports query, dedupe count, ai-summary state, total ms,
+per-backend status (ok/skipped-quota/skipped-rate/error + count + ms). `details`
+object mirrors structurally for pi UI.
 
 ## Limitations
 
-- TLS fingerprinting isn't a concern here (we hit JSON APIs, not bot-protected
-  HTML), but each vendor has its own rate-limiting and bot-detection.
-- Marginalia is English-only and BM25-keyword based; bad for natural-language
-  queries and non-English content.
-- Tavily and Exa burn 1k/month free quota - heavy days will exhaust them early.
-  Spillover to LangSearch (1k/day) covers the gap.
-- No POST-style search, no per-domain filters, no time-range filters. Add as
-  optional `parameters` later if needed.
-- Per-minute rate-limit window lives in process memory only; restart resets it.
-  Acceptable because a 60s window resets every minute anyway.
+- Backends don't paginate; same query -> same results. Rephrase to explore.
+- Tavily 500/month + Exa 1000/month -> heavy days exhaust. LangSearch 1000/day
+  covers spillover.
+- ai-summary adds ~16-30s latency. End-to-end ~25-45s.
+- Marginalia English + BM25; bad for natural-language or non-English.
+- Per-minute window resets on pi restart.
+- No domain filter, no time-range, no pagination.
