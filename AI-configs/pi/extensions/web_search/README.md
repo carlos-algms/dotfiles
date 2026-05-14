@@ -72,25 +72,32 @@ Haiku pass.
 
 Basic returns ~250-char synth blob; advanced returns 3 x 500-char chunks from
 relevant sections. 2cr/req halves monthly free to 500. Worth it for content
-density; `usage.ts` reflects halved cap.
+density; `usage.ts` reflects halved cap. See
+`../../decisions/web_search/2026-05-14-provider-mix-per-query-type.md`.
 
 ### Exa max content
 
 `contents: { summary:true, highlights:{numSentences:3, highlightsPerUrl:1}, text:{maxCharacters:2000} }`.
 Multi-axis coverage in one call.
 
+### LangSearch keeps `summary: true`
+
+11x payload vs `snippet`. Body has broken tokenization upstream; Haiku post-pass
+strips noise. Snippet alone too short to answer agent queries on long-form
+pages. See `../../decisions/web_search/2026-05-14-langsearch-summary-kept.md`.
+
 ### ai-summary uses Haiku 4.5, `--thinking off`
 
 - Haiku: ~16s for 10 results, ~$0.01-0.02/call. Sonnet adds latency, no quality
   delta on this task.
-- `--thinking off`: tested off/low/medium. off is 47% faster than low; identical
-  format adherence + ranking on post-processing task.
+- `--thinking off`: tested off/low/medium. off matches low; medium is 2x slower.
+  See `../../decisions/web_search/2026-05-14-thinking-level-tested.md`.
 - Flags used:
   `--no-tools --no-extensions --no-session --no-skills --provider anthropic --print`.
 - Failure modes: blank output, child error, 60s timeout -> raw `formatResults`
   fallback.
-- `--system-prompt` takes string only (pi's `@/path` expansion is
-  positional-only). Prompt loaded with `readFileSync` and passed inline.
+- `--system-prompt` takes string only. Prompt loaded with `readFileSync` and
+  passed inline. See `../../decisions/web_search/2026-05-14-ai-summary-prompt-loading.md`.
 - Requires `pi` on PATH + Anthropic key in pi auth
   (`~/.pi/agent/auth.json -> anthropic.key`). Missing -> fallback.
 
@@ -144,7 +151,8 @@ object mirrors structurally for pi UI.
 
 ## Limitations
 
-- Backends don't paginate; same query -> same results. Rephrase to explore.
+- Backends don't paginate; same query -> same results. Rephrase to explore. See
+  `../../decisions/web_search/2026-05-14-no-pagination.md`.
 - Tavily 500/month + Exa 1000/month -> heavy days exhaust. LangSearch 1000/day
   covers spillover.
 - ai-summary adds ~16-30s latency. End-to-end ~25-45s.

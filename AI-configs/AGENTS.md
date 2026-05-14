@@ -24,15 +24,18 @@ Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
   build step). Current extensions: `web_search`, `web_fetch`, `vim-mode`.
 - `pi/extensions-disabled/` - extensions kept around but not loaded.
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
-  `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox`
-  to the pnpm global install. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
+  `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to
+  the pnpm global install. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
   from any directory to type-check all extensions.
 
 Per-extension docs (read on demand, don't pre-emptively load):
 
-- `pi/extensions/<name>/README.md` - what the extension does, parameters, flow
-  diagram, ADRs, limitations. Load when editing that specific extension or
-  debugging its behaviour.
+- `pi/extensions/<name>/README.md` - what the extension does, parameters, flow,
+  short-form ADRs, limitations. Load when editing that extension or debugging
+  its behaviour.
+- `pi/decisions/<extension-name>/<date>-<slug>.md` - deep-dive ADRs: what was
+  tried, what failed, why, what NOT to retry. Load ONLY when the README ADR
+  references it or you are about to redo something it covers.
 - Other extension-local files (`*-prompt.md`, etc) - referenced from the
   extension's source. Load when editing the source that consumes them.
 
@@ -40,10 +43,10 @@ Auth and runtime config live OUTSIDE the repo:
 
 - `~/.pi/agent/auth.json` - provider API keys (Anthropic etc). Resolved by env
   var name; pi inherits env from the parent shell.
-- `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API
-  keys for `web_search` (override path via `WEB_SEARCH_AUTH_PATH`).
-- `~/.pi/web-search-usage.json` - per-backend daily/monthly counters (managed
-  by the `web_search` extension).
+- `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API keys
+  for `web_search` (override path via `WEB_SEARCH_AUTH_PATH`).
+- `~/.pi/web-search-usage.json` - per-backend daily/monthly counters (managed by
+  the `web_search` extension).
 
 Pi CLI flags worth knowing when scripting extensions:
 
@@ -52,8 +55,8 @@ Pi CLI flags worth knowing when scripting extensions:
   only applies to positional message args. Read prompt files in your code and
   pass the contents inline.
 - `--no-tools --no-extensions --no-session --no-skills` - isolate a single-shot
-  LLM call from the wider pi runtime (useful when one extension shells out to
-  pi for a sub-task).
+  LLM call from the wider pi runtime (useful when one extension shells out to pi
+  for a sub-task).
 - `--thinking <off|minimal|low|medium|high|xhigh>` - reasoning budget on
-  thinking-capable models. `off` is fastest; raise only when format adherence
-  or task complexity demands it.
+  thinking-capable models. `off` is fastest; raise only when format adherence or
+  task complexity demands it.
