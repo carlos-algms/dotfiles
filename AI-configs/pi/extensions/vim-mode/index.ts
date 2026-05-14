@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 
 import { CustomEditor, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import { matchesKey } from "@earendil-works/pi-tui";
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
 const NORMAL_KEYS: Record<string, string | null> = {
@@ -49,10 +49,15 @@ const MOTION_KEYS: Record<string, string[]> = {
 };
 
 // Delete primitive applied when an operator (d/c) is followed by a motion.
+// alt+letter uses CSI-u (\x1b[<cp>;3u) not legacy \x1b<letter>: pi's matcher
+// rejects the legacy form when kitty keyboard protocol is active (kitty, wezterm,
+// ghostty, foot, ...). CSI-u matches in both modes.
 const DELETE_FOR_MOTION: Record<string, string> = {
-	w: "\x1bd", // alt+d  = delete word forward
-	W: "\x1bd",
-	b: "\x17", // ctrl+w = delete word backward
+	w: "\x1b[100;3u", // alt+d = delete word forward (codepoint 100 = 'd', mod 3 = alt)
+	W: "\x1b[100;3u",
+	e: "\x1b[100;3u", // alias of dw; pi has no "to end of word" primitive, eats trailing ws
+	E: "\x1b[100;3u",
+	b: "\x17", // ctrl+w = delete word backward (raw ctrl char, kitty-safe)
 	B: "\x17",
 	h: "\x7f", // backspace
 	l: "\x1b[3~", // delete
@@ -81,7 +86,7 @@ const SIMPLE_KEYS: Record<string, { seqs: string[]; insert?: boolean }> = {
 class ModalEditor extends CustomEditor {
 	private mode: "normal" | "insert" = "insert";
 	// LOCAL: pending operator state. `g` is a two-key prefix (resolves to gu/gU).
-	private pendingOp: "d" | "c" | "g" | "gu" | "gU" | null = null;
+	private pendingOp: "d" | "c" | "g" | "gu" | "gU" | "dt" | "df" | "ct" | "cf" | null = null;
 
 	handleInput(data: string): void {
 		// LOCAL hook: handles operator-pending, extended motions, A/I, and
@@ -154,11 +159,16 @@ class ModalEditor extends CustomEditor {
 			const op = this.pendingOp;
 			this.pendingOp = null;
 
-			// d/c: dd/cc clears line, else apply delete primitive for motion.
+			// d/c: dd/cc clears line, t/f waits for target char, else apply delete
+			// primitive for motion.
 			if (op === "d" || op === "c") {
 				if (data === op) {
 					for (const s of CLEAR_LINE) super.handleInput(s);
 					if (op === "c") this.mode = "insert";
+					return true;
+				}
+				if (data === "t" || data === "f") {
+					this.pendingOp = (op + data) as "dt" | "df" | "ct" | "cf";
 					return true;
 				}
 				const seq = DELETE_FOR_MOTION[data];
@@ -167,6 +177,34 @@ class ModalEditor extends CustomEditor {
 					if (op === "c") this.mode = "insert";
 				}
 				return true; // swallow even on unknown motion, like vim
+			}
+
+			// dt/df/ct/cf: data is the target char. Single-line, forward only.
+			// Uses setText for one undo step (pi's forward-delete pushes one
+			// snapshot per char). Cursor is restored via direct state poke;
+			// safe because pi's UndoStack deep-clones on push (structuredClone),
+			// so mutating state after setText doesn't corrupt the snapshot.
+			if (op === "dt" || op === "df" || op === "ct" || op === "cf") {
+				if (data.length === 1 && data.charCodeAt(0) >= 32) {
+					const { line, col } = this.getCursor();
+					const lines = this.getLines();
+					const lineText = lines[line] ?? "";
+					const idx = lineText.indexOf(data, col + 1);
+					if (idx !== -1) {
+						const inclusive = op === "df" || op === "cf";
+						const endCol = inclusive ? idx + 1 : idx;
+						const newLines = lines.slice();
+						newLines[line] = lineText.slice(0, col) + lineText.slice(endCol);
+						this.setText(newLines.join("\n"));
+						const editorState = (this as unknown as {
+							state: { cursorLine: number; cursorCol: number };
+						}).state;
+						editorState.cursorLine = line;
+						editorState.cursorCol = col;
+					}
+				}
+				if (op === "ct" || op === "cf") this.mode = "insert";
+				return true;
 			}
 
 			// gu/gU: capture region via cursor diff, delete, re-insert transformed.
@@ -235,16 +273,12 @@ class ModalEditor extends CustomEditor {
 		const lines = super.render(width);
 		if (lines.length === 0) return lines;
 
-		// Add mode indicator to bottom border (LOCAL: left-aligned with leading border char)
-		const label = this.mode === "normal" ? " NORMAL " : " INSERT ";
-		const last = lines.length - 1;
-		if (visibleWidth(lines[last]!) >= label.length + 1) {
-			lines[last] =
-				truncateToWidth(lines[last]!, 1, "") +
-				label +
-				truncateToWidth(lines[last]!, width - 1 - label.length, "");
-		}
-		return lines;
+		// LOCAL: render mode label as a separate line below editor + autocomplete
+		// list. super.render() emits autocomplete after the bottom border (see
+		// pi-tui editor.js render()), so appending here keeps the label visually
+		// pinned to the bottom regardless of the popup state.
+		const label = this.mode === "normal" ? "NORMAL" : "INSERT";
+		return [...lines, ` ${label}`];
 	}
 }
 

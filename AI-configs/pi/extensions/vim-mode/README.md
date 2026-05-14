@@ -17,8 +17,10 @@ motions, and one-shot commands.
 
 - Motions: `h` `j` `k` `l` `0` `$` `w` `W` `b` `B` `e` `E`
 - Edits: `x` `D` `C` `S` `s` `~`
-- Operators: `d{motion}` / `c{motion}` over `w` `b` `h` `l` `0` `$`;
+- Operators: `d{motion}` / `c{motion}` over `w` `b` `e` `h` `l` `0` `$`;
   `dd` / `cc` for whole-line
+- Char search: `dt<char>` / `df<char>` / `ct<char>` / `cf<char>`
+  (forward, single-line)
 - Case ops: `gu{motion}` / `gU{motion}`
 - Open lines: `o` `O`
 - Append: `A` `I`
@@ -35,6 +37,10 @@ Symlinked via the whole-dir extension link set up in
   do not emit ctrl+_ at all; mapping falls flat there.
 - Word motions (`w` `b` `e` and their capital variants) rely on pi binding
   `alt+left` / `alt+right` to word-step. If those are remapped, motions break.
+- `dw` / `dW` send the kitty CSI-u form `\x1b[100;3u` for `alt+d`, not the
+  legacy `\x1bd`. pi's key matcher (`pi-tui/dist/keys.js`) rejects
+  `\x1b<letter>` when the kitty keyboard protocol is active (kitty, wezterm,
+  ghostty, foot). CSI-u matches in both modes.
 - `e` / `E` is approximated as `word-right` then `left-one-char` because pi has
   no native "end-of-word" primitive. Off-by-one near punctuation runs is
   possible.
@@ -76,6 +82,17 @@ No editor primitive for "toggle case at cursor", so `~` reads via `getLines()`
 mutation is the cheapest path; the alternative (sequence-only) would need a
 new pi primitive.
 
+### `dt`/`df` use `setText` + direct cursor state poke
+
+pi's `handleForwardDelete` pushes one undo snapshot per char, so the natural
+implementation (loop N forward-deletes) creates N undo steps. To get one undo
+step, `dt`/`df` build the modified buffer text and call `setText` (single
+snapshot), then restore the cursor via direct mutation of `state.cursorLine`
+/ `state.cursorCol`. Safe because pi's `UndoStack.push` deep-clones via
+`structuredClone`, so post-`setText` mutation doesn't corrupt the snapshot.
+This is the only place we touch private editor state; lifted instead of
+walking visual lines with key sequences (which break under word wrap).
+
 ### No tests
 
 Personal fork, manually exercised. Add tests if the operator state machine
@@ -84,7 +101,14 @@ grows.
 ## Limitations
 
 - No visual mode, no registers, no marks, no `.` repeat.
-- No `f` / `t` / `F` / `T` char-search motions.
+- No standalone `f` / `t` / `F` / `T` char-search motions (only as `d`/`c`
+  operator targets, forward only).
+- No `i` / `a` text objects (`diw`, `da"`, etc).
 - No counts (e.g. `3w`, `5dd`).
 - `g` prefix only resolves to `gu` / `gU`. `gg` / `G` not implemented.
+- `d{motion}` / `c{motion}` only over `w` `b` `e` `h` `l` `0` `$` (plus `dd`/`cc`).
+- `de` / `dE` are aliased to `dw` / `dW` (pi has no "to end of word" primitive).
+  They eat trailing whitespace, unlike real vim `de`.
+- `dt`/`df`/`ct`/`cf` are forward + single-line only. `dT`/`dF` (backward) not
+  implemented.
 - Word definition follows pi (single rule), not vim's word/WORD split.
