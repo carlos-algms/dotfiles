@@ -92,8 +92,6 @@ ln -s $(pwd)/AI-configs/claude/commands             ~/.pi/agent/prompts
 
 ln -s $(pwd)/AI-configs/pi/agent/settings.json      ~/.pi/agent/settings.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp.json           ~/.pi/agent/mcp.json
-ln -s $(pwd)/AI-configs/pi/agent/mcp-work.json      ~/.pi/agent/mcp-work.json
-ln -s $(pwd)/AI-configs/pi/agent/mcp-personal.json  ~/.pi/agent/mcp-personal.json
 
 ln -s $(pwd)/AI-configs/pi/extensions               ~/.pi/agent/extensions
 ```
@@ -122,6 +120,12 @@ Notes:
 
 - Pi rewrites `settings.json` (e.g., `lastChangelogVersion`) at runtime; expect
   occasional staged diffs.
+- MCP servers (work + personal) live in a single `mcp.json`. Split was reverted
+  until https://github.com/nicobailon/pi-mcp-adapter/pull/56 lands (adds
+  extension-contributed MCP server definitions). Revisit once merged.
+- Need isolation now? Use a second pi home dir via env var, e.g.
+  `PI_CONFIG_DIR=~/.pi-work pi` with its own `mcp.json` symlink. One folder per
+  context, no merge needed.
 
 ## crush AI cli
 
