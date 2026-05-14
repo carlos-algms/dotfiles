@@ -1,10 +1,13 @@
 ---
 name: personal-wiki
 description: >
-  Save durable, reusable knowledge to the Obsidian vault wiki at `100-wiki/`.
-  Use when the user asks to save, store, or ingest knowledge to the wiki.
-  Triggers on: "save to wiki", "add to wiki", "wiki this", "turn this into
-  knowledge", "save as knowledge", "save knowledge", "document in wiki".
+  MANDATORY for any wiki interaction at `100-wiki/`: read, search, check,
+  browse, cite, cross-reference, save, update. Precedence over `obsidian:*`
+  when wiki is the target. Load before any vault Grep/Glob/Obsidian CLI
+  scoped to wiki. Triggers: "my wiki", "the wiki", "personal wiki",
+  "100-wiki", "check/search/read/browse my wiki", "what do I have on",
+  "do I have notes on", "wiki page about", "save to wiki", "add to wiki",
+  "wiki this", "document in wiki".
 ---
 
 # Personal Wiki
