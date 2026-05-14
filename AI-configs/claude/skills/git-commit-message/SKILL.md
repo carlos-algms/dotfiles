@@ -31,7 +31,14 @@ config, related slash commands) defer here.
 
 ## Format
 
-**Conventional commit, bullet body. No prose paragraphs.**
+**Format depends on position in branch.**
+
+- **First commit of a branch**: conventional commit with `type(scope): subject`,
+  optional bullet body.
+- **All subsequent commits on the branch**: one-line subject only, no
+  type/scope, no body.
+
+### First commit (type/scope)
 
 ```markdown
 type(scope): subject
@@ -52,6 +59,30 @@ Rules:
 - **Body length**: each line ≤72 chars.
 - **Standard markdown only.** No em-dashes, curly quotes, special characters.
 - **Single-change commit**: subject only, no body.
+
+### Subsequent commits (one-liner)
+
+- Imperative mood, ≤70 chars.
+- **FORBIDDEN: `type(scope):` prefix.** No exceptions. Not `fix(ui):`, not
+  `docs(adr):`, not `chore:`. Bare imperative subject only.
+- No body.
+- One change per commit; if scope grows, split into multiple one-liners.
+
+**How to detect "first commit of a branch"**: the branch has no commits ahead of
+its base (default branch). Check with `git rev-list --count <base>..HEAD` - `0`
+means the next commit is the first. Any other number (1, 2, 6, 50) means the
+next commit is a subsequent commit and MUST be a bare one-liner. On
+`main`/`master` itself, treat every commit as a "first commit" (use type/scope).
+
+### Red flags (subsequent commits)
+
+These thoughts mean STOP - you are about to break the rule:
+
+- "The change is meaningful enough to deserve a scope." -> No. One-liner.
+- "fix(ui) reads cleaner than the bare subject." -> No. One-liner.
+- "Conventional Commits is standard, surely it applies here." -> No. One-liner.
+- "Squash-merge will drop it anyway, doesn't matter." -> No. One-liner.
+- "Just this one needs a type." -> No. One-liner.
 
 ### Type
 
@@ -98,7 +129,15 @@ Usage:
 
 ## Workflow
 
-1. **Determine scope of changes.**
+1. **Determine branch position. ALWAYS run `git rev-list --count <base>..HEAD`
+   before composing.**
+   - `0` -> first commit. Use `type(scope): subject` + optional bullet body.
+   - Any other value -> subsequent commit. Bare one-liner, no type, no scope,
+     no body. The forbidden-prefix rule from "Subsequent commits" applies.
+   - Skipping this check is the most common failure mode. State the count in
+     chat before composing.
+
+2. **Determine scope of changes.**
    - Staged files exist: use those only.
    - Nothing staged: ask whether to stage all modified, or to base the message
      on the full branch diff vs default branch.
@@ -106,24 +145,27 @@ Usage:
      that file; ignore spell/lint issues; write the message to the top of that
      file instead of committing.
 
-2. **Read the full diff**, not just filenames. Understand what was introduced,
+3. **Read the full diff**, not just filenames. Understand what was introduced,
    modified, removed.
 
-3. **Check branch context.** If on a feature branch, scan prior commits in the
+4. **Check branch context.** If on a feature branch, scan prior commits in the
    branch (not on main) to understand the progression and avoid duplicating
    intent.
 
-4. **Compose message** per format above.
+5. **Compose message** per format above. Re-check: does the format match the
+   branch position from step 1? Subsequent commit with `type(scope):` prefix is
+   a bug, not a stylistic preference.
 
-5. **Show, then commit** (visibility gate):
-   - Output the full message as a markdown code block in chat.
+6. **Show, then commit** (visibility gate):
+   - Output the full message as a markdown fenced code in chat, with proper
+     markdown type for highlights
    - Immediately call `git commit` with the same message in the same turn. Do
      NOT end the turn between message and commit.
    - **Never** commit without showing the message first.
    - **Never** show the message and end the turn without committing (unless the
      user invoked a "draft only" path; see below).
 
-6. **Pass the message via heredoc on stdin** to preserve formatting:
+7. **Pass the message via heredoc on stdin** to preserve formatting:
 
    ```bash
    git commit -F- <<'EOF'
@@ -144,7 +186,7 @@ it", "don't commit yet"):
 - If the selected file is `.git/COMMIT_EDITMSG`, apply the message to the top of
   that file instead.
 
-The visibility gate (step 5) does not apply on this path.
+The visibility gate (step 6) does not apply on this path.
 
 ## Why these rules
 
