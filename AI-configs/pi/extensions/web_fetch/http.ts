@@ -27,6 +27,8 @@ const EXT_BY_TYPE: Record<string, string> = {
   'image/gif': 'gif',
   'image/webp': 'webp',
   'image/svg+xml': 'svg',
+  'image/x-icon': 'ico',
+  'image/vnd.microsoft.icon': 'ico',
   'video/mp4': 'mp4',
   'audio/mpeg': 'mp3',
 };

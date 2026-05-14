@@ -31,9 +31,10 @@ contents in an LLM-friendly form.
   a `final-url` line when redirected before the error. Body read is gated on
   textual content-type; binary responses skip the excerpt.
 - TUI rendering folds long output by default. Collapsed view shows the first
-  22 body lines, a `... (N more lines, M total, ctrl+o to expand)` separator,
-  and the full provenance footer. `app.tools.expand` (ctrl+o) toggles to the
-  full view. The LLM always receives the unfolded content.
+  22 body lines, a `... (N more lines, M total)` truncation note, the full
+  provenance footer, and a separate `ctrl+o to expand` key hint at the bottom.
+  `app.tools.expand` (ctrl+o) toggles to the full view. The LLM always
+  receives the unfolded content.
 - `renderCall` displays `web_fetch <url>` while the request is in flight.
 
 ## Installation

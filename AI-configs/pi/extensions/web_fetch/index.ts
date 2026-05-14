@@ -192,10 +192,11 @@ export default function piWebFetchTool(pi: ExtensionAPI) {
 
         const summary = [
           `Binary/unsupported content saved to disk.`,
+          `URL: ${url.href}`,
+          finalUrlChanged ? `Final URL: ${finalUrl}` : null,
           `Path: ${filePath}`,
           `Content-Type: ${ct.type}`,
           `Bytes: ${bytes}`,
-          finalUrlChanged ? `Final URL: ${finalUrl}` : null,
         ]
           .filter(Boolean)
           .join('\n');

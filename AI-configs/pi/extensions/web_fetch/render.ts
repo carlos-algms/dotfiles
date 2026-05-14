@@ -76,6 +76,10 @@ export function renderResult(
   const HEAD_LINES = 22;
   const lines = text.split('\n');
   const footerStart = findFooterStart(lines);
+  const expandHint = theme.fg(
+    'muted',
+    keyHint('app.tools.expand', 'to expand'),
+  );
 
   if (footerStart === -1) {
     if (lines.length <= HEAD_LINES) {
@@ -84,8 +88,11 @@ export function renderResult(
     }
     const head = lines.slice(0, HEAD_LINES).join('\n');
     const hidden = lines.length - HEAD_LINES;
-    const hint = `... (${hidden} more lines, ${lines.length} total, ${keyHint('app.tools.expand', 'to expand')})`;
-    comp.setText(`${head}\n\n${theme.fg('muted', hint)}`);
+    const midHint = theme.fg(
+      'muted',
+      `... (${hidden} more lines, ${lines.length} total)`,
+    );
+    comp.setText(`${head}\n\n${midHint}\n\n${expandHint}`);
     return comp;
   }
 
@@ -102,8 +109,11 @@ export function renderResult(
 
   const head = body.slice(0, HEAD_LINES).join('\n');
   const hidden = body.length - HEAD_LINES;
-  const hint = `... (${hidden} more lines, ${body.length} total, ${keyHint('app.tools.expand', 'to expand')})`;
-  comp.setText(`${head}\n\n${theme.fg('muted', hint)}\n\n${footer}`);
+  const midHint = theme.fg(
+    'muted',
+    `... (${hidden} more lines, ${body.length} total)`,
+  );
+  comp.setText(`${head}\n\n${midHint}\n\n${footer}\n\n${expandHint}`);
   return comp;
 }
 
