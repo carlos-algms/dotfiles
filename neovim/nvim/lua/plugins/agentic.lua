@@ -39,6 +39,12 @@ local M = {
                     ),
                 },
             },
+
+            ["pi-acp"] = {
+                name = "Pi ACP",
+                command = "pi-acp",
+                env = {},
+            },
         }
 
         if vim.g.is_ssh and os.getenv("CARLOS_ANTHROPIC_API_KEY") ~= nil then
