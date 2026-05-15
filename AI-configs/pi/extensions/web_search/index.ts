@@ -15,19 +15,17 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
     name: 'web_search',
     label: 'Web Search',
     description:
-      'Search the web across multiple providers (LangSearch, Tavily, Exa, Brave, Marginalia) ' +
-      'in parallel, dedupe by URL, and return markdown-formatted results with per-result ' +
-      'source tags. Runs the top 2 priority backends by default; falls through to lower ' +
-      'priority on quota exhaustion or failure. Provide `provider` to force a single ' +
-      'backend (override falls back to the queue if that backend is unavailable).',
+      'Search the web for open-ended questions, current facts, keyword lookups, ' +
+      'documentations, definitions, and source discovery.',
     promptSnippet:
-      'Search the web via multiple providers in parallel with auto-fallback and dedupe.',
+      'Search the web via parallel providers with fallback and ai dedupe and returns Markdown results.',
     promptGuidelines: [
-      'Use web_search for any open-ended web lookup instead of bash curl or guessing URLs. The tool already runs 2 providers in parallel and dedupes - do not call it repeatedly with rephrased queries to "compare backends".',
-      'Set `provider` on web_search only when comparing a known backend or when one backend uniquely suits the query (e.g. Marginalia for indie blogs, Exa for semantic / find-similar). Default fan-out covers most queries.',
-      'Read result snippets before calling web_fetch. Skip web_fetch when the snippet answers the query.',
-      'Use `gh` for github.com lookups. web_search is for open-ended web research, not direct-source fetches.',
-      'Provider overrides: `tavily` general web + RAG retrieval; `exa` semantic, find-similar, example URL; `brave` independent (non-Google/Bing) index, mainstream English queries; `langsearch` Bing-derived broad search; `marginalia` indie web and small blogs, skip for news.',
+      'Use web_search for open-ended web lookup; prefer web_search over curl or guessed URLs.',
+      'web_search searches 2 providers in parallel and dedupes, do not repeat the same query to compare backends.',
+      'Use web_search again with better keywords when results are weak or confidence is low.',
+      'You can use web_fetch on web_search result URLs when summaries are insufficient or user ask for details',
+      'Use gh for github.com lookups; web_search is not for direct-source fetches.',
+      'Use web_search provider only for backend debugging or clear fit: exa code/docs/repos, semantic, find-similar, papers; tavily current web, RAG snippets, extract/crawl; brave independent mainstream; langsearch free broad; marginalia indie/small-web long-tail.',
     ],
     parameters: Type.Object({
       query: Type.String({
@@ -187,10 +185,7 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         return out.join('\n');
       });
 
-      const hint = theme.fg(
-        'muted',
-        keyHint('app.tools.expand', 'to expand'),
-      );
+      const hint = theme.fg('muted', keyHint('app.tools.expand', 'to expand'));
       const parts: string[] = [folded.join('\n\n')];
       if (footerText) parts.push(footerText);
       parts.push(hint);

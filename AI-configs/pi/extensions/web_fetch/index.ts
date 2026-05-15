@@ -22,16 +22,15 @@ export default function piWebFetchTool(pi: ExtensionAPI) {
     name: 'web_fetch',
     label: 'Web Fetch',
     description:
-      'Fetch a URL (GET only) and return its content in an LLM-friendly form: ' +
-      'markdown for HTML pages (via Cloudflare Accept: text/markdown when supported, ' +
-      'otherwise via defuddle), pretty-printed JSON for JSON responses, raw text ' +
-      'for plain text, or a temp-file path for binary content. Spoofs a Chrome ' +
-      'User-Agent to reduce 403s from sites that block default HTTP clients. ' +
-      'Allows http and https only. Caps response size at 10MB.',
-    promptSnippet:
-      'Retrieve URL contents as markdown/JSON/text. GET only. Prefer over bash curl/wget.',
+      'Fetch known http/https URLs for full-page reading, source verification, ' +
+      'JSON, and plain text.',
+    promptSnippet: 'Fetch a known URL as markdown, JSON, or text.',
     promptGuidelines: [
-      'Use web_fetch to retrieve URL contents instead of bash curl/wget; it handles markdown conversion, JSON pretty-printing, bot-block workarounds, and TLS safely. Only fall back to bash for non-GET requests or when web_fetch returns an unsupported scheme/content-type error.',
+      'Use web_fetch when you already have a URL and need full page content, source verification, JSON, or plain text.',
+      'Prefer web_fetch over curl/wget for http/https GET; web_fetch converts HTML to markdown and formats JSON/text for the model.',
+      'Do not use web_fetch for topic discovery; use web_search first when you only have a topic or keywords.',
+      'Use gh, not web_fetch, for github.com repos, files, issues, PRs, releases, and API data; use web_fetch on GitHub only when gh cannot retrieve the URL.',
+      'Fall back from web_fetch to bash and curl/defuddle only for non-GET requests or unsupported schemes/content types.',
     ],
     parameters: Type.Object({
       url: Type.String({
