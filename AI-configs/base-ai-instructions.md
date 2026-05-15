@@ -295,6 +295,13 @@ sources. Never guess, never assume - fact-check before answering.
   - Skip defuddle for raw/plain text URLs (raw.githubusercontent.com, plain
     APIs).
   - Defuddle unavailable: fall back to WebFetch/curl.
+- GitHub source code:
+  - One or two direct GitHub reads are fine for small checks.
+  - Complex repo exploration requires a local clone.
+  - Clone before repeated file reads, searches, or cross-references.
+  - Prefer shallow clone unless history is required.
+  - Run `rg`, `fd`, tests, and code navigation inside the clone.
+  - Do not use repeated `curl`, `gh`, or GitHub API calls for repo browsing.
 
 # File operations
 
