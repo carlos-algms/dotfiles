@@ -2,7 +2,7 @@
 name: obsidian-mechanics
 description: >
   Personal Obsidian CLI mechanics and patterns not covered by the base
-  `obsidian:obsidian-cli` skill. Load when driving the Obsidian CLI for content
+  `obsidian-cli` skill. Load when driving the Obsidian CLI for content
   creation, file operations, vault hygiene, or version history. Triggers on:
   "search my vault", "find notes about", "show orphan notes", "find broken
   links", "rename this note", "move this note", "show note history", "restore
@@ -13,10 +13,10 @@ description: >
 # Obsidian Mechanics
 
 Personal patterns for driving the Obsidian CLI. Fills gaps in the base
-`obsidian:obsidian-cli` skill (heredoc content creation, file operations,
+`obsidian-cli` skill (heredoc content creation, file operations,
 version history, vault hygiene, direct-file fallback).
 
-**MANDATORY:** Load `obsidian:obsidian-cli` for the base CLI reference (syntax,
+**MANDATORY:** Load `obsidian-cli` for the base CLI reference (syntax,
 file targeting, common patterns).
 
 ## Vault context
@@ -366,7 +366,7 @@ obsidian base:query file="<base>" view="<view>" format=json
 Use a Base when a query is reused often (e.g. "all `type: comparison` notes
 tagged `agent-memory`"). For one-offs, shell loops are lighter.
 
-See `obsidian:obsidian-bases` for authoring `.base` files.
+See `obsidian-bases` for authoring `.base` files.
 
 ### Limits
 
@@ -448,7 +448,7 @@ daily, etc.). Per-skill rules layer on top.
 - No em-dashes (`—`) or en-dashes (`–`) - use `-`.
 - British English. No Oxford comma.
 - For OFM syntax (wikilinks, embeds, callouts, properties), see
-  `obsidian:obsidian-markdown` skill.
+  `obsidian-markdown` skill.
 - For general formatting (headings, tables, line spacing), see
   `markdown-formatting` skill.
 

@@ -1,17 +1,26 @@
 # AI Configuration
 
-Shared AI assistant configurations in `AI-configs/`. Each agent (claude, gemini,
-opencode, crush) has its own subdir following that platform's layout.
+Shared AI assistant configurations in `AI-configs/`. Cross-tool components live
+at the top, CLI-specific overrides in per-tool subdirs.
 
 - `base-ai-instructions.md` - shared instructions, symlinked globally as the
   main instructions file for each agent:
   - `~/.claude/CLAUDE.md`
   - `~/.gemini/GEMINI.md`
   - `~/.config/opencode/AGENTS.md`
+  - `~/.codex/AGENTS.md`
+  - `~/.pi/agent/AGENTS.md`
   - `.github/copilot-instructions.md` (per-repo, for Copilot)
-- Skills, commands, and agents live under `AI-configs/claude/` and are symlinked
-  into other agents (gemini, opencode) per @AI-Config-README.md.
-- See @AI-Config-README.md for the exact symlink commands per agent.
+- `skills/`, `commands/`, `agents/` are cross-tool. `~/.agents/skills/` is
+  symlinked once to `skills/`; Codex, opencode, cursor, Copilot CLI, Gemini, and
+  pi auto-discover it. Claude does not, so it gets a direct symlink. Commands
+  and agents have no cross-tool standard, so each CLI symlinks them directly.
+- `claude/` holds Claude-specific bits (`claude-settings.json`,
+  `claude-statusline.sh`, `hooks/`).
+- Third-party components (skills, agents, commands, hooks) are vendored into
+  these top-level directories via a single sync script. See ./COMPONENTS-sync.md
+  for the manifest format, run instructions, and how to add a new source.
+- See ./AI-Config-README.md for the exact symlink commands per agent.
 
 ## Pi (`pi/`)
 

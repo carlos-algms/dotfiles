@@ -1,0 +1,53 @@
+{
+  "components": [
+    {
+      "name": "defuddle",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/defuddle",
+      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+    },
+    {
+      "name": "json-canvas",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/json-canvas",
+      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+    },
+    {
+      "name": "obsidian-bases",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-bases",
+      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+    },
+    {
+      "name": "obsidian-cli",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-cli",
+      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+    },
+    {
+      "name": "obsidian-markdown",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-markdown",
+      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+    },
+    {
+      "name": "grill-with-docs",
+      "target": "skills",
+      "repo": "https://github.com/mattpocock/skills",
+      "subpath": "skills/engineering/grill-with-docs",
+      "sha": "e74f0061bb67222181640effa98c675bdb2fdaa7"
+    },
+    {
+      "name": "code-simplifier",
+      "target": "agents",
+      "repo": "https://github.com/anthropics/claude-plugins-official",
+      "subpath": "plugins/code-simplifier/agents/code-simplifier.md",
+      "sha": "b5a156b6ecd2f69c418184b7c093930ddabaf9c0"
+    }
+  ]
+}

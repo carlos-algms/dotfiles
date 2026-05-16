@@ -300,7 +300,7 @@ sources. Never guess, never assume - fact-check before answering.
 
 - On URL: retrieve and analyze.
   - Prefer fetch tool over `curl`.
-  - HTML pages (docs, blogs, SO, GitHub non-raw): use `obsidian:defuddle` skill
+  - HTML pages (docs, blogs, SO, GitHub non-raw): use `defuddle` skill
     for clean markdown and less token usage.
   - Skip defuddle for raw/plain text URLs (raw.githubusercontent.com, plain
     APIs).

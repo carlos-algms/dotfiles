@@ -1,0 +1,47 @@
+{
+  "_comment": "Vendored claude components. See ../../COMPONENTS-sync.md. Edit, then run sync-components.sh --update.",
+  "components": [
+    {
+      "name": "defuddle",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/defuddle"
+    },
+    {
+      "name": "json-canvas",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/json-canvas"
+    },
+    {
+      "name": "obsidian-bases",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-bases"
+    },
+    {
+      "name": "obsidian-cli",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-cli"
+    },
+    {
+      "name": "obsidian-markdown",
+      "target": "skills",
+      "repo": "https://github.com/kepano/obsidian-skills",
+      "subpath": "skills/obsidian-markdown"
+    },
+    {
+      "name": "grill-with-docs",
+      "target": "skills",
+      "repo": "https://github.com/mattpocock/skills",
+      "subpath": "skills/engineering/grill-with-docs"
+    },
+    {
+      "name": "code-simplifier",
+      "target": "agents",
+      "repo": "https://github.com/anthropics/claude-plugins-official",
+      "subpath": "plugins/code-simplifier/agents/code-simplifier.md"
+    }
+  ]
+}

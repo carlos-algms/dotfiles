@@ -2,8 +2,8 @@
 name: personal-wiki
 description: >
   MANDATORY for any wiki interaction at `100-wiki/`: read, search, check,
-  browse, cite, cross-reference, save, update. Precedence over `obsidian:*`
-  when wiki is the target. Load before any vault Grep/Glob/Obsidian CLI
+  browse, cite, cross-reference, save, update. Precedence over `obsidian-*`
+  skills when wiki is the target. Load before any vault Grep/Glob/Obsidian CLI
   scoped to wiki. Triggers: "my wiki", "the wiki", "personal wiki",
   "100-wiki", "check/search/read/browse my wiki", "what do I have on",
   "do I have notes on", "wiki page about", "save to wiki", "add to wiki",
@@ -21,7 +21,7 @@ curates sources, directs analysis, asks questions.
 - `obsidian-mechanics` - vault context, file ops, sources convention, vault
   writing conventions.
 - `markdown-formatting` - personal markdown formatting rules.
-- `obsidian:obsidian-markdown` - OFM syntax (wikilinks, callouts, etc.).
+- `obsidian-markdown` - OFM syntax (wikilinks, callouts, etc.).
 
 ## Folder layout
 

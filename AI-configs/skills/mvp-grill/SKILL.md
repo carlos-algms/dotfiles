@@ -31,6 +31,21 @@ Run this before every user-facing question, report, or recommendation.
 3. Resolve it through reading, searching, fetching, or deciding
 4. Emit only verified facts, locked defaults, or real blockers
 5. Never turn exploration permission into a grill question
+6. Verify first, then ask. Never offer the user a choice between
+   "verify X" and "skip X". If verification is cheap and reversible, do
+   it before drafting the question.
+
+### Forbidden question shapes
+
+These patterns are lazy. Never emit them:
+
+1. "Want me to verify <X> before deciding, or <skip>?"
+2. "Should I check <X> first, or assume <Y>?"
+3. "Do you want me to read/inspect/test <X>?"
+4. "Confirm <X> first, or proceed?"
+
+If you catch yourself drafting any of these, stop. Do the verification.
+Then ask a real blocker, or close with a locked default.
 
 ## 1. Establish scope
 

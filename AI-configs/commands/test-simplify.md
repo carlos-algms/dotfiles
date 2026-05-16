@@ -32,7 +32,7 @@ Give it the file path, and also give it the following instructions:
 - Focus on delivering clean, concise test code without explanatory overhead.
 
 <system-reminder>
-You MUST use the Task tool with subagent_type="code-simplifier:code-simplifier" 
+You MUST use the Task tool with subagent_type="code-simplifier" 
 to launch this as a separate agent. 
 DO NOT execute the simplification in the current context.
 </system-reminder>

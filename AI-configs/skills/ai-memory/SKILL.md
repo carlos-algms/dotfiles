@@ -21,7 +21,7 @@ For reusable wiki-style knowledge, use `personal-wiki` instead.
 - `obsidian-mechanics` - vault context, file ops, sources convention, vault
   writing conventions.
 - `markdown-formatting` - personal markdown formatting rules.
-- `obsidian:obsidian-markdown` - OFM syntax (wikilinks, callouts, etc.).
+- `obsidian-markdown` - OFM syntax (wikilinks, callouts, etc.).
 
 ## Where to save
 
@@ -76,7 +76,7 @@ Rules:
 - Title as H1, concise and descriptive.
 - Include the date (`2026-03-17` format) in the H1 or first paragraph.
 - Body: findings, key decisions, links, code snippets as needed.
-- Use OFM (wikilinks, callouts) per `obsidian:obsidian-markdown`.
+- Use OFM (wikilinks, callouts) per `obsidian-markdown`.
 - Reference links and file links with line numbers when available (GitHub,
   etc.).
 - Investigations must be reproducible: include queries, scripts, commands,

@@ -44,8 +44,7 @@ with the exclusion goes in a single closing line, not as smuggled bullets:
 Launch the subagent:
 
 - Tool: Agent
-- subagent_type: `code-simplifier:code-simplifier` (plugin-prefixed, exact
-  string - the bare `code-simplifier` name fails with "Agent type not found")
+- subagent_type: `code-simplifier`
 - Mode: state `apply` or `report` in the first line of the prompt
 - Output shape: include the five-header template above in the prompt
 - Exclusions: forward any user exclusions verbatim and require strict honor
@@ -72,7 +71,7 @@ Check CLAUDE.md/AGENTS.md for project-specific conventions before making
 changes.
 
 <system-reminder>
-You MUST use the Agent tool with subagent_type="code-simplifier:code-simplifier"
+You MUST use the Agent tool with subagent_type="code-simplifier"
 to launch this as a separate agent.
 DO NOT execute the simplification in the current context.
 </system-reminder>
