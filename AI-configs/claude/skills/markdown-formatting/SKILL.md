@@ -1,175 +1,85 @@
 ---
 name: markdown-formatting
 description: >
-  Enforces strict Markdown formatting standards for ALL Markdown file
-  operations. Use when creating, writing, or editing ANY Markdown file (.md),
-  regardless of purpose. Triggers include: implementation plans, plan-mode
-  output written to disk, plan files, design docs, specs, RFCs, ADRs,
-  documentation, READMEs, notes, reports, changelogs, or any agent-authored
-  `.md` content. Ensures consistent formatting with 80-character line limit,
-  proper spacing, correct list syntax, and clean hierarchical structure.
+  Load before any `.md` or `.markdown` operation: create, edit, append, rewrite,
+  review, format, or generate Markdown. Applies to READMEs, docs, notes,
+  reports, specs, RFCs, ADRs, plans, changelogs, and agent-authored Markdown.
+  Required because Markdown style is file-wide, not task-local.
 ---
 
-# Markdown Formatting Standards
+# Markdown formatting
 
-Enforce consistent, professional Markdown formatting across all files.
+Apply these rules to every Markdown file you create or modify.
 
-## Core Formatting Rules
+## Baseline
 
-Apply these rules to **every Markdown file** you create or modify:
+- Follow CommonMark/GFM syntax
+- Prefer markdownlint-compatible formatting
+- Match stricter local project conventions when present
+- Keep docs short, direct, and source-readable
+- Preserve existing content unless the task asks for content changes
 
-### Line Length
+## Lines and spacing
 
-- **80 character maximum per line**
-- Break long sentences naturally at word boundaries
-- URLs and code blocks may exceed 80 chars when necessary
-- Use soft wrapping for readability
+- Wrap prose at 80 characters
+- Let URLs and code exceed 80 characters when needed
+- Use one blank line around headings, lists, tables, and fences
+- Use one blank line between paragraphs
+- Remove trailing whitespace
+- End files with one newline
 
-### Spacing
+## Headings
 
-- **One blank line** between paragraphs
-- **One blank line** before and after headings
-- **One blank line** before and after code blocks
-- **One blank line** before and after lists
-- **No trailing whitespace** at line ends
-- **Single newline** at end of file
+- Use one H1 per file
+- Use ATX headings, (`#`, `##`, ...)
+- Add one space after `#`
+- Do not skip levels
+- Use sentence case
+- Use unique, complete names
+- Do not end headings with punctuation
 
-### Headings
+## Lists
 
-- Use ATX-style headings (`#`, `##`, `###`)
-- Space after hash marks: `## Heading` not `##Heading`
-- Only one H1 (`#`) per document (typically title)
-- Hierarchical structure: don't skip levels (## → ### not ## → ####)
-- Sentence case preferred: "Core principles" not "Core Principles"
-- No punctuation at end of headings
-- Don't add punctuation in existing lines, if not asked to.
+- Use `-` for unordered lists
+- Use ordered lists only when order matters
+- Use sequential numbers for ordered lists
+- Renumber ordered lists after inserting, deleting, or moving items
+- Do not use repeated `1.` for ordered lists, use sequenced numbers
+- Do not mix ordered-list styles inside one list
+- Use one space after list markers
+- Indent nested unordered items by two spaces
+- Indent nested ordered items to align with parent text
+- Do not end list items with punctuation
+- Keep punctuation only when required by syntax or quoted text
+- Do not create one-item lists
 
-### Lists
+## Code
 
-#### Unordered Lists
+- Use fenced code blocks
+- Declare language on every fence
+- Use `text` for plain text
+- Use `markdown`, not `md`
+- Use `tsx` for JSX or React
+- Use short identifiers otherwise: `ts`, `js`, `py`, `sh`, `json`
+- For nested fences, make the outer fence longer than any inner fence
+- Use four backticks outside a block that contains triple-backtick fences
+- Increase outer fence length again for deeper nesting
+- Set outer language to the content shown, usually `markdown` or `text`
+- Never escape inner backticks
+- Use inline code for commands, paths, symbols, and file extensions
 
-- Use `-` (dash) for bullet points consistently
-- Space after marker: `- Item` not `-Item`
-- Indent nested items with 2 spaces
+## Links
 
-```markdown
-- First level
-  - Second level
-    - Third level
-```
+- Use descriptive link text
+- Use inline links for single-use URLs
+- Use reference links for repeated URLs
+- Wrap bare URLs in angle brackets when the URL is the link text
 
-#### Ordered Lists
+## Tables
 
-- Use `1.` for all items (auto-numbering)
-- Space after marker: `1. Item` not `1.Item`
-- Indent nested items with 3 spaces (align with parent text)
-
-```markdown
-1. First item
-   1. Nested item
-   1. Another nested item
-1. Second item
-```
-
-#### Task Lists (Checkboxes)
-
-- Use `- [ ]` for incomplete tasks
-- Use `- [x]` for completed tasks
-- Space inside brackets and after closing bracket
-- Correct: `- [ ] Task` or `- [x] Done`
-- Wrong: `- []Task`, `-[ ]Task`, `- [X] Done`
-
-### Code Blocks
-
-- Use fenced code blocks with **short** language identifiers
-- Common identifiers: `ts`, `tsx`, `js`, `jsx`, `py`, `bash`, `sh`, `json`
-- **EXCEPTION**: For Markdown blocks, use the full `markdown` identifier, not
-  `md`. The treesitter `markdown` parser does not register `md` as an alias, so
-  highlighting breaks; other languages work fine with their short forms.
-- **ALWAYS use `tsx`** when code contains JSX or React components
-- Examples:
-
-````markdown
-```ts
-const example = 'code here';
-```
-````
-
-````markdown
-```tsx
-export function Button({ label }: { label: string }) {
-  return <button>{label}</button>;
-}
-```
-````
-
-- Inline code uses single backticks: `variable` or `function()`
-- No language identifier for plain text blocks
-- **Nested fences**: outer fence uses 4 backticks when inner block uses 3.
-  Never escape inner backticks with `\`.
-
-````markdown
-```tasks
-not done
-```
-````
-
-### Links and References
-
-- Inline links: `[text](url)` with no space between `]` and `(`
-- Reference links allowed for repeated URLs
-- Descriptive link text (not "click here")
-
-### Emphasis
-
-- **Bold**: `**text**` (always use double asterisks)
-- _Italic_: `_text_` (always use underscores)
-
-### Horizontal Rules
-
-- Use `---` (three dashes) on its own line
-- Blank line before and after
-
-### Tables
-
-- **Align all columns**: every `|` in the same column must be
-  vertically aligned across all rows
-- **Column width**: each column width is determined by its
-  widest cell content (header or data), not by the header alone
-  - Scan all rows to find the longest content per column, then
-    size every cell in that column to match
-- Pad every cell with exactly one space on each side
-- Separator dashes fill the full column width
-- Left-alignment by default; use `:---:` for center, `---:` for
-  right only when needed
-- Leading and trailing `|` required on every row
-- One blank line before and after tables
-
-## Content Guidelines
-
-### Clarity and Conciseness
-
-- No filler words or storytelling
-- Short, clear sentences
-- Active voice preferred
-- One idea per paragraph
-
-### Structure
-
-- Logical flow from general to specific
-- Related information grouped together
-- Consistent section ordering across similar documents
-
-## When to Apply
-
-**ALWAYS** apply these formatting rules when:
-
-- Creating new Markdown files
-- Editing existing Markdown files
-- Writing content to `.md` files
-- Generating documentation
-- Creating plans, notes, or reports
-- Modifying README files
-
-**NO EXCEPTIONS**: These rules apply regardless of file purpose or content type.
-
+- Use tables only for repeated comparable values
+- Prefer lists when values do not vary by row
+- Align pipes by column
+- Pad cells with one space
+- Include leading and trailing pipes
+- Use one blank line before and after tables
