@@ -250,6 +250,16 @@ Four-line summary. Concrete rules live in the sections referenced.
   existing functionality. Reuse beats reinvent, even when the existing helper
   needs a small extension.
 
+## Composition boundaries
+
+- Keep code together when it changes for the same reason.
+- Extract code when it changes for a different reason.
+- Prefer the existing module that owns the behavior.
+- Create a new helper only when it removes current duplication or clarifies
+  current ownership.
+- Do not create interfaces, classes, or extension points for one implementation
+  unless the boundary already exists.
+
 ## Goal-driven execution (sub-rules)
 
 Convert the task into verifiable goals before coding:
