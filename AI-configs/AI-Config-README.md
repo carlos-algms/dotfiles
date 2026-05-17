@@ -96,6 +96,14 @@ Notes:
 - Codex auto-creates `.system/` for managed skills under each skills directory
   it reads. With the cross-tool `~/.agents/skills/` symlink pointing at the
   repo, that folder lands at `AI-configs/skills/.system/` and is gitignored.
+- **Known bug**: Codex does NOT follow directory symlinks for `~/.codex/prompts`
+  or skills. The symlink commands above leave commands invisible to Codex
+  (no autocomplete, `no matches` on `/prompts:`). Workaround: real dir + copy
+  files, or per-file symlinks. Tracking:
+  [openai/codex#4383](https://github.com/openai/codex/issues/4383),
+  [#3637](https://github.com/openai/codex/issues/3637),
+  [#5040](https://github.com/openai/codex/issues/5040),
+  [#11314](https://github.com/openai/codex/issues/11314).
 
 ## pi
 
