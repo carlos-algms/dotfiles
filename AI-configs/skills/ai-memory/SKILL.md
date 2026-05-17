@@ -52,8 +52,6 @@ type: project | reference | fleeting
 status: active | completed | archived
 aliases:
   - Alternate Name
-related:
-  - '[[filename-without-ext|Display Title]]'
 ---
 ```
 
@@ -63,9 +61,10 @@ Rules:
   macOS/Windows forbid `:` in filenames. Use `-` instead.
 - **No `sources` in frontmatter** - see Sources convention in
   `obsidian-mechanics`.
+- **No `related`** - use inline `[[wikilinks]]` in the body and the `## Sources`
+  section.
 - **Tags use nested hierarchy** - `project/dotfiles`, `testing/e2e`. Not flat
   tags.
-- **`related` uses pipe wikilinks** - `"[[filename|Display Title]]"`.
 - **`date`** from file creation date (filesystem birthtime or filename date
   prefix).
 - **`type`**: `project` for project notes, `reference` for reusable snippets,
