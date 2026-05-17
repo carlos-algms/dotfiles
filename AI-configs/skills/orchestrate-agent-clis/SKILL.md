@@ -2,11 +2,12 @@
 name: orchestrate-agent-clis
 description: >
   Execute and orchestrate multiple AI agent CLIs (Gemini, Codex, Cursor, Claude
-  Code) for getting alternative opinions, comparing approaches, or leveraging
-  different AI models' strengths. Use when the user explicitly mentions agent
-  names like "ask gemini", "ask cursor", "ask codex", "ask pi", "use composer",
-  "use pi", "try grok", or when needing diverse perspectives on complex
-  problems, alternative implementation approaches, or multi-agent collaboration.
+  Code, Pi) for getting alternative opinions, comparing approaches, or
+  leveraging different AI models' strengths. Use when the user explicitly
+  mentions agent names like "ask gemini", "ask cursor", "ask codex", "ask pi",
+  "use composer", "use pi", "try grok", or when needing diverse perspectives on
+  complex problems, alternative implementation approaches, or multi-agent
+  collaboration.
 ---
 
 # Orchestrate Agent CLIs
@@ -46,17 +47,19 @@ Full-featured Claude agent with tool access.
 cursor-agent --model=MODEL -p "<prompt>"
 ```
 
-Available models:
+Available models (not extensive, favorites):
 
-- `composer-2` preferred for multi-file edits, also fast
-- `composer-2-fast` default, fastest composer variant
-- `claude-opus-4-7-thinking-high` Opus 4.7 1M ctx, strongest reasoning
-- `claude-4.6-sonnet-medium-thinking` Sonnet 4.6 1M ctx with thinking
-- `gemini-3.1-pro` better for code investigation, planning and web research
-- `gemini-3-flash` faster, good for simple tasks
-- `grok-4.3` creative solutions, unconventional approaches (1M ctx)
-- `gpt-5.4-xhigh` High reasoning
-- `gpt-5.5-high` GPT-5.5 1M high reasoning
+| Alias         | Model                                 | Use                                        |
+| ------------- | ------------------------------------- | ------------------------------------------ |
+| `composer`    | `composer-2-fast`                     | default, fastest composer variant          |
+| `codex`       | `gpt-5.3-codex-xhigh-fast`            | extra-high coding                          |
+| `opus`        | `claude-opus-4-7-thinking-xhigh-fast` | 1M ctx                                     |
+| `opus max`    | `claude-opus-4-7-thinking-max`        | 1M ctx, max thinking                       |
+| `sonnet`      | `claude-4.6-sonnet-medium-thinking`   | 1M ctx, medium thinking                    |
+| `gemini`      | `gemini-3.1-pro`                      | code investigation, planning, web research |
+| `gemini fast` | `gemini-3-flash`                      | simple tasks                               |
+| `grok`        | `grok-4.3`                            | creative solutions, unconventional, 1M ctx |
+| `gpt`         | `gpt-5.5-extra-high`                  | 1M extra-high reasoning                    |
 
 Note: If these models fail, you can get the list of available models by running
 this command, but don't use head or tail, otherwise you'll cut out important
@@ -74,9 +77,16 @@ pi -p "<prompt>"
 
 Multi-provider agent (Anthropic, OpenAI, Google, xAI, etc)
 
-- `--model claude-opus-4-7` strongest reasoning (1M ctx).
-- `--model claude-sonnet-4-6` fast, 1M ctx.
-- `--model gpt-5.4-xhigh` high reasoning via OpenAI.
+Model is optional for Pi. Omit `--model` for the default.
+
+| Alias             | Model flag                  | Use                       |
+| ----------------- | --------------------------- | ------------------------- |
+| `opus`, `default` | omit `--model`              | default general reasoning |
+| `sonnet`          | `--model claude-sonnet-4-6` | fast 1M ctx               |
+| `haiku`           | `--model claude-haiku-4-5`  | fastest simple tasks      |
+| `codex`           | `--model gpt-5.3-codex`     | code-focused OpenAI       |
+| `gpt`             | `--model gpt-5.5`           | latest GPT via OpenAI     |
+
 - `--thinking <off|minimal|low|medium|high|xhigh>` controls reasoning depth.
 - `--tools read,grep,find,ls` for read-only runs.
 - `--continue` / `--resume` to reuse sessions.
