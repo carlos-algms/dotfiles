@@ -2,8 +2,7 @@
 """Parse a WebVTT subtitle file into JSON segments matching transcribe.sh output.
 
 YouTube auto-subs emit rolling-duplicate cues; we dedupe consecutive identical
-cues and merge their time ranges. (We only ever fetch manual subs in this
-skill, but the dedupe is harmless and copied verbatim from upstream.)
+cues and merge their time ranges.
 
 Output: [{"start": 0.0, "end": 2.4, "text": "..."}, ...] to stdout or <out>.
 """

@@ -1,9 +1,9 @@
 ---
 name: video-summary
 description:
-  Summarize a video (URL or local path) by downloading it, extracting frames,
-  transcribing audio locally with whisperkit-cli, and producing a TLDR + verdict
-  + key moments. Use when the user pastes a YouTube/Vimeo/X/etc URL, points at a
+  Summarize a video (URL or local path) by pulling captions first, falling back
+  to audio-only transcription, and optionally extracting frames for visual
+  summaries. Use when the user pastes a YouTube/Vimeo/X/etc URL, points at a
   local video file, or asks to summarize, watch, or extract takeaways from a
   video. Triggers on "summarize this video", "what's in this video", "watch
   this", URLs ending in /watch, /shorts, common video extensions
@@ -15,10 +15,10 @@ allowed-tools:
 
 # video-summary
 
-Local-first video summarizer. yt-dlp downloads + pulls manual subs; ffmpeg
-extracts frames; whisperkit-cli transcribes audio on-device when manual subs are
-missing. A haiku subagent reads the frames + transcript and returns the summary
-so you do not eat 50+ image tokens per call.
+Local-first video summarizer. For URLs, yt-dlp first pulls metadata and
+captions without media download. If captions are missing or unusable, it
+downloads audio only and transcribes on-device with whisperkit-cli. Full video
+download and frame extraction happen only with `--with-frames`.
 
 No external API, no Python venv. macOS / Apple Silicon only.
 
@@ -57,18 +57,18 @@ Separate the video source from any specific question.
 bash ~/.claude/skills/video-summary/bin/run.sh "<source>"
 ```
 
-`run.sh` orchestrates `watch.sh` (download + frames + transcribe) and
-`summarize.sh` (haiku CLI subprocess that reads frames + thumbnail and writes
-the structured summary). Frame image tokens never enter your context - they only
-live inside the subprocess.
+`run.sh` orchestrates `watch.sh` (metadata/captions -> audio fallback ->
+optional frames -> transcript) and `summarize.sh` (haiku CLI subprocess that
+writes the structured summary). Frame image tokens are used only when
+`--with-frames` is passed.
 
 Optional flags forwarded to `watch.sh`:
 
-- `--max-frames N` soft cap on frames; default 100. Tiered curve scales by
-  duration. Raise for long or visually-dense content. Short videos (<=60s)
-  already auto-bump to 60-80 frames since rapid demos pack visual info.
-- `--height H` caps download resolution AND frame scale (default 480p). Raise to
-  escalate (see "Unreadable frames" below).
+- `--with-frames` download full video and extract frames; off by default
+- `--max-frames N` soft cap on frames; default 100. Applies only with
+  `--with-frames`
+- `--height H` caps full-video download resolution and frame scale (default
+  480p). Applies only with `--with-frames`
 - `--start T` / `--end T` focus on a section
 - `--fps F` override auto-fps (cap 2)
 - `--language LANG` force whisperkit language (`en`, `pt`, `es`, ...)
@@ -81,8 +81,9 @@ Optional flags forwarded to `watch.sh`:
 
 ### Unreadable frames
 
-Frames default to 480p. Do NOT lower this default - past runs at 240p caused VLM
-OCR failures (couldn't read code/slides/captions).
+Frames are disabled by default. When `--with-frames` is used, frames default to
+480p. Do NOT lower this default - past runs at 240p caused VLM OCR failures
+(couldn't read code/slides/captions).
 
 The summarizer subagent flags unreadable frames in its output via a
 `FRAMES_UNREADABLE:` line, and `run.sh` echoes the same signal to stderr:
@@ -96,7 +97,7 @@ When you see this signal, do NOT silently accept the summary. Tell the user
 which frames were unreadable and offer to re-run at higher resolution:
 
 ```bash
-bash ~/.claude/skills/video-summary/bin/run.sh "<source>" --refresh --height 720
+bash ~/.claude/skills/video-summary/bin/run.sh "<source>" --with-frames --refresh-frames --height 720
 ```
 
 Higher tiers: 720 -> 1080. Network cost roughly 2-3x per step. The cached video
@@ -117,7 +118,7 @@ Pipeline is composable. Each stage is gated by its own artifact under
 | download   | `download.json` + `download/` | `--refresh-download`   |
 | frames     | `frames.tsv` + `frames/`      | `--refresh-frames`     |
 | transcribe | `transcript.json`             | `--refresh-transcript` |
-| summarize  | `summary.md`                  | `--refresh-summary`    |
+| summarize  | `summaries/summary-*.md`      | `--refresh-summary`    |
 
 Cascade rule: each `--refresh-*` wipes its own stage and everything downstream.
 Re-running on the same source replays cached stages instantly. Delete any
@@ -129,13 +130,16 @@ Decision tree (pick the matching flag for the user's intent):
 - "Re-summarize, transcript is fine" -> `--refresh-summary`
 - You edited `video-summary-prompt.md` -> `--refresh-summary`
 - "Transcript is bad, re-transcribe and re-summarize" -> `--refresh-transcript`
-- "Frames are unreadable" -> `--refresh-frames --height 720` (or 1080)
-- "Re-download at higher resolution" -> `--refresh-download --height 720`
+- "Need visual context" -> `--with-frames`
+- "Frames are unreadable" -> `--with-frames --refresh-frames --height 720`
+- "Re-download at higher resolution" ->
+  `--with-frames --refresh-download --height 720`
 - "Wipe everything" -> `--refresh`
 
 Stdout of `run.sh` is the clean structured summary (TLDR / Verdict / Summary /
-Key moments / Caveats / Pacing) plus a `## Run metrics` block. The
-`FRAMES_UNREADABLE:` and `WORK_DIR:` subagent lines are stripped before output.
+Key moments / Caveats / Pacing) plus `## Processing strategy` and
+`## Run metrics` blocks. The `FRAMES_UNREADABLE:` and `WORK_DIR:` subagent
+lines are stripped before output.
 
 The work dir path is in the footer of `pre-summary-context.md` earlier in the
 pipeline. To recover it for follow-ups, parse `Work dir:` from that file or use
@@ -148,23 +152,28 @@ The legacy alternative if `claude` CLI is unavailable: use the Agent tool with
 
 ### Artifacts
 
-After a complete run, `~/.cache/video-summary/<id>/` contains:
+After a complete run, `~/.cache/video-summary/<id>/` contains reusable stages
+for both text-only and `--with-frames` runs:
 
-- `download/video.mp4` - source video. Input to frames + audio.
+- `download/video.mp4` - source video. Present only with `--with-frames`.
 - `download/video.info.json` - full yt-dlp metadata dump.
-- `download/video.<lang>.vtt` - manual captions, when available.
-- `download/thumbnail.<ext>` - thumbnail image.
+- `download/video.<lang>.vtt` - manual or auto captions, when available.
+- `download/audio.<ext>` - audio-only fallback when captions are missing or
+  unusable.
+- `download/thumbnail.<ext>` - thumbnail image, when yt-dlp provides one.
 - `download.json` - manifest with paths + title/channel/chapters/description.
-- `frames/frame_NNNN.jpg` - extracted frames at the chosen height/fps.
+- `frames/frame_NNNN.jpg` - extracted frames at the chosen height/fps. Present
+  only with `--with-frames`.
 - `frames.tsv` - `<seconds>\t<absolute path>` per frame. Use this to map a frame
   to its timestamp - do NOT estimate from `frame_NNNN` indices.
-- `audio.wav` - 16kHz mono PCM. Only present when no manual captions (whisper
-  fallback input).
+- `audio.wav` - 16kHz mono PCM. Only present for whisper fallback input.
 - `transcript.json` - `[{start, end, text}]`. Canonical transcript for the
   video. Read directly for transcript follow-ups.
-- `pre-summary-context.md` - assembled markdown (metadata + frame list +
-  transcript) consumed by the haiku subagent.
-- `summary.md` - final structured output served as-is on cache hit.
+- `pre-summary-context.md` - assembled markdown consumed by the haiku subagent.
+  It includes frame paths only with `--with-frames`.
+- `summaries/summary-<signature>.md` - final structured output for each option
+  set.
+- `summary.md` - copy of the latest emitted summary for convenience.
 - `download.metrics.json` / `frames.metrics.json` / `transcribe.metrics.json` -
   per-stage `{seconds, cached, ...}`.
 - `metrics.json` - merged per-stage view for `run.sh`.
@@ -176,12 +185,12 @@ After a complete run, `~/.cache/video-summary/<id>/` contains:
 
 The user may ask follow-ups about the same video:
 
-- **"What was on screen at 2:15?"** Read the relevant frame from
+- **"What was on screen at 2:15?"** Re-run with `--with-frames` if frames are
+  absent. If frames exist, read the relevant
   `<work_dir>/frames/frame_NNNN.jpg` directly. Do not re-dispatch the subagent
   for one frame.
 - **"Re-summarize focused on the demo section"** Re-run `run.sh` with
-  `--start/--end`; pipeline cache hit on the same source means only frames
-  re-extract.
+  `--start/--end`; pipeline cache hit on the same source reuses cached media.
 - **"Check the transcript around MM:SS"** Read `<work_dir>/transcript.json`
   directly.
 
@@ -201,14 +210,16 @@ when they want to drop one.
   > 14 days, suggest `brew upgrade yt-dlp` and ask the user to retry.
 - **whisperkit-cli fails** -> hard fail. Surface the error verbatim. Do not fall
   back to frames-only.
-- **No audio track** -> ffmpeg audio extract fails; same hard-fail path.
+- **No captions and no audio track** -> ffmpeg audio extract fails; same
+  hard-fail path.
 - **Subagent returns malformed output** -> surface what it returned and ask the
   user whether to retry, fall back to direct (you read frames), or accept as-is.
 
 ## Bundled scripts
 
 - `bin/run.sh` cache-aware orchestrator (entry point)
-- `bin/watch.sh` pipeline (download → frames → transcribe), cache-by-id
+- `bin/watch.sh` pipeline (download -> transcribe -> optional frames),
+  cache-by-id
 - `bin/summarize.sh` stdin report → claude -p haiku → stdout summary
 - `bin/download.sh` yt-dlp wrapper / local path resolver
 - `bin/extract-frames.py` ffprobe + ffmpeg, tiered fps curve

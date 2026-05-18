@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Orchestrator: download -> frames -> transcript -> markdown report.
+# Orchestrator: download -> transcript -> optional frames -> markdown report.
 #
 # Stage-based, resumable. Each stage is gated by its own output artifact:
-#   download.json, frames.tsv, transcript.json, report.md.
+#   download.json, transcript.json, optional frames.tsv, report.md.
 # Re-running on the same source replays from cache. Delete any artifact (or
 # pass the matching --refresh-* flag) to redo that stage and downstream.
 #
 # Usage: watch.sh <url-or-path> [options]
 #
 # Options:
+#   --with-frames         download full video and extract frames
 #   --max-frames N        override frame budget (cap 100)
 #   --height H            frame height in px (omit / 0 = native, no scaling)
 #   --fps F               override auto-fps (cap 2)
@@ -33,6 +34,7 @@ REFRESH=0
 REFRESH_DOWNLOAD=0
 REFRESH_FRAMES=0
 REFRESH_TRANSCRIPT=0
+WITH_FRAMES=0
 PASS_THROUGH=()
 
 while (($# > 0)); do
@@ -59,6 +61,10 @@ while (($# > 0)); do
     ;;
   --refresh-transcript)
     REFRESH_TRANSCRIPT=1
+    shift
+    ;;
+  --with-frames)
+    WITH_FRAMES=1
     shift
     ;;
   --max-frames | --height | --fps | --start | --end)
@@ -134,6 +140,7 @@ METRICS="${OUT_DIR}/metrics.json"
 M_DOWNLOAD="${OUT_DIR}/download.metrics.json"
 M_FRAMES="${OUT_DIR}/frames.metrics.json"
 M_TRANSCRIBE="${OUT_DIR}/transcribe.metrics.json"
+SUMMARY_DIR="${OUT_DIR}/summaries"
 
 # Resolve --height for download cap and frame scale (single source of truth).
 HEIGHT_VAL="480"
@@ -157,6 +164,18 @@ if ((has_height == 0)); then
   PASS_THROUGH+=("--height" "${HEIGHT_VAL}")
 fi
 
+pipeline_signature() {
+  printf 'frames=%s\n' "${WITH_FRAMES}"
+  printf 'language=%s\n' "${LANGUAGE}"
+  local i=0
+  while ((i < ${#PASS_THROUGH[@]})); do
+    printf '%s=%s\n' "${PASS_THROUGH[$i]}" "${PASS_THROUGH[$((i + 1))]}"
+    i=$((i + 2))
+  done
+}
+
+PIPELINE_SIGNATURE="$(pipeline_signature | shasum -a 1 | cut -c1-12)"
+
 # --- Cascade refresh: top-down. Each level wipes itself + everything below.
 if ((REFRESH == 1)); then
   rm -rf "${OUT_DIR}"
@@ -167,15 +186,16 @@ if ((REFRESH_DOWNLOAD == 1)); then
     "${FRAMES_DIR}" "${FRAMES_TSV}" "${M_FRAMES}" \
     "${TRANSCRIPT_JSON}" "${AUDIO_WAV}" "${M_TRANSCRIBE}" \
     "${M_DOWNLOAD}" "${REPORT}" "${METRICS}" \
-    "${OUT_DIR}/summary.md"
+    "${OUT_DIR}/summary.md" "${SUMMARY_DIR}"
 fi
 if ((REFRESH_FRAMES == 1)); then
   rm -rf "${FRAMES_DIR}" "${FRAMES_TSV}" "${M_FRAMES}" \
-    "${REPORT}" "${METRICS}" "${OUT_DIR}/summary.md"
+    "${REPORT}" "${METRICS}" "${OUT_DIR}/summary.md" "${SUMMARY_DIR}"
 fi
 if ((REFRESH_TRANSCRIPT == 1)); then
   rm -f "${TRANSCRIPT_JSON}" "${AUDIO_WAV}" "${M_TRANSCRIBE}" \
     "${REPORT}" "${METRICS}" "${OUT_DIR}/summary.md"
+  rm -rf "${SUMMARY_DIR}"
 fi
 
 echo "[video-summary] working dir: ${OUT_DIR}" >&2
@@ -191,23 +211,43 @@ write_stage_metrics() {
 # ----- Stage 1: download -----
 stage_download() {
   if [[ -f "${DL_JSON}" ]]; then
-    echo "[video-summary] download: cache hit" >&2
-    write_stage_metrics "${M_DOWNLOAD}" 0 true
-    return 0
+    local video_path
+    video_path="$(jq -r '.video_path // ""' "${DL_JSON}")"
+    if ((WITH_FRAMES == 0)) || [[ -n "${video_path}" && -f "${video_path}" ]]; then
+      echo "[video-summary] download: cache hit" >&2
+      write_stage_metrics "${M_DOWNLOAD}" 0 true
+      return 0
+    fi
+    echo "[video-summary] download: adding full video for frames" >&2
   fi
   local t0=${SECONDS}
-  HEIGHT="${HEIGHT_VAL}" "${SCRIPT_DIR}/download.sh" "${SOURCE}" "${DL_DIR}" >"${DL_JSON}"
+  NEED_VIDEO="${WITH_FRAMES}" HEIGHT="${HEIGHT_VAL}" \
+    "${SCRIPT_DIR}/download.sh" "${SOURCE}" "${DL_DIR}" >"${DL_JSON}"
   write_stage_metrics "${M_DOWNLOAD}" $((SECONDS - t0)) false
 }
 
 # ----- Stage 2: frames -----
 stage_frames() {
-  if [[ -s "${FRAMES_TSV}" && -d "${FRAMES_DIR}" ]]; then
-    echo "[video-summary] frames: cache hit" >&2
-    local count
-    count="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
-    write_stage_metrics "${M_FRAMES}" 0 true --argjson frame_count "${count}"
+  if ((WITH_FRAMES == 0)); then
+    write_stage_metrics "${M_FRAMES}" 0 false \
+      --argjson frame_count 0 \
+      --arg mode "off" \
+      --arg signature "${PIPELINE_SIGNATURE}"
     return 0
+  fi
+  if [[ -s "${FRAMES_TSV}" && -d "${FRAMES_DIR}" ]]; then
+    cached_signature="$(jq -r '.signature // ""' "${M_FRAMES}" 2>/dev/null || true)"
+    if [[ "${cached_signature}" == "${PIPELINE_SIGNATURE}" ]]; then
+      echo "[video-summary] frames: cache hit" >&2
+      local count
+      count="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
+      write_stage_metrics "${M_FRAMES}" 0 true \
+        --argjson frame_count "${count}" \
+        --arg mode "on" \
+        --arg signature "${PIPELINE_SIGNATURE}"
+      return 0
+    fi
+    rm -rf "${FRAMES_DIR}" "${FRAMES_TSV}"
   fi
   if [[ ! -f "${DL_JSON}" ]]; then
     echo "[video-summary] frames: missing download.json - run --refresh-download" >&2
@@ -231,7 +271,9 @@ stage_frames() {
   local count
   count="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
   write_stage_metrics "${M_FRAMES}" $((SECONDS - t0)) false \
-    --argjson frame_count "${count}"
+    --argjson frame_count "${count}" \
+    --arg mode "on" \
+    --arg signature "${PIPELINE_SIGNATURE}"
 }
 
 # ----- Stage 3: transcribe -----
@@ -245,7 +287,7 @@ stage_transcribe() {
     elif [[ -f "${DL_JSON}" ]]; then
       local sub
       sub="$(jq -r '.subtitle_path // ""' "${DL_JSON}")"
-      [[ -n "${sub}" && -f "${sub}" ]] && source="manual captions"
+      [[ -n "${sub}" && -f "${sub}" ]] && source="$(jq -r '.subtitle_source // "captions"' "${DL_JSON}")"
     fi
     write_stage_metrics "${M_TRANSCRIBE}" 0 true --arg source "${source}"
     return 0
@@ -254,22 +296,45 @@ stage_transcribe() {
     echo "[video-summary] transcribe: missing download.json - run --refresh-download" >&2
     exit 1
   fi
-  local video_path subtitle_path source=""
+  local video_path audio_path subtitle_path subtitle_source source=""
   video_path="$(jq -r '.video_path // ""' "${DL_JSON}")"
+  audio_path="$(jq -r '.audio_path // ""' "${DL_JSON}")"
   subtitle_path="$(jq -r '.subtitle_path // ""' "${DL_JSON}")"
+  subtitle_source="$(jq -r '.subtitle_source // "captions"' "${DL_JSON}")"
   local t0=${SECONDS}
   if [[ -n "${subtitle_path}" && -f "${subtitle_path}" ]]; then
     if python3 "${SCRIPT_DIR}/transcribe.py" "${subtitle_path}" "${TRANSCRIPT_JSON}"; then
-      source="manual captions"
+      seg_count="$(jq 'length' "${TRANSCRIPT_JSON}")"
+      if ((seg_count > 0)); then
+        source="${subtitle_source}"
+      else
+        rm -f "${TRANSCRIPT_JSON}"
+      fi
     fi
   fi
   if [[ -z "${source}" ]]; then
-    if [[ -z "${video_path}" || ! -f "${video_path}" ]]; then
-      echo "[video-summary] transcribe: video file missing - run --refresh-download" >&2
+    if [[ -z "${audio_path}" || ! -f "${audio_path}" ]]; then
+      if [[ -z "${video_path}" || ! -f "${video_path}" ]]; then
+        if is_url "${SOURCE}"; then
+          tmp_json="${DL_JSON}.audio"
+          FORCE_AUDIO=1 NEED_VIDEO=0 HEIGHT="${HEIGHT_VAL}" \
+            "${SCRIPT_DIR}/download.sh" "${SOURCE}" "${DL_DIR}" >"${tmp_json}"
+          mv -f "${tmp_json}" "${DL_JSON}"
+          audio_path="$(jq -r '.audio_path // ""' "${DL_JSON}")"
+          video_path="$(jq -r '.video_path // ""' "${DL_JSON}")"
+        fi
+      fi
+    fi
+    input_path="${audio_path}"
+    if [[ -z "${input_path}" || ! -f "${input_path}" ]]; then
+      input_path="${video_path}"
+    fi
+    if [[ -z "${input_path}" || ! -f "${input_path}" ]]; then
+      echo "[video-summary] transcribe: audio/video file missing - run --refresh-download" >&2
       exit 1
     fi
     ffmpeg -hide_banner -loglevel error -y \
-      -i "${video_path}" -vn -ac 1 -ar 16000 "${AUDIO_WAV}" >&2
+      -i "${input_path}" -vn -ac 1 -ar 16000 "${AUDIO_WAV}" >&2
     "${SCRIPT_DIR}/transcribe.sh" "${AUDIO_WAV}" "${TRANSCRIPT_JSON}" "${LANGUAGE}"
     source="whisperkit (large-v3-turbo)"
   fi
@@ -279,11 +344,15 @@ stage_transcribe() {
 # ----- Stage 4: report (rebuilt when missing; cascades delete it upstream) -----
 stage_report() {
   if [[ -f "${REPORT}" && -f "${METRICS}" ]]; then
-    echo "[video-summary] report: cache hit" >&2
-    return 0
+    cached_signature="$(jq -r '.pipeline_signature // ""' "${METRICS}" 2>/dev/null || true)"
+    if [[ "${cached_signature}" == "${PIPELINE_SIGNATURE}" ]]; then
+      echo "[video-summary] report: cache hit" >&2
+      return 0
+    fi
   fi
+  rm -f "${OUT_DIR}/summary.md"
   local title uploader channel categories tags upload_date webpage_url thumbnail_path
-  local has_description has_chapters duration frame_count transcript_source
+  local has_description has_chapters duration frame_count transcript_source download_mode
   title="$(jq -r '.title // ""' "${DL_JSON}")"
   uploader="$(jq -r '.uploader // ""' "${DL_JSON}")"
   channel="$(jq -r '.channel // ""' "${DL_JSON}")"
@@ -292,19 +361,31 @@ stage_report() {
   upload_date="$(jq -r '.upload_date // ""' "${DL_JSON}")"
   webpage_url="$(jq -r '.webpage_url // ""' "${DL_JSON}")"
   thumbnail_path="$(jq -r '.thumbnail_path // ""' "${DL_JSON}")"
+  download_mode="$(jq -r '.download_mode // "unknown"' "${DL_JSON}")"
   has_description="$(jq -r 'if (.description // "") != "" then "1" else "" end' "${DL_JSON}")"
   has_chapters="$(jq -r 'if (.chapters // [] | length) > 0 then "1" else "" end' "${DL_JSON}")"
 
   local video_path
   video_path="$(jq -r '.video_path // ""' "${DL_JSON}")"
-  duration=""
+  duration="$(jq -r '.duration // empty' "${DL_JSON}")"
   if [[ -n "${video_path}" && -f "${video_path}" ]]; then
-    duration="$(ffprobe -v quiet -print_format json -show_format "${video_path}" |
+    probed_duration="$(ffprobe -v quiet -print_format json -show_format "${video_path}" |
       jq -r '.format.duration // empty' | head -n1)"
+    [[ -n "${probed_duration}" ]] && duration="${probed_duration}"
   fi
 
-  frame_count="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
+  frame_count="0"
+  if [[ -s "${FRAMES_TSV}" ]]; then
+    frame_count="$(wc -l <"${FRAMES_TSV}" | tr -d ' ')"
+  fi
   transcript_source="$(jq -r '.source // "unknown"' "${M_TRANSCRIBE}")"
+  if ((WITH_FRAMES == 1)); then
+    download_mode="video"
+  elif [[ "${download_mode}" != "local" && "${transcript_source}" == *"captions"* ]]; then
+    download_mode="subtitles"
+  elif [[ "${download_mode}" != "local" ]]; then
+    download_mode="audio"
+  fi
 
   # --start/--end filter for transcript view.
   local start_sec="" end_sec=""
@@ -348,11 +429,18 @@ stage_report() {
     if [[ -n "${duration}" && "${duration}" != "null" ]]; then
       echo "- **Duration:** $(format_ts "${duration}") (${duration}s)"
     fi
-    echo "- **Frames:** ${frame_count}"
+    if ((WITH_FRAMES == 1)); then
+      echo "- **Frames:** ${frame_count}"
+    else
+      echo "- **Frames:** skipped"
+    fi
     echo "- **Transcript source:** ${transcript_source}"
-    [[ -n "${thumbnail_path}" ]] && echo "- **Thumbnail:** \`${thumbnail_path}\`"
+    echo "- **Download mode:** ${download_mode}"
+    if ((WITH_FRAMES == 1)); then
+      [[ -n "${thumbnail_path}" ]] && echo "- **Thumbnail:** \`${thumbnail_path}\`"
+    fi
     echo
-    if [[ -n "${thumbnail_path}" ]]; then
+    if ((WITH_FRAMES == 1)) && [[ -n "${thumbnail_path}" ]]; then
       echo "## Thumbnail"
       echo
       echo "Read the thumbnail to see the title-card framing the publisher chose:"
@@ -391,14 +479,16 @@ stage_report() {
       ' "${DL_JSON}"
       echo
     fi
-    echo "## Frames"
-    echo
-    echo "Read each frame path below with the Read tool. Frames are chronological; \`t=MM:SS\` is the absolute timestamp."
-    echo
-    while IFS=$'\t' read -r ts path; do
-      echo "- \`${path}\` (t=$(format_ts_simple "${ts}"))"
-    done <"${FRAMES_TSV}"
-    echo
+    if ((WITH_FRAMES == 1)); then
+      echo "## Frames"
+      echo
+      echo "Read each frame path below with the Read tool. Frames are chronological; \`t=MM:SS\` is the absolute timestamp."
+      echo
+      while IFS=$'\t' read -r ts path; do
+        echo "- \`${path}\` (t=$(format_ts_simple "${ts}"))"
+      done <"${FRAMES_TSV}"
+      echo
+    fi
     echo "## Transcript"
     echo
     echo "_Source: ${transcript_source}._"
@@ -425,12 +515,17 @@ stage_report() {
   # Merge per-stage metrics into a single metrics.json for run.sh.
   jq -n \
     --arg duration "${duration:-}" \
+    --arg download_mode "${download_mode}" \
+    --arg signature "${PIPELINE_SIGNATURE}" \
     --slurpfile dl "${M_DOWNLOAD}" \
     --slurpfile fr "${M_FRAMES}" \
     --slurpfile tr "${M_TRANSCRIBE}" \
     '{
       video_duration_s: ($duration | if . == "" then null else tonumber end),
       transcript_source: ($tr[0].source // "unknown"),
+      download_mode: $download_mode,
+      frame_mode: ($fr[0].mode // "off"),
+      pipeline_signature: $signature,
       frame_count: ($fr[0].frame_count // 0),
       download_s: $dl[0].seconds,
       download_cached: $dl[0].cached,
@@ -442,8 +537,8 @@ stage_report() {
 }
 
 stage_download
-stage_frames
 stage_transcribe
+stage_frames
 stage_report
 
 cat "${REPORT}"

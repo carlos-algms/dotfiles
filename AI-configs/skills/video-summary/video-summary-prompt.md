@@ -1,15 +1,18 @@
 You are summarizing a video. A report from a video-extraction pipeline will be
-provided below. It lists frame paths, an optional thumbnail, channel and
-metadata, chapters, and a transcript.
+provided below. It lists channel and metadata, chapters, a transcript, and
+optionally frame paths plus a thumbnail.
 
-**Read every frame path and the thumbnail (if present) in parallel using the
-Read tool.**
+**Visual input is optional.** If the report includes a `## Frames` section, read
+every frame path and the thumbnail (if present) in parallel using the Read tool.
+If there is no `## Frames` section, summarize from metadata and transcript only.
+Do not claim visual evidence unless the transcript explicitly says the host
+shows or demonstrates it.
 
-**Frame legibility check.** Frames are extracted at 480p by default. If any
-frame is too low-resolution to read text that matters for the summary (code,
-slides, terminal output, captions, on-screen UI), you MUST flag it. Do not
-silently skip the frame or guess at its content. Track unreadable frames as you
-read them.
+**Frame legibility check.** Only applies when frames are present. Frames are
+extracted at 480p by default. If any frame is too low-resolution to read text
+that matters for the summary (code, slides, terminal output, captions,
+on-screen UI), you MUST flag it. Do not silently skip the frame or guess at its
+content. Track unreadable frames as you read them.
 
 If one or more frames are unreadable, end your response with a `FRAMES_UNREADABLE`
 line BEFORE the final `WORK_DIR` line, listing the frame paths (one per line, or
@@ -29,10 +32,11 @@ content (text, diagrams, code) that the summary needs.
 
 **Thin transcript check.** The transcript may be very short, silent, or missing
 entire stretches (silent demos, ambient-music-only videos, audio capture
-failures). When this happens you still produce a summary from frames + the
-thumbnail, BUT you MUST add a Caveats bullet stating the audio was thin or
-silent. Heuristic: less than ~50 spoken words for a >30s video, or empty
-transcript, qualifies as thin. Example caveat:
+failures). When this happens, still produce the best summary you can. If frames
+are present, use frames + thumbnail. If frames are absent, add a Caveats bullet
+stating that the audio was thin or silent and visual extraction was not enabled.
+Heuristic: less than ~50 spoken words for a >30s video, or empty transcript,
+qualifies as thin. Example caveat:
 
 ```
 - [00:00] Audio is silent or near-silent; summary inferred from frames only.
@@ -41,9 +45,9 @@ transcript, qualifies as thin. Example caveat:
 Do not invent dialog or claims that require audio. State only what is visible.
 
 Before writing the summary, run these explicit checks against the transcript and
-frames. Caveats can hide anywhere - intro hook, mid-demo aside, comparison
-section, "but here's the thing" reversal, outro. Scan the whole transcript, not
-just the end.
+frames when present. Caveats can hide anywhere - intro hook, mid-demo aside,
+comparison section, "but here's the thing" reversal, outro. Scan the whole
+transcript, not just the end.
 
 **Mental model:** a video is a sequence of _facts_ (concrete claims, demos,
 reversals, asides). Authors group facts into _chapters_ for navigation. Chapters
@@ -80,7 +84,8 @@ timestamp each, not a range. Sizing is content-driven, not length-driven:
 1. **Credibility risk.** The point is not to hunt sponsorships - it is to
    tell the viewer how much to trust the review. Pick one: **low**,
    **medium**, **high**, or **inconclusive**. Evidence must be quoted
-   verbatim from transcript, description, or an on-screen element.
+   verbatim from transcript, description, or an on-screen element when frames
+   are present.
 
    - **High** - the video's **main topic** IS the sponsored product.
      Both must be true:
@@ -150,9 +155,10 @@ timestamp each, not a range. Sizing is content-driven, not length-driven:
 
 2. **Title vs delivery.** Does the body literally deliver the claim in the
    title? Where does it stop short, and where does it overstate?
-3. **Demonstrated vs described features.** List only features actually shown
-   working on screen. Features only described in voiceover are weaker evidence -
-   flag if the headline relies on them.
+3. **Demonstrated vs described features.** When frames are present, list only
+   features actually shown working on screen. Features only described in
+   voiceover are weaker evidence - flag if the headline relies on them. When
+   frames are absent, do not upgrade transcript claims to visual proof.
 4. **Conditional claims and reversals.** Anywhere the host says "if you're doing
    X then Y", "honestly though", "but only when", "the catch is", "to be fair" -
    these are caveats. Capture them with timestamps even when they sit in the
@@ -185,9 +191,10 @@ timestamp each, not a range. Sizing is content-driven, not length-driven:
 
 1. **Self-introduction in transcript.** Scan for "I'm <name>", "my name is
    <name>", "this is <name>", "<name> here". Capture all distinct names.
-2. **On-screen banners / lower-thirds.** Read frames for nameplates, intro
-   cards, Zoom/Meet participant tiles, or any text bearing a person's name
-   (often with a role/title underneath). Capture all distinct names.
+2. **On-screen banners / lower-thirds.** If frames are present, read frames for
+   nameplates, intro cards, Zoom/Meet participant tiles, or any text bearing a
+   person's name (often with a role/title underneath). Capture all distinct
+   names.
 3. **Channel as personal brand.** If the channel name looks like a personal
    brand (single person, e.g. "Web Dev Cody", "Theo - t3.gg") and no other
    names were detected, treat the channel name as the speaker.
@@ -300,5 +307,5 @@ End your response with one final line, exactly:
 WORK_DIR: <absolute path of the work dir from the report>
 ```
 
-Cite timestamps liberally - they are the actionable part. Do not skip reading
-frames; they carry visual context the transcript misses.
+Cite timestamps liberally - they are the actionable part. If frames are present,
+do not skip them; they carry visual context the transcript misses.
