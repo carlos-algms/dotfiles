@@ -18,6 +18,7 @@ TS_RE = re.compile(
     r"(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[.,](\d{3})"
 )
 TAG_RE = re.compile(r"<[^>]+>")
+MAX_OVERLAP_WORDS = 20
 
 
 def _to_seconds(h: str, m: str, s: str, ms: str) -> float:
@@ -65,8 +66,34 @@ def _dedupe(segments: list[dict]) -> list[dict]:
             out[-1]["text"] = seg["text"]
             out[-1]["end"] = seg["end"]
             continue
+        if out:
+            text = _trim_overlap(_recent_text(out), seg["text"])
+            if not text:
+                out[-1]["end"] = seg["end"]
+                continue
+            if text != seg["text"]:
+                seg = {**seg, "text": text}
         out.append(seg)
     return out
+
+
+def _recent_text(segments: list[dict]) -> str:
+    words: list[str] = []
+    for segment in reversed(segments):
+        words = segment["text"].split() + words
+        if len(words) >= MAX_OVERLAP_WORDS:
+            break
+    return " ".join(words[-MAX_OVERLAP_WORDS:])
+
+
+def _trim_overlap(previous: str, current: str) -> str:
+    previous_words = previous.split()
+    current_words = current.split()
+    limit = min(len(previous_words), len(current_words), MAX_OVERLAP_WORDS)
+    for size in range(limit, 0, -1):
+        if previous_words[-size:] == current_words[:size]:
+            return " ".join(current_words[size:])
+    return current
 
 
 if __name__ == "__main__":
