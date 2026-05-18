@@ -15,6 +15,17 @@ description: >
 Execute different AI agent CLIs to get alternative perspectives, compare
 approaches, or leverage specific model strengths.
 
+## Defaults
+
+- If user names an agent but not provider, model, or effort, use that CLI's
+  default
+- Do not ask which provider, model, or effort to use unless user explicitly asks
+  to choose
+- Do not pause to recommend alternatives when the requested agent can run with
+  defaults
+- Ask only for missing task inputs that block execution, such as absent file
+  paths or destructive write intent
+
 ## Available CLIs
 
 ### Gemini
@@ -77,7 +88,8 @@ pi -p "<prompt>"
 
 Multi-provider agent (Anthropic, OpenAI, Google, xAI, etc)
 
-Model is optional for Pi. Omit `--model` for the default.
+Model and thinking mode are optional for Pi. Omit `--model` and `--thinking`
+unless user requested them.
 
 | Alias             | Model flag                  | Use                       |
 | ----------------- | --------------------------- | ------------------------- |
