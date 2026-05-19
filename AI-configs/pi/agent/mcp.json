@@ -19,6 +19,14 @@
     "atlassian": {
       "url": "https://mcp.atlassian.com/v1/mcp",
       "auth": "oauth"
+    },
+    "google-workspace": {
+      "command": "sh",
+      "args": ["-c", "exec ~/.cache/mcp-gateway/target/release/google-workspace-stdio \"$@\"", "--"]
+    },
+    "playwright": {
+      "command": "sh",
+      "args": ["-c", "exec ~/.claude/playwright-mcp.sh \"$@\"", "--"]
     }
   }
 }
