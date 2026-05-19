@@ -36,13 +36,12 @@ Personal vault is a second-brain / Zettelkasten in Obsidian Flavored Markdown.
 ```
 001-Quick-Notes/    Fleeting notes, inbox
 010-Daily/          Daily notes (Obsidian daily notes plugin)
-100-wiki/           LLM-maintained personal wiki - see personal-wiki skill
-  <category>/<topic>/  - dynamic folders, kebab-case
-  log/<year>/          - monthly ingestion logs
-999-system/         Obsidian internals (Archive, Attachments, Templates, ai-agents)
-ai-memory/          AI investigation notes - see ai-memory skill
-  Projects/<name>/     - per-project, date-prefixed files
-  Researches/          - FROZEN, do NOT add new notes
+011-personal/       Personal documentation and non-work long-term notes
+020-work/           Work notes and project memory
+  project-memory/<name>/  - per-project, date-prefixed files
+100-wiki/           LLM-maintained personal wiki - see second-brain skill
+  <category>/<topic>/     - dynamic folders, kebab-case
+999-system/         Obsidian internals, archive, attachments, templates
 ```
 
 Run `tree -d -L 3` over the vault path for the live layout.
@@ -439,8 +438,8 @@ Grep "auth middleware" $VAULT/
 
 ## Vault writing conventions
 
-Apply to every note written into this vault (wiki, ai-memory, quick notes,
-daily, etc.). Per-skill rules layer on top.
+Apply to every note written into this vault (wiki, project memory, quick notes,
+daily, personal docs, etc.). Per-skill rules layer on top.
 
 - Obsidian callouts (`> [!type]`) for highlighted info.
 - 80-char line width. Unordered lists use `-` (dash).
@@ -454,7 +453,7 @@ daily, etc.). Per-skill rules layer on top.
 
 ## Sources convention
 
-Applies to any note that cites sources (wiki pages, ai-memory notes, any
+Applies to any note that cites sources (wiki pages, project-memory notes, any
 long-form note). Goal: investigations stay reproducible. The note itself is the
 comparison point if a source changes - `retrieved` dates anchor when the claims
 were true.
