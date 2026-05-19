@@ -25,17 +25,6 @@ reading nested inline threads or replying to one (cli/cli#12273). Use `gh api`.
 URL anchor: `pull/N#discussion_rNNN` -> `NNN` is the comment's REST `id` and
 GraphQL `databaseId`.
 
-## Account check (do this first)
-
-Multiple gh accounts (work + personal). Verify before any write.
-
-```bash
-gh auth status
-gh auth switch --user <login>   # if wrong account
-```
-
-Set and forget. No restore.
-
 ## Reading all reviews on a PR
 
 ```bash

@@ -438,11 +438,7 @@ In projects with tests:
   2. Apply its format, staging flow, and show-then-commit visibility gate.
 - **On PR open/create intent**:
   1. Load `create-pull-request` skill.
-  2. Apply its format, auth flow, and show-then-create visibility gate.
-- Multiple `gh` accounts (work + personal). Applies to `gh` CLI only, NOT `git`
-  (push/fetch/pull use ssh/remote, no gh involvement). Before any `gh` write
-  (PR/comment/review/issue), run `gh auth status`, switch with
-  `gh auth switch --user <login>` if wrong. No restore.
+  2. Apply its format and show-then-create visibility gate.
 
 # Package manager
 
