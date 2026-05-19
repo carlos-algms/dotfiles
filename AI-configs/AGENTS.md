@@ -30,7 +30,7 @@ Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
 - `pi/agent/mcp.json` - MCP servers wired into pi.
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
   that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
-  build step). Current extensions: `web_search`, `web_fetch`, `vim-mode`.
+  build step). Current extensions: `web_fetch`, `vim-mode`.
 - `pi/extensions-disabled/` - extensions kept around but not loaded.
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
   `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to
@@ -53,9 +53,10 @@ Auth and runtime config live OUTSIDE the repo:
 - `~/.pi/agent/auth.json` - provider API keys (Anthropic etc). Resolved by env
   var name; pi inherits env from the parent shell.
 - `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API keys
-  for `web_search` (override path via `WEB_SEARCH_AUTH_PATH`).
-- `~/.pi/web-search-usage.json` - per-backend daily/monthly counters (managed by
-  the `web_search` extension).
+  for `fallback-web-research` (override path via `WEB_SEARCH_AUTH_PATH`).
+- `${XDG_STATE_HOME:-~/.local/state}/fallback-web-research/usage.json` -
+  per-backend daily/monthly counters (managed by the `fallback-web-research`
+  skill).
 
 Pi CLI flags worth knowing when scripting extensions:
 

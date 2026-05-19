@@ -28,7 +28,7 @@ export default function piWebFetchTool(pi: ExtensionAPI) {
     promptGuidelines: [
       'Use web_fetch when you already have a URL and need full page content, source verification, JSON, or plain text.',
       'Prefer web_fetch over curl/wget for http/https GET; web_fetch converts HTML to markdown and formats JSON/text for the model.',
-      'Do not use web_fetch for topic discovery; use web_search first when you only have a topic or keywords.',
+      'Do not use web_fetch for topic discovery; use the fallback-web-research skill first when you only have a topic or keywords.',
       'Use gh, not web_fetch, for github.com repos, files, issues, PRs, releases, and API data; use web_fetch on GitHub only when gh cannot retrieve the URL.',
       'Fall back from web_fetch to bash and curl/defuddle only for non-GET requests or unsupported schemes/content types.',
     ],

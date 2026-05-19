@@ -1,9 +1,18 @@
-export type BackendName =
-  | 'langsearch'
-  | 'tavily'
-  | 'exa'
-  | 'brave'
-  | 'marginalia';
+export const BACKEND_NAMES = [
+  'langsearch',
+  'tavily',
+  'exa',
+  'brave',
+  'marginalia',
+] as const;
+
+const BACKEND_NAME_SET: ReadonlySet<string> = new Set(BACKEND_NAMES);
+
+export type BackendName = (typeof BACKEND_NAMES)[number];
+
+export function isBackendName(value: string): value is BackendName {
+  return BACKEND_NAME_SET.has(value);
+}
 
 export interface SearchResult {
   title: string;

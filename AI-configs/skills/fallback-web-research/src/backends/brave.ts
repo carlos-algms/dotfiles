@@ -1,5 +1,5 @@
-import { asArray, asObject, asString, mapResults, requestJson } from '../http';
-import type { SearchBackend, SearchResult } from '../types';
+import { asArray, asObject, asString, mapResults, requestJson } from '../http.ts';
+import type { SearchBackend, SearchResult } from '../types.ts';
 
 interface BraveRaw {
   title?: unknown;
@@ -28,7 +28,7 @@ export const brave: SearchBackend = {
       throw new Error('Brave apiKey missing in web-search-auth.json');
     }
     const url =
-      `https://api.search.brave.com/res/v1/web/search?` +
+      'https://api.search.brave.com/res/v1/web/search?' +
       `q=${encodeURIComponent(query)}&count=${numResults}`;
     const data = await requestJson(url, {
       headers: {

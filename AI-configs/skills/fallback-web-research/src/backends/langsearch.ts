@@ -1,5 +1,5 @@
-import { asArray, asObject, asString, mapResults, requestJson } from '../http';
-import type { SearchBackend, SearchResult } from '../types';
+import { asArray, asObject, asString, mapResults, requestJson } from '../http.ts';
+import type { SearchBackend, SearchResult } from '../types.ts';
 
 interface LangSearchRaw {
   name?: unknown;

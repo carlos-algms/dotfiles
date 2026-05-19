@@ -1,9 +1,9 @@
-import { brave } from './backends/brave';
-import { exa } from './backends/exa';
-import { langsearch } from './backends/langsearch';
-import { marginalia } from './backends/marginalia';
-import { tavily } from './backends/tavily';
-import type { BackendName, SearchBackend } from './types';
+import { brave } from './backends/brave.ts';
+import { exa } from './backends/exa.ts';
+import { langsearch } from './backends/langsearch.ts';
+import { marginalia } from './backends/marginalia.ts';
+import { tavily } from './backends/tavily.ts';
+import type { BackendName, SearchBackend } from './types.ts';
 
 export const PRIORITY_ORDER: BackendName[] = [
   'exa',

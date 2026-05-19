@@ -1,10 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { asObject } from './http';
-import type { BackendName } from './types';
+import { asObject } from './http.ts';
+import type { BackendName } from './types.ts';
 
-const USAGE_PATH = join(homedir(), '.pi', 'web-search-usage.json');
+const USAGE_PATH = join(xdgStateHome(), 'fallback-web-research', 'usage.json');
 
 export interface BackendQuota {
   dailyCap?: number;
@@ -33,6 +33,10 @@ const minuteWindow = new Map<BackendName, number[]>();
 // Serialize commits per backend so parallel runs don't lose increments via
 // read-modify-write race on the shared usage file.
 const commitChain = new Map<BackendName, Promise<unknown>>();
+
+function xdgStateHome(): string {
+  return process.env.XDG_STATE_HOME || join(homedir(), '.local', 'state');
+}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);

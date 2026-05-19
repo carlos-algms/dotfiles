@@ -1,7 +1,7 @@
-import { keyFor, loadAuth } from './config';
-import { DEFAULT_PARALLEL, PRIORITY_ORDER, getBackend } from './registry';
-import type { BackendName, BackendOutcome, SearchResult } from './types';
-import { reserve } from './usage';
+import { keyFor, loadAuth } from './config.ts';
+import { DEFAULT_PARALLEL, PRIORITY_ORDER, getBackend } from './registry.ts';
+import type { BackendName, BackendOutcome, SearchResult } from './types.ts';
+import { reserve } from './usage.ts';
 
 export interface OrchestrateOptions {
   query: string;

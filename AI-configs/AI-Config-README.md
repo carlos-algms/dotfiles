@@ -137,6 +137,9 @@ The whole `extensions/` dir is linked, so every extension in it auto-loads.
 Extensions kept in the repo but intentionally inactive live in
 `AI-configs/pi/extensions-disabled/` (not symlinked, invisible to pi).
 
+Pi has no native web search tool. Use the cross-tool
+`fallback-web-research` skill for web lookup.
+
 `web_fetch` needs `defuddle` on `PATH`:
 
 ```bash

@@ -1,5 +1,5 @@
-import { asArray, asObject, asString, mapResults, requestJson } from '../http';
-import type { SearchBackend, SearchResult } from '../types';
+import { asArray, asObject, asString, mapResults, requestJson } from '../http.ts';
+import type { SearchBackend, SearchResult } from '../types.ts';
 
 interface MarginaliaRaw {
   url?: unknown;
@@ -26,7 +26,7 @@ export const marginalia: SearchBackend = {
   async run(query, numResults, apiKey, signal) {
     const key = apiKey || 'public';
     const url =
-      `https://api2.marginalia-search.com/search?` +
+      'https://api2.marginalia-search.com/search?' +
       `query=${encodeURIComponent(query)}&count=${numResults}`;
     const data = await requestJson(url, {
       headers: { 'API-Key': key },
