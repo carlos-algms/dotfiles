@@ -47,9 +47,7 @@ export async function loadAuth(): Promise<AuthConfig> {
     parsed = JSON.parse(raw);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `web-search auth file at ${path} is not valid JSON: ${message}`,
-    );
+    throw new Error(`web-search auth file at ${path} is not valid JSON: ${message}`);
   }
 
   const root = asObject(parsed);
@@ -58,9 +56,7 @@ export async function loadAuth(): Promise<AuthConfig> {
     tavily: { apiKey: asString(asObject(root.tavily).apiKey) },
     exa: { apiKey: asString(asObject(root.exa).apiKey) },
     brave: { apiKey: asString(asObject(root.brave).apiKey) },
-    marginalia: {
-      apiKey: asString(asObject(root.marginalia).apiKey, 'public'),
-    },
+    marginalia: { apiKey: asString(asObject(root.marginalia).apiKey, 'public') },
   };
   return cached;
 }

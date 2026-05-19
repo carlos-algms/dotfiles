@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { parseArgs } from 'node:util';
 import { summarizeResults } from './ai-summary.ts';
 import { formatFooter, formatResults } from './format.ts';
@@ -12,7 +14,15 @@ const MAX_TIMEOUT_MS = 300_000;
 const MIN_NUM_RESULTS = 1;
 const MAX_NUM_RESULTS = 20;
 
-export async function runCli(args: string[]): Promise<void> {
+try {
+  await runCli(process.argv.slice(2));
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(message);
+  process.exitCode = 1;
+}
+
+async function runCli(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
     console.log(usage());
     return;
@@ -121,7 +131,7 @@ function parseBoundedInt(
 function usage(): string {
   return [
     'Usage:',
-    '  node ~/.agents/skills/fallback-web-research/bin/run.ts "<query>"',
+    '  web-search-ai-summary "<query>"',
     '',
     'Options:',
     `  --provider ${BACKEND_NAMES.join('|')}`,

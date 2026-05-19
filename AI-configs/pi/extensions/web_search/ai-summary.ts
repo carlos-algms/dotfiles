@@ -1,12 +1,12 @@
 import { spawn } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SearchResult } from './types.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const PROMPT_PATH = join(HERE, '..', 'ai-summary-prompt.md');
+const PROMPT_PATH = join(HERE, 'ai-summary-prompt.md');
 const SYSTEM_PROMPT = readFileSync(PROMPT_PATH, 'utf8');
 
 const PI_BIN = 'pi';
@@ -18,7 +18,7 @@ function serializeResults(query: string, results: SearchResult[]): string {
   const blocks = results.map((r) => {
     const provider = r.sources.join(', ');
     const title = r.title || r.url;
-    const body = r.snippet.trim() || '(no body)';
+    const body = r.snippet?.trim() || '(no body)';
     return [
       `## ${title}`,
       `- URL: ${r.url}`,
@@ -28,11 +28,11 @@ function serializeResults(query: string, results: SearchResult[]): string {
     ].join('\n');
   });
   return [
-    '# Query',
+    `# Query`,
     '',
     query,
     '',
-    '# Raw results',
+    `# Raw results`,
     '',
     blocks.join('\n\n========\n\n'),
   ].join('\n');
@@ -48,7 +48,7 @@ export async function summarizeResults(
   }
 
   const payload = serializeResults(query, results);
-  const tmp = mkdtempSync(join(tmpdir(), 'fallback-web-research-ai-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'web-search-ai-'));
   const payloadPath = join(tmp, 'results.md');
   writeFileSync(payloadPath, payload, 'utf8');
 
@@ -114,9 +114,9 @@ function runPi(args: string[], signal: AbortSignal): Promise<string> {
       signal.removeEventListener('abort', onAbort);
       if (code === 0) {
         resolve(stdout);
-        return;
+      } else {
+        reject(new Error(`pi exited ${code}: ${stderr.slice(0, 400)}`));
       }
-      reject(new Error(`pi exited ${code}: ${stderr.slice(0, 400)}`));
     });
   });
 }

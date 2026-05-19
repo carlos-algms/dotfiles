@@ -137,8 +137,15 @@ The whole `extensions/` dir is linked, so every extension in it auto-loads.
 Extensions kept in the repo but intentionally inactive live in
 `AI-configs/pi/extensions-disabled/` (not symlinked, invisible to pi).
 
-Pi has no native web search tool. Use the cross-tool
-`fallback-web-research` skill for web lookup.
+Pi has a native `web_search` extension. Other agents shell out to the same
+logic via the `multi-provider-web-search` skill. Install the shared CLI symlink
+once:
+
+```bash
+chmod +x $(pwd)/AI-configs/pi/extensions/web_search/run.ts
+ln -s $(pwd)/AI-configs/pi/extensions/web_search/run.ts \
+  ~/.local/bin/web-search-ai-summary
+```
 
 `web_fetch` needs `defuddle` on `PATH`:
 

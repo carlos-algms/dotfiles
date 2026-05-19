@@ -1,14 +1,14 @@
 import { asArray, asObject, asString, mapResults, requestJson } from '../http.ts';
 import type { SearchBackend, SearchResult } from '../types.ts';
 
-interface MarginaliaRaw {
-  url?: unknown;
+interface BraveRaw {
   title?: unknown;
+  url?: unknown;
   description?: unknown;
 }
 
 function mapResult(raw: unknown): SearchResult | null {
-  const r = asObject(raw) as MarginaliaRaw;
+  const r = asObject(raw) as BraveRaw;
   const url = asString(r.url);
   if (!url) {
     return null;
@@ -17,22 +17,28 @@ function mapResult(raw: unknown): SearchResult | null {
     title: asString(r.title),
     url,
     snippet: asString(r.description),
-    sources: ['marginalia'],
+    sources: ['brave'],
   };
 }
 
-export const marginalia: SearchBackend = {
-  name: 'marginalia',
+export const brave: SearchBackend = {
+  name: 'brave',
   async run(query, numResults, apiKey, signal) {
-    const key = apiKey || 'public';
+    if (!apiKey) {
+      throw new Error('Brave apiKey missing in web-search-auth.json');
+    }
     const url =
-      'https://api2.marginalia-search.com/search?' +
-      `query=${encodeURIComponent(query)}&count=${numResults}`;
+      `https://api.search.brave.com/res/v1/web/search?` +
+      `q=${encodeURIComponent(query)}&count=${numResults}`;
     const data = await requestJson(url, {
-      headers: { 'API-Key': key },
+      headers: {
+        'X-Subscription-Token': apiKey,
+        Accept: 'application/json',
+      },
       signal,
     });
     const root = asObject(data);
-    return mapResults(asArray(root.results), mapResult);
+    const web = asObject(root.web);
+    return mapResults(asArray(web.results), mapResult);
   },
 };
