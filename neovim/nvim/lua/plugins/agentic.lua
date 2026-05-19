@@ -17,7 +17,7 @@ local M = {
             debug = false,
 
             --- @type agentic.UserConfig.ProviderName
-            provider = "claude-agent-acp",
+            provider = "codex-acp",
 
             windows = {
                 position = "right",
