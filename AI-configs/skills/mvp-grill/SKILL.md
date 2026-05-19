@@ -20,10 +20,13 @@ Bias toward visible progress over perfect protocol.
 These rules override the rest of the flow.
 
 1. Choose grill mode before the first blocker
-2. Do not ask permission to read, search, fetch, or inspect
-3. The human is a tie breaker, not a required step
-4. If a standard, pattern, or reversible default decides, lock it
-5. Ask at most one blocker per turn
+2. Do not ask permission to read, search, fetch, inspect, or test
+3. Before any user-facing question, at any time, resolve factual uncertainty by
+   reading, searching, fetching, inspecting, or testing
+4. Never ask whether to verify, inspect, read, test, assume, skip, or proceed
+5. The human is a tie breaker, not a required step
+6. If a standard, pattern, or reversible default decides, lock it
+7. Ask at most one blocker per turn
 
 ## Mode gate
 
@@ -33,7 +36,7 @@ Choose mode after scope and before the first blocker.
 2. If the target is source code, use patch-unit grill unless each answer maps to
    a small, valid edit
 3. If no target file is referenced, use in-memory grill
-4. If mode is ambiguous, ask once before **Q1**
+4. If mode is ambiguous, ask once before the first blocker question
 5. Mode choice authorizes only writes implied by that mode and target
 6. Destructive, broad, or off-target writes still require confirmation
 
@@ -58,9 +61,9 @@ Run this before every user-facing question, report, or recommendation.
 4. Ask only blockers that need human intent or preference
 5. Emit only verified facts, locked defaults, or real blockers
 6. Never turn exploration permission into a grill question
-7. Verify first, then ask. Never offer the user a choice between
-   "verify X" and "skip X". If verification is cheap and reversible, do
-   it before drafting the question.
+7. Verify before any question, at any time. Never offer the user a choice
+   between "verify X" and "skip X". If verification is possible without
+   destructive action, do it before drafting the question.
 
 ### Forbidden question shapes
 
@@ -77,7 +80,7 @@ Then ask a real blocker, or close with a locked default.
 ## 1. Establish scope
 
 Infer scope from the prompt and repository before asking. Ask only when the goal
-or artifact remains unknowable after cheap inspection.
+or artifact remains unknowable after inspection.
 
 1. Identify the MVP outcome in one line
 2. Identify the target artifact: code, docs, plan, command, config, or design
