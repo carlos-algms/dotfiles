@@ -32,6 +32,18 @@ Load these when working in their folders:
 - `neovim/AGENTS.md` - Neovim v0.11+ config, doc-lookup strategy, plugins
 - `AI-configs/AGENTS.md` - AI assistant configs + symlink layout
 
+Agent home dirs contain symlinks back into this repo. Editing under them is
+editing this repo. Mandatory: load `AI-configs/AGENTS.md` before any work in:
+
+- `~/.claude/` - settings, hooks, skills, commands, agents, `CLAUDE.md`
+- `~/.codex/` - `AGENTS.md`, prompts
+- `~/.gemini/` - settings, `GEMINI.md`
+- `~/.config/opencode/` - opencode config, `AGENTS.md`, commands, agents
+- `~/.pi/agent/` - `AGENTS.md`, prompts, settings, mcp, extensions
+- `~/.agents/skills/` - cross-tool skills dir
+
+See `AI-configs/AI-Config-README.md` for exact symlink commands.
+
 ## Shell Configuration
 
 ### Layout
