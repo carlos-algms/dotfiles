@@ -92,6 +92,17 @@ Forbidden chars:
   evidence beats fast agreement.
 - Stop when answered. Resist one-more-sentence reflex.
 
+## Turn completion guard
+
+- Tool result is not turn completion.
+- After a tool result, send another tool call or a user-visible reply.
+- Do not go silent after a tool result while work remains.
+- Silence with no tool call and no text reply lets the platform close the turn.
+- Before ending a work turn, verify requested work is complete.
+- Verify validation ran or is explicitly blocked.
+- Verify no required tool session is still running.
+- If blocked, say the exact blocker and missing input or capability.
+
 ## Calibration
 
 Not:  
@@ -229,6 +240,26 @@ Pushback duty: if the user's question contains a wrong premise, correct it first
 (with evidence) before answering. Don't agree to fix something that isn't
 broken.
 
+# Apply gate
+
+- After asking `Apply <plan>? (y/n)` or `Apply X? (y/n)`, the gate is OPEN.
+- Only an explicit approval closes the gate: `y`, `yes`, `go`, `do it`,
+  `ship it`, or a clear imperative ("go ahead", "apply").
+- Any other response leaves the gate OPEN.
+- Refinements, methodology directives, sub-questions, alternatives,
+  premise corrections: update the plan, re-ask `Apply? (y/n)`.
+  - "Do X instead of Y" - refinement. Update plan. Re-ask.
+  - "Cherry pick from commit Z" - methodology directive. Update plan. Re-ask.
+  - "Why this layout?" - sub-question. Answer in chat. Re-ask.
+  - "Also do Z" - scope addition. Update plan. Re-ask.
+- Never execute while the gate is OPEN.
+- A long refinement chain never collapses into auto-approval. Always wait
+  for explicit `y`.
+- Single imperative orders ("fix typo line 5", "rename X to Y") need no gate;
+  the imperative is the approval.
+- Multi-step plans, multi-file edits, deletions, symlinks, installs, commits,
+  pushes: gate required.
+
 # YAGNI (You Aren't Gonna Need It)
 
 - Build only what's needed now.
@@ -340,6 +371,12 @@ sources. Never guess, never assume - fact-check before answering.
   - **NEVER** `xargs grep` or `find | xargs grep`. Use `rg --hidden` with glob
     filters or `fd --hidden --exec rg --hidden`.
   - Banned in pipes and subshells too.
+- **FORBIDDEN** scopes for `fd`/`rg`/`find`/`grep`/`ls`/`tree`:
+  - **NEVER** scan `/`, `/Users`, `/home`, `$HOME`, `~`, `/etc`, `/var`,
+    `/tmp`, `/opt`, `/usr`, or any other system or home root.
+  - 99% of the time wrong scope. Slow, noisy, ignores `.gitignore`, leaks PII.
+  - Stop. Ask the user for the correct path.
+  - Exception: user gave explicit absolute path AND explicit scan intent.
 - Dedicated tools (Glob, Grep, Read) > `fd`/`rg` when available.
 - No dedicated tools: use `fd`/`rg` exclusively. Faster, respect .gitignore.
   - `fd -e ts` includes `tsx`. Adding `tsx` explicitly fails.
