@@ -371,6 +371,8 @@ instructions, and any markdown emitted in chat. No exceptions for artifact type
 - After writing or editing any `.md`/`.markdown` file, run
   `prettier --write <file>` to enforce mechanical formatting (wrap, spacing,
   list markers, fence normalization, final newline)
+- Preserve two trailing spaces before newline in Markdown. It is intentional
+  hard-break syntax to avoid `<br>`.
 
 ## Semantic rules (files and chat)
 
