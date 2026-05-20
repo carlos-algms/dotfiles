@@ -21,7 +21,6 @@ For reusable wiki-style knowledge, use `second-brain`.
 **MANDATORY:** Load these skills before any operation:
 
 - `obsidian-mechanics` - vault path, file ops, sources convention, safety
-- `markdown-formatting` - markdown style
 - `obsidian-markdown` - Obsidian Flavoured Markdown syntax
 
 ## Where to save

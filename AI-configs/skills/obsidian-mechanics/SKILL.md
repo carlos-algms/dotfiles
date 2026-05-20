@@ -2,22 +2,22 @@
 name: obsidian-mechanics
 description: >
   Personal Obsidian CLI mechanics and patterns not covered by the base
-  `obsidian-cli` skill. Load when driving the Obsidian CLI for content
-  creation, file operations, vault hygiene, or version history. Triggers on:
-  "search my vault", "find notes about", "show orphan notes", "find broken
-  links", "rename this note", "move this note", "show note history", "restore
-  version", "list backlinks", "show outline", "heredoc obsidian", "obsidian
-  fallback", "vault hygiene".
+  `obsidian-cli` skill. Load when driving the Obsidian CLI for content creation,
+  file operations, vault hygiene, or version history. Triggers on: "search my
+  vault", "find notes about", "show orphan notes", "find broken links", "rename
+  this note", "move this note", "show note history", "restore version", "list
+  backlinks", "show outline", "heredoc obsidian", "obsidian fallback", "vault
+  hygiene".
 ---
 
 # Obsidian Mechanics
 
 Personal patterns for driving the Obsidian CLI. Fills gaps in the base
-`obsidian-cli` skill (heredoc content creation, file operations,
-version history, vault hygiene, direct-file fallback).
+`obsidian-cli` skill (heredoc content creation, file operations, version
+history, vault hygiene, direct-file fallback).
 
-**MANDATORY:** Load `obsidian-cli` for the base CLI reference (syntax,
-file targeting, common patterns).
+**MANDATORY:** Load `obsidian-cli` for the base CLI reference (syntax, file
+targeting, common patterns).
 
 ## Vault context
 
@@ -318,8 +318,8 @@ obsidian unresolved verbose
 ## Graph queries
 
 The vault is a graph: notes are nodes, edges are wikilinks, tags, and
-frontmatter properties. The CLI exposes one-hop traversal natively. Multi-hop
-is composed via shell loops or via Bases.
+frontmatter properties. The CLI exposes one-hop traversal natively. Multi-hop is
+composed via shell loops or via Bases.
 
 ### Edges
 
@@ -448,8 +448,8 @@ daily, personal docs, etc.). Per-skill rules layer on top.
 - British English. No Oxford comma.
 - For OFM syntax (wikilinks, embeds, callouts, properties), see
   `obsidian-markdown` skill.
-- For general formatting (headings, tables, line spacing), see
-  `markdown-formatting` skill.
+- For general markdown formatting, see the `Markdown` section in your main agent
+  instructions or from your context.
 
 ## Sources convention
 

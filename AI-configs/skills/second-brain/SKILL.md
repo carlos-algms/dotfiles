@@ -5,9 +5,8 @@ description: >
   over generic Obsidian skills for vault content routing. Load this first when
   the user asks to search, read, create, update, move, or organize notes in
   their vault. Routes reusable knowledge and vault-wide personal docs. Triggers:
-  "second brain", "my vault", "Obsidian", "my notes", "my wiki", "save to
-  second brain", "what do I have on", "find notes about", "quick note",
-  "daily note".
+  "second brain", "my vault", "Obsidian", "my notes", "my wiki", "save to second
+  brain", "what do I have on", "find notes about", "quick note", "daily note".
 ---
 
 # Second brain
@@ -20,7 +19,6 @@ repo-specific findings, investigations, decisions, and coding lessons.
 **MANDATORY:** Load these skills before any operation:
 
 - `obsidian-mechanics` - vault path, file ops, sources convention, safety
-- `markdown-formatting` - markdown style
 - `obsidian-markdown` - Obsidian Flavoured Markdown syntax
 
 ## Route selection
@@ -68,8 +66,8 @@ trigger text.
 
 ## Filenames
 
-All note filenames must be globally unique vault-wide because Obsidian
-wikilinks resolve by filename, not folder path.
+All note filenames must be globally unique vault-wide because Obsidian wikilinks
+resolve by filename, not folder path.
 
 Good:
 
