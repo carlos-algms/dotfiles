@@ -19,11 +19,19 @@ task.
 - Never put pages directly under a category.
 - File slug is kebab-case, no date prefix.
 - File slug must be globally unique vault-wide.
+- Use `notable-people/` for public person profiles.
+- Do not use `people/` for wiki person profiles; reserve
+  `011-personal/people/` for people personally relevant to the user.
+- Use `people` only when the note is about people as a general concept.
+- Country-specific public rules use
+  `100-wiki/countries/<country>/<domain>/<note>.md`.
+- Use country routes for immigration, tax, healthcare, law and government
+  processes.
 
 Examples:
 
 - `technology/neovim/`
-- `people/andrej-karpathy/`
+- `notable-people/andrej-karpathy/`
 - `health/nutrition/`
 - `culture/books/`
 
@@ -79,7 +87,7 @@ Rules:
 
 ## Page body template
 
-````markdown
+```markdown
 ---
 frontmatter...
 ---
@@ -107,7 +115,7 @@ Use `[text](url)` for external links only.
 
 - **YYYY-MM-DD**
   - Created. Brief note on source/context.
-````
+```
 
 ## Conventions
 

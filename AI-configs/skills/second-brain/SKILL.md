@@ -24,7 +24,7 @@ repo-specific findings, investigations, decisions, and coding lessons.
 ## Route selection
 
 - Reusable knowledge -> `references/wiki.md`
-- Personal docs, quick captures, daily notes, travel, family, admin -> inline
+- Personal docs, quick captures, daily notes, travel, people, admin -> inline
   vault-wide rules below
 
 Load only the selected route reference.
@@ -45,10 +45,57 @@ Use these for content that is not wiki and not project memory.
 - Use `011-personal/` for personal documentation.
 - Use `001-Quick-Notes/` for low-context captures and inbox notes.
 - Use `010-Daily/` only for date-scoped daily notes.
-- Ask only when multiple destinations are plausible and materially different.
-- Create new folders only when no existing home fits.
-- Do not create specialised routes for travel, visa, residency, or admin until
-  repeated use proves a need.
+- Ask when multiple destinations are plausible.
+- Create folders when needed for durable ownership or lifecycle.
+- Example folders are guidance, not a closed taxonomy.
+
+### Dynamic routing
+
+Route content units, not imported headings.
+
+- Profile: stable entity facts
+- Case: personal process, timeline, documents, decisions and outcome
+- Reference: reusable knowledge
+- Raw source: input only unless the user asks to archive, attach or quote
+
+Rules:
+
+- People use
+  `011-personal/people/<common-person-slug>/<common-person-slug>.md`
+- Country cases use
+  `011-personal/countries/<country>/<domain>/<stable-case>/<unique-note>.md`
+- Country references use
+  `100-wiki/countries/<country>/<domain>/<unique-reference>.md`
+- Start with one note per case.
+- Keep status, outcome, decision and action plan together for one episode.
+- Split only for independent lifecycle, owner, update cadence or reuse.
+- Link personal case notes to wiki reference notes.
+- Do not duplicate reusable rules in personal notes.
+- Put dates in filenames, not stable folders.
+- Person paths use first name and one surname by default.
+- Full legal names and variants go in aliases.
+
+### Example structure
+
+Add folders when the same routing rules call for them.
+
+```text
+011-personal/
+  people/
+    <person-slug>/
+      <person-slug>.md
+  countries/
+    germany/
+      visa/
+        renewal/
+          <unique-case-note>.md
+
+100-wiki/
+  countries/
+    germany/
+      immigration/
+        <unique-reference-note>.md
+```
 
 ## Root folders
 
@@ -69,18 +116,15 @@ trigger text.
 All note filenames must be globally unique vault-wide because Obsidian wikilinks
 resolve by filename, not folder path.
 
-Good:
+Rules:
+
+- Folders organise context
+- Filenames identify the note
+- Do not use `index.md`
+- Use a descriptive slug even when folder names already provide context
+
+Pattern:
 
 ```text
-011-personal/countries/germany/visa/renew-2026/germany-visa-renew-2026.md
-011-personal/people/carlos-gomes/carlos-gomes.md
+<folder-context>/<globally-unique-note-slug>.md
 ```
-
-Bad:
-
-```text
-011-personal/countries/germany/visa/renew-2026/renew-2026.md
-011-personal/people/carlos-gomes/index.md
-```
-
-Folders organize. Filenames identify.
