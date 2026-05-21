@@ -389,7 +389,18 @@ Prettier does not enforce these. You must.
 
 ### Lists
 
-- Ordered lists only when order matters
+- Ordered (numbered) lists when:
+  1. Order matters (sequential steps, phases)
+  2. User is choosing, comparing, approving, rejecting, or following up on items
+  3. Items are selectable options, candidates, rules, tools, files, commands, or
+     actions
+  4. Items need to be referenced by number (e.g. "step 3", "item 2.1")
+  5. Output is a checklist, procedure, or runbook
+- Default to numbered top level for procedural, selectable, or referenceable
+  lists. Bullets for unordered peers
+- Sub-items: nested numbered list. Renders `1.` again; indentation shows
+  hierarchy. Reference as "2.1", "2.2"
+  - `a.` / `b.` not valid CommonMark/GFM. Use nested `1.` `2.` instead
 - No trailing punctuation on items (keep only when syntax or quoted text
   requires it)
 - No one-item lists
@@ -492,6 +503,25 @@ In projects with tests:
 - **On PR open/create intent**:
   1. Load `create-pull-request` skill
   2. Apply its format and show-then-create visibility gate
+
+# Command output hygiene
+
+- Before running a shell command, classify its output
+  - Needed signal: keep visible
+  - Potential flood: write stdout/stderr to a temp log
+- Log commands that can emit progress bars, spinners, loading states, ANSI
+  noise, long test output, install logs, or build noise
+- Read the log only when the command fails or user explicitly asks for output
+- On failure, inspect the smallest useful excerpt first
+  - Start with the final 80-120 lines
+  - Search for error markers before reading more
+- Typical logged commands: tests, builds, type checks, linters, installs, Docker
+  pulls/builds, codegen, and bulk formatters
+- Keep exploration output visible: `rg`, `fd`, `find`, `grep`, `ls`,
+  `git status`, `git diff`, `git log`
+- Keep output visible when output itself is the requested result
+- Report command, exit code, log path, and relevant excerpt when a logged
+  command fails
 
 # Package manager
 
