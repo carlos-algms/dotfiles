@@ -19,13 +19,20 @@ local code_blocks = {
     "tsx",
 }
 
+local code_block_aliases = {
+    md = "markdown",
+}
+
 local snippets = {}
 
 for _, lang in ipairs(code_blocks) do
-    snippets[#snippets + 1] = s(
-        { trig = lang, desc = lang .. " code block", condition = line_begin },
-        { t({ "```" .. lang, "" }), i(0), t({ "", "```" }) }
-    )
+    local fence_lang = code_block_aliases[lang] or lang
+
+    snippets[#snippets + 1] = s({
+        trig = lang,
+        desc = fence_lang .. " code block",
+        condition = line_begin,
+    }, { t({ "```" .. fence_lang, "" }), i(0), t({ "", "```" }) })
 end
 
 return snippets
