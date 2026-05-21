@@ -168,6 +168,7 @@ local theme = {
         ["@tag"] = "@function",
         ["@type.astro"] = "@none", -- it was flagging JSX tags as types
         ["@type.builtin"] = "@function",
+        ["@type.builtin.python"] = "Type",
         ["@type.css"] = "@function",
         ["@type.javascript"] = "Function",
         ["@type.literal.string"] = "@string",
