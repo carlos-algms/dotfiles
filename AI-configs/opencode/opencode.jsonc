@@ -25,26 +25,26 @@
       "head *": "allow",
       "wc *": "allow",
       "which *": "allow",
-      "realpath *": "allow"
+      "realpath *": "allow",
     },
     "external_directory": {
       "/opt/homebrew/opt/nvim/**": "allow",
       "~/.config/nvim/**": "allow",
-      "~/.local/share/nvim/**": "allow"
+      "~/.local/share/nvim/**": "allow",
     },
-    "lsp": "allow"
+    "lsp": "allow",
   },
   "plugin": [
     "opencode-antigravity-auth@latest",
     "opencode-copilot-auth@latest",
-    "opencode-openai-codex-auth"
+    "opencode-openai-codex-auth",
   ],
   "default_agent": "build",
   "agent": {
     "build": {
       "mode": "primary",
       "description": "Default agent - asks permission for edits and commands",
-      "color": "#034cff"
+      "color": "#034cff",
     },
     "plan": {
       "mode": "primary",
@@ -52,39 +52,52 @@
       "color": "#12c905",
       "permission": {
         "edit": "deny",
-        "bash": "deny"
-      }
+        "bash": "deny",
+      },
     },
     "yolo": {
       "mode": "primary",
       "description": "Full auto-approve - no permission prompts",
       "color": "#e03c1f",
       "permission": {
-        "*": "allow"
-      }
-    }
+        "*": "allow",
+      },
+    },
   },
-  "model": "anthropic/claude-sonnet-4-6",
+  "model": "anthropic/claude-opus-4-7-fast",
   "provider": {
     "anthropic": {
-      "models": {},
+      "models": {
+        "claude-opus-4-7-fast": {
+          "options": {
+            "thinking": { "type": "adaptive", "display": "summarized" },
+            "effort": "xhigh",
+          },
+        },
+        "claude-opus-4-7": {
+          "options": {
+            "thinking": { "type": "adaptive", "display": "summarized" },
+            "effort": "xhigh",
+          },
+        },
+      },
       "options": {
-        "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}"
-      }
+        "apiKey": "{env:CARLOS_ANTHROPIC_API_KEY}",
+      },
     },
     "lmstudio": {
       "name": "LM Studio (local)",
       "options": {
-        "baseURL": "http://localhost:1234/v1"
+        "baseURL": "http://localhost:1234/v1",
       },
       "models": {
         "qwen/qwen3-coder-30b": {
-          "name": "Qwen 3 Coder 30B"
-        }
-      }
+          "name": "Qwen 3 Coder 30B",
+        },
+      },
     },
     "nvidia-nim": {
-      "models": {}
+      "models": {},
     },
     "google": {
       "models": {
@@ -92,475 +105,373 @@
           "name": "Gemini 3 Pro (Antigravity)",
           "limit": {
             "context": 1048576,
-            "output": 65535
+            "output": 65535,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
-              "thinkingLevel": "low"
+              "thinkingLevel": "low",
             },
             "high": {
-              "thinkingLevel": "high"
-            }
-          }
+              "thinkingLevel": "high",
+            },
+          },
         },
         "antigravity-gemini-3.1-pro": {
           "name": "Gemini 3.1 Pro (Antigravity)",
           "limit": {
             "context": 1048576,
-            "output": 65535
+            "output": 65535,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
-              "thinkingLevel": "low"
+              "thinkingLevel": "low",
             },
             "high": {
-              "thinkingLevel": "high"
-            }
-          }
+              "thinkingLevel": "high",
+            },
+          },
         },
         "antigravity-gemini-3-flash": {
           "name": "Gemini 3 Flash (Antigravity)",
           "limit": {
             "context": 1048576,
-            "output": 65536
+            "output": 65536,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
           },
           "variants": {
             "minimal": {
-              "thinkingLevel": "minimal"
+              "thinkingLevel": "minimal",
             },
             "low": {
-              "thinkingLevel": "low"
+              "thinkingLevel": "low",
             },
             "medium": {
-              "thinkingLevel": "medium"
+              "thinkingLevel": "medium",
             },
             "high": {
-              "thinkingLevel": "high"
-            }
-          }
+              "thinkingLevel": "high",
+            },
+          },
         },
         "antigravity-claude-sonnet-4-6": {
           "name": "Claude Sonnet 4.6 (Antigravity)",
           "limit": {
             "context": 200000,
-            "output": 64000
+            "output": 64000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "antigravity-claude-opus-4-6-thinking": {
           "name": "Claude Opus 4.6 Thinking (Antigravity)",
           "limit": {
             "context": 200000,
-            "output": 64000
+            "output": 64000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
               "thinkingConfig": {
-                "thinkingBudget": 8192
-              }
+                "thinkingBudget": 8192,
+              },
             },
             "max": {
               "thinkingConfig": {
-                "thinkingBudget": 32768
-              }
-            }
-          }
+                "thinkingBudget": 32768,
+              },
+            },
+          },
         },
         "gemini-2.5-flash": {
           "name": "Gemini 2.5 Flash (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65536
+            "output": 65536,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "gemini-2.5-pro": {
           "name": "Gemini 2.5 Pro (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65536
+            "output": 65536,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "gemini-3-flash-preview": {
           "name": "Gemini 3 Flash Preview (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65536
+            "output": 65536,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "gemini-3-pro-preview": {
           "name": "Gemini 3 Pro Preview (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65535
+            "output": 65535,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "gemini-3.1-pro-preview": {
           "name": "Gemini 3.1 Pro Preview (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65535
+            "output": 65535,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
         },
         "gemini-3.1-pro-preview-customtools": {
           "name": "Gemini 3.1 Pro Preview Custom Tools (Gemini CLI)",
           "limit": {
             "context": 1048576,
-            "output": 65535
+            "output": 65535,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        }
-      }
+            "input": ["text", "image", "pdf"],
+            "output": ["text"],
+          },
+        },
+      },
     },
     "openai": {
       "options": {
         "reasoningEffort": "medium",
         "reasoningSummary": "auto",
         "textVerbosity": "medium",
-        "include": [
-          "reasoning.encrypted_content"
-        ],
-        "store": false
+        "include": ["reasoning.encrypted_content"],
+        "store": false,
       },
       "models": {
         "gpt-5.2": {
           "name": "GPT 5.2 (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "none": {
               "reasoningEffort": "none",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "low": {
               "reasoningEffort": "low",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "xhigh": {
               "reasoningEffort": "xhigh",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
-            }
-          }
+              "textVerbosity": "medium",
+            },
+          },
         },
         "gpt-5.2-codex": {
           "name": "GPT 5.2 Codex (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
               "reasoningEffort": "low",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "xhigh": {
               "reasoningEffort": "xhigh",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
-            }
-          }
+              "textVerbosity": "medium",
+            },
+          },
         },
         "gpt-5.1-codex-max": {
           "name": "GPT 5.1 Codex Max (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
               "reasoningEffort": "low",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "xhigh": {
               "reasoningEffort": "xhigh",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
-            }
-          }
+              "textVerbosity": "medium",
+            },
+          },
         },
         "gpt-5.1-codex": {
           "name": "GPT 5.1 Codex (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "low": {
               "reasoningEffort": "low",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
-            }
-          }
+              "textVerbosity": "medium",
+            },
+          },
         },
         "gpt-5.1-codex-mini": {
           "name": "GPT 5.1 Codex Mini (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "medium"
-            }
-          }
+              "textVerbosity": "medium",
+            },
+          },
         },
         "gpt-5.1": {
           "name": "GPT 5.1 (Codex OAuth)",
           "limit": {
             "context": 272000,
-            "output": 128000
+            "output": 128000,
           },
           "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image"],
+            "output": ["text"],
           },
           "variants": {
             "none": {
               "reasoningEffort": "none",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "low": {
               "reasoningEffort": "low",
               "reasoningSummary": "auto",
-              "textVerbosity": "low"
+              "textVerbosity": "low",
             },
             "medium": {
               "reasoningEffort": "medium",
               "reasoningSummary": "auto",
-              "textVerbosity": "medium"
+              "textVerbosity": "medium",
             },
             "high": {
               "reasoningEffort": "high",
               "reasoningSummary": "detailed",
-              "textVerbosity": "high"
-            }
-          }
-        }
-      }
-    }
+              "textVerbosity": "high",
+            },
+          },
+        },
+      },
+    },
   },
   "formatter": {
     "prettier": {
-      "disabled": true
+      "disabled": true,
     },
     "custom-prettier": {
-      "command": [
-        "prettier",
-        "--write",
-        "$FILE"
-      ],
+      "command": ["prettier", "--write", "$FILE"],
       "environment": {},
       "extensions": [
         ".js",
@@ -577,8 +488,8 @@
         ".html",
         ".yaml",
         ".yml",
-        ".svg"
-      ]
-    }
-  }
+        ".svg",
+      ],
+    },
+  },
 }
