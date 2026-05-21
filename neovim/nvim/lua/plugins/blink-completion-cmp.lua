@@ -59,7 +59,10 @@ return {
                         -- When picking an emoji (`:foo`), silence non-emoji
                         -- providers so the menu shows emoji suggestions only.
                         lsp = { enabled = not_picking_emoji },
-                        snippets = { enabled = not_picking_emoji },
+                        snippets = {
+                            enabled = not_picking_emoji,
+                            score_offset = 20, -- > buffer (+15), < path (+25)
+                        },
 
                         path = {
                             enabled = not_picking_emoji,
