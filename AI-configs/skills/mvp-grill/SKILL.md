@@ -74,8 +74,8 @@ These patterns are lazy. Never emit them:
 3. "Do you want me to read/inspect/test <X>?"
 4. "Confirm <X> first, or proceed?"
 
-If you catch yourself drafting any of these, stop. Do the verification.
-Then ask a real blocker, or close with a locked default.
+If you catch yourself drafting any of these, stop. Do the verification. Then ask
+a real blocker, or close with a locked default.
 
 ## 1. Establish scope
 
@@ -103,7 +103,7 @@ Know facts before recommending or asking. Exploration is agent work.
 9. Go upstream without asking when the issue may be an external bug, library
    limitation, undocumented behavior, or current behavior
 10. Search GitHub issues and PRs when codebase research is inconclusive and
-   upstream behavior affects the recommendation
+    upstream behavior affects the recommendation
 11. Read nearby project patterns or prior code
 12. Stop when more reading will not change the MVP path
 
@@ -134,13 +134,13 @@ Implementation artifacts are not decision logs.
    format
 
 State locked defaults with evidence every session, before the first blocker and
-in the close report. The user cannot see agent context, so visible state is part
-of the contract.
+in the close report. Number locked items so the user can respond by number. The
+user cannot see agent context, so visible state is part of the contract.
 
 ```markdown
 Defaults locked:
 
-- <decision> - <source or rationale>
+1. <decision> - <source or rationale>
 ```
 
 Use `<path:line>` for code when available. Use docs URLs for docs. Use
@@ -180,8 +180,8 @@ Time cost is not a user question unless the user set a strict budget.
 ### Anti-examples
 
 - Bad: "Should I inspect the API before deciding?"
-- Good: inspect the API, then lock the fact: `API shape is <X> - source:
-  <path:line>`
+- Good: inspect the API, then lock the fact:
+  `API shape is <X> - source: <path:line>`
 - Bad: "Want me to check existing tests first?"
 - Good: read the tests, then ask only if behavior still depends on intent
 - Bad: "Should I write this into the target file now?"
@@ -194,8 +194,8 @@ Time cost is not a user question unless the user set a strict budget.
 Ask one question at a time. Recommend first. Ask for override second.
 
 Before each question, maintain the open blocker queue internally. If blockers
-were added, removed, or reprioritized since the last turn, show the
-state-change block before the next question.
+were added, removed, or reprioritized since the last turn, show the state-change
+block before the next question.
 
 Do not show state-change blocks just to prove bookkeeping.
 
@@ -266,7 +266,7 @@ Close when the MVP path is clear, not when every possible branch is resolved.
 Required close content:
 
 1. State the MVP goal
-2. List locked defaults and decisions
+2. List locked defaults and decisions as numbered items
 3. List parking-lot items only when present
 4. Give concrete verification
 5. End with `Next`
@@ -280,8 +280,8 @@ Pick the next action before asking.
 1. If blockers are resolved, report the locked final state in chat
 2. If implementation is requested and no patch exists, recommend applying the
    patch
-3. If a target file was requested but target-file mode was not active,
-   recommend writing that file
+3. If a target file was requested but target-file mode was not active, recommend
+   writing that file
 4. If edits exist and validation has not run, recommend the most relevant check
 5. If validation is done, recommend diff review
 6. Recommend staging, committing, pushing, or PR creation only when the user
@@ -296,12 +296,12 @@ Default close shape:
 ```markdown
 MVP locked:
 
-- <goal>
-- <default or decision>
+1. <goal>
+2. <default or decision>
 
 Parking lot:
 
-- <deferred item>
+1. <deferred item the user may pick by number>
 
 Verify:
 
@@ -313,6 +313,9 @@ Next:
 ```
 
 Omit empty sections.
+
+Use numbered lists for `MVP locked`, `Defaults locked`, and selectable
+`Parking lot` items. Keep blocker choice options lettered.
 
 If one next action is recommended, ask yes/no. If two or more next actions are
 viable peer paths, use lettered options and recommend one.
