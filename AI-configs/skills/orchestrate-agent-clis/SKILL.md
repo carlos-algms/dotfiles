@@ -39,7 +39,7 @@ Has internet access. Good for research and current information.
 ### Codex
 
 ```bash
-codex exec "<prompt>"
+codex exec --skip-git-repo-check "<prompt>"
 ```
 
 No internet access. Fast, focused on code generation.
@@ -109,7 +109,7 @@ unless user requested them.
 Reference files using `@` prefix with relative paths:
 
 ```bash
-codex exec "Review @src/components/Button.tsx"
+codex exec --skip-git-repo-check "Review @src/components/Button.tsx"
 gemini -p "Create tests for @src/utils/helpers.ts"
 cursor-agent --model=composer-2 -p "Refactor @src/api/client.ts"
 pi -p "Review @src/api/client.ts"
@@ -135,5 +135,5 @@ Get multiple perspectives on the same problem:
 gemini -p "How would you implement feature X?"
 
 # Then compare with Codex
-codex exec "How would you implement feature X?"
+codex exec --skip-git-repo-check "How would you implement feature X?"
 ```
