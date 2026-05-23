@@ -10,20 +10,32 @@ Use this template when dispatching a code quality reviewer subagent.
 Task tool (general-purpose):
   Use template at requesting-code-review/code-reviewer.md
 
-  DESCRIPTION: [task summary, from implementer's report]
-  PLAN_OR_REQUIREMENTS: Task N from [plan-file]
-  BASE_SHA: [commit before task]
-  HEAD_SHA: [current commit]
+  DESCRIPTION: [one-line task summary]
+  PLAN_OR_REQUIREMENTS: Task <task_id> from <plan_path>
+  BASE_REF: [branch base or commit SHA before task]
+  CHANGED_FILES: [paths from `git status --porcelain` for this task]
+
+  Reviewer reconstructs the diff itself:
+    - Committed: `git diff <BASE_REF>...HEAD -- <CHANGED_FILES>`
+    - Staged:    `git diff --cached -- <CHANGED_FILES>`
+    - Unstaged:  `git diff -- <CHANGED_FILES>`
+    - Untracked: read each path in <CHANGED_FILES> not tracked by git
 ```
 
-**In addition to standard code quality concerns, the reviewer should check:**
+**Also check (beyond standard code quality):**
 
-- Does each file have one clear responsibility with a well-defined interface?
-- Are units decomposed so they can be understood and tested independently?
-- Is the implementation following the file structure from the plan?
-- Did this implementation create new files that are already large, or
-  significantly grow existing files? (Don't flag pre-existing file sizes — focus
-  on what this change contributed.)
+- One responsibility per file, well-defined interface
+- Units independently understandable and testable
+- File structure matches the plan
+- Growth caused by THIS change (don't flag pre-existing file sizes)
+
+**One-hop scope:**
+
+- Identify exported/changed symbols in `<CHANGED_FILES>`
+- `rg --hidden -F '<symbol>'` to find importers/callers
+- Read each one-hop caller file; flag quality issues caused by the change
+- Do not flag pre-existing quality issues in caller files unrelated to the
+  change
 
 **Code reviewer returns:** Strengths, Issues (Critical/Important/Minor),
 Assessment

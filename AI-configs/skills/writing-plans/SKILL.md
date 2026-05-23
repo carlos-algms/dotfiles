@@ -9,14 +9,11 @@ description: >
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context
-for the codebase, toolset, and problem domain. Document everything they need to
-know: which files to touch for each task, code, testing, docs they might need to
-check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI.
-TDD. Optional commit checkpoints.
+Write self-contained implementation plans for agents with zero repo context.
+Cover files to touch, what to build, how to test. Bite-sized tasks. DRY, YAGNI,
+TDD, optional commit checkpoints.
 
-Assume they are a skilled developer, but know almost nothing about our toolset
-or problem domain.
+Agent is skilled but does not know this codebase or domain.
 
 **Announce at start:** "I'm using the writing-plans skill to create the
 implementation plan."
@@ -56,25 +53,17 @@ testable software on its own.
 
 ## File structure
 
-Before defining tasks, map out which files will be created or modified and what
-each one is responsible for. This is where decomposition decisions get locked
-in.
+Map files to create/modify and their responsibilities before defining tasks.
+Decomposition gets locked here.
 
-- Design units with clear boundaries and well-defined interfaces. Each file
-  should have one clear responsibility.
-- You reason best about code you can hold in context at once, and your edits are
-  more reliable when files are focused. Prefer smaller, focused files over large
-  ones that do too much.
-- Files that change together should live together. Split by responsibility, not
-  by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large
-  files, don't unilaterally restructure - but if a file you're modifying has
-  grown unwieldy, including a split in the plan is reasonable.
-- Before locking in new code, search the codebase for existing components,
-  helpers, utilities, and shared features that do what you need. Reuse is
-  mandatory - importing a shared `Button` beats creating one inline. Extend an
-  existing helper before writing a new one. Only create new code when nothing
-  reusable exists.
+- Define file boundaries, responsibilities, interfaces, reuse points. One
+  responsibility per file
+- Prefer small, focused files over large ones
+- Files that change together live together. Split by responsibility, not layer
+- Follow existing patterns. Don't restructure unilaterally. Split an unwieldy
+  file only when modifying it
+- Search the codebase for existing components, helpers, hooks, utilities before
+  adding new code. Reuse mandatory. Extend before creating
 
 Prefer surgical edits to existing files. Apply single-responsibility: each
 component/module/function does one thing. Don't bundle unrelated changes into a
@@ -85,25 +74,30 @@ self-contained changes that make sense independently.
 
 ## Bite-sized task granularity
 
-**Each step is one action (2-5 minutes):**
+**Each step is one action, small enough to verify/review/commit, AND ends in a
+green state.** A step must be safely committable when complete. Red phases are
+NOT separate steps: they are activities inside the step that produces the green
+result.
 
-- "Bootstrap stubs so tests can run" - step
-- "Write the failing test" - step
-- "Run it - verify it fails on the assertion, not on missing files/imports" -
-  step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
+Examples:
 
-**TDD Red/Green done right:** Tests must fail because the assertion doesn't
-match, never because of runtime errors, missing files, unresolved imports, or
-undefined symbols. Before writing tests, create the minimum boilerplate needed
-for the test to _run_: empty files, stub exports, type scaffolds. The red phase
-proves the test checks the right thing. If the test crashes instead of failing
-an assertion, the red phase is broken - fix the bootstrap first.
+- "Bootstrap stubs so tests can run" - step (green: code compiles)
+- "Implement <feature> with TDD: write failing test, verify red on assertion,
+  implement, verify green" - one step (green: tests pass)
+- "Run full suite to confirm no regressions" - step (green: all pass)
 
-Implementation steps describe _what_ to build and _why_, not the literal code.
-The executing agent is a skilled developer - give them constraints and intent,
-let them write the code.
+Do NOT write red-phase work as a separate step:
+
+- ❌ "Write the failing test" (leaves repo red; cannot commit under pre-commit
+  test gate)
+- ❌ "Run it - verify it fails" (red is interim state, not a deliverable)
+
+**TDD Red/Green:** bootstrap stubs first so tests can run. Red must fail on
+assertion mismatch, not on runtime/import/setup errors. If the test crashes, fix
+bootstrap. Red happens inside the implementation step, not as a separate ticked
+step.
+
+Describe intent and constraints, not full implementation. Agent writes the code.
 
 Commit is not a required task step. Include optional commit checkpoints only
 when the user selects one commit per task or one commit at the end.
@@ -131,6 +125,13 @@ updates at the end.
 **Architecture:** [2-3 sentences about approach]
 
 **Tech Stack:** [Key technologies/libraries]
+
+**Commit policy:** [One commit per task | One commit at the end | No commits]
+
+**Final verification:**
+
+- [List the commands the final reviewer must run after all tasks complete, e.g.
+  full test suite, type check, lint, build]
 
 ---
 ```
@@ -161,11 +162,26 @@ Create `exact/path/to/file.py` with:
 - `Result` class/type (empty or minimal)
 - `function()` stub that raises `NotImplementedError` or returns a wrong default
 
-This ensures tests can import and run without crashes.
+Green: file compiles, imports resolve. Tests can run without crashes.
 
-- [ ] **Step 2: Write failing tests for `function`**
+- [ ] **Step 2: Implement `function` with TDD**
 
 Test file: `exact/path/to/file.test.py`
+
+Inside this step (NOT separate ticked steps):
+
+1. Write tests for the base cases below
+2. Run them - verify they fail on assertion mismatch (not on
+   `ImportError`/`ModuleNotFoundError`/`AttributeError`). If they crash, fix the
+   bootstrap first
+3. Implement `function` per signature + constraints
+4. Run tests - verify all pass
+
+Signature: `def function(input: str) -> Result`
+
+- Accept X, validate Y, return Z
+- Use `LibraryThing` for the heavy lifting
+- Constraint: must handle empty input by returning `Result.empty()`
 
 Base cases:
 
@@ -175,27 +191,9 @@ Base cases:
 
 Explore and add edge cases you find relevant (unicode, whitespace, large input).
 
-- [ ] **Step 3: Run tests, verify they fail on assertions**
+Green: `pytest exact/path/to/file.test.py -v` passes all cases.
 
-Run: `pytest exact/path/to/file.test.py -v` Expected: FAIL - assertion mismatch
-(stub returns wrong value). NOT import errors, `ModuleNotFoundError`, or
-`AttributeError`. If tests crash instead of failing assertions, fix the
-bootstrap first.
-
-- [ ] **Step 4: Implement `function`**
-
-Signature: `def function(input: str) -> Result`
-
-- Accept X, validate Y, return Z
-- Use `LibraryThing` for the heavy lifting
-- Constraint: must handle empty input by returning `Result.empty()`
-
-- [ ] **Step 5: Run tests, verify they pass**
-
-Run: `pytest exact/path/to/file.test.py -v` Expected: PASS (all cases including
-any edge cases you added)
-
-- [ ] **Step 6: Optional commit checkpoint**
+- [ ] **Step 3: Optional commit checkpoint**
 
 Remove this step if the selected commit policy is `One commit at the end` or
 `No commits`.
@@ -234,31 +232,28 @@ These are **fine** - the engineer is skilled, let them work:
 
 ## Code detail calibration
 
-**Full code:**
+**Full code** - include verbatim:
 
-- Config files that are tricky to get right (tsconfig quirks, vitest setup)
-- Type signatures, interfaces, and function signatures
+- Tricky config files (tsconfig quirks, vitest setup)
+- Type signatures, interfaces, function signatures
 - Shell commands with expected output
 
-**Test lists, not test code:**
+**Test lists** - describe, don't write:
 
-- List base cases with inputs and expected outputs
-- List assertions that matter (roles, landmarks, states, text)
-- Instruct the agent to explore and add edge cases they find relevant
-- The agent writes the actual test code, setup, and assertions
+- Base cases with inputs and expected outputs
+- Assertions that matter (roles, landmarks, states, text)
+- Instruct agent to add edge cases
 
-**Instructions, not code** (the agent can derive it from test list +
-signatures + constraints):
+**Instructions** - describe, don't write:
 
-- Component/function bodies
-- CSS/styles: describe layout intent (e.g. "horizontal flex, input fills
-  remaining space"), not property values. Before picking values, search for
-  existing CSS variables, design tokens, and helper classes (`.card`,
-  `.section`, etc.) and re-use them
-- Straightforward CRUD, wiring, glue code
+- Component/function bodies (agent derives from test list + signature)
+- CSS: layout intent ("horizontal flex, input fills remaining space"), not
+  property values. Search for existing CSS variables, design tokens, helper
+  classes (`.card`, `.section`) and reuse
+- CRUD, wiring, glue code
 
-When in doubt: write the signature + constraints + what to test. If the agent
-can derive the implementation from the test list, don't write it.
+When in doubt: signature + constraints + what to test. If agent can derive from
+test list, don't write it.
 
 ## Remember
 
@@ -315,23 +310,25 @@ on. If you find a spec requirement with no task, add the task.
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two
-execution options:**
+**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution
+options:**
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task,
-review between tasks, fast iteration
+**1. Subagent-Driven** - fresh subagent per task, two-stage review per task,
+fast iteration. Requires plan saved to file (cold subagents have no chat
+context)
 
-**2. Inline Execution** - Execute tasks in this session using executing-plans,
-batch execution with checkpoints
+**2. Inline Execution** - execute tasks in this session using `executing-plans`,
+two-stage review per task. Supports memory plans
 
 **Which approach?"**
 
+If the plan is chat-memory only, the subagent path is unavailable. Either save
+the plan to file or pick inline execution.
+
 **If Subagent-Driven chosen:**
 
-- **REQUIRED SUB-SKILL:** Use subagent-driven-development
-- Fresh subagent per task + two-stage review
+- **REQUIRED SUB-SKILL:** `subagent-driven-development`
 
 **If Inline Execution chosen:**
 
-- **REQUIRED SUB-SKILL:** Use executing-plans
-- Batch execution with checkpoints for review
+- **REQUIRED SUB-SKILL:** `executing-plans`

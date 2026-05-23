@@ -9,54 +9,54 @@ less)
 Task tool (general-purpose):
   description: "Review spec compliance for Task N"
   prompt: |
-    You are reviewing whether an implementation matches its specification.
+    You are a cold reviewer with no prior context. You are reviewing whether an
+    implementation matches its specification.
 
-    ## What Was Requested
+    ## Spec Source (pick ONE)
 
-    [FULL TEXT of task requirements]
+    Pointer mode (preferred, plan saved to disk):
+    - plan_path: [absolute path to plan file]
+    - task_id: [task number / heading in plan]
 
-    ## What Implementer Claims They Built
+    Paste mode (fallback, chat-memory plan, inline path only):
+    - task_spec: |
+        [full task text pasted here]
 
-    [From implementer's report]
+    ## Diff Pointers
 
-    ## CRITICAL: Do Not Trust the Report
+    - base_ref: [SHA at task start, or merge-base for final review]
+    - changed_files: [list of paths from `git status --porcelain` for this task]
 
-    The implementer finished suspiciously quickly. Their report may be incomplete,
-    inaccurate, or optimistic. You MUST verify everything independently.
+    ## Collect Data Yourself
 
-    **DO NOT:**
-    - Take their word for what they implemented
-    - Trust their claims about completeness
-    - Accept their interpretation of requirements
+    1. Spec: if pointer mode, read plan at <plan_path> and locate <task_id>;
+       if paste mode, the spec is in <task_spec>
+    2. Reconstruct the change set, scoped to <changed_files>:
+       - Committed: `git diff <base_ref>...HEAD -- <changed_files>`
+       - Staged:    `git diff --cached -- <changed_files>`
+       - Unstaged:  `git diff -- <changed_files>`
+       - Untracked: read each path in <changed_files> not tracked by git
+    3. One-hop scope:
+       - Identify exported/changed symbols in <changed_files>
+       - `rg --hidden -F '<symbol>'` to find importers/callers across the repo
+       - Read each one-hop caller file
+       - Flag breakage in callers caused by <changed_files>
+    4. Do not flag pre-existing issues in caller files that are unrelated to
+       the changes
 
-    **DO:**
-    - Read the actual code they wrote
-    - Compare actual implementation to requirements line by line
-    - Check for missing pieces they claimed to implement
-    - Look for extra features they didn't mention
+    Do not trust any external summary of what was built. Read code directly.
 
     ## Your Job
 
     Read the implementation code and verify:
 
-    **Missing requirements:**
-    - Did they implement everything that was requested?
-    - Are there requirements they skipped or missed?
-    - Did they claim something works but didn't actually implement it?
+    - **MISSING**: requirements not implemented; claimed-but-absent work
+    - **EXTRA**: features not requested; over-engineering; nice-to-haves
+    - **MISUNDERSTOOD**: wrong interpretation, wrong problem solved, wrong approach
 
-    **Extra/unneeded work:**
-    - Did they build things that weren't requested?
-    - Did they over-engineer or add unnecessary features?
-    - Did they add "nice to haves" that weren't in spec?
-
-    **Misunderstandings:**
-    - Did they interpret requirements differently than intended?
-    - Did they solve the wrong problem?
-    - Did they implement the right feature but wrong way?
-
-    **Verify by reading code, not by trusting report.**
+    Verify by reading code, not by trusting any report.
 
     Report:
-    - ✅ Spec compliant (if everything matches after code inspection)
-    - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
+    - ✅ Spec compliant, OR
+    - ❌ Issues: list with file:line refs
 ```

@@ -8,13 +8,27 @@ Task tool (general-purpose):
   prompt: |
     You are implementing Task N: [task name]
 
-    ## Task Description
+    ## Pointers
 
-    [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+    - plan_path: [absolute path to plan file]
+    - task_id: [task number / heading in plan]
+    - working_dir: [absolute path]
+
+    Read the plan at <plan_path> and locate task <task_id>. That is your spec.
+    Do not implement anything outside that task's scope.
+
+    ## Commit Policy
+
+    Selected policy: [`One commit per task` | `One commit at the end` | `No commits`]
+
+    - `One commit per task`: after self-review passes, commit the task's changes
+    - `One commit at the end`: DO NOT commit. Leave changes staged or unstaged
+    - `No commits`: DO NOT commit
 
     ## Context
 
-    [Scene-setting: where this fits, dependencies, architectural context]
+    [Scene-setting only: where this task fits, prior task outputs, dependencies,
+    architectural notes that aren't in the plan. Do NOT paste the task text.]
 
     ## Before You Begin
 
@@ -32,8 +46,8 @@ Task tool (general-purpose):
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
     3. Verify implementation works
-    4. Commit your work
-    5. Self-review (see below)
+    4. Self-review (see below)
+    5. Commit IFF commit policy is `One commit per task`
     6. Report back
 
     Work from: [directory]
@@ -43,33 +57,23 @@ Task tool (general-purpose):
 
     ## Code Organization
 
-    You reason best about code you can hold in context at once, and your edits are more
-    reliable when files are focused. Keep this in mind:
     - Follow the file structure defined in the plan
-    - Each file should have one clear responsibility with a well-defined interface
-    - If a file you're creating is growing beyond the plan's intent, stop and report
-      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-    - If an existing file you're modifying is already large or tangled, work carefully
-      and note it as a concern in your report
-    - In existing codebases, follow established patterns. Improve code you're touching
-      the way a good developer would, but don't restructure things outside your task.
+    - One responsibility per file
+    - File growing beyond plan intent: stop, return DONE_WITH_CONCERNS, don't split
+      on your own
+    - Existing file already large/tangled: work carefully, note in report
+    - Follow established patterns; don't restructure outside your task
 
-    ## When You're in Over Your Head
+    ## Escalate before guessing
 
-    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-    no work. You will not be penalized for escalating.
+    Return BLOCKED or NEEDS_CONTEXT with: blocker, attempts, what help is needed.
+    Triggers:
 
-    **STOP and escalate when:**
-    - The task requires architectural decisions with multiple valid approaches
-    - You need to understand code beyond what was provided and can't find clarity
-    - You feel uncertain about whether your approach is correct
-    - The task involves restructuring existing code in ways the plan didn't anticipate
-    - You've been reading file after file trying to understand the system without progress
-
-    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-    specifically what you're stuck on, what you've tried, and what kind of help you need.
-    The controller can provide more context, re-dispatch with a more capable model,
-    or break the task into smaller pieces.
+    - Architectural decisions with multiple valid approaches
+    - Code beyond what was provided needs understanding and clarity is missing
+    - Uncertain whether your approach is correct
+    - Task requires restructuring the plan didn't anticipate
+    - Reading file after file without progress
 
     ## Before Reporting Back: Self-Review
 

@@ -10,11 +10,9 @@ description: >
 Execute plan by dispatching fresh subagent per task, with two-stage review after
 each: spec compliance review first, then code quality review.
 
-**Why subagents:** You delegate tasks to specialized agents with isolated
-context. By precisely crafting their instructions and context, you ensure they
-stay focused and succeed at their task. They should never inherit your session's
-context or history — you construct exactly what they need. This also preserves
-your own context for coordination work.
+**Why subagents:** Isolated context per task. Controller coordinates only.
+Subagents never inherit session history; controller constructs exactly what they
+need. Preserves controller context for orchestration.
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then
 quality) = high quality, fast iteration
@@ -25,6 +23,18 @@ reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely
 prevents progress, or all tasks complete. "Should I continue?" prompts and
 progress summaries waste their time — they asked you to execute the plan, so
 execute it.
+
+## Plan location precondition
+
+Pointer-style dispatch requires a plan file on disk. Cold subagents have no chat
+context.
+
+1. If plan is saved to a file: proceed
+2. If plan is chat-memory only: STOP. Ask the user to either:
+   - Save the plan to `docs/plans/YYYY-MM-DD-<feature-name>.md`, or
+   - Switch to `executing-plans` (inline path supports memory plans)
+
+Never paste full task text into subagent dispatches as a workaround.
 
 ## Branch safety
 
@@ -101,18 +111,18 @@ digraph process {
         "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
         "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
         "Implementer subagent fixes spec gaps" [shape=box];
-        "Dispatch code quality reviewer subagent (requesting-code-review)" [shape=box];
+        "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
         "Code quality reviewer subagent approves?" [shape=diamond];
         "Implementer subagent fixes quality issues" [shape=box];
         "Mark task complete in TodoWrite" [shape=box];
     }
 
-    "Read plan, run safety gates, extract all tasks with full text, note context, create TodoWrite" [shape=box];
+    "Read plan, run safety gates, note plan_path + task ids + scene-setting context, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use verification-before-completion and report final status" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, run safety gates, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Read plan, run safety gates, note plan_path + task ids + scene-setting context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
@@ -121,10 +131,10 @@ digraph process {
     "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
     "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
     "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (requesting-code-review)" [label="yes"];
-    "Dispatch code quality reviewer subagent (requesting-code-review)" -> "Code quality reviewer subagent approves?";
+    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
+    "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
     "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (requesting-code-review)" [label="re-review"];
+    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
     "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
@@ -139,7 +149,8 @@ Before dispatching subagents:
 2. Run branch safety gate
 3. Run plan tracking gate
 4. Resolve commit policy
-5. Extract all tasks with full text and relevant context
+5. Note `plan_path`, task ids, and scene-setting context per task. Do NOT
+   extract task text verbatim - subagents read the plan themselves via pointers
 6. Create TodoWrite
 
 Tell implementer subagents the selected commit policy:
@@ -148,26 +159,36 @@ Tell implementer subagents the selected commit policy:
 - `One commit at the end`: do not commit during individual tasks
 - `No commits`: do not commit
 
+## `base_ref` discovery
+
+Capture two values:
+
+1. Plan-level (final reviewer): `git merge-base HEAD <default-branch>` where
+   default-branch is `main` or `master` (detect with
+   `git symbolic-ref refs/remotes/origin/HEAD`)
+2. Per-task (per-task reviewers): capture `git rev-parse HEAD` at task start,
+   before dispatching the implementer. Per-task `base_ref` = that SHA. Task 1's
+   base equals the plan-level merge-base only on a clean branch with no prior
+   commits; otherwise it's whatever HEAD is at task start
+3. With `One commit per task`, per-task base shifts after each commit; recapture
+   at the start of each task
+
+**Preconditions before dispatching:**
+
+1. Worktree clean of unrelated changes. Dirty at task start: ask the user before
+   proceeding (otherwise reviewers audit user's WIP edits)
+2. `changed_files` captured at task end, BEFORE any per-task commit. After
+   `git commit`, `git status --porcelain` returns empty; derive from
+   `git diff --name-only <task_base_ref>...HEAD` instead. For renames, use the
+   destination path
+
 ## Model selection
 
-Use the least powerful model that can handle each role to conserve cost and
-increase speed.
+Use the least powerful model that handles each role.
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2
-files): use a fast, cheap model. Most implementation tasks are mechanical when
-the plan is well-specified.
-
-**Integration and judgment tasks** (multi-file coordination, pattern matching,
-debugging): use a standard model.
-
-**Architecture, design, and review tasks**: use the most capable available
-model.
-
-**Task complexity signals:**
-
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
+- 1-2 files, complete spec, mechanical implementation → cheap/fast model
+- Multi-file integration, pattern matching, debugging → standard model
+- Architecture, design, review, broad codebase reasoning → most capable model
 
 ## Handling implementer status
 
@@ -194,119 +215,21 @@ Provide the missing context and re-dispatch.
 **Never** ignore an escalation or force the same model to retry without changes.
 If the implementer said it's stuck, something needs to change.
 
+## Review retry budget
+
+3 rounds per reviewer (spec, code-quality, AND final reviewer). One round = one
+dispatch + one implementer fix attempt. Round 4: STOP. Escalate with the
+reviewer's latest issues and the implementer's latest attempt.
+
+Repeated rejection often signals a plan defect, not a fix defect. Escalation
+gives the user a chance to update the plan.
+
 ## Prompt templates
 
 - `./implementer-prompt.md` - Dispatch implementer subagent
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `requesting-code-review` - Use for code quality reviewer subagents
-
-## Example workflow
-
-```text
-You: I'm using Subagent-Driven Development to execute this plan.
-
-[Read plan file once: docs/plans/feature-plan.md]
-[Extract all 5 tasks with full text and context]
-[Create TodoWrite with all tasks]
-
-Task 1: Hook installation script
-
-[Get Task 1 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
-
-Implementer: "Before I begin - should the hook be installed at user or system level?"
-
-You: "User level (~/.config/app/hooks/)"
-
-Implementer: "Got it. Implementing now..."
-[Later] Implementer:
-  - Implemented install-hook command
-  - Added tests, 5/5 passing
-  - Self-review: Found I missed --force flag, added it
-  - Committed if commit policy is `One commit per task`
-
-[Dispatch spec compliance reviewer]
-Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
-
-[Get git SHAs, dispatch code quality reviewer]
-Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
-
-[Mark Task 1 complete]
-
-Task 2: Recovery modes
-
-[Get Task 2 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
-
-Implementer: [No questions, proceeds]
-Implementer:
-  - Added verify/repair modes
-  - 8/8 tests passing
-  - Self-review: All good
-  - Committed if commit policy is `One commit per task`
-
-[Dispatch spec compliance reviewer]
-Spec reviewer: ❌ Issues:
-  - Missing: Progress reporting (spec says "report every 100 items")
-  - Extra: Added --json flag (not requested)
-
-[Implementer fixes issues]
-Implementer: Removed --json flag, added progress reporting
-
-[Spec reviewer reviews again]
-Spec reviewer: ✅ Spec compliant now
-
-[Dispatch code quality reviewer]
-Code reviewer: Strengths: Solid. Issues (Important): Magic number (100)
-
-[Implementer fixes]
-Implementer: Extracted PROGRESS_INTERVAL constant
-
-[Code reviewer reviews again]
-Code reviewer: ✅ Approved
-
-[Mark Task 2 complete]
-
-...
-
-[After all tasks]
-[Dispatch final code-reviewer]
-Final reviewer: All requirements met, ready to merge
-[Use verification-before-completion]
-
-Done!
-```
-
-## Advantages
-
-**vs. Manual execution:**
-
-- Subagents follow TDD naturally
-- Fresh context per task (no confusion)
-- Parallel-safe (subagents don't interfere)
-- Subagent can ask questions (before AND during work)
-
-**Efficiency gains:**
-
-- No file reading overhead (controller provides full text)
-- Controller curates exactly what context is needed
-- Subagent gets complete information upfront
-- Questions surfaced before work begins (not after)
-
-**Quality gates:**
-
-- Self-review catches issues before handoff
-- Two-stage review: spec compliance, then code quality
-- Review loops ensure fixes actually work
-- Spec compliance prevents over/under-building
-- Code quality ensures implementation is well-built
-
-**Cost:**
-
-- More subagent invocations (implementer + 2 reviewers per task)
-- Controller does more prep work (extracting all tasks upfront)
-- Review loops add iterations
-- But catches issues early (cheaper than debugging later)
+- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+  (wraps `requesting-code-review`)
 
 ## Red flags
 
@@ -316,7 +239,7 @@ Done!
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
-- Make subagent read plan file (provide full text instead)
+- Paste full task text into the prompt (use pointers: plan_path + task_id)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (spec reviewer found issues = not
@@ -348,5 +271,6 @@ Done!
 
 **Related workflow skills:**
 
-- **requesting-code-review** - Code review template for reviewer subagents
+- **./code-quality-reviewer-prompt.md** - Code review template (wraps
+  `requesting-code-review`)
 - **verification-before-completion** - Verifies before claiming completion
