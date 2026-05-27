@@ -1,7 +1,7 @@
 return {
     {
         "pwntester/octo.nvim",
-        dir = "/Users/carlos.gomes/projects/octo.nvim",
+        -- dir = "/Users/carlos.gomes/projects/octo.nvim",
         enabled = not vim.g.is_ssh,
         -- event = "VeryLazy",
         dependencies = {
