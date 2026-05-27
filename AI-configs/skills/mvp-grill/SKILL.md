@@ -115,12 +115,14 @@ paid calls, or scope expansion beyond the MVP.
 Defaults are decisions. Do not ask the user to confirm them.
 
 1. Apply explicit user goal
-2. Apply existing project standard
-3. Apply nearby implementation pattern
-4. Apply industry default
-5. Apply simplest reversible option
-6. Lock obvious artifact boundaries
-7. Park non-MVP branches
+2. Apply project mandate (AGENTS.md, CLAUDE.md, contributing guide, ADR). These
+   are locked, never asked. Cite path
+3. Apply existing project standard
+4. Apply nearby implementation pattern
+5. Apply industry default
+6. Apply simplest reversible option
+7. Lock obvious artifact boundaries
+8. Park non-MVP branches
 
 Parking means defer visibly, not hide. Surface material parking-lot items in the
 close report.
@@ -202,7 +204,22 @@ Do not show state-change blocks just to prove bookkeeping.
 1. Use yes/no for one recommended path
 2. Use lettered options for two or more peer paths
 3. Drop options with no plausible MVP reason
-4. Include the real tradeoff in one line
+4. Drop options that violate a locked default, project mandate, or invariant.
+   Never add a forbidden path as a balance option. If only one path remains
+   valid, lock it instead of asking
+5. Include a tradeoff only when one exists
+
+Tradeoff means a concrete cost: bug risk, visual or behavioral regression,
+revert or undo cost, performance impact, lock-in, or data loss. A tradeoff is
+not a restatement, summary, or explanation of the option. Omit the tradeoff line
+when the option is self-explanatory or no real cost exists.
+
+Anti-examples:
+
+- Bad: "Tradeoff: 2 small tests" (restates option)
+- Bad: "Tradeoff: adds a helper function" (restates option)
+- Good: "Tradeoff: breaks existing callers of `foo()`, needs grep+update"
+- Good: "Tradeoff: extra render on every keystroke"
 
 Format:
 
@@ -211,7 +228,7 @@ Format:
 
 **Q<n>**: <blocking decision>? (<answer format>)
 
-Recommendation: <answer>. Tradeoff: <real cost>.
+Recommendation: <answer>. Tradeoff: <real cost, omit if none>.
 ```
 
 ## 6. Handle answers
