@@ -24,18 +24,6 @@ prevents progress, or all tasks complete. "Should I continue?" prompts and
 progress summaries waste their time — they asked you to execute the plan, so
 execute it.
 
-## Plan location precondition
-
-Pointer-style dispatch requires a plan file on disk. Cold subagents have no chat
-context.
-
-1. If plan is saved to a file: proceed
-2. If plan is chat-memory only: STOP. Ask the user to either:
-   - Save the plan to `docs/plans/YYYY-MM-DD-<feature-name>.md`, or
-   - Switch to `executing-plans` (inline path supports memory plans)
-
-Never paste full task text into subagent dispatches as a workaround.
-
 ## Branch safety
 
 Before implementation, inspect the current branch.
@@ -145,7 +133,11 @@ digraph process {
 
 Before dispatching subagents:
 
-1. Read the plan file once
+1. Read the plan file once. STOP if `plan_path` was not provided OR the file
+   does not exist OR is empty. Ask the user for a valid plan file before
+   proceeding. Skills load at the step that needs them (see step annotations
+   `**Skills (load if not already loaded):**` in the plan) - implementer
+   subagents handle that themselves. Do NOT pre-load skills upfront
 2. Run branch safety gate
 3. Run plan tracking gate
 4. Resolve commit policy
@@ -224,12 +216,59 @@ reviewer's latest issues and the implementer's latest attempt.
 Repeated rejection often signals a plan defect, not a fix defect. Escalation
 gives the user a chance to update the plan.
 
-## Prompt templates
+## Dispatch payloads
 
-- `./implementer-prompt.md` - Dispatch implementer subagent
-- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
-  (wraps `requesting-code-review`)
+Do NOT load template files into your own context. Each subagent reads its
+template directly. Pass the absolute template path + the values it needs.
+
+Conventions:
+
+- `<skill_dir>` resolves to the directory of THIS SKILL.md (e.g.
+  `/Users/me/.claude/skills/subagent-driven-development`). Substitute the real
+  absolute path before sending
+- `changed_files` is a SPACE-separated list of paths suitable for use after `--`
+  in git commands (e.g. `src/a.ts src/b.ts`). No JSON, no commas, no brackets
+- WRONG: pasting the template body into the prompt
+- RIGHT: the prompt literally contains the `MUST read instructions at ...` line
+  and the values
+
+**Implementer:**
+
+```text
+MUST read instructions at <skill_dir>/implementer-prompt.md FIRST. Do not
+act until you have read it. Then apply:
+  task_summary  = <one-line summary of the task>
+  plan_path     = <abs path>
+  task_id       = <task number / heading>
+  working_dir   = <abs path>
+  commit_policy = <One commit per task | One commit at the end | No commits>
+  context       = <scene-setting only: where this task fits, prior task
+                   outputs, dependencies, architectural notes not in the plan>
+```
+
+**Spec compliance reviewer:**
+
+```text
+MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST. Do not
+act until you have read it. Then apply:
+  task_summary  = <one-line summary of the task>
+  plan_path     = <abs path>
+  task_id       = <task number / heading>
+  base_ref      = <SHA at task start, or merge-base for final review>
+  changed_files = <space-separated paths>
+```
+
+**Code quality reviewer:**
+
+```text
+MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
+Do not act until you have read it. Then apply:
+  task_summary         = <one-line summary of the task>
+  description          = <one-line task summary>
+  plan_or_requirements = "Task <task_id> from <plan_path>"
+  base_ref             = <SHA>
+  changed_files        = <space-separated paths>
+```
 
 ## Red flags
 
@@ -239,7 +278,7 @@ gives the user a chance to update the plan.
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
-- Paste full task text into the prompt (use pointers: plan_path + task_id)
+- Paste full task text into the prompt (pass `plan_path` + `task_id` only)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (spec reviewer found issues = not

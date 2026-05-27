@@ -20,14 +20,16 @@ implementation plan."
 
 ## Plan location
 
-Before writing the plan, choose where it lives.
+The plan ALWAYS lives in a file. Subagents have no session memory; the file is
+the only source of truth.
 
-- If already working in a plan file, ask before editing it to match this format.
-  Preserve all original content unless the user explicitly approves removal.
-- If not working in a plan file, ask whether the plan should stay in chat memory
-  or be saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`.
-- Recommend `docs/plans/` for multi-session work. Recommend memory for short,
-  disposable planning.
+- Already working in a plan file: ask before editing it to match this format.
+  Preserve all original content unless the user explicitly approves removal
+- Not yet saved: default to `docs/plans/YYYY-MM-DD-<feature-name>.md`. The user
+  may specify any other path
+- If the user refuses to save the plan to any file: STOP. Do not proceed
+- The plan file is not committed automatically. The user decides whether to
+  commit it
 
 ## Commit policy
 
@@ -108,6 +110,34 @@ When executing from a plan file, update each checkbox from `- [ ]` to `- [x]`
 immediately after completing and verifying that step. Do not batch checkbox
 updates at the end.
 
+## Required skills (per step)
+
+Skills load at the step that needs them, not upfront. This keeps them salient
+when the implementer is about to act and avoids paying the token tax for skills
+loaded too early (forgotten by the time they matter).
+
+For each step, scan its footprint and match against the available skills (listed
+in your system prompt). The skill list is environment-specific - never hard-code
+skill names.
+
+Scan for signals that imply a skill:
+
+- File extensions touched (e.g. `.ts`, `.tsx`, `.css`, `.py`, `.lua`, `.sh`,
+  `.md`, `.sql`)
+- Frameworks / runtimes named in the step
+- Test runners and config (e.g. planned `*.test.*` files, test config edits)
+- Specific imports the step introduces or relies on
+- Build / package managers the step touches
+- Domain tooling the step interacts with (e.g. Git workflows, Obsidian vaults,
+  Slack, Jira, CI, Neovim, browsers)
+
+Annotate each step with a `**Skills (load if not already loaded):**` line
+listing the matched skills. Annotate only steps that actually need a skill;
+steps with no skill need no annotation.
+
+Always include `verification-before-completion` on the FINAL verification step
+(the step that runs the plan-level final verification commands).
+
 ## Plan document header
 
 **Every plan MUST start with this header:**
@@ -132,6 +162,9 @@ updates at the end.
 
 - [List the commands the final reviewer must run after all tasks complete, e.g.
   full test suite, type check, lint, build]
+
+Note: skills are annotated per step (see step format below), not listed in the
+header.
 
 ---
 ```
@@ -165,6 +198,9 @@ Create `exact/path/to/file.py` with:
 Green: file compiles, imports resolve. Tests can run without crashes.
 
 - [ ] **Step 2: Implement `function` with TDD**
+
+**Skills (load if not already loaded):** `<test-runner-skill>`,
+`<language-skill>`
 
 Test file: `exact/path/to/file.test.py`
 
@@ -202,6 +238,13 @@ Remove this step if the selected commit policy is `One commit at the end` or
 git add exact/path/to/file.py exact/path/to/file.test.py
 git commit -m "Add specific feature"
 ```
+
+- [ ] **Final step (last task only): Run final verification**
+
+**Skills (load if not already loaded):** `verification-before-completion`
+
+Run the commands listed in the plan header's `Final verification` field. Report
+results.
 ````
 
 ## No ambiguity
@@ -280,11 +323,12 @@ test list, don't write it.
 
 ## Self-review
 
-After writing the complete plan, look at the spec with fresh eyes and check the
-plan against it. This is a checklist you run yourself — not a subagent dispatch.
+After writing the complete plan, re-read it with fresh eyes. This is a checklist
+you run yourself — not a subagent dispatch.
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point
-to a task that implements it? List any gaps.
+**1. Requirements coverage:** Skim the user's stated requirements (from
+conversation or any brief). Can you point to a task that implements each one?
+List any gaps.
 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns
 from the "No Placeholders" section above. Fix them.
@@ -304,26 +348,73 @@ modules before locking in new code. If a reusable piece exists, the plan must
 import it, not recreate it. If it needs a small extension, extend it.
 
 If you find issues, fix them inline. No need to re-review - just fix and move
-on. If you find a spec requirement with no task, add the task.
+on. If a requirement has no task, add the task.
+
+## Plan reviewer
+
+After self-review, dispatch a plan-reviewer subagent. Catches blind spots the
+author missed. The reviewer audits the plan's internal quality only
+(contradictions, hidden assumptions, ordering, granularity, reuse, blind spots,
+etc.) - it does NOT compare against an external spec.
+
+Pass:
+
+1. `plan_path` - absolute path to plan file
+2. `repo_root` - absolute path to repo root
+
+Dispatch payload (do NOT load the template into your own context):
+
+```text
+MUST read instructions at <skill_dir>/plan-reviewer-prompt.md FIRST. Do not
+act until you have read it. Then apply:
+  task_summary = <one-line summary of the plan under review>
+  plan_path    = <abs path>
+  repo_root    = <abs path>
+```
+
+`<skill_dir>` resolves to the directory of THIS SKILL.md (e.g.
+`/Users/me/.claude/skills/writing-plans`). Substitute the real absolute path
+before sending.
+
+WRONG: pasting the template body into the prompt. RIGHT: the prompt literally
+contains the `MUST read instructions at ...` line.
+
+Subagent reads the template itself. Main agent never embeds it.
+
+Flow:
+
+1. Dispatch reviewer once
+2. Reviewer returns ✅ or ❌ with Critical / Important / Minor issues. Only
+   Critical + Important block approval
+3. Fix blocking issues inline
+4. Re-review is OPTIONAL. Each dispatch is independent (subagents do not
+   remember prior reviews) and costs tokens. Only re-dispatch if the fixes could
+   plausibly introduce new defects (large rewrites, new tasks, changed
+   structure). Skip re-review for surgical fixes
+5. Cap at 3 total dispatches per plan. If issues remain after the 3rd, escalate
+   to the user with the issues and the current plan
+
+Audit categories live in `plan-reviewer-prompt.md`.
+
+**Model selection:** plan review is mostly mechanical pattern matching
+(contradictions, placeholders, header completeness, skill scan). Default to a
+cheap/fast model. Escalate to a more capable model only when the first review
+came back thin, or for high-stakes / complex plans where hidden assumptions and
+blind spots dominate.
 
 ## Execution Handoff
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution
-options:**
+**"Plan complete and saved to `<plan_path>`. Two execution options:**
 
 **1. Subagent-Driven** - fresh subagent per task, two-stage review per task,
-fast iteration. Requires plan saved to file (cold subagents have no chat
-context)
+fast iteration
 
 **2. Inline Execution** - execute tasks in this session using `executing-plans`,
-two-stage review per task. Supports memory plans
+two-stage review per task
 
 **Which approach?"**
-
-If the plan is chat-memory only, the subagent path is unavailable. Either save
-the plan to file or pick inline execution.
 
 **If Subagent-Driven chosen:**
 

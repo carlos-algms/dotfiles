@@ -18,15 +18,6 @@ plan."
 offer `subagent-driven-development` as an alternative. Do not switch workflows
 without user approval.
 
-## Plan location
-
-If plan is saved to a file: reviewer dispatch uses pointer-style (see
-`Reviewer dispatch pointers`).
-
-If plan is chat-memory only: reviewer dispatch falls back to paste-style.
-Controller pastes the task spec into the reviewer prompt; pointer fields
-(`base_ref`, `changed_files`) still apply for diff reconstruction.
-
 ## Branch safety
 
 Before implementation, inspect the current branch.
@@ -48,13 +39,13 @@ When creating a worktree, ensure `.worktrees/` is listed in the target repo
 
 ## Plan tracking
 
-If the plan file uses checkboxes, ask before editing it to track progress.
+Plan file uses checkboxes: tick them. Not optional.
 
-If approved, preserve all original content except checkbox state. Update each
-checkbox from `- [ ]` to `- [x]` immediately after completing and verifying that
-step. Do not batch checkbox updates at the end.
-
-If not approved, track progress with TodoWrite and chat status only.
+- Preserve all original content except checkbox state
+- Update each `- [ ]` to `- [x]` immediately after completing and verifying the
+  step
+- Do not batch checkbox updates at the end
+- Also track progress with TodoWrite in parallel (harness-native task list)
 
 ## Commit policy
 
@@ -74,13 +65,15 @@ Follow the selected policy. Never commit when the policy is `No commits`.
 
 ### Step 1: Load and review plan
 
-1. Read plan file
+1. Read plan file. STOP if `plan_path` was not provided OR the file does not
+   exist OR is empty. Ask the user for a valid plan file before proceeding.
+   Skills load at the step that needs them - see step annotations
+   `**Skills (load if not already loaded):**`. Do NOT load skills upfront
 2. Run branch safety gate
-3. Run plan tracking gate
-4. Resolve commit policy
-5. Review critically - identify any questions or concerns about the plan
-6. If concerns: Raise them with your human partner before starting
-7. If no concerns: Create TodoWrite and proceed
+3. Resolve commit policy
+4. Review critically - identify any questions or concerns about the plan
+5. If concerns: Raise them with your human partner before starting
+6. If no concerns: Create TodoWrite and proceed
 
 ### Step 2: Execute tasks
 
@@ -89,13 +82,11 @@ For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. If plan tracking was approved, tick each completed step immediately after
-   verification
-5. Dispatch spec compliance reviewer subagent (cold, fresh context) with
-   pointers only (see `Reviewer dispatch pointers` below)
+4. Tick each completed step immediately after verification
+5. Dispatch spec compliance reviewer subagent with pointers (see
+   `Reviewer dispatch pointers` below)
 6. Spec reviewer flags issues -> fix -> re-dispatch reviewer -> repeat until ✅
-7. Dispatch code quality reviewer subagent (cold, fresh context) with pointers
-   only
+7. Dispatch code quality reviewer subagent with pointers
 8. Code reviewer flags issues -> fix -> re-dispatch reviewer -> repeat until ✅
 9. If commit policy is `One commit per task`, commit after both reviews approve
 10. Mark as completed
@@ -110,8 +101,7 @@ continue.
 
 ## Reviewer dispatch pointers
 
-Dispatch pointers only when plan is on disk. Reviewer reads plan and
-reconstructs diff. Paste-style fallback for memory plans (see `Plan location`).
+Reviewer reads plan and reconstructs diff.
 
 **Preconditions before dispatching:**
 
@@ -123,7 +113,7 @@ reconstructs diff. Paste-style fallback for memory plans (see `Plan location`).
 
 **Pointer set per dispatch:**
 
-1. `plan_path` - absolute path to plan file (or `task_spec` paste for memory)
+1. `plan_path` - absolute path to plan file
 2. `task_id` - task number/name in the plan
 3. `base_ref` - see `base_ref discovery` below
 4. `changed_files[]` - paths for the task scope (rename `A -> B` -> use `B`)
@@ -138,28 +128,44 @@ reconstructs diff. Paste-style fallback for memory plans (see `Plan location`).
 3. With `One commit per task`, per-task base shifts after each commit; recapture
    at the start of each task
 
-**Subagent instructions (include verbatim in dispatch):**
+**Dispatch payloads (do NOT load templates into your context):**
+
+Reviewer subagents read their templates directly. Pass template path + values.
+
+Conventions:
+
+- `<skill_dir>` is the absolute path to the `subagent-driven-development` skill
+  directory (the templates live there). Resolve it before sending (e.g.
+  `realpath ~/.claude/skills/subagent-driven-development`) and reuse
+- `changed_files` is a SPACE-separated list of paths suitable for use after `--`
+  in git commands. No JSON, no commas, no brackets
+- WRONG: pasting the template body into the prompt
+- RIGHT: the prompt literally contains the `MUST read instructions at ...` line
+  and the values
 
 ```text
-You are a cold reviewer. You have no prior context.
-
-1. Read the plan at <plan_path>. Locate task <task_id>. That is the spec
-2. Reconstruct the change set:
-   - Committed diff: `git diff <base_ref>...HEAD -- <changed_files>`
-   - Staged diff:    `git diff --cached -- <changed_files>`
-   - Unstaged diff:  `git diff -- <changed_files>`
-   - Untracked files: read each path in <changed_files> not tracked by git
-3. One-hop scope: identify exported/changed symbols in <changed_files>, run
-   `rg --hidden -F '<symbol>'` to find importers/callers, read each, flag
-   issues caused by the change. Do not flag pre-existing issues in callers
-4. Role:
-   - spec-compliance: report MISSING (spec items absent) and EXTRA (work not in
-     spec). Reference task spec lines
-   - code-quality: load `requesting-code-review` and apply it
-5. Output: ✅ approved, or a list of issues with file:line refs
+# Spec compliance reviewer
+MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST.
+Do not act until you have read it. Then apply:
+  task_summary  = <one-line summary of the task>
+  plan_path     = <abs path>
+  task_id       = <task number / heading>
+  base_ref      = <SHA at task start>
+  changed_files = <space-separated paths>
 ```
 
-Fallback if `base_ref` is unclear: ask the user before dispatching.
+```text
+# Code quality reviewer
+MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md
+FIRST. Do not act until you have read it. Then apply:
+  task_summary         = <one-line summary of the task>
+  description          = <one-line task summary>
+  plan_or_requirements = "Task <task_id> from <plan_path>"
+  base_ref             = <SHA>
+  changed_files        = <space-separated paths>
+```
+
+If `base_ref` is unclear: ask the user before dispatching.
 
 ### Step 3: Complete development
 
@@ -167,9 +173,8 @@ After all tasks complete and verified:
 
 - Run final verification from the plan
 - Run any additional relevant checks for the changed files
-- Dispatch final code quality reviewer subagent (cold, fresh context) with
-  pointers only. Scope = all files changed by the plan (`base_ref` = branch
-  base, `changed_files` = full plan diff)
+- Dispatch final code quality reviewer subagent. Scope = all files changed by
+  the plan (`base_ref` = branch base, `changed_files` = full plan diff)
 - Fix any issues, re-dispatch reviewer, repeat until ✅. Retry budget (3 rounds)
   applies; round 4 escalates to user
 - Under `One commit per task`, final reviewer fixes create extra commits.
@@ -205,7 +210,7 @@ After all tasks complete and verified:
 - Skip either reviewer (spec compliance OR code quality)
 - Start code quality review before spec compliance is ✅ (wrong order)
 - Move to the next task while either reviewer has open issues
-- Reuse a reviewer subagent across tasks (each review = fresh cold subagent)
+- Reuse a reviewer subagent across tasks (each review = fresh subagent)
 - Let your own self-check replace the reviewer subagent (both are needed)
 
 ## Remember
@@ -216,5 +221,5 @@ After all tasks complete and verified:
 - Reference skills when the plan says to
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
-- Reviewer subagents are cold and neutral: never share session history. Pass
-  pointers (plan path, task id, base ref, changed files), not pasted text/diffs
+- Reviewer subagents are neutral: never share session history. Pass plan_path,
+  task_id, base_ref, changed_files
