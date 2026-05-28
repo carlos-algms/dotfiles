@@ -5,6 +5,9 @@
 # Delete all local branches that have been removed from the remote (gone)
 alias gbdg="git branch -vv | grep ': gone]' | awk '{print \$1}' | tee /dev/stderr | xargs git branch -D"
 
+# show all files, not truncated by top-level folders
+alias gsa="git status --short --untracked-files=all"
+
 # override git commit command to remove --verbose
 ## commenting for now to test Copilot suggestions
 # alias gc="git commit"
