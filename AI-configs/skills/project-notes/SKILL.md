@@ -1,17 +1,19 @@
 ---
-name: project-memory
+name: project-notes
 description: >
-  Durable repo-specific memory: project notes, investigations, decisions, coding
-  lessons, failure analyses, and implementation findings. Triggers: "save
-  project notes", "project memory", "save this project finding", "log this
+  Durable repo-specific notes: project findings, investigations, decisions,
+  coding lessons, failure analyses, and implementation findings. Distinct from
+  the agent's native memory feature. Triggers: "save to project notes", "project
+  notes", "save this to my notes", "note this for the project", "log this
+  finding", "save project notes", "save this project finding", "log this
   investigation", "coding lesson", "project decision", "remember this for this
   repo", "document this bug investigation".
 ---
 
-# Project memory
+# Project notes
 
-Save project notes, findings, and investigations as long-lasting memory under
-`020-work/project-memory/<project-name>/`.
+Save project notes, findings, and investigations as long-lasting repo-scoped
+notes under `020-work/project-notes/<project-name>/`.
 
 Use for repo-specific provenance: what happened, what was tried, why a decision
 was made, and what future agents need to know.
@@ -26,7 +28,7 @@ For reusable wiki-style knowledge, use `second-brain`.
 ## Where to save
 
 ```text
-020-work/project-memory/<project-name>/YYYY-MM-DD-<topic-slug>.md
+020-work/project-notes/<project-name>/YYYY-MM-DD-<topic-slug>.md
 ```
 
 - Derive `<project-name>` from current working directory basename or context.

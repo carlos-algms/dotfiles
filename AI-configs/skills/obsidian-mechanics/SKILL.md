@@ -37,8 +37,8 @@ Personal vault is a second-brain / Zettelkasten in Obsidian Flavored Markdown.
 001-Quick-Notes/    Fleeting notes, inbox
 010-Daily/          Daily notes (Obsidian daily notes plugin)
 011-personal/       Personal documentation and non-work long-term notes
-020-work/           Work notes and project memory
-  project-memory/<name>/  - per-project, date-prefixed files
+020-work/           Work notes and project notes
+  project-notes/<name>/   - per-project, date-prefixed files
 100-wiki/           LLM-maintained personal wiki - see second-brain skill
   <category>/<topic>/     - dynamic folders, kebab-case
 999-system/         Obsidian internals, archive, attachments, templates
@@ -453,7 +453,7 @@ daily, personal docs, etc.). Per-skill rules layer on top.
 
 ## Sources convention
 
-Applies to any note that cites sources (wiki pages, project-memory notes, any
+Applies to any note that cites sources (wiki pages, project-notes notes, any
 long-form note). Goal: investigations stay reproducible. The note itself is the
 comparison point if a source changes - `retrieved` dates anchor when the claims
 were true.
