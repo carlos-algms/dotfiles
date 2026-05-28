@@ -11,15 +11,15 @@ at the top, CLI-specific overrides in per-tool subdirs.
   - `~/.codex/AGENTS.md`
   - `~/.pi/agent/AGENTS.md`
   - `.github/copilot-instructions.md` (per-repo, for Copilot)
-- `skills/`, `commands/`, `agents/` are cross-tool. `~/.agents/skills/` is
-  symlinked once to `skills/`; Codex, opencode, cursor, Copilot CLI, Gemini, and
-  pi auto-discover it. Claude does not, so it gets a direct symlink. Commands
-  and agents have no cross-tool standard, so each CLI symlinks them directly.
+- `skills/` are cross-tool. `~/.agents/skills/` is symlinked once to `skills/`;
+  Codex, opencode, cursor, Copilot CLI, Gemini, and pi auto-discover it. Claude
+  does not, so it gets a direct symlink. `agents/` has no cross-tool standard,
+  so each CLI symlinks it directly.
 - `claude/` holds Claude-specific bits (`claude-settings.json`,
   `claude-statusline.sh`, `hooks/`).
-- Third-party components (skills, agents, commands, hooks) are vendored into
-  these top-level directories via a single sync script. See ./COMPONENTS-sync.md
-  for the manifest format, run instructions, and how to add a new source.
+- Third-party components (skills, agents, hooks) are vendored into these
+  top-level directories via a single sync script. See ./COMPONENTS-sync.md for
+  the manifest format, run instructions, and how to add a new source.
 - See ./AI-Config-README.md for the exact symlink commands per agent.
 
 ## Pi (`pi/`)
@@ -56,9 +56,10 @@ Auth and runtime config live OUTSIDE the repo:
   for `web_search` extension (override path via `WEB_SEARCH_AUTH_PATH`).
 - `~/.pi/web-search-usage.json` - per-backend daily/monthly counters managed by
   the `web_search` extension.
-- `~/.local/bin/web-search-ai-summary` -> `AI-configs/pi/extensions/web_search/run.ts`
+- `~/.local/bin/web-search-ai-summary` ->
+  `AI-configs/pi/extensions/web_search/run.ts`
   - user-installed symlink so other agents (via `multi-provider-web-search`
-  skill) can shell out to the same logic pi uses in-process.
+    skill) can shell out to the same logic pi uses in-process.
 
 Pi CLI flags worth knowing when scripting extensions:
 
