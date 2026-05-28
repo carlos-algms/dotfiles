@@ -72,17 +72,10 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "slack@claude-plugins-official": true,
-    "gateway@claudes-kitchen": false,
-    "operational-excellence@claudes-kitchen": false,
-    "skills-development@claudes-kitchen": false,
-    "typescript-services@claudes-kitchen": false,
-    "workflows@claudes-kitchen": false,
     "typescript-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": false,
-    "claude-md-management@claude-plugins-official": true
+    "superpowers@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "obsidian-skills": {
@@ -94,7 +87,7 @@
     }
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim",
   "preferredNotifChannel": "notifications_disabled",
