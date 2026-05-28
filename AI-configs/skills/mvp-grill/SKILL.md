@@ -285,10 +285,54 @@ Required close content:
 1. State the MVP goal
 2. List locked defaults and decisions as numbered items
 3. List parking-lot items only when present
-4. Give concrete verification
-5. End with `Next`
-6. Name the real next action from the ladder below
-7. Apply Mode gate write rules to any `Next` write action
+4. Emit a step-by-step plan as a numbered list with sub-lists. Any agent must be
+   able to execute it with no prior context
+5. Give concrete verification
+6. End with `Next`
+7. Name the real next action from the ladder below
+8. Apply Mode gate write rules to any `Next` write action
+
+### Plan format
+
+The plan is a numbered list. Each step is one action. Sub-steps are a nested
+numbered list under their parent. Each step or sub-step ends with
+`-> verify: <check>` when verifiable.
+
+Reference: see Karpathy goal-driven execution rules in user CLAUDE.md.
+
+```markdown
+Plan:
+
+1. <step> -> verify: <check>
+   1. <sub-step> -> verify: <check>
+   2. <sub-step> -> verify: <check>
+2. <step> -> verify: <check>
+```
+
+### TDD mandatory when tests exist
+
+If the project contains tests (any test runner, fixture dir, or test file
+pattern detected during exploration), TDD red/green is mandatory in the plan.
+Not optional. Not "if time permits".
+
+Required structure when TDD applies:
+
+1. Bootstrap step: create stubs, imports, fixtures, types so the test can run
+   without runtime, compile, import, or reference errors -> verify: test file
+   loads, target symbol resolves
+2. Red step: write the assertion, run the test, confirm it fails for the right
+   reason -> verify: failure reason is value/behavior mismatch, not
+   `ReferenceError`, `TypeError`, `ModuleNotFound`, syntax error, missing file,
+   "element not found", null ref before assertion, or compile error
+3. Green step: minimum code to pass -> verify: target test passes
+4. Regression step: run full suite -> verify: no regressions
+
+Wrong-reason failures are not red. If the red step fails for a bootstrap reason,
+the plan loops back to step 1 before proceeding to green. Never patch the
+assertion to dodge a wrong-reason failure.
+
+No test infra detected: state that explicitly in the plan and ask before adding
+it. Do not silently skip TDD by claiming "no tests".
 
 ### Next action ladder
 
@@ -320,6 +364,12 @@ Parking lot:
 
 1. <deferred item the user may pick by number>
 
+Plan:
+
+1. <step> -> verify: <check>
+   1. <sub-step> -> verify: <check>
+2. <step> -> verify: <check>
+
 Verify:
 
 - <check>
@@ -329,9 +379,9 @@ Next:
 - <context-specific call to action>
 ```
 
-Omit empty sections.
+Omit empty sections except `Plan`. `Plan` is mandatory.
 
-Use numbered lists for `MVP locked`, `Defaults locked`, and selectable
+Use numbered lists for `MVP locked`, `Defaults locked`, `Plan`, and selectable
 `Parking lot` items. Keep blocker choice options lettered.
 
 If one next action is recommended, ask yes/no. If two or more next actions are
