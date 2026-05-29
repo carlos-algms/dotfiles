@@ -1,0 +1,41 @@
+{
+  "providers": {
+    "omlx": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "1",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": "Qwen3.6-35B-A3B-4bit-DWQ",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-4bit",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "gemma-4-26B-A4B-it-4bit-DWQ",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "OpenAI-gpt-oss-20B-INSTRUCT-Heretic-Uncensored-MXFP4-q8-hi-mlx",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        }
+      ]
+    }
+  }
+}

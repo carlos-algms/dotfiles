@@ -1,9 +1,12 @@
 {
-  "lastChangelogVersion": "0.75.3",
+  "lastChangelogVersion": "0.77.0",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "xhigh",
   "packages": [
-    "npm:pi-mcp-adapter"
-  ]
+    "npm:pi-mcp-adapter",
+    "npm:pi-subagents"
+  ],
+  "hideThinkingBlock": false,
+  "showHardwareCursor": true
 }
