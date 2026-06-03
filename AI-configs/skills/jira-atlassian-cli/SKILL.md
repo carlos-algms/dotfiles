@@ -13,14 +13,34 @@ description: |
 
 ## Team Context (load before any Jira call)
 
-Private team values live in `~/OneDrive/work/contexts/jira-teams.yaml`.
+Private team values live in `~/OneDrive/work/contexts/jira-data.yaml`.
 
 - Read the ENTIRE file once per session. No partial reads; risks missing
   `my_team` (pointer to default team key) or mixing cross-team values.
 - Resolve team: user-named team, else top-level `my_team` field.
 - Substitute placeholders from resolved team: `{cloud_id}`, `{project_key}`,
-  `{team_field}`, `{team_id}`, `{sprint_field}`, `{refinement_sprint_id}`.
+  `{team_field}`, `{team_id}`, `{sprint_field}`, `{refinement_sprint_id}`,
+  `{active_sprint_board_id}`.
 - File missing: ask user. Do not guess. End turn.
+
+### Active (current) sprint is NOT constant
+
+- `{refinement_sprint_id}` is stable; the active sprint id rotates every sprint.
+- Never hardcode the active sprint id. Resolve it at runtime.
+- `{active_sprint_board_id}` is the constant agile board; sprints are its
+  children. Resolve the active sprint from the board in one call (verified):
+
+  ```bash
+  acli jira board list-sprints --id {active_sprint_board_id} --state active --json
+  ```
+
+  Read `id` from the single active sprint. Flag is `--id` (the board id), not
+  `--board`. The command is `board list-sprints`; there is no
+  `acli jira sprint list`.
+
+- Do NOT use the old search+view path (`customfield_10020` is rejected in a
+  search `--fields` list and stripped from search results). The board endpoint
+  replaces it.
 
 ## Tool Priority
 
@@ -222,6 +242,17 @@ child.
 
 NOT `{ "id": ... }` (errors with "Number value expected as the Sprint id").
 
+#### Active (current) sprint vs refinement
+
+`jira-data.yaml` holds `refinement_sprint_id` and `active_sprint_board_id`. The
+current/active sprint id is NOT in the yaml and changes every sprint. To target
+the active sprint (user says "current sprint", "this sprint", "not refinement"),
+resolve it live from the board in one call:
+
+`acli jira board list-sprints --id {active_sprint_board_id} --state active --json`
+then read `id` from the single active sprint. Use that integer as
+`{sprint_field}` in the create JSON.
+
 ### Parent / Epic Linking
 
 MCP create: `"parent": "{project_key}-NNN"`. MCP edit
@@ -247,13 +278,30 @@ Substitute `{project_key}` before running.
 | Transition | `acli jira workitem transition --key {project_key}-N --status "In Progress"`    |
 | Comment    | `acli jira workitem comment create --key {project_key}-N --body "..."`          |
 
+### acli pitfalls (verified)
+
+- `acli jira workitem edit` prompts y/N; pass `--yes` for non-interactive runs.
+- No `acli jira me`. Get your accountId via JQL:
+  `acli jira workitem search --jql "assignee = currentUser()" --limit 1 --json`,
+  read `fields.assignee.accountId`.
+- Assignee on create: nest inside `additionalAttributes` as
+  `"assignee": { "accountId": "..." }`.
+- Active sprint id: resolve at runtime (see "Active (current) sprint" above);
+  never reuse `{refinement_sprint_id}` for it.
+
 ### acli JSON Template (for `--from-json`)
+
+Assignee on create: add `assignee.accountId` inside `additionalAttributes`.
+There is NO `acli jira me`. Get your own accountId via:
+`acli jira workitem search --jql "assignee = currentUser()" --limit 1 --json`
+then read `fields.assignee.accountId`.
 
 ```json
 {
   "additionalAttributes": {
     "{team_field}": "{team_id}",
-    "{sprint_field}": {refinement_sprint_id}
+    "{sprint_field}": {refinement_sprint_id},
+    "assignee": { "accountId": "712020:..." }
   },
   "parentIssueId": "{project_key}-NNN",
   "projectKey": "{project_key}",
@@ -286,6 +334,22 @@ Uses `"issues"` (array of keys) instead of `"projectKey"`:
   }
 }
 ```
+
+## Ticket framing (summary = deliverable, not motivation)
+
+The summary and description must describe the WORK to be done, not the event
+that prompted it. A PR, bug sighting, or incident is the MOTIVATION; it belongs
+in the description as context, never as the headline.
+
+- Wrong: "Remove duplicate handler type in chat-embedded (PR #2100)" — that
+  frames a one-off PR fix when the actual deliverable was a review-rule
+  enhancement.
+- Right: "Enhance AI-review duplication rule: same-app scope + near-dup
+  detection" — names the durable change; the PR is one motivating line in the
+  body.
+
+Before creating: ask "what is the lasting deliverable?" If the summary names a
+PR/ticket/incident as its subject, rewrite it to name the change instead.
 
 ## Common Workflows
 
