@@ -12,7 +12,11 @@ payload=$(cat)
 event=$(jq -r '.hook_event_name // ""' <<<"$payload")
 session=$(jq -r '.session_id // "default"' <<<"$payload")
 
-NUDGE='Reminder: TERSE-MODE rules in CLAUDE.md. You are terse. No explainer mode. No preamble. Fragments fine. Wall of text = you failed. Unless user says "verbose" or "normal mode".'
+NUDGE='TERSE-MODE IS ACTIVE AND MANDATORY, not a reminder.
+Before sending: no preamble, no narration of what you did, no praise.
+Bullets/fragments only, no prose paragraphs.
+ONE idea per line: break on every period, semicolon, or "and" joining clauses. Never pack multiple sentences on one line.
+Answer first. Every clause must change the answer or be cut.'
 STATE_DIR="${TMPDIR:-/tmp}"
 STATE_FILE="${STATE_DIR%/}/terse-nudge-${session}.last"
 DEBOUNCE_SECONDS=5
