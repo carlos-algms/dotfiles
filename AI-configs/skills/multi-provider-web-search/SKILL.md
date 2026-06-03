@@ -48,9 +48,3 @@ Options:
 
 - CLI binary symlinked to `~/.local/bin/web-search-ai-summary`. Source of truth:
   `AI-configs/pi/extensions/web_search/run.ts`.
-- Pi uses the same modules in-process via the native `web_search` tool. Other
-  agents shell out to the CLI.
-- Node must support type stripping for `.ts` files.
-- No runtime npm packages required.
-- `pi` on PATH is optional, used for the Haiku AI summary pass. Missing `pi` or
-  failed summary falls back to raw formatted results.
