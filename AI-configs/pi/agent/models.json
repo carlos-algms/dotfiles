@@ -34,6 +34,11 @@
           "id": "OpenAI-gpt-oss-20B-INSTRUCT-Heretic-Uncensored-MXFP4-q8-hi-mlx",
           "contextWindow": 128000,
           "maxTokens": 32768
+        },
+        {
+          "id": "Qwopus3.6-35B-A3B-v1-4bit-MTPLX-Optimized-Speed",
+          "contextWindow": 128000,
+          "maxTokens": 32768
         }
       ]
     }
