@@ -116,9 +116,9 @@ Skills load at the step that needs them, not upfront. This keeps them salient
 when the implementer is about to act and avoids paying the token tax for skills
 loaded too early (forgotten by the time they matter).
 
-For each step, scan its footprint and match against the available skills (listed
-in your system prompt). The skill list is environment-specific - never hard-code
-skill names.
+For each step, scan its footprint and match against the available skills listed
+in the current environment. Use exact skill names. Do not invent, rename, or
+assume skills that are not listed.
 
 Scan for signals that imply a skill:
 
@@ -135,8 +135,10 @@ Annotate each step with a `**Skills (load if not already loaded):**` line
 listing the matched skills. Annotate only steps that actually need a skill;
 steps with no skill need no annotation.
 
-Always include `verification-before-completion` on the FINAL verification step
-(the step that runs the plan-level final verification commands).
+For the final verification step only, always annotate:
+`**Skills (load if not already loaded):** verification-before-completion`. Do
+not load `verification-before-completion` before that final step unless a
+different instruction explicitly requires it.
 
 ## Plan document header
 
@@ -311,6 +313,8 @@ test list, don't write it.
 - Test files collocated next to source: `Foo.test.tsx` beside `Foo.tsx`, no
   `__tests__/` folders
 - Each component gets its own test file; don't pile tests into a parent's file
+- Destructive ops (`rmtree`, overwrite, move-onto-existing) need an exists-guard
+  or a stated reason they can't collide. Never hard-destroy on a soft-delete path
 - Stubs must satisfy the tests but the plan doesn't prescribe their content
 - Design decisions that affect test assertions (ARIA roles, landmarks, semantic
   HTML choices) must be locked in the plan. Styling details can be left open
@@ -331,7 +335,7 @@ conversation or any brief). Can you point to a task that implements each one?
 List any gaps.
 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns
-from the "No Placeholders" section above. Fix them.
+from the "No ambiguity" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you
 used in later tasks match what you defined in earlier tasks? A function called
@@ -346,6 +350,12 @@ with a base-case list + "explore edge cases" instruction.
 codebase? Search for existing components, helpers, hooks, utilities, and shared
 modules before locking in new code. If a reusable piece exists, the plan must
 import it, not recreate it. If it needs a small extension, extend it.
+
+**6. Destructive-op scan:** Does any step delete, overwrite, move-onto, or
+truncate a path that may hold data? For each: is the target guaranteed empty,
+or is there an exists-guard? A soft-delete / restore / move that hard-destroys
+the collision target is a bug — replace with a guard or fail closed. Does every
+"raises X → HTTP N" have a step that catches X? Uncaught → 500.
 
 If you find issues, fix them inline. No need to re-review - just fix and move
 on. If a requirement has no task, add the task.
@@ -387,10 +397,17 @@ Flow:
 2. Reviewer returns ✅ or ❌ with Critical / Important / Minor issues. Only
    Critical + Important block approval
 3. Fix blocking issues inline
-4. Re-review is OPTIONAL. Each dispatch is independent (subagents do not
-   remember prior reviews) and costs tokens. Only re-dispatch if the fixes could
-   plausibly introduce new defects (large rewrites, new tasks, changed
-   structure). Skip re-review for surgical fixes
+4. Apply diminishing returns after the first fresh review. Re-review is
+   OPTIONAL. Each dispatch is independent (subagents do not remember prior
+   reviews) and costs tokens. Only re-dispatch if the fixes could plausibly
+   introduce new plan defects: changed architecture, changed implementation
+   direction, new tasks, changed task boundaries, changed ordering, changed file
+   ownership, changed verification strategy, changed acceptance criteria, or
+   changed test expectations. Skip re-review for surgical fixes that preserve
+   the plan's architecture and direction: wording, clearer file paths, tighter
+   task language, or style-only edits. Completeness fixes and missing
+   constraints skip re-review only when they do not change acceptance criteria,
+   tests, verification, task boundaries, architecture, or direction
 5. Cap at 3 total dispatches per plan. If issues remain after the 3rd, escalate
    to the user with the issues and the current plan
 
