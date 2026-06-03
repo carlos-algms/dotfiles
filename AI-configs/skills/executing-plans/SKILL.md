@@ -18,6 +18,17 @@ plan."
 offer `subagent-driven-development` as an alternative. Do not switch workflows
 without user approval.
 
+## Execution workflow gate
+
+Before implementation, if subagents are available and the plan has mostly
+independent tasks, ask which workflow to use:
+
+1. Continue inline with `executing-plans`
+2. Switch to `subagent-driven-development`
+
+Do not start task execution until the user answers. Skip this gate only when the
+user already explicitly chose inline execution for this plan.
+
 ## Branch safety
 
 Before implementation, inspect the current branch.
@@ -67,13 +78,15 @@ Follow the selected policy. Never commit when the policy is `No commits`.
 
 1. Read plan file. STOP if `plan_path` was not provided OR the file does not
    exist OR is empty. Ask the user for a valid plan file before proceeding.
-   Skills load at the step that needs them - see step annotations
-   `**Skills (load if not already loaded):**`. Do NOT load skills upfront
-2. Run branch safety gate
-3. Resolve commit policy
-4. Review critically - identify any questions or concerns about the plan
-5. If concerns: Raise them with your human partner before starting
-6. If no concerns: Create TodoWrite and proceed
+   Skills load at the step that needs them - see the plan file's step
+   annotations `**Skills (load if not already loaded):**`. Do NOT load skills
+   upfront
+2. Review critically - identify any questions or concerns about the plan
+3. If concerns: Raise them with your human partner before starting
+4. Run the execution workflow gate
+5. Run branch safety gate
+6. Resolve commit policy
+7. If no concerns: Create TodoWrite and proceed
 
 ### Step 2: Execute tasks
 
@@ -85,14 +98,49 @@ For each task:
 4. Tick each completed step immediately after verification
 5. Dispatch spec compliance reviewer subagent with pointers (see
    `Reviewer dispatch pointers` below)
-6. Spec reviewer flags issues -> fix -> re-dispatch reviewer -> repeat until ✅
+6. Spec reviewer flags issues -> fix -> apply the re-review decision rule below
 7. Dispatch code quality reviewer subagent with pointers
-8. Code reviewer flags issues -> fix -> re-dispatch reviewer -> repeat until ✅
-9. If commit policy is `One commit per task`, commit after both reviews approve
+8. Code reviewer flags issues -> fix -> apply the re-review decision rule below
+9. If commit policy is `One commit per task`, commit after both review stages
+   are resolved
 10. Mark as completed
 
-**Never move to the next task while either reviewer has open issues.** Spec
-compliance must approve before dispatching the code quality reviewer.
+**Never move to the next task while either reviewer has unfixed issues.** Spec
+compliance must be resolved before dispatching the code quality reviewer.
+
+A review stage is resolved when the reviewer approves, or when every issue has
+been fixed, verified, and explicitly self-closed under the re-review decision
+rule.
+
+**Diminishing returns / re-review decision rule:** Always dispatch the first
+fresh reviewer for each required review stage. After fixing reviewer issues,
+re-dispatch only when the fix could plausibly introduce new defects or when the
+reviewer raised Critical / Important concerns that need independent
+confirmation. Skip the second reviewer run when the fix is narrow, verified, and
+does not change architecture, task direction, public behavior, public API,
+cross-module contracts, or the plan/code ownership boundaries.
+
+Use stricter judgment for spec compliance:
+
+- Re-dispatch when the fix changes what the task delivers, reinterprets the
+  plan, adds/removes behavior, changes file boundaries, or alters verification
+- Skip re-review only for unambiguous mechanical fixes that directly satisfy the
+  finding and pass the plan's targeted checks
+
+Use diminishing returns more readily for code quality:
+
+- Re-dispatch when the fix changes behavior, architecture, public API,
+  cross-module contracts, concurrency/state flow, error handling, security,
+  persistence, or test strategy
+- Skip re-review for style guide fixes, formatting, naming, import/dead-code
+  cleanup, mechanical, narrow, behavior-preserving abstraction cleanup covered
+  by targeted checks, or code changes whose risk is fully covered by
+  targeted/unit tests that passed
+
+When skipping re-review, record the reviewer issue, the fix, and the
+verification command that closed it in the final report. If committing before
+the final report, also record it in the commit body or task handoff note. Do not
+edit the plan solely to log skipped re-reviews.
 
 **Review retry budget:** 3 rounds per reviewer. One round = one dispatch + one
 fix attempt. If round 4 would be needed, STOP. Escalate to the user with the
@@ -105,8 +153,10 @@ Reviewer reads plan and reconstructs diff.
 
 **Preconditions before dispatching:**
 
-1. Worktree clean of unrelated changes. If dirty at task start, ask the user
-   before proceeding (otherwise reviewers audit user's WIP edits)
+1. Worktree clean of unrelated changes. Expected plan checkbox updates and
+   prior-task changes are allowed under `No commits` and
+   `One commit at the end`. If unrelated dirty changes exist at task start, ask
+   the user before proceeding (otherwise reviewers audit user's WIP edits)
 2. `changed_files` captured at task end, BEFORE any per-task commit. After
    `git commit`, `git status --porcelain` returns empty; capture from
    `git diff --name-only <task_base_ref>...HEAD` instead
@@ -175,8 +225,11 @@ After all tasks complete and verified:
 - Run any additional relevant checks for the changed files
 - Dispatch final code quality reviewer subagent. Scope = all files changed by
   the plan (`base_ref` = branch base, `changed_files` = full plan diff)
-- Fix any issues, re-dispatch reviewer, repeat until ✅. Retry budget (3 rounds)
-  applies; round 4 escalates to user
+- Fix any issues, then apply the same diminishing returns / re-review decision
+  rule using the code-quality branch. If the fix changes delivered behavior or
+  spec compliance, re-dispatch the final reviewer and consider a spec compliance
+  re-check for the affected task. Retry budget (3 rounds) applies; round 4
+  escalates to user
 - Under `One commit per task`, final reviewer fixes create extra commits.
   Acceptable. Do not amend prior commits
 - Use `verification-before-completion` before claiming the plan is complete
@@ -191,6 +244,7 @@ After all tasks complete and verified:
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
 - Verification fails repeatedly
+- A required reviewer cannot be dispatched
 
 **Ask for clarification rather than guessing.**
 
@@ -207,9 +261,9 @@ After all tasks complete and verified:
 
 **Never:**
 
-- Skip either reviewer (spec compliance OR code quality)
-- Start code quality review before spec compliance is ✅ (wrong order)
-- Move to the next task while either reviewer has open issues
+- Skip the required first-pass reviewer (spec compliance OR code quality)
+- Start code quality review before spec compliance is resolved (wrong order)
+- Move to the next task while either reviewer has unfixed issues
 - Reuse a reviewer subagent across tasks (each review = fresh subagent)
 - Let your own self-check replace the reviewer subagent (both are needed)
 
