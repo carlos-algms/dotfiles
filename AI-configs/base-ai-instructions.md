@@ -154,6 +154,14 @@ These 4 rules guide how you think, behave, and work with code and files:
 - Avoid `cat`
 - `head`/`tail` only when bounded output is the point
 
+### Running commands
+
+- Data processing: prefer `sed`, `awk`, `jq`, or bash over Python/Node
+- File edits remain subject to file-edit rules
+- Use individual commands instead of `&&` chains when tracking output matters
+- You start in the project cwd
+  - run commands directly, never `cd <path> && ...` to reach it
+
 ## Search and discovery
 
 - Prefer dedicated search/glob tools
@@ -211,14 +219,6 @@ These 4 rules guide how you think, behave, and work with code and files:
 - Run commands in the closest workspace
 - Uncertain: ask
 - Do not default to `npm`/`npx` unless the project uses it
-
-## Bash scripts
-
-- Add `trap`/cleanup when scripts create temp files or mutate external state
-- Data processing: prefer `sed`, `awk`, `jq`, or bash over Python/Node
-- File edits remain subject to file-edit rules
-- Use individual commands instead of `&&` chains when tracking output matters
-- Do not prefix commands with `cd` when already in target cwd
 
 ## Markdown edits
 
