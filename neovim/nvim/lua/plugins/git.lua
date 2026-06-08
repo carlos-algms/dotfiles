@@ -179,7 +179,10 @@ return {
     },
 
     {
-        "sindrets/diffview.nvim",
+        -- actively maintained fork of abandoned sindrets/diffview.nvim
+        -- repo renamed to diffview-plus.nvim; name= keeps dir/require stable
+        "dlyongemallo/diffview-plus.nvim",
+        name = "diffview.nvim",
         enabled = true,
 
         cmd = {
