@@ -17,12 +17,12 @@ Thin shell to `web-search-ai-summary` CLI on PATH.
 
 - Use only on explicit user intent matching one of:
   - Named provider request: Exa, Tavily, Brave, LangSearch, Marginalia
-  - Cross-provider fanout, "search multiple providers"
   - Provider-fit query: code/docs/repos/papers (exa), current web/RAG (tavily),
     independent mainstream (brave), free broad (langsearch), indie/small-web
     long-tail (marginalia)
   - Native WebSearch returned weak/empty results and user asks to try harder
-- Do not use on generic "search the web" queries. Prefer native WebSearch.
+- Do not use on generic "search the web" queries. Prefer native WebSearch,
+  web_search.
 
 ## Run
 
