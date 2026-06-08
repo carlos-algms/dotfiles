@@ -38,16 +38,16 @@ evidence is not an issue.
 
 **Destructive & unsafe operations (plan-stated only):**
 
-- A step prescribes an irreversible op (`rmtree`, `rm -rf`, `mv` /
-  `shutil.move` onto an existing target, truncate, `DROP`, force-push,
-  overwrite) where the target may hold real data — cite plan:line. Irreversible
-  data loss on a literal-execution path is Critical
+- A step prescribes an irreversible op (`rmtree`, `rm -rf`, `mv` / `shutil.move`
+  onto an existing target, truncate, `DROP`, force-push, overwrite) where the
+  target may hold real data — cite plan:line. Irreversible data loss on a
+  literal-execution path is Critical
 - A "soft" operation (soft-delete, archive, trash) whose steps perform a HARD
   destroy on the move/restore path (contradiction between stated intent and
   mechanism)
-- Move/rename onto a path that may exist: flag silent overwrite or
-  move-into-dir nesting; require an exists-guard or an explicit "cannot collide
-  because <reason>"
+- Move/rename onto a path that may exist: flag silent overwrite or move-into-dir
+  nesting; require an exists-guard or an explicit "cannot collide because
+  <reason>"
 - Error mapping NAMED but not wired: a step says "raises X → 404/409" but no
   step catches X (uncaught → 500). Flag as Important
 - Concurrent writers to the same file/dir/queue the PLAN introduces (two tasks,
@@ -64,6 +64,9 @@ evidence is not an issue.
 **Red-on-commit violations:**
 
 - ANY step that does not end in a green, commit-safe state
+- `Green:` line missing a paste-able command + observable success token (exit 0,
+  `PASS`, `0 errors`). Bare "compiles" / "tests pass" with no command is a
+  violation
 - Failing test as a step deliverable (red must live INSIDE the implementation
   step, not as a separate ticked step)
 - Steps that would fail a commit gate (pre-commit hooks, CI tests, lint,
@@ -119,13 +122,10 @@ Skills are annotated per step, not in the header. For each step:
 
 Cite the signal (plan:line) and the matching skill name.
 
-**Blind spots (evidence-based only):**
+**Blind spots:**
 
 - Schema/env/fixture/CI/migration needs implied by the plan or repo but not
   addressed by any task
-- Race conditions / data loss / runtime behavior: flag ONLY when the plan or
-  repo states the operation (a prescribed `rmtree`, a shared writer the plan
-  adds). Do NOT invent failure modes from unstated runtime behavior
 
 ## Output
 
