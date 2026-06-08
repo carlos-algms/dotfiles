@@ -39,6 +39,44 @@
           "id": "Qwopus3.6-35B-A3B-v1-4bit-MTPLX-Optimized-Speed",
           "contextWindow": 128000,
           "maxTokens": 32768
+        },
+        {
+          "id": "Qwopus3.6-35B-A3B-v1-MLX-3bit-mixed_3_6",
+          "contextWindow": 128000,
+          "maxTokens": 32768
+        }
+      ]
+    },
+    "nvidia": {
+      "baseUrl": "https://integrate.api.nvidia.com/v1",
+      "api": "openai-completions",
+      "apiKey": "$NVIDIA_API_KEY",
+      "models": [
+        {
+          "id": "qwen/qwen3.5-397b-a17b",
+          "name": "Qwen3.5 400B VLM"
+        }
+      ]
+    },
+    "mistral": {
+      "baseUrl": "https://api.mistral.ai/v1",
+      "api": "openai-completions",
+      "apiKey": "$MISTRAL_API_KEY",
+      "models": [
+        {
+          "id": "mistral-medium-3-5",
+          "name": "Mistral Medium 3.5"
+        }
+      ]
+    },
+    "opencode-zen": {
+      "baseUrl": "https://opencode.ai/zen/v1",
+      "api": "openai-completions",
+      "apiKey": "$OPENCODE_ZEN_API_KEY",
+      "models": [
+        {
+          "id": "minimax-m3-free",
+          "name": "MiniMax M3 Free"
         }
       ]
     }
