@@ -7,33 +7,105 @@ description: >
 
 # Writing plans
 
-## Overview
-
-Write self-contained implementation plans for agents with zero repo context.
-Cover files to touch, what to build, how to test. Bite-sized tasks. DRY, YAGNI,
-TDD, optional commit checkpoints.
-
-Agent is skilled but does not know this codebase or domain.
+Write self-contained implementation plans for an agent with zero repo context.
+Skilled engineer, but does not know this codebase or domain. Cover: files to
+touch, what to build, how to test. Bite-sized tasks. DRY, YAGNI, TDD, optional
+commit checkpoints.
 
 **Announce at start:** "I'm using the writing-plans skill to create the
 implementation plan."
 
+## Terms
+
+- **Green:** repo in a committable state - a paste-able command runs and emits
+  an observable success token (exit 0, `PASS`, `0 errors`, compiled artifact).
+  Not "looks done"
+- **Bite-sized:** one step = one action, verifiable, reviewable, committable in
+  isolation
+- **Bootstrap stubs:** minimal types/signatures that make tests _run_ (not pass)
+  - empty bodies, `NotImplementedError`, or wrong defaults
+- **Footprint:** the files, frameworks, runtimes, imports, and tooling a step
+  touches - scanned to match skills
+
+## Worked example (the shape every task follows)
+
+Example is Python; the same shape applies to any language. Language-specific
+rules (test-file naming, package manager) are in "Net-new constraints" below.
+
+````markdown
+### Task N: [Goal-oriented title - what it achieves, not files touched]
+
+**Goal:** [One sentence: what works after this that didn't before]
+
+**Files:**
+
+1. `exact/path/to/file.py`
+   - Create `function()` that validates input and returns `Result`
+   - Re-use `LibraryThing` from `exact/path/to/lib.py`
+2. `exact/path/to/file.test.py`
+   - Covers `function()` base + edge cases
+
+- [ ] **Step 1: Bootstrap stubs**
+
+  Create `Result` type + `function()` stub raising `NotImplementedError`. Green:
+  `python -c "import file"` exits 0 (imports resolve, tests run without
+  crashing).
+
+- [ ] **Step 2: Implement `function` with TDD**
+
+  **Skills (load if not already loaded):** `<test-runner-skill>`,
+  `<language-skill>`
+
+  Inside this step (NOT separate ticked steps):
+  1. Write tests for the base cases below
+  2. Run - verify they fail on assertion mismatch (not Import/Module/Attribute
+     error). If they crash, fix the bootstrap first
+  3. Implement per signature + constraints
+  4. Run - verify all pass
+
+  Signature: `def function(input: str) -> Result`
+  - Accept X, validate Y, return Z. Use `LibraryThing` for heavy lifting
+  - Empty input returns `Result.empty()`
+
+  Base cases:
+  - `function("valid")` -> `Result(value="valid")`
+  - `function("")` -> `Result.empty()`
+  - `function(None)` raises `ValueError`
+
+  Explore edge cases you find relevant (unicode, whitespace, large input).
+
+  Green: `pytest exact/path/to/file.test.py -v` passes all cases.
+
+- [ ] **Step 3: Optional commit checkpoint** (only if policy needs it)
+
+  ```bash
+  git add exact/path/to/file.py exact/path/to/file.test.py <this-plan-file>.md
+  git commit -m "Add specific feature"
+  ```
+
+  Stage the plan file too, so its `- [x]` ticks commit with the task.
+
+- [ ] **Final step (last task only): Run final verification**
+
+  **Skills (load if not already loaded):** `verification-before-completion`
+
+  Run the header's `Final verification` commands. Report results.
+````
+
 ## Plan location
 
-The plan ALWAYS lives in a file. Subagents have no session memory; the file is
-the only source of truth.
-
-- Already working in a plan file: ask before editing it to match this format.
-  Preserve all original content unless the user explicitly approves removal
-- Not yet saved: default to `docs/plans/YYYY-MM-DD-<feature-name>.md`. The user
-  may specify any other path
-- If the user refuses to save the plan to any file: STOP. Do not proceed
-- The plan file is not committed automatically. The user decides whether to
-  commit it
+- Plan ALWAYS lives in a file. Subagents have no session memory; file is the
+  only source of truth
+- Already in a plan file: ask before reformatting. Preserve original content
+  unless user approves removal
+- Not saved: default `docs/plans/YYYY-MM-DD-<feature-name>.md`. User may pick
+  another path
+- User refuses to save to any file: STOP. Do not proceed
+- Plan file is not committed automatically. User decides
 
 ## Commit policy
 
-Before writing the plan, ask how commits should be handled for the whole plan:
+Before writing, ask:
 
 ```markdown
 How should commits be handled for this plan?
@@ -43,102 +115,62 @@ How should commits be handled for this plan?
 3. No commits
 ```
 
-Write the plan to match the selected policy. Do not make commits part of the
-task structure unless the user selects a commit policy that needs them.
+Match the selected policy. Commit steps only when policy needs them (option 1 or
+2).
 
 ## Scope check
 
-If the spec covers multiple independent subsystems, it should have been broken
-into sub-project specs during brainstorming. If it wasn't, suggest breaking this
-into separate plans — one per subsystem. Each plan should produce working,
-testable software on its own.
+- Spec covers multiple independent subsystems: suggest splitting into separate
+  plans, one per subsystem
+- Each plan must produce working, testable software on its own
 
-## File structure
+## File structure (decomposition locks here)
 
-Map files to create/modify and their responsibilities before defining tasks.
-Decomposition gets locked here.
-
-- Define file boundaries, responsibilities, interfaces, reuse points. One
-  responsibility per file
-- Prefer small, focused files over large ones
-- Files that change together live together. Split by responsibility, not layer
+- Map files to create/modify + their responsibilities before defining tasks
+- One responsibility per file. Files that change together live together. Split
+  by responsibility, not layer
 - Follow existing patterns. Don't restructure unilaterally. Split an unwieldy
   file only when modifying it
-- Search the codebase for existing components, helpers, hooks, utilities before
-  adding new code. Reuse mandatory. Extend before creating
-
-Prefer surgical edits to existing files. Apply single-responsibility: each
-component/module/function does one thing. Don't bundle unrelated changes into a
-task because they touch nearby code.
-
-This structure informs the task decomposition. Each task should produce
-self-contained changes that make sense independently.
+- Search the codebase for existing components/helpers/hooks/utilities first.
+  Reuse mandatory. Extend before creating
+- Prefer surgical edits. Don't bundle unrelated changes because they touch
+  nearby code
 
 ## Bite-sized task granularity
 
-**Each step is one action, small enough to verify/review/commit, AND ends in a
-green state.** A step must be safely committable when complete. Red phases are
-NOT separate steps: they are activities inside the step that produces the green
-result.
-
-Examples:
-
-- "Bootstrap stubs so tests can run" - step (green: code compiles)
-- "Implement <feature> with TDD: write failing test, verify red on assertion,
-  implement, verify green" - one step (green: tests pass)
-- "Run full suite to confirm no regressions" - step (green: all pass)
-
-Do NOT write red-phase work as a separate step:
-
-- ❌ "Write the failing test" (leaves repo red; cannot commit under pre-commit
-  test gate)
-- ❌ "Run it - verify it fails" (red is interim state, not a deliverable)
-
-**TDD Red/Green:** bootstrap stubs first so tests can run. Red must fail on
-assertion mismatch, not on runtime/import/setup errors. If the test crashes, fix
-bootstrap. Red happens inside the implementation step, not as a separate ticked
-step.
-
-Describe intent and constraints, not full implementation. Agent writes the code.
-
-Commit is not a required task step. Include optional commit checkpoints only
-when the user selects one commit per task or one commit at the end.
+- Each step is one action: verifiable, reviewable, committable, ending green
+- Every step ends with a `Green:` line = exact paste-able command + observable
+  success token. No bare "compiles" / "tests pass" - name the command and what
+  output proves it
+- Red phases are activities INSIDE the green-producing step, never separate
+  ticked steps
+- GOOD: "Bootstrap stubs" (Green: `tsc --noEmit` -> `0 errors`)
+- GOOD: "Implement <feature> with TDD" (Green: `pytest path -v` -> all pass)
+- BAD: "Write the failing test" (leaves repo red, can't commit)
+- BAD: "Run it, verify it fails" (red is interim, not a deliverable)
+- TDD red must fail on assertion mismatch, not runtime/import/setup error. Crash
+  -> fix bootstrap
+- Describe intent + constraints, not full implementation. Agent writes the code
 
 ## Tracking
 
-When executing from a plan file, update each checkbox from `- [ ]` to `- [x]`
-immediately after completing and verifying that step. Do not batch checkbox
-updates at the end.
+When executing from a plan file, flip `- [ ]` to `- [x]` immediately after
+verifying each step. Do not batch at the end.
 
 ## Required skills (per step)
 
-Skills load at the step that needs them, not upfront. This keeps them salient
-when the implementer is about to act and avoids paying the token tax for skills
-loaded too early (forgotten by the time they matter).
-
-For each step, scan its footprint and match against the available skills listed
-in the current environment. Use exact skill names. Do not invent, rename, or
-assume skills that are not listed.
-
-Scan for signals that imply a skill:
-
-- File extensions touched (e.g. `.ts`, `.tsx`, `.css`, `.py`, `.lua`, `.sh`,
-  `.md`, `.sql`)
-- Frameworks / runtimes named in the step
-- Test runners and config (e.g. planned `*.test.*` files, test config edits)
-- Specific imports the step introduces or relies on
-- Build / package managers the step touches
-- Domain tooling the step interacts with (e.g. Git workflows, Obsidian vaults,
-  Slack, Jira, CI, Neovim, browsers)
-
-Annotate each step with a `**Skills (load if not already loaded):**` line
-listing the matched skills. Annotate only steps that actually need a skill;
-steps with no skill need no annotation.
-
-For the final verification step only, always annotate:
-`**Skills (load if not already loaded):** verification-before-completion`. Do
-not load `verification-before-completion` before that final step unless a
-different instruction explicitly requires it.
+- Skills load at the step that needs them, not upfront (keeps them salient,
+  avoids early token tax)
+- Scan each step's footprint against skills listed in the current environment.
+  Use exact names. Do not invent or rename
+- Signals: file extensions touched; frameworks/runtimes named; test
+  runners/config; specific imports; build/package managers; domain tooling (Git,
+  Obsidian, Slack, Jira, CI, Neovim, browsers)
+- Add `**Skills (load if not already loaded):**` line only on steps with a
+  match. No match -> no line
+- Final verification step always:
+  `**Skills (load if not already loaded):** verification-before-completion`. Do
+  not load it earlier unless another instruction requires it
 
 ## Plan document header
 
@@ -149,8 +181,8 @@ different instruction explicitly requires it.
 
 > **For agentic workers:** Execute task-by-task. Use `executing-plans` when
 > working from a saved plan in a separate session. Steps use checkbox (`- [ ]`)
-> syntax for tracking and must be marked complete immediately after each step is
-> verified.
+> syntax and must be marked complete immediately after each step is verified.
+> Tick each checkbox the moment its step passes; never batch ticks at the end.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -162,215 +194,82 @@ different instruction explicitly requires it.
 
 **Final verification:**
 
-- [List the commands the final reviewer must run after all tasks complete, e.g.
-  full test suite, type check, lint, build]
-
-Note: skills are annotated per step (see step format below), not listed in the
-header.
+- [Commands the final reviewer runs after all tasks: full suite, type check,
+  lint, build]
 
 ---
 ```
 
-## Task structure
-
-````markdown
-### Task N: [Goal-oriented title - what this achieves, not what files it touches]
-
-**Goal:** [One sentence: what works after this task that didn't before]
-
-**Files:**
-
-1. `exact/path/to/file.py`
-   - Create `function()` that validates input and returns `Result`
-   - Re-use `LibraryThing` from `exact/path/to/lib.py`
-   - Import `BaseError` from `exact/path/to/errors.py`
-2. `exact/path/to/existing.py:123-145`
-   - Add `function` to the public API exports
-   - Needed so downstream modules can import it
-3. `exact/path/to/file.test.py`
-   - Covers `function()` base cases + edge cases
-
-- [ ] **Step 1: Bootstrap stubs**
-
-Create `exact/path/to/file.py` with:
-
-- `Result` class/type (empty or minimal)
-- `function()` stub that raises `NotImplementedError` or returns a wrong default
-
-Green: file compiles, imports resolve. Tests can run without crashes.
-
-- [ ] **Step 2: Implement `function` with TDD**
-
-**Skills (load if not already loaded):** `<test-runner-skill>`,
-`<language-skill>`
-
-Test file: `exact/path/to/file.test.py`
-
-Inside this step (NOT separate ticked steps):
-
-1. Write tests for the base cases below
-2. Run them - verify they fail on assertion mismatch (not on
-   `ImportError`/`ModuleNotFoundError`/`AttributeError`). If they crash, fix the
-   bootstrap first
-3. Implement `function` per signature + constraints
-4. Run tests - verify all pass
-
-Signature: `def function(input: str) -> Result`
-
-- Accept X, validate Y, return Z
-- Use `LibraryThing` for the heavy lifting
-- Constraint: must handle empty input by returning `Result.empty()`
-
-Base cases:
-
-- `function("valid")` returns `Result(value="valid")`
-- `function("")` returns `Result.empty()`
-- `function(None)` raises `ValueError`
-
-Explore and add edge cases you find relevant (unicode, whitespace, large input).
-
-Green: `pytest exact/path/to/file.test.py -v` passes all cases.
-
-- [ ] **Step 3: Optional commit checkpoint**
-
-Remove this step if the selected commit policy is `One commit at the end` or
-`No commits`.
-
-```bash
-git add exact/path/to/file.py exact/path/to/file.test.py
-git commit -m "Add specific feature"
-```
-
-- [ ] **Final step (last task only): Run final verification**
-
-**Skills (load if not already loaded):** `verification-before-completion`
-
-Run the commands listed in the plan header's `Final verification` field. Report
-results.
-````
+Skills are annotated per step, not in the header.
 
 ## No ambiguity
 
-Every step must be unambiguous - the engineer should never have to guess _what_
-to build or _which_ constraints matter. But unambiguous does not mean
-copy-paste-ready code.
+Every step unambiguous on _what_ to build and _which_ constraints matter. But
+unambiguous != copy-paste-ready code.
 
-These are **plan failures** - never write them:
+**Plan failures - never write:**
 
 - "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling" / "add validation" / "handle edge cases"
+- "Add appropriate error handling / validation / handle edge cases"
 - "Write tests for the above" (without listing what to test)
-- "Similar to Task N" (repeat the content - the engineer may read tasks out of
-  order)
-- Vague instructions with no constraints ("build the component", "style it
-  nicely")
-- References to types, functions, or methods not defined in any task
+- "Similar to Task N" (repeat it - steps get read out of order)
+- Vague no-constraint instructions ("build the component", "style it nicely")
+- References to types/functions/methods not defined in any task
 
-These are **fine** - the engineer is skilled, let them work:
+**Fine - the engineer is skilled:**
 
-- Signature + bullet constraints instead of full function body
-- "CSS Grid layout, sidebar fixed-width, content fills remaining" instead of a
-  complete CSS file
-- "A nav component with proper aria label and an h2 placeholder" instead of full
-  JSX with exact markup
-- Describing what a config needs to contain instead of the verbatim file
+- Signature + bullet constraints instead of full body
+- "CSS Grid, sidebar fixed-width, content fills remaining" instead of full CSS
+- "Nav component with aria label + h2 placeholder" instead of full JSX
+- Describe what a config needs instead of the verbatim file
 
 ## Code detail calibration
 
-**Full code** - include verbatim:
+- **Full code, verbatim:** tricky config (tsconfig/vitest quirks), type +
+  function signatures, shell commands with expected output
+- **Test lists, describe:** base cases with inputs/outputs, assertions that
+  matter (roles, landmarks, states, text), instruct agent to add edge cases
+- **Instructions, describe:** function/component bodies (agent derives from test
+  list + signature), CSS layout intent not property values (reuse existing
+  variables/tokens/helper classes), CRUD/wiring/glue
+- When in doubt: signature + constraints + what to test
 
-- Tricky config files (tsconfig quirks, vitest setup)
-- Type signatures, interfaces, function signatures
-- Shell commands with expected output
+## Net-new constraints (not covered elsewhere)
 
-**Test lists** - describe, don't write:
-
-- Base cases with inputs and expected outputs
-- Assertions that matter (roles, landmarks, states, text)
-- Instruct agent to add edge cases
-
-**Instructions** - describe, don't write:
-
-- Component/function bodies (agent derives from test list + signature)
-- CSS: layout intent ("horizontal flex, input fills remaining space"), not
-  property values. Search for existing CSS variables, design tokens, helper
-  classes (`.card`, `.section`) and reuse
-- CRUD, wiring, glue code
-
-When in doubt: signature + constraints + what to test. If agent can derive from
-test list, don't write it.
-
-## Remember
-
-- Exact file paths always
-- Test lists with base cases + "explore edge cases"; signatures for
-  implementations; instructions for bodies
-- Exact commands with expected output
-- DRY, YAGNI, TDD, optional commit checkpoints
-- Commit messages: bare imperative subject, no Conventional Commits prefix
-  (`type(scope):`). Branches are squash-merged, so PR title carries the
-  conventional format, not individual commits
-- Test files collocated next to source: `Foo.test.tsx` beside `Foo.tsx`, no
-  `__tests__/` folders
-- Each component gets its own test file; don't pile tests into a parent's file
+- Commit messages: bare imperative subject, no `type(scope):` prefix. Branches
+  squash-merge, so PR title carries conventional format, not commits
+- Test files collocated beside source: `Foo.test.tsx` beside `Foo.tsx`, no
+  `__tests__/` folders. Each component its own test file
 - Destructive ops (`rmtree`, overwrite, move-onto-existing) need an exists-guard
-  or a stated reason they can't collide. Never hard-destroy on a soft-delete path
-- Stubs must satisfy the tests but the plan doesn't prescribe their content
-- Design decisions that affect test assertions (ARIA roles, landmarks, semantic
-  HTML choices) must be locked in the plan. Styling details can be left open
-- Same level of constraint detail for all steps of the same type (don't be
-  precise on one CSS step and vague on the next)
-- Package manager: detect from lock files (`pnpm-lock.yaml`, `yarn.lock`,
-  `package-lock.json`, `bun.lock`) or `packageManager` field in root
-  `package.json`. Use the detected runner in all commands (`pnpm exec`, `yarn`,
-  `npx`, `bunx`). Never default to `npm`/`npx`. If undetectable, stop and ask
+  or a stated reason they can't collide. Never hard-destroy on a soft-delete
+  path
+- Design decisions affecting test assertions (ARIA roles, landmarks, semantic
+  HTML) locked in the plan. Styling can stay open
+- Same constraint-detail level across steps of the same type
+- Package manager: detect from lock files or root `packageManager`. Use detected
+  runner. Never default to `npm`/`npx`. Undetectable -> stop and ask
 
-## Self-review
+## Self-review (run yourself, not a subagent)
 
-After writing the complete plan, re-read it with fresh eyes. This is a checklist
-you run yourself — not a subagent dispatch.
+After writing, re-check and fix inline:
 
-**1. Requirements coverage:** Skim the user's stated requirements (from
-conversation or any brief). Can you point to a task that implements each one?
-List any gaps.
-
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns
-from the "No ambiguity" section above. Fix them.
-
-**3. Type consistency:** Do the types, method signatures, and property names you
-used in later tasks match what you defined in earlier tasks? A function called
-`clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
-
-**4. Implementation leak scan:** Does any step contain a full function/component
-body or full test code that the agent could derive from the constraints? Replace
-implementation bodies with signature + bullet instructions. Replace test code
-with a base-case list + "explore edge cases" instruction.
-
-**5. Reuse scan:** Does any task create something that already exists in the
-codebase? Search for existing components, helpers, hooks, utilities, and shared
-modules before locking in new code. If a reusable piece exists, the plan must
-import it, not recreate it. If it needs a small extension, extend it.
-
-**6. Destructive-op scan:** Does any step delete, overwrite, move-onto, or
-truncate a path that may hold data? For each: is the target guaranteed empty,
-or is there an exists-guard? A soft-delete / restore / move that hard-destroys
-the collision target is a bug — replace with a guard or fail closed. Does every
-"raises X → HTTP N" have a step that catches X? Uncaught → 500.
-
-If you find issues, fix them inline. No need to re-review - just fix and move
-on. If a requirement has no task, add the task.
+1. **Coverage:** each user requirement maps to a task. List gaps, add tasks
+2. **Placeholder scan:** any "No ambiguity" red flag. Fix
+3. **Type consistency:** signatures/names match across tasks (`clearLayers()` in
+   Task 3 vs `clearFullLayers()` in Task 7 is a bug)
+4. **Implementation leak:** any full body/test code derivable from constraints
+   -> replace with signature + bullets / base-case list + "explore edge cases"
+5. **Reuse:** anything created that already exists -> import or extend instead
+6. **Destructive-op:** any delete/overwrite/move-onto/truncate on a path holding
+   data -> exists-guard or fail closed. Every "raises X -> HTTP N" has a step
+   catching X (uncaught -> 500)
 
 ## Plan reviewer
 
-After self-review, dispatch a plan-reviewer subagent. Catches blind spots the
-author missed. The reviewer audits the plan's internal quality only
-(contradictions, hidden assumptions, ordering, granularity, reuse, blind spots,
-etc.) - it does NOT compare against an external spec.
-
-Pass:
-
-1. `plan_path` - absolute path to plan file
-2. `repo_root` - absolute path to repo root
+After self-review, dispatch a plan-reviewer subagent once. Audits internal
+quality only (contradictions, assumptions, ordering, granularity, reuse, blind
+spots), NOT against an external spec. Categories live in
+`plan-reviewer-prompt.md`.
 
 Dispatch payload (do NOT load the template into your own context):
 
@@ -382,61 +281,36 @@ act until you have read it. Then apply:
   repo_root    = <abs path>
 ```
 
-`<skill_dir>` resolves to the directory of THIS SKILL.md (e.g.
-`/Users/me/.claude/skills/writing-plans`). Substitute the real absolute path
-before sending.
-
-WRONG: pasting the template body into the prompt. RIGHT: the prompt literally
-contains the `MUST read instructions at ...` line.
-
-Subagent reads the template itself. Main agent never embeds it.
+`<skill_dir>` = directory of THIS SKILL.md. Substitute the real absolute path.
+WRONG: pasting the template body. RIGHT: the literal
+`MUST read instructions at ...` line. Subagent reads the template itself.
 
 Flow:
 
-1. Dispatch reviewer once
-2. Reviewer returns ✅ or ❌ with Critical / Important / Minor issues. Only
-   Critical + Important block approval
-3. Fix blocking issues inline
-4. Apply diminishing returns after the first fresh review. Re-review is
-   OPTIONAL. Each dispatch is independent (subagents do not remember prior
-   reviews) and costs tokens. Only re-dispatch if the fixes could plausibly
-   introduce new plan defects: changed architecture, changed implementation
-   direction, new tasks, changed task boundaries, changed ordering, changed file
-   ownership, changed verification strategy, changed acceptance criteria, or
-   changed test expectations. Skip re-review for surgical fixes that preserve
-   the plan's architecture and direction: wording, clearer file paths, tighter
-   task language, or style-only edits. Completeness fixes and missing
-   constraints skip re-review only when they do not change acceptance criteria,
-   tests, verification, task boundaries, architecture, or direction
-5. Cap at 3 total dispatches per plan. If issues remain after the 3rd, escalate
-   to the user with the issues and the current plan
+1. Reviewer returns ✅/❌ with Critical/Important/Minor. Only Critical +
+   Important block approval
+2. Fix blocking issues inline
+3. Re-review only if fixes could introduce new defects: changed architecture,
+   direction, tasks, boundaries, ordering, file ownership, verification, or test
+   expectations. Skip for surgical/wording/style fixes
+4. Cap at 3 dispatches. Issues remain after 3rd -> escalate to user
 
-Audit categories live in `plan-reviewer-prompt.md`.
+**Model:** default cheap/fast (review is mostly pattern matching). Escalate only
+when the first review came back thin or the plan is high-stakes/complex.
 
-**Model selection:** plan review is mostly mechanical pattern matching
-(contradictions, placeholders, header completeness, skill scan). Default to a
-cheap/fast model. Escalate to a more capable model only when the first review
-came back thin, or for high-stakes / complex plans where hidden assumptions and
-blind spots dominate.
+## Execution handoff
 
-## Execution Handoff
-
-After saving the plan, offer execution choice:
+After saving, offer:
 
 **"Plan complete and saved to `<plan_path>`. Two execution options:**
 
 **1. Subagent-Driven** - fresh subagent per task, two-stage review per task,
 fast iteration
 
-**2. Inline Execution** - execute tasks in this session using `executing-plans`,
+**2. Inline Execution** - execute in this session using `executing-plans`,
 two-stage review per task
 
 **Which approach?"**
 
-**If Subagent-Driven chosen:**
-
-- **REQUIRED SUB-SKILL:** `subagent-driven-development`
-
-**If Inline Execution chosen:**
-
-- **REQUIRED SUB-SKILL:** `executing-plans`
+- Subagent-Driven -> **REQUIRED SUB-SKILL:** `subagent-driven-development`
+- Inline -> **REQUIRED SUB-SKILL:** `executing-plans`
