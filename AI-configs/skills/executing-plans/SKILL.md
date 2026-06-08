@@ -14,20 +14,17 @@ Load plan, review critically, execute all tasks, report when complete.
 **Announce at start:** "I'm using the executing-plans skill to implement this
 plan."
 
-**Note:** If subagents are available and the plan has mostly independent tasks,
-offer `subagent-driven-development` as an alternative. Do not switch workflows
-without user approval.
-
 ## Execution workflow gate
 
-Before implementation, if subagents are available and the plan has mostly
-independent tasks, ask which workflow to use:
+If subagents are available and the plan has mostly independent tasks, ask which
+workflow to use before implementation:
 
 1. Continue inline with `executing-plans`
 2. Switch to `subagent-driven-development`
 
-Do not start task execution until the user answers. Skip this gate only when the
-user already explicitly chose inline execution for this plan.
+Do not start task execution until the user answers. Do not switch workflows
+without user approval. Skip this gate only when the user already explicitly
+chose inline execution for this plan.
 
 ## Branch safety
 
@@ -124,18 +121,17 @@ Use stricter judgment for spec compliance:
 
 - Re-dispatch when the fix changes what the task delivers, reinterprets the
   plan, adds/removes behavior, changes file boundaries, or alters verification
-- Skip re-review only for unambiguous mechanical fixes that directly satisfy the
-  finding and pass the plan's targeted checks
+- Skip re-review only for unambiguous mechanical fixes that satisfy the finding
+  and pass the plan's targeted checks
 
 Use diminishing returns more readily for code quality:
 
 - Re-dispatch when the fix changes behavior, architecture, public API,
   cross-module contracts, concurrency/state flow, error handling, security,
   persistence, or test strategy
-- Skip re-review for style guide fixes, formatting, naming, import/dead-code
-  cleanup, mechanical, narrow, behavior-preserving abstraction cleanup covered
-  by targeted checks, or code changes whose risk is fully covered by
-  targeted/unit tests that passed
+- Skip re-review for style, formatting, naming, import/dead-code cleanup, or
+  narrow behavior-preserving changes whose risk is fully covered by targeted
+  checks that passed
 
 When skipping re-review, record the reviewer issue, the fix, and the
 verification command that closed it in the final report. If committing before
@@ -189,9 +185,8 @@ Conventions:
   `realpath ~/.claude/skills/subagent-driven-development`) and reuse
 - `changed_files` is a SPACE-separated list of paths suitable for use after `--`
   in git commands. No JSON, no commas, no brackets
-- WRONG: pasting the template body into the prompt
-- RIGHT: the prompt literally contains the `MUST read instructions at ...` line
-  and the values
+- Pass the `MUST read instructions at ...` line plus values; never paste the
+  template body into the prompt
 
 ```text
 # Spec compliance reviewer
@@ -208,7 +203,6 @@ Do not act until you have read it. Then apply:
 # Code quality reviewer
 MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md
 FIRST. Do not act until you have read it. Then apply:
-  task_summary         = <one-line summary of the task>
   description          = <one-line task summary>
   plan_or_requirements = "Task <task_id> from <plan_path>"
   base_ref             = <SHA>
@@ -269,11 +263,9 @@ After all tasks complete and verified:
 
 ## Remember
 
-- Review plan critically first
-- Follow plan steps exactly
-- Don't skip verifications
-- Reference skills when the plan says to
+- Review plan critically first, then follow steps exactly
+- Don't skip verifications; reference skills when the plan says to
 - Stop when blocked, don't guess
-- Never start implementation on main/master branch without explicit user consent
+- Never start implementation on main/master without explicit user consent
 - Reviewer subagents are neutral: never share session history. Pass plan_path,
   task_id, base_ref, changed_files
