@@ -10,12 +10,10 @@ description: >
 Execute plan by dispatching fresh subagent per task, with two-stage review after
 each: spec compliance review first, then code quality review.
 
-**Why subagents:** Isolated context per task. Controller coordinates only.
-Subagents never inherit session history; controller constructs exactly what they
-need. Preserves controller context for orchestration.
-
-**Core principle:** Fresh subagent per task + two-stage review (spec then
-quality) = high quality, fast iteration
+**Why subagents:** Fresh subagent per task + two-stage review (spec then
+quality) = high quality, fast iteration. Isolated context per task; subagents
+never inherit session history, controller constructs exactly what they need and
+coordinates only, preserving its context for orchestration.
 
 **Continuous execution:** Do not pause to check in with your human partner
 between tasks. Execute all tasks from the plan without stopping. The only
@@ -70,65 +68,37 @@ Follow the selected policy. Never commit when the policy is `No commits`.
 
 ## When to use
 
-```dot
-digraph when_to_use {
-    "Have implementation plan?" [shape=diamond];
-    "Tasks mostly independent?" [shape=diamond];
-    "subagent-driven-development" [shape=box];
-    "Manual execution or brainstorm first" [shape=box];
-
-    "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
-    "Have implementation plan?" -> "Manual execution or brainstorm first" [label="no"];
-    "Tasks mostly independent?" -> "subagent-driven-development" [label="yes"];
-    "Tasks mostly independent?" -> "Manual execution or brainstorm first" [label="no - tightly coupled"];
-}
+```mermaid
+flowchart TD
+    P{Have implementation plan?} -->|yes| I{Tasks mostly independent?}
+    P -->|no| M[Manual execution or brainstorm first]
+    I -->|yes| S[subagent-driven-development]
+    I -->|"no - tightly coupled"| M
 ```
 
 ## The process
 
-```dot
-digraph process {
-    rankdir=TB;
+```mermaid
+flowchart TD
+    Start[Read plan, run safety gates, note plan_path + task ids + scene-setting context, create TodoWrite] --> Disp
 
-    subgraph cluster_per_task {
-        label="Per Task";
-        "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
-        "Implementer subagent asks questions?" [shape=diamond];
-        "Answer questions, provide context" [shape=box];
-        "Implementer subagent implements, tests, maybe commits, self-reviews" [shape=box];
-        "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
-        "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
-        "Implementer subagent fixes spec gaps" [shape=box];
-        "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
-        "Code quality reviewer subagent approves?" [shape=diamond];
-        "Implementer subagent fixes quality issues" [shape=box];
-        "Mark task complete in TodoWrite" [shape=box];
-    }
+    subgraph PerTask[Per Task]
+        Disp[Dispatch implementer subagent ./implementer-prompt.md] --> Q{Implementer asks questions?}
+        Q -->|yes| Ans[Answer questions, provide context] --> Disp
+        Q -->|no| Impl[Implementer implements, tests, maybe commits, self-reviews]
+        Impl --> Spec[Dispatch spec reviewer ./spec-reviewer-prompt.md]
+        Spec --> SpecOk{Code matches spec?}
+        SpecOk -->|no| SpecFix[Implementer fixes spec gaps] -->|re-review| Spec
+        SpecOk -->|yes| CQ[Dispatch code quality reviewer ./code-quality-reviewer-prompt.md]
+        CQ --> CQOk{Approved?}
+        CQOk -->|no| CQFix[Implementer fixes quality issues] -->|re-review| CQ
+        CQOk -->|yes| Done[Mark task complete in TodoWrite]
+    end
 
-    "Read plan, run safety gates, note plan_path + task ids + scene-setting context, create TodoWrite" [shape=box];
-    "More tasks remain?" [shape=diamond];
-    "Dispatch final code reviewer subagent for entire implementation" [shape=box];
-    "Use verification-before-completion and report final status" [shape=box style=filled fillcolor=lightgreen];
-
-    "Read plan, run safety gates, note plan_path + task ids + scene-setting context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
-    "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
-    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, maybe commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, maybe commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
-    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
-    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
-    "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
-    "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
-    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
-    "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
-    "Mark task complete in TodoWrite" -> "More tasks remain?";
-    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
-    "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use verification-before-completion and report final status";
-}
+    Done --> More{More tasks remain?}
+    More -->|yes| Disp
+    More -->|no| Final[Dispatch final code reviewer for entire implementation]
+    Final --> Verify[Use verification-before-completion and report final status]
 ```
 
 Before dispatching subagents:
@@ -228,9 +198,8 @@ Conventions:
   absolute path before sending
 - `changed_files` is a SPACE-separated list of paths suitable for use after `--`
   in git commands (e.g. `src/a.ts src/b.ts`). No JSON, no commas, no brackets
-- WRONG: pasting the template body into the prompt
-- RIGHT: the prompt literally contains the `MUST read instructions at ...` line
-  and the values
+- Pass the `MUST read instructions at ...` line plus values; never paste the
+  template body into the prompt
 
 **Implementer:**
 
@@ -263,7 +232,6 @@ act until you have read it. Then apply:
 ```text
 MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
 Do not act until you have read it. Then apply:
-  task_summary         = <one-line summary of the task>
   description          = <one-line task summary>
   plan_or_requirements = "Task <task_id> from <plan_path>"
   base_ref             = <SHA>
@@ -275,36 +243,18 @@ Do not act until you have read it. Then apply:
 **Never:**
 
 - Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality)
-- Proceed with unfixed issues
+- Skip reviews (spec compliance OR code quality), or proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Paste full task text into the prompt (pass `plan_path` + `task_id` only)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (spec reviewer found issues = not
   done)
-- Skip review loops (reviewer found issues = implementer fixes = review again)
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
-
-**If subagent asks questions:**
-
-- Answer clearly and completely
-- Provide additional context if needed
-- Don't rush them into implementation
-
-**If reviewer finds issues:**
-
-- Implementer (same subagent) fixes them
-- Reviewer reviews again
-- Repeat until approved
-- Don't skip the re-review
-
-**If subagent fails task:**
-
-- Dispatch fix subagent with specific instructions
-- Don't try to fix manually (context pollution)
+- Fix a failed subagent's task manually (context pollution); dispatch a fix
+  subagent with specific instructions
 
 ## Integration
 
