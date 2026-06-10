@@ -47,13 +47,14 @@ When creating a worktree, ensure `.worktrees/` is listed in the target repo
 
 ## Plan tracking
 
-Plan file uses checkboxes: tick them. Not optional.
+Plan file uses checkboxes: tick them. Mandatory.
 
 - Preserve all original content except checkbox state
-- Update each `- [ ]` to `- [x]` immediately after completing and verifying the
-  step
-- Do not batch checkbox updates at the end
-- Also track progress with TodoWrite in parallel (harness-native task list)
+- Update exactly one `- [ ]` to `- [x]` immediately after completing and
+  verifying that step, before starting the next step
+- Never batch checkbox updates; one box per completed step, in order
+- If the harness has a native task/todo list, also track progress there in
+  parallel
 
 ## Commit policy
 
@@ -226,7 +227,13 @@ After all tasks complete and verified:
   escalates to user
 - Under `One commit per task`, final reviewer fixes create extra commits.
   Acceptable. Do not amend prior commits
-- Use `verification-before-completion` before claiming the plan is complete
+- **Mandatory gate — load and run `verification-before-completion`.** Loading
+  the skill and running its Gate Function is required, not optional. Running the
+  plan's verification commands does NOT satisfy this gate; the skill is the
+  discipline, the commands are its input. Until the skill is loaded and its Gate
+  Function passes, you may not: claim the plan complete, express completion,
+  commit, or open a PR. No exceptions ("just this once", "commands already ran",
+  "different words" are the exact rationalizations the skill forbids)
 - If commit policy is `One commit at the end`, commit after final verification
 - Report changed files, verification results, and any remaining risk
 
@@ -260,6 +267,9 @@ After all tasks complete and verified:
 - Move to the next task while either reviewer has unfixed issues
 - Reuse a reviewer subagent across tasks (each review = fresh subagent)
 - Let your own self-check replace the reviewer subagent (both are needed)
+- Claim the plan complete, commit, or open a PR with
+  `verification-before-completion` skipped (running its commands ≠ loading the
+  skill; the load + Gate Function is mandatory)
 
 ## Remember
 
