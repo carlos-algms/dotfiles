@@ -1,7 +1,7 @@
 # Components sync
 
 How third-party AI components (skills, agents, hooks) are vendored into
-`AI-configs/<target>/` so every agent CLI (Claude, Gemini, Codex, pi, opencode,
+`AI-configs/<target>/` so every agent CLI (Claude, agy, Codex, pi, opencode,
 cursor, copilot) picks them up via the existing symlinks. No `npx`, no
 `/plugin install`.
 

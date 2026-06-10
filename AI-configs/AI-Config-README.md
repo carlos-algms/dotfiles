@@ -3,9 +3,9 @@
 Shared components live at the top of `AI-configs/`:
 
 - `AI-configs/skills/` - cross-tool skills (read by Codex, opencode, cursor,
-  Copilot CLI, Gemini CLI, and pi via `~/.agents/skills/`). Claude is the only
-  CLI that does not auto-discover that path, so it symlinks `~/.claude/skills/`
-  directly to this folder.
+  Copilot CLI, agy, and pi via `~/.agents/skills/`). Claude is the only CLI that
+  does not auto-discover that path, so it symlinks `~/.claude/skills/` directly
+  to this folder.
 - `AI-configs/agents/` - subagent definitions (Claude, opencode). No cross-tool
   standard, so each CLI gets its own symlink.
 - `AI-configs/claude/hooks/` - Claude-specific. No cross-tool standard.
@@ -17,8 +17,8 @@ mkdir -p ~/.agents
 ln -s $(pwd)/AI-configs/skills ~/.agents/skills
 ```
 
-That single symlink covers Codex, opencode, cursor, Copilot CLI, Gemini CLI, and
-pi. The per-CLI install steps below only set up what each CLI does **not**
+That single symlink covers Codex, opencode, cursor, Copilot CLI, agy, and pi.
+The per-CLI install steps below only set up what each CLI does **not**
 auto-discover.
 
 ## Claude
@@ -38,16 +38,20 @@ ln -s $(pwd)/AI-configs/agents    ~/.claude/agents
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.claude/CLAUDE.md
 ```
 
-## Gemini
+## agy (Antigravity CLI)
 
+Google's Antigravity CLI (`agy`) replaced Gemini CLI. It keeps `~/.gemini/` as
+its config home and reads the same global context file, `~/.gemini/GEMINI.md`.
 Skills come from `~/.agents/skills/` (cross-tool symlink above), no per-CLI link
 needed.
 
 ```bash
 mkdir -p ~/.gemini
-ln -s $(pwd)/AI-configs/gemini/settings.json    ~/.gemini/settings.json
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.gemini/GEMINI.md
 ```
+
+`agy` writes its own settings under `~/.gemini/antigravity-cli/`; not tracked
+here.
 
 ## GitHub Copilot
 

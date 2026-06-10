@@ -6,13 +6,13 @@ at the top, CLI-specific overrides in per-tool subdirs.
 - `base-ai-instructions.md` - shared instructions, symlinked globally as the
   main instructions file for each agent:
   - `~/.claude/CLAUDE.md`
-  - `~/.gemini/GEMINI.md`
+  - `~/.gemini/GEMINI.md` (read by agy, Google's Antigravity CLI)
   - `~/.config/opencode/AGENTS.md`
   - `~/.codex/AGENTS.md`
   - `~/.pi/agent/AGENTS.md`
   - `.github/copilot-instructions.md` (per-repo, for Copilot)
 - `skills/` are cross-tool. `~/.agents/skills/` is symlinked once to `skills/`;
-  Codex, opencode, cursor, Copilot CLI, Gemini, and pi auto-discover it. Claude
+  Codex, opencode, cursor, Copilot CLI, agy, and pi auto-discover it. Claude
   does not, so it gets a direct symlink. `agents/` has no cross-tool standard,
   so each CLI symlinks it directly.
 - `claude/` holds Claude-specific bits (`claude-settings.json`,

@@ -1,11 +1,11 @@
 ---
 name: orchestrate-agent-clis
 description: >
-  Execute and orchestrate multiple AI agent CLIs (Gemini, Codex, Cursor, Claude
+  Execute and orchestrate multiple AI agent CLIs (agy, Codex, Cursor, Claude
   Code, Pi) for getting alternative opinions, comparing approaches, or
   leveraging different AI models' strengths. Use when the user explicitly
-  mentions agent names like "ask gemini", "ask cursor", "ask codex", "ask pi",
-  "use composer", "use pi", "try grok", or when needing diverse perspectives on
+  mentions agent names like "ask agy", "ask cursor", "ask codex", "ask pi", "use
+  composer", "use pi", "try grok", or when needing diverse perspectives on
   complex problems, alternative implementation approaches, or multi-agent
   collaboration.
 ---
@@ -28,13 +28,21 @@ approaches, or leverage specific model strengths.
 
 ## Available CLIs
 
-### Gemini
+### agy (Antigravity CLI)
+
+Google's Antigravity CLI, the successor to Gemini CLI.
 
 ```bash
-gemini -p "<prompt>"
+agy -p "<prompt>"
 ```
 
 Has internet access. Good for research and current information.
+
+Discover models (use when a `--model` name fails or may be stale):
+
+```bash
+agy models
+```
 
 ### Codex
 
@@ -42,7 +50,9 @@ Has internet access. Good for research and current information.
 codex exec --skip-git-repo-check "<prompt>"
 ```
 
-No internet access. Fast, focused on code generation.
+No model-list subcommand. Set with `-m <model>` (e.g. `-m gpt-5.5-codex`).
+Discover current OpenAI model IDs at <https://platform.openai.com/docs/models>
+or the interactive `/model` picker in `codex` (no subcommand).
 
 ### Claude Code
 
@@ -51,6 +61,10 @@ claude -p "<prompt>"
 ```
 
 Full-featured Claude agent with tool access.
+
+No model-list subcommand. `--model` takes an alias (`opus`, `sonnet`, `haiku`)
+or a full ID (e.g. `claude-opus-4-8`). Discover current IDs at
+<https://docs.claude.com/en/docs/about-claude/models/overview>.
 
 ### Cursor Agent
 
@@ -110,7 +124,7 @@ Reference files using `@` prefix with relative paths:
 
 ```bash
 codex exec --skip-git-repo-check "Review @src/components/Button.tsx"
-gemini -p "Create tests for @src/utils/helpers.ts"
+agy -p "Create tests for @src/utils/helpers.ts"
 cursor-agent --model=composer-2 -p "Refactor @src/api/client.ts"
 pi -p "Review @src/api/client.ts"
 ```
@@ -131,8 +145,8 @@ cursor-agent --model=gemini-3.1-pro -p "Analyze the architecture in @src/core/ -
 Get multiple perspectives on the same problem:
 
 ```bash
-# Get Gemini's opinion first
-gemini -p "How would you implement feature X?"
+# Get agy's opinion first
+agy -p "How would you implement feature X?"
 
 # Then compare with Codex
 codex exec --skip-git-repo-check "How would you implement feature X?"

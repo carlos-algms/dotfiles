@@ -68,8 +68,8 @@ Summaries are cached per option signature inside that same work dir.
 - **Live streams or DRM-protected sources.** yt-dlp refuses; skill aborts.
 - **Very short clips (under 30s).** With `--with-frames`, frame curve produces
   1-20 frames at up to 2 fps. No special-casing needed.
-- **Very long videos (over 30 min).** With `--with-frames`, capped at 100
-  frames sparsely sampled. Summary quality degrades on visual details. Use
+- **Very long videos (over 30 min).** With `--with-frames`, capped at 100 frames
+  sparsely sampled. Summary quality degrades on visual details. Use
   `--start/--end` to focus.
 - **No chapters.** Most non-YouTube sources lack them. Report skips the Chapters
   section; summarizer still works fine.
@@ -88,16 +88,16 @@ Summaries are cached per option signature inside that same work dir.
   Channel-marketing is the typical fit for a company channel covering
   third-party tools as part of its content strategy. Affiliated requires a
   quoted signal (sponsor card, promo code, "#ad", etc).
-- **Visual-heavy content (slides, code, dense UI).** Use `--with-frames`.
-  Haiku vision is weaker than opus on fine text. Working dir stays on disk;
-  rerun an opus subagent on the same artifacts for higher fidelity.
+- **Visual-heavy content (slides, code, dense UI).** Use `--with-frames`. Haiku
+  vision is weaker than opus on fine text. Working dir stays on disk; rerun an
+  opus subagent on the same artifacts for higher fidelity.
 
 ## Replacing Claude
 
 Pipeline is provider-agnostic. The only Claude-specific seam is the body of
 `bin/summarize.sh`. To swap:
 
-- Other agent CLI (Codex, Gemini, OpenCode) - edit `bin/summarize.sh` to invoke
+- Other agent CLI (Codex, agy, OpenCode) - edit `bin/summarize.sh` to invoke
   that CLI instead of `claude -p`. Pass it the prompt template as context
   (system prompt, file ref, or inline) and the report on stdin. The other bin/
   scripts and report shape do not change.
@@ -125,5 +125,5 @@ client can map to its own image-loading mechanism.
   - Summary cache (run.sh): replay `summaries/summary-<signature>.md`, instant,
     $0. No LLM call when the option signature matches.
   - `--refresh` invalidates pipeline (and implicitly summary).
-  - `--refresh-summary` invalidates summary only (re-runs haiku on same
-    report; useful after editing the prompt template).
+  - `--refresh-summary` invalidates summary only (re-runs haiku on same report;
+    useful after editing the prompt template).
