@@ -133,6 +133,19 @@ return {
                 cmdline = {
                     keymap = { preset = "inherit" },
                     completion = { menu = { auto_show = true } },
+
+                    -- Only `cmdline` source for `:` commands (no buffer/path
+                    -- noise); keep buffer for `/` `?` search.
+                    sources = function()
+                        local t = vim.fn.getcmdtype()
+                        if t == "/" or t == "?" then
+                            return { "buffer" }
+                        end
+                        if t == ":" or t == "@" then
+                            return { "cmdline" }
+                        end
+                        return {}
+                    end,
                 },
 
                 appearance = {
