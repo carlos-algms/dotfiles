@@ -221,15 +221,36 @@ Anti-examples:
 - Good: "Tradeoff: breaks existing callers of `foo()`, needs grep+update"
 - Good: "Tradeoff: extra render on every keystroke"
 
-Format:
+Format (yes/no, one recommended path):
 
 ```markdown
 ---
 
-**Q<n>**: <blocking decision>? (<answer format>)
+**Q<n>**: <blocking decision>? (y/n)
 
 Recommendation: <answer>. Tradeoff: <real cost, omit if none>.
 ```
+
+Format (lettered, two or more peer paths):
+
+```markdown
+---
+
+**Q<n>**: <blocking decision>?
+
+- **A** <action> - <when to use or tradeoff>
+- **B** <action> - <when to use or tradeoff>
+- **C** <action> - <when to use or tradeoff>
+
+Recommendation: <label>. <why, cite file:line if relevant>.
+```
+
+Lettered rules:
+
+- Bold each label with no trailing dot: `**A**`, `**B**`, `**C**`
+- Recommended option first
+- One option per line as a bullet
+- Close on the `Recommendation:` line naming the label
 
 ## 6. Handle answers
 
