@@ -137,7 +137,7 @@ local M = {
         {
             "<A-i>l",
             function()
-                require("agentic").rotate_layout({ "right", "bottom" })
+                require("agentic").rotate_layout({ "left", "bottom" })
             end,
             desc = "Agentic rotate layout",
             silent = true,
