@@ -64,20 +64,20 @@
       },
     },
   },
-  "model": "anthropic/claude-opus-4-7-fast",
+  "model": "anthropic/claude-opus-4-8-fast",
   "provider": {
     "anthropic": {
       "models": {
-        "claude-opus-4-7-fast": {
+        "claude-opus-4-8-fast": {
           "options": {
             "thinking": { "type": "adaptive", "display": "summarized" },
-            "effort": "xhigh",
+            "effort": "high",
           },
         },
-        "claude-opus-4-7": {
+        "claude-opus-4-8": {
           "options": {
             "thinking": { "type": "adaptive", "display": "summarized" },
-            "effort": "xhigh",
+            "effort": "high",
           },
         },
       },
