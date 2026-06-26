@@ -12,6 +12,31 @@
       "models": [
         {
           "id": "Qwen3.6-35B-A3B-4bit-DWQ",
+          "contextWindow": 75000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "Qwen3.6-28B-REAP-oQ4",
+          "contextWindow": 85000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "gemma-4-26B-A4B-it-4bit-DWQ",
+          "contextWindow": 80000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "gemma-4-26B-A4B-it-QAT-MLX-4bit",
+          "contextWindow": 80000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "gemma-4-26B-A4B-it-heretic-4bit",
+          "contextWindow": 75000,
+          "maxTokens": 32768
+        },
+        {
+          "id": "gemma-4-E2B-Heretic-Uncensored-mlx-4bit",
           "contextWindow": 128000,
           "maxTokens": 32768
         },
@@ -21,28 +46,8 @@
           "maxTokens": 32768
         },
         {
-          "id": "gemma-4-26B-A4B-it-4bit-DWQ",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "OpenAI-gpt-oss-20B-INSTRUCT-Heretic-Uncensored-MXFP4-q8-hi-mlx",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "Qwopus3.6-35B-A3B-v1-4bit-MTPLX-Optimized-Speed",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
           "id": "Qwopus3.6-35B-A3B-v1-MLX-3bit-mixed_3_6",
-          "contextWindow": 128000,
+          "contextWindow": 75000,
           "maxTokens": 32768
         }
       ]
@@ -53,8 +58,8 @@
       "apiKey": "$NVIDIA_API_KEY",
       "models": [
         {
-          "id": "qwen/qwen3.5-397b-a17b",
-          "name": "Qwen3.5 400B VLM"
+          "id": "stepfun-ai/step-3.7-flash",
+          "name": "Step 3.7 Flash"
         }
       ]
     },
@@ -75,8 +80,31 @@
       "apiKey": "$OPENCODE_ZEN_API_KEY",
       "models": [
         {
-          "id": "minimax-m3-free",
-          "name": "MiniMax M3 Free"
+          "id": "deepseek-v4-flash-free",
+          "name": "DeepSeek V4 Flash Free"
+        }
+      ]
+    },
+    "cerebras": {
+      "baseUrl": "https://api.cerebras.ai/v1",
+      "api": "openai-completions",
+      "apiKey": "$CEREBRAS_API_KEY",
+      "models": [
+        {
+          "id": "zai-glm-4.7",
+          "name": "GLM 4.7"
+        }
+      ]
+    },
+
+    "lmstduio": {
+      "baseUrl": "http://localhost:1234/v1",
+      "apiKey": "",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "Qwen3.6-28B-REAP-oQ4",
+          "name": "Qwen3.6 28B REAP oQ4"
         }
       ]
     }
