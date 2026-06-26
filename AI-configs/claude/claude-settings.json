@@ -44,7 +44,6 @@
     "ask": [],
     "defaultMode": "default"
   },
-  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -87,8 +86,10 @@
     }
   },
   "alwaysThinkingEnabled": false,
+  "disableClaudeAiConnectors": true,
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
   "editorMode": "vim",
   "preferredNotifChannel": "notifications_disabled",
   "skipAutoPermissionPrompt": true
