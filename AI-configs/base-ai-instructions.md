@@ -163,8 +163,13 @@ These 4 rules guide how you think, behave, and work with code and files:
 - Data processing: prefer `sed`, `awk`, `jq`, or bash over Python/Node
 - File edits remain subject to file-edit rules
 - Use individual commands instead of `&&` chains when tracking output matters
-- You start in the project cwd
-  - run commands directly, never `cd <path> && ...` to reach it
+- You start in the project's cwd
+- Forbidden: `cd` to reach cwd or the project root
+  - `cd /abs/path/to/project && ...`
+  - `cd . && ...`, `cd "$PWD" && ...`, `cd $(git rev-parse --show-toplevel)`
+- Run cwd-level commands directly; never `cd` first
+- `cd <nested-dir>` allowed to scope to a nested workspace
+  - pnpm/npm in a sub-package, nested Makefile, per-tool `install.sh`
 
 ## Search and discovery
 
