@@ -156,6 +156,9 @@ local theme = {
         ["@string.escape"] = "Constant",
         ["@string.regexp.ssh_config"] = "String",
         ["@string.regexp"] = "Constant",
+        ["@string.special.nginx"] = "String",
+        ["@keyword.nginx"] = "Constant",
+        ["@keyword.directive.nginx"] = "Function",
         ["@string.special.path.diff"] = "@identifier",
         ["@string.special.path.gitcommit"] = "@identifier",
         ["@string.special.url.gitcommit"] = "@identifier",
@@ -326,6 +329,7 @@ local theme = {
         zshShortDeref = "Constant",
         zshSubstDelim = "Keyword",
         zshSubstQuoted = "String",
+        DiffviewHash = "Type",
     },
 }
 
