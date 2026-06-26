@@ -612,15 +612,16 @@ local M = {
         {
             "<leader>zn",
             function()
-                vim.cmd(
-                    string.format(
-                        "e %s/%s.md",
+                Snacks.picker.files({
+                    hidden = false,
+                    cwd = string.format(
+                        "%s/020-work/project-notes/%s",
                         os.getenv("SECOND_BRAIN_PATH"),
-                        os.date("%Y-%m-%d_%H-%M")
-                    )
-                )
+                        vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+                    ),
+                })
             end,
-            desc = "Second brain new file 🧠 - Snacks",
+            desc = "Project notes files 📓 - Snacks",
         },
     },
 
