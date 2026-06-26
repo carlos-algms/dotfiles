@@ -19,6 +19,12 @@ local M = {
                 width = "50%",
                 height = "25%",
             },
+
+            folding = {
+                tool_calls = {
+                    threshold = 15,
+                },
+            },
         }
 
         config.acp_providers = {
