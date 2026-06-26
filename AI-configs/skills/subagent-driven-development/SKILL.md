@@ -188,8 +188,9 @@ gives the user a chance to update the plan.
 
 ## Dispatch payloads
 
-Do NOT load template files into your own context. Each subagent reads its
-template directly. Pass the absolute template path + the values it needs.
+Do NOT read or open the template files yourself — each subagent reads its
+template. Reading them into your own context defeats the offload. Pass the
+absolute template path + the values it needs.
 
 Conventions:
 

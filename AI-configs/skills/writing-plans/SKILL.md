@@ -89,7 +89,11 @@ rules (test-file naming, package manager) are in "Net-new constraints" below.
 
   **Skills (load if not already loaded):** `verification-before-completion`
 
-  Run the header's `Final verification` commands. Report results.
+  Run each command below and report results:
+  - `[full test suite]` -> all pass
+  - `[type check]` -> `0 errors`
+  - `[lint]` -> clean
+  - `[build]` -> succeeds
 ````
 
 ## Plan location
@@ -192,11 +196,6 @@ verifying each step. Do not batch at the end.
 
 **Commit policy:** [One commit per task | One commit at the end | No commits]
 
-**Final verification:**
-
-- [Commands the final reviewer runs after all tasks: full suite, type check,
-  lint, build]
-
 ---
 ```
 
@@ -266,12 +265,13 @@ After writing, re-check and fix inline:
 
 ## Plan reviewer
 
-After self-review, dispatch a plan-reviewer subagent once. Audits internal
+After self-review, dispatch a subagent once to review the plan. Audits internal
 quality only (contradictions, assumptions, ordering, granularity, reuse, blind
 spots), NOT against an external spec. Categories live in
 `plan-reviewer-prompt.md`.
 
-Dispatch payload (do NOT load the template into your own context):
+Dispatch payload. Do NOT read or open `plan-reviewer-prompt.md` yourself — the
+subagent reads it. Reading it into your own context defeats the offload:
 
 ```text
 MUST read instructions at <skill_dir>/plan-reviewer-prompt.md FIRST. Do not

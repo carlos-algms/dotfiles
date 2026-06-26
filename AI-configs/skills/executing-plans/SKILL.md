@@ -175,7 +175,9 @@ Reviewer reads plan and reconstructs diff.
 3. With `One commit per task`, per-task base shifts after each commit; recapture
    at the start of each task
 
-**Dispatch payloads (do NOT load templates into your context):**
+**Dispatch payloads. Do NOT read or open the template files yourself — the
+reviewer subagents read them. Reading them into your context defeats the
+offload:**
 
 Reviewer subagents read their templates directly. Pass template path + values.
 
