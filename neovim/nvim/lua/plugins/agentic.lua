@@ -12,11 +12,11 @@ local M = {
             debug = false,
 
             --- @type agentic.UserConfig.ProviderName
-            provider = "codex-acp",
+            provider = "claude-agent-acp",
 
             windows = {
-                position = "right",
-                width = "40%",
+                position = "left",
+                width = "50%",
                 height = "25%",
             },
         }
