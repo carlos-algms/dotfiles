@@ -3,12 +3,7 @@ local M = {
 
     version = false,
 
-    dependencies = {
-        {
-            "HakonHarnes/img-clip.nvim",
-            opts = {},
-        },
-    },
+    dependencies = {},
 
     opts = function(_, _maybeOpts)
         ---@module 'agentic'
