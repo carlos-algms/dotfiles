@@ -1,12 +1,46 @@
 {
-  "lastChangelogVersion": "0.77.0",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "xhigh",
+  "lastChangelogVersion": "0.79.4",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-8",
+  "defaultThinkingLevel": "high",
   "packages": [
-    "npm:pi-mcp-adapter",
-    "npm:pi-subagents"
+    {
+      "source": "npm:pi-mcp-adapter",
+      "extensions": [
+        "-index.ts"
+      ]
+    },
+    {
+      "source": "npm:pi-subagents",
+      "skills": [
+        "-skills/pi-subagents/SKILL.md"
+      ],
+      "prompts": [],
+      "extensions": [
+        "-src/extension/index.ts"
+      ]
+    },
+    "npm:@vanillagreen/pi-task-panel"
   ],
   "hideThinkingBlock": false,
-  "showHardwareCursor": true
+  "showHardwareCursor": true,
+  "skills": [
+    "-skills/ai-web-search/SKILL.md",
+    "-skills/frontend-unit-test/SKILL.md",
+    "-skills/css/SKILL.md",
+    "-skills/grill-with-docs/SKILL.md",
+    "-skills/jira-atlassian-cli/SKILL.md",
+    "-skills/json-canvas/SKILL.md",
+    "-skills/replying-to-pr-review-threads/SKILL.md",
+    "+skills/requesting-code-review/SKILL.md",
+    "-skills/code-simplify/SKILL.md",
+    "-skills/create-pull-request/SKILL.md",
+    "-skills/defuddle/SKILL.md",
+    "-skills/multi-provider-web-search/SKILL.md",
+    "-skills/neovim-documentation/SKILL.md",
+    "-skills/react/SKILL.md",
+    "-skills/test-simplify/SKILL.md",
+    "-skills/video-summary/SKILL.md"
+  ],
+  "theme": "dark"
 }
