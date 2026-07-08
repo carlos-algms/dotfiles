@@ -1,10 +1,21 @@
-alias Rsync="$(which -p rsync) --recursive \
+# Rsync: exact archival mirror that preserves metadata and resumes interrupted transfers.
+# --no-inc-recursive: scan whole tree first so progress2 has a real total (more startup RAM)
+# --archive: -rlptgoD; recurse + preserve symlinks/perms/times/group/owner/devices (excludes -H/-S)
+# --hard-links: recreate hardlink sharing instead of copying the data multiple times
+# --sparse: punch holes for zero runs so disk images/VMs don't expand to full size
+# --partial: keep partial files on interrupt so reruns resume instead of restarting
+# --modify-window=1: treat mtimes within 1s as equal (FAT/SMB coarse timestamps)
+# --info=progress2,name: aggregate total progress bar (ETA) + name of each file as it transfers
+# --human-readable: sizes as K/M/G instead of raw bytes
+alias Rsync="$(which -p rsync) \
     --no-inc-recursive \
-    --progress \
-    --links \
-    --human-readable \
-    --times \
-    --perms"
+    --archive \
+    --hard-links \
+    --sparse \
+    --partial \
+    --modify-window=1 \
+    --info=progress2,name \
+    --human-readable"
 
 alias path-show='echo $PATH | tr ":" "\n"'
 
