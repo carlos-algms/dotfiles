@@ -106,8 +106,16 @@ return {
                                 return vim.tbl_filter(function(item)
                                     local name = item.textEdit
                                         and item.textEdit.newText
-                                    if name and name:match("^:flag%-") then
+                                    if not name then
+                                        return true
+                                    end
+                                    if name:match("^:flag%-") then
                                         return allowed[name]
+                                    end
+                                    -- Keep base emoji only; drop gendered
+                                    -- `man-`/`woman-` variants.
+                                    if name:match("^:woman%-") or name:match("^:man%-") then
+                                        return false
                                     end
                                     return true
                                 end, items)
