@@ -25,6 +25,15 @@ local M = {
                     threshold = 15,
                 },
             },
+
+            keymaps = {
+                prompt = {
+                    submit = {
+                        { "<CR>", mode = { "n", "i" } },
+                        { "<C-s>", mode = { "i", "n", "v" } },
+                    },
+                },
+            },
         }
 
         config.acp_providers = {
