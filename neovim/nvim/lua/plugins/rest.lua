@@ -29,10 +29,14 @@ return {
             -- Setup is required, even if you don't pass any options
             local kulala = require("kulala")
             kulala.setup({
-                additional_curl_options = { "--insecure", "-L" },
-                default_view = "headers_body",
-                -- Display mode, possible values: "split", "float"
-                display_mode = "split",
+                kulala_core = {
+                    timeout = 120000,
+                },
+                ui = {
+                    default_view = "headers_body",
+                    display_mode = "split",
+                    max_response_size = 4096,
+                },
             })
 
             vim.api.nvim_create_autocmd("FileType", {
