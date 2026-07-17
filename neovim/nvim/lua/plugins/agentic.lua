@@ -28,6 +28,10 @@ local M = {
         }
 
         config.acp_providers = {
+            ["codex-acp"] = {
+                default_mode = "agent-full-access",
+            },
+
             ["opencode-acp"] = {
                 env = {
                     CARLOS_ANTHROPIC_API_KEY = os.getenv(
