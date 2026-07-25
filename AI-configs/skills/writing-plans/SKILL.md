@@ -17,13 +17,22 @@ implementation plan."
 
 ## Terms
 
-- **Green:** repo in a committable state - a paste-able command runs and emits
-  an observable success token (exit 0, `PASS`, `0 errors`, compiled artifact).
-  Not "looks done"
-- **Bite-sized:** one step = one action, verifiable, reviewable, committable in
-  isolation
+- **Green:** a paste-able command runs and emits an observable success token
+  (exit 0, `PASS`, `0 errors`, compiled artifact). Not "looks done". At a task
+  boundary it also means committable
+- **Bite-sized:** one step = one action, verifiable in isolation. Committable is
+  a property of the task, not of every step
 - **Bootstrap stubs:** minimal types/signatures that make tests _run_ (not pass)
   - empty bodies, `NotImplementedError`, or wrong defaults
+  - Default: write them as the first activity INSIDE the implementing step
+  - A separate ticked bootstrap step is justified ONLY when the step creates a
+    new file, module, or public symbol that a LATER task imports
+- **Full gate:** the project's whole validation suite — format + lint + types +
+  full test run — in ONE command where the project has one (`make validate`,
+  `pnpm validate`). Slow. Runs once per task, not once per step. Prefer the
+  project's single command over a hand-assembled chain; it is what CI runs and
+  it cannot drift from it
+- **Narrow gate:** the single test file or single check a step actually affects
 - **Footprint:** the files, frameworks, runtimes, imports, and tooling a step
   touches - scanned to match skills
 
@@ -45,23 +54,20 @@ rules (test-file naming, package manager) are in "Net-new constraints" below.
 2. `exact/path/to/file.test.py`
    - Covers `function()` base + edge cases
 
-- [ ] **Step 1: Bootstrap stubs**
-
-  Create `Result` type + `function()` stub raising `NotImplementedError`. Green:
-  `python -c "import file"` exits 0 (imports resolve, tests run without
-  crashing).
-
-- [ ] **Step 2: Implement `function` with TDD**
+- [ ] **Step 1: Implement `function` with TDD**
 
   **Skills (load if not already loaded):** `<test-runner-skill>`,
   `<language-skill>`
 
   Inside this step (NOT separate ticked steps):
-  1. Write tests for the base cases below
-  2. Run - verify they fail on assertion mismatch (not Import/Module/Attribute
-     error). If they crash, fix the bootstrap first
-  3. Implement per signature + constraints
-  4. Run - verify all pass
+  1. Stub `Result` + `function()` with their FINAL signatures and a wrong body
+     (returns `None`, returns a constant). Signature written once, so the
+     implementation edits only the body
+  2. Write tests for the base cases below
+  3. Run - verify they fail on assertion mismatch (not Import/Module/Attribute
+     error). If they crash, finish the stub
+  4. Implement per signature + constraints
+  5. Run - verify all pass
 
   Signature: `def function(input: str) -> Result`
   - Accept X, validate Y, return Z. Use `LibraryThing` for heavy lifting
@@ -74,26 +80,33 @@ rules (test-file naming, package manager) are in "Net-new constraints" below.
 
   Explore edge cases you find relevant (unicode, whitespace, large input).
 
-  Green: `pytest exact/path/to/file.test.py -v` passes all cases.
+  Green (narrow gate): `pytest exact/path/to/file.test.py -v` passes all cases.
 
-- [ ] **Step 3: Optional commit checkpoint** (only if policy needs it)
+- [ ] **Step 2: Full gate, then commit** (commit only if policy needs it)
+
+  Run the header's `Full gate` once for the whole task - not in Step 1.
+  Reviewers do not run it, so a red gate here must not be dispatched onward.
+
+  Green: `[header Full gate command]` exits 0.
 
   ```bash
   git add exact/path/to/file.py exact/path/to/file.test.py <this-plan-file>.md
   git commit -m "Add specific feature"
   ```
 
-  Stage the plan file too, so its `- [x]` ticks commit with the task.
+  Stage the plan file too when the executing agent ticked before committing. In
+  subagent mode ticks land after the implementer's commit — leave them for the
+  next one, never amend.
 
 - [ ] **Final step (last task only): Run final verification**
 
   **Skills (load if not already loaded):** `verification-before-completion`
 
-  Run each command below and report results:
-  - `[full test suite]` -> all pass
-  - `[type check]` -> `0 errors`
-  - `[lint]` -> clean
-  - `[build]` -> succeeds
+  This REPLACES the last task's full gate - do not write both. Run the header's
+  `Final verification` commands and report actual output:
+  - `[header Full gate command]` -> exits 0
+  - `[anything the Full gate does not cover: build, doc generation]`
+  - `[any manual check headless tests cannot reach]`
 ````
 
 ## Plan location
@@ -142,24 +155,53 @@ Match the selected policy. Commit steps only when policy needs them (option 1 or
 
 ## Bite-sized task granularity
 
-- Each step is one action: verifiable, reviewable, committable, ending green
+- Each step is one action, verifiable on its own. The TASK ends green and
+  committable; individual steps need not
 - Every step ends with a `Green:` line = exact paste-able command + observable
   success token. No bare "compiles" / "tests pass" - name the command and what
   output proves it
+- Green uses the NARROWEST command that proves the step: the one test file, the
+  one check. Never the full gate
+- The full gate runs ONCE per task, as the task's last verification - before any
+  review stage and before the commit
+- The LAST task has no separate full gate. Its final-verification step is the
+  gate, run once. Writing both means running the whole suite twice back to back
 - Red phases are activities INSIDE the green-producing step, never separate
   ticked steps
-- GOOD: "Bootstrap stubs" (Green: `tsc --noEmit` -> `0 errors`)
 - GOOD: "Implement <feature> with TDD" (Green: `pytest path -v` -> all pass)
-- BAD: "Write the failing test" (leaves repo red, can't commit)
-- BAD: "Run it, verify it fails" (red is interim, not a deliverable)
+- BAD: "Write the failing test" (red is interim, not a deliverable)
+- BAD: "Run it, verify it fails" (same)
+- BAD: a step whose Green is the full gate when only one test file changed
+- BAD: a step whose only content re-checks something a previous task's Green
+  already proved
 - TDD red must fail on assertion mismatch, not runtime/import/setup error. Crash
-  -> fix bootstrap
+  -> finish the stub inside the same step
 - Describe intent + constraints, not full implementation. Agent writes the code
+
+## Plan size budget
+
+Every task costs a test cycle, a full gate, and a commit. Fewer, wider tasks
+beat many narrow ones.
+
+- Two tasks whose file sets overlap MUST merge. Re-editing a file in a later
+  task pays the whole cycle twice
+- One task per file set, not one task per concern
+- Past ~8 tasks: merge overlapping file sets, or split into separate plans (see
+  "Scope check")
+- Rationale is capped at 2 lines per constraint. Cite `path:line` instead of
+  restating the argument the reader can go read
+- State a repo rule once, in the plan's shared preamble. Never repeat it
+  per-task
+- Collapse families of near-identical base cases (same assertion, different
+  input) into one loop-driven case. Keep them separate only when each pins a
+  distinct code path
 
 ## Tracking
 
 When executing from a plan file, flip `- [ ]` to `- [x]` immediately after
-verifying each step. Do not batch at the end.
+verifying each step. Do not batch at the end. Flip back to `- [ ]` if a reviewer
+sends that step back. `executing-plans` owns this; only the agent running it
+writes to the plan file.
 
 ## Required skills (per step)
 
@@ -183,10 +225,15 @@ verifying each step. Do not batch at the end.
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** Execute task-by-task. Use `executing-plans` when
+> **For the executing agent:** Execute task-by-task. Use `executing-plans` when
 > working from a saved plan in a separate session. Steps use checkbox (`- [ ]`)
-> syntax and must be marked complete immediately after each step is verified.
-> Tick each checkbox the moment its step passes; never batch ticks at the end.
+> syntax. Tick each box the moment its step passes; never batch ticks at the
+> end. A reviewer sending a step back returns its box to `- [ ]` until the fix
+> passes.
+>
+> **Only the agent running `executing-plans` ticks these boxes.** If you are an
+> implementer subagent dispatched for one task, do not edit this file at all -
+> the orchestrator ticks on your behalf. Report your results instead.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -196,10 +243,20 @@ verifying each step. Do not batch at the end.
 
 **Commit policy:** [One commit per task | One commit at the end | No commits]
 
+**Full gate:** [the project's single validation command if it has one, e.g.
+`make validate`. Otherwise the exact chain covering format + lint + types + full
+test run, e.g. `pnpm format && pnpm lint && pnpm typecheck && pnpm test`]
+
+**Final verification:** [the full gate above, plus anything it does not cover -
+build, doc generation, manual checks headless tests cannot reach]
+
 ---
 ```
 
 Skills are annotated per step, not in the header.
+
+State the gate commands here once. Task steps reference them ("run the full
+gate") instead of repeating the command list per task.
 
 ## No ambiguity
 
@@ -262,13 +319,21 @@ After writing, re-check and fix inline:
 6. **Destructive-op:** any delete/overwrite/move-onto/truncate on a path holding
    data -> exists-guard or fail closed. Every "raises X -> HTTP N" has a step
    catching X (uncaught -> 500)
+7. **Verification redundancy:** any `Green:` that re-proves a previous step's
+   `Green:` -> delete. Any full gate that is not the task's LAST verification ->
+   narrow it. Any step that only verifies a previous task -> delete the step.
+   More than one full gate in the same task -> delete all but the last
+8. **Task overlap:** list each task's file set. Overlapping sets -> merge the
+   tasks
+9. **Repetition:** any repo rule, lint quirk, or convention stated in more than
+   one task -> move to the shared preamble, delete the copies
 
 ## Plan reviewer
 
 After self-review, dispatch a subagent once to review the plan. Audits internal
-quality only (contradictions, assumptions, ordering, granularity, reuse, blind
-spots), NOT against an external spec. Categories live in
-`plan-reviewer-prompt.md`.
+quality only (contradictions, assumptions, ordering, granularity, reuse,
+redundant verification, over-specification, blind spots), NOT against an
+external spec. Categories live in `plan-reviewer-prompt.md`.
 
 Dispatch payload. Do NOT read or open `plan-reviewer-prompt.md` yourself — the
 subagent reads it. Reading it into your own context defeats the offload:

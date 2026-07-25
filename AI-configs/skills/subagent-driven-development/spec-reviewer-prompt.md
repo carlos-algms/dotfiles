@@ -14,6 +14,20 @@ specification.
 - `base_ref` - SHA at task start, or merge-base for final review
 - `changed_files` - space-separated list of paths for the task scope
 
+## You Review Code, Not the Build
+
+**Read-only. Never edit a file, never stage, never commit.** Whoever wrote the
+code commits it; you report findings.
+
+The tree was already validated before you were dispatched. Do NOT run the test
+suite, type check, lint, or build - that is not what you are here for.
+
+- To substantiate a specific finding, run THAT one test file alone. Narrow runs
+  are always allowed
+- A green suite is not evidence a requirement is implemented. It says nothing
+  about a requirement no test covers - that is the MISSING category below, and
+  you find it by reading
+
 ## Collect Data Yourself
 
 1. Read the plan at `plan_path` and locate `task_id`. That is the spec
@@ -23,14 +37,11 @@ specification.
    - Unstaged: `git diff -- <changed_files>`
    - Untracked: read each path in `changed_files` not tracked by git. If a path
      no longer exists, treat as deleted and review the deletion via `git diff`
-3. One-hop scope:
-   - Identify exported/changed symbols in `changed_files`
-   - `rg --hidden -F '<symbol>'` to find importers/callers across the repo
-   - Read each one-hop caller file
-   - Flag breakage in callers caused by `changed_files`
-4. Do not flag pre-existing issues in caller files unrelated to the changes
 
 Do not trust any external summary of what was built. Read code directly.
+
+Stay inside `changed_files` and the plan. The code-quality reviewer runs the
+one-hop caller sweep right after you - do not duplicate it here.
 
 ## Your Job
 

@@ -19,6 +19,11 @@ its internal quality, not its fidelity to any external spec.
 Each issue MUST cite evidence (plan:line or repo path:line). Speculation without
 evidence is not an issue.
 
+A plan that is too long is a defect, same as one that is too vague. Do not
+recommend a fix that adds a step, a gate, or a paragraph when a `path:line`
+citation, a merge, or a deletion closes the issue. Every recommended fix states
+its net effect on plan length.
+
 **Contradictions:**
 
 - Rules, signatures, names, or constraints that disagree across tasks
@@ -63,18 +68,47 @@ evidence is not an issue.
 
 **Red-on-commit violations:**
 
-- ANY step that does not end in a green, commit-safe state
+- ANY task that does not END in a green, commit-safe state. Judge this per task,
+  NOT per step - intermediate steps are allowed to leave the repo red
 - `Green:` line missing a paste-able command + observable success token (exit 0,
   `PASS`, `0 errors`). Bare "compiles" / "tests pass" with no command is a
   violation
 - Failing test as a step deliverable (red must live INSIDE the implementation
   step, not as a separate ticked step)
-- Steps that would fail a commit gate (pre-commit hooks, CI tests, lint,
-  type-check)
+- The task does not run the full gate (lint, types, full test run) as its last
+  verification. Under commit policy `One commit per task` /
+  `One commit at the end` that belongs in the commit step; under `No commits`
+  there is no commit step, so it is the task's final step instead. Do not flag a
+  missing commit step under `No commits`
+- EXCEPT the last task, whose final-verification step IS the gate. Two full-gate
+  runs back to back there is the defect, not one
+
+**Redundant verification:**
+
+- A step's `Green:` re-proves what a previous step's `Green:` already proved -
+  cite both lines
+- A step runs the full gate when only one test file changed. The narrowest
+  command that proves the step is the correct Green; the full gate runs once per
+  task, at the task's end
+- A ticked step whose only content is verifying a previous task's output
+- A separate bootstrap/stub step for a symbol NO later task imports. Stubs
+  default to being the first activity inside the implementing step
+
+**Over-specification:**
+
+- More than ~2 lines of rationale for one constraint where a `path:line`
+  citation would carry it
+- The same repo rule, lint quirk, or convention restated in more than one task
+  instead of living in the plan's shared preamble
+- Families of near-identical base cases (same assertion, different input) listed
+  one-by-one where a loop-driven case covers them, AND each does not pin a
+  distinct code path
 
 **Granularity:**
 
-- Steps too large to verify, review, and commit as one unit
+- Steps too large to verify and review as one unit
+- Two tasks whose file sets overlap - they pay the test + gate + commit cycle
+  twice on the same file. Recommend merging; cite both tasks' `**Files:**` lines
 
 **Reuse misses:**
 
@@ -99,9 +133,11 @@ evidence is not an issue.
 
 **Header quality:**
 
-- Missing fields: Goal, Architecture, Tech Stack, Commit policy, Final
-  verification
+- Missing fields: Goal, Architecture, Tech Stack, Commit policy, Full gate,
+  Final verification
 - Vague values (e.g. Final verification = "run tests" with no command)
+- Task steps that repeat the gate command list instead of referencing the
+  header's `Full gate`
 - Package manager not detectable from the plan or lock files
 
 **Skills checklist (per step):**
@@ -126,6 +162,28 @@ Cite the signal (plan:line) and the matching skill name.
 
 - Schema/env/fixture/CI/migration needs implied by the plan or repo but not
   addressed by any task
+
+## Calibration
+
+**Only flag what would cause a real problem during implementation.** An
+implementer building the wrong thing, getting stuck, losing data, or running the
+same gate twice is a real problem. Wording, stylistic preference, and "nice to
+have" are not.
+
+Approve unless there are serious gaps: a requirement with no task, contradictory
+steps, placeholder content, an unguarded destructive op, or a task so vague it
+cannot be acted on.
+
+Severity means what it says:
+
+- **Critical** - the plan as written produces wrong behaviour, data loss, or an
+  implementer who cannot proceed
+- **Important** - the plan works but a defect is likely, or it wastes a full
+  verification cycle
+- **Minor** - advisory. If you cannot name what breaks, it is Minor at most
+
+Uncertain between two levels: pick the lower one. Inflating severity is itself a
+defect - it pads the plan with fixes nobody needed.
 
 ## Output
 

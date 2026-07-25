@@ -1,11 +1,23 @@
 ---
 name: subagent-driven-development
 description: >
-  Use when executing implementation plans with independent tasks in the current
-  session
+  Subagent-per-task MODE of executing-plans, for implementation plans with
+  independent tasks. Requires executing-plans, which holds the shared rules;
+  load that first if it is not already loaded.
 ---
 
 # Subagent-driven development
+
+**Requires `executing-plans`.** This skill is the subagent-per-task MODE of that
+one, not a standalone workflow. `executing-plans` owns everything both modes
+share: branch safety, commit policy, plan tracking, `base_ref` discovery,
+dispatch preconditions, the re-review decision rule, the retry budget, and the
+reviewer dispatch payloads. This file holds only what differs when a subagent
+implements instead of you.
+
+If `executing-plans` is not already loaded in this session, load it now, before
+anything else. You reached here from its execution workflow gate
+(`executing-plans` → "Execution workflow gate"), so normally it already is.
 
 Execute plan by dispatching fresh subagent per task, with two-stage review after
 each: spec compliance review first, then code quality review.
@@ -21,50 +33,6 @@ reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely
 prevents progress, or all tasks complete. "Should I continue?" prompts and
 progress summaries waste their time — they asked you to execute the plan, so
 execute it.
-
-## Branch safety
-
-Before implementation, inspect the current branch.
-
-If on `main` or `master`, ask which path to use:
-
-1. Create a feature branch in the current working tree
-2. Create a worktree under `.worktrees/<branch-name>/` in the current working
-   directory
-3. Continue on `main` or `master`
-
-Recommend a feature branch for simple work. Recommend a worktree for risky work,
-parallel work, or changes that need stronger isolation.
-
-Continuing on `main` or `master` requires explicit user consent.
-
-When creating a worktree, ensure `.worktrees/` is listed in the target repo
-`.gitignore`. Add it first if missing.
-
-## Plan tracking
-
-If the plan file uses checkboxes, ask before editing it to track progress.
-
-If approved, preserve all original content except checkbox state. Update each
-task checkbox from `- [ ]` to `- [x]` immediately after the task is implemented,
-verified, and approved by both reviewers. Do not batch checkbox updates at the
-end.
-
-If not approved, track progress with TodoWrite and chat status only.
-
-## Commit policy
-
-Read the plan for its commit policy.
-
-If the plan has no commit policy, ask before implementation:
-
-```markdown
-How should commits be handled for this plan?
-
-**A**. One commit per task **B**. One commit at the end **C**. No commits
-```
-
-Follow the selected policy. Never commit when the policy is `No commits`.
 
 ## When to use
 
@@ -108,12 +76,11 @@ Before dispatching subagents:
    proceeding. Skills load at the step that needs them (see step annotations
    `**Skills (load if not already loaded):**` in the plan) - implementer
    subagents handle that themselves. Do NOT pre-load skills upfront
-2. Run branch safety gate
-3. Run plan tracking gate
-4. Resolve commit policy
-5. Note `plan_path`, task ids, and scene-setting context per task. Do NOT
+2. Run the shared gates from `executing-plans`: branch safety, plan tracking,
+   commit policy
+3. Note `plan_path`, task ids, and scene-setting context per task. Do NOT
    extract task text verbatim - subagents read the plan themselves via pointers
-6. Create TodoWrite
+4. Create TodoWrite
 
 Tell implementer subagents the selected commit policy:
 
@@ -121,28 +88,47 @@ Tell implementer subagents the selected commit policy:
 - `One commit at the end`: do not commit during individual tasks
 - `No commits`: do not commit
 
-## `base_ref` discovery
+## Extra precondition in this mode
 
-Capture two values:
+`executing-plans` → "Reviewer dispatch pointers" holds `base_ref` discovery and
+the shared preconditions. Capture per-task `base_ref` at task start, **before
+dispatching the implementer**. One precondition is specific to this mode:
 
-1. Plan-level (final reviewer): `git merge-base HEAD <default-branch>` where
-   default-branch is `main` or `master` (detect with
-   `git symbolic-ref refs/remotes/origin/HEAD`)
-2. Per-task (per-task reviewers): capture `git rev-parse HEAD` at task start,
-   before dispatching the implementer. Per-task `base_ref` = that SHA. Task 1's
-   base equals the plan-level merge-base only on a clean branch with no prior
-   commits; otherwise it's whatever HEAD is at task start
-3. With `One commit per task`, per-task base shifts after each commit; recapture
-   at the start of each task
+- The implementer reported a full gate that passed. Reviewers are told not to
+  run one, so dispatching without this ships unvalidated code. No reported gate,
+  or a failing one: send the implementer back — do not run it yourself, and do
+  not dispatch reviewers
 
-**Preconditions before dispatching:**
+## You orchestrate, you do not validate or commit
 
-1. Worktree clean of unrelated changes. Dirty at task start: ask the user before
-   proceeding (otherwise reviewers audit user's WIP edits)
-2. `changed_files` captured at task end, BEFORE any per-task commit. After
-   `git commit`, `git status --porcelain` returns empty; derive from
-   `git diff --name-only <task_base_ref>...HEAD` instead. For renames, use the
-   destination path
+Never run a test, lint, type-check, or build command yourself. Not to check the
+implementer's work, not to confirm a fix, not "just quickly".
+
+**You also do not commit.** Whoever writes code commits it, after gating it: the
+implementer for its task, the fix subagent for its fix. Reviewers are read-only
+and never commit. You own only the plan file's checkboxes.
+
+Sole exception: under `One commit at the end` you told every implementer not to
+commit, so at the very end no other agent is alive to do it. You commit once,
+after the final gate.
+
+Two reasons, both load-bearing:
+
+- Command output floods your context, and an orchestrator holding build output
+  drifts into implementation mode — it starts fixing things directly and stops
+  dispatching the subagents that make this workflow work
+- Your context is the coordination budget for the whole plan. Spend it on
+  dispatching and on reading reports, nothing else
+
+Something needs running: dispatch an agent to run it. The implementer runs the
+task's gate; reviewers run narrow single-test checks to substantiate a finding.
+
+**One exception, at the very end.** After the last task and the final review,
+you make the completion claim, and `verification-before-completion`'s Iron Law
+says a claim needs evidence you ran yourself — so you run the final gate. That
+is one command, once, with no tasks left to dispatch, so the drift it would
+cause has nothing left to damage. It is the only command of this kind you ever
+run.
 
 ## Model selection
 
@@ -177,15 +163,6 @@ Provide the missing context and re-dispatch.
 **Never** ignore an escalation or force the same model to retry without changes.
 If the implementer said it's stuck, something needs to change.
 
-## Review retry budget
-
-3 rounds per reviewer (spec, code-quality, AND final reviewer). One round = one
-dispatch + one implementer fix attempt. Round 4: STOP. Escalate with the
-reviewer's latest issues and the implementer's latest attempt.
-
-Repeated rejection often signals a plan defect, not a fix defect. Escalation
-gives the user a chance to update the plan.
-
 ## Dispatch payloads
 
 Do NOT read or open the template files yourself — each subagent reads its
@@ -216,46 +193,25 @@ act until you have read it. Then apply:
                    outputs, dependencies, architectural notes not in the plan>
 ```
 
-**Spec compliance reviewer:**
-
-```text
-MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST. Do not
-act until you have read it. Then apply:
-  task_summary  = <one-line summary of the task>
-  plan_path     = <abs path>
-  task_id       = <task number / heading>
-  base_ref      = <SHA at task start, or merge-base for final review>
-  changed_files = <space-separated paths>
-```
-
-**Code quality reviewer:**
-
-```text
-MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
-Do not act until you have read it. Then apply:
-  description          = <one-line task summary>
-  plan_or_requirements = "Task <task_id> from <plan_path>"
-  base_ref             = <SHA>
-  changed_files        = <space-separated paths>
-```
+**Both reviewers:** identical to inline mode — see `executing-plans` → "Reviewer
+dispatch pointers" for the two payloads. Same templates, same values, and both
+templates live in THIS directory.
 
 ## Red flags
 
+`executing-plans` → "Red flags" applies in full. These are additional, and all
+of them are specific to dispatching implementers:
+
 **Never:**
 
-- Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality), or proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Paste full task text into the prompt (pass `plan_path` + `task_id` only)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
-- Accept "close enough" on spec compliance (spec reviewer found issues = not
-  done)
-- Let implementer self-review replace actual review (both are needed)
-- **Start code quality review before spec compliance is ✅** (wrong order)
-- Move to next task while either review has open issues
 - Fix a failed subagent's task manually (context pollution); dispatch a fix
   subagent with specific instructions
+- Accept "close enough" on spec compliance (spec reviewer found issues = not
+  done)
 
 ## Integration
 

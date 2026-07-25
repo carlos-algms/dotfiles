@@ -23,20 +23,27 @@ Task tool (general-purpose):
 
     ## Review Scope
 
-    {REVIEW_SCOPE}
+    - BASE_REF = {BASE_REF}
+    - CHANGED_FILES = {CHANGED_FILES}
 
-    ## Git Status
-
-    {GIT_STATUS}
-
-    ## Diff Commands
-
-    Run the supplied commands exactly. They may describe a committed range,
-    staged changes, unstaged changes, or mixed work.
+    Reconstruct the diff yourself, scoped to CHANGED_FILES:
 
     ```bash
-    {DIFF_COMMANDS}
+    git diff <BASE_REF>...HEAD -- <CHANGED_FILES>   # committed
+    git diff --cached -- <CHANGED_FILES>            # staged
+    git diff -- <CHANGED_FILES>                     # unstaged
     ```
+
+    Untracked: read each path in CHANGED_FILES not tracked by git. If a path no
+    longer exists, treat it as deleted and review the deletion via `git diff`.
+
+    ## You Review Code, Not the Build
+
+    The tree was already validated before you were dispatched. Do NOT run the
+    test suite, type check, lint, or build - that is not what you are here for.
+
+    To substantiate a claim about one specific test, run that test file alone -
+    narrow runs are always allowed.
 
     ## What to Check
 
@@ -62,7 +69,8 @@ Task tool (general-purpose):
     - Tests verify real behavior, not mocks?
     - Edge cases covered?
     - Integration tests where they matter?
-    - All tests passing?
+    - Any changed branch, error path, or requirement with no test covering it?
+      (the suite is green - green says nothing about what is untested)
 
     **Production readiness:**
     - Migration strategy if schema changed?
@@ -134,9 +142,10 @@ Task tool (general-purpose):
 - `{DESCRIPTION}` — brief summary of what was built
 - `{PLAN_OR_REQUIREMENTS}` — what it should do (plan file path, task text, or
   requirements)
-- `{REVIEW_SCOPE}` — committed range, uncommitted work, or mixed work
-- `{GIT_STATUS}` — output from `git status --short`
-- `{DIFF_COMMANDS}` — exact diff commands to run
+- `{BASE_REF}` — branch base or commit SHA before the work
+- `{CHANGED_FILES}` — space-separated paths, for use after `--` in git commands
+
+Run the full gate yourself before dispatching. The reviewer will not run it.
 
 **Reviewer returns:** Strengths, Issues (Critical / Important / Minor),
 Recommendations, Assessment

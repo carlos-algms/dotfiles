@@ -30,26 +30,21 @@ process, and preserves your own context for continued work.
 
 ## How to request
 
-**1. Collect review context:**
+**1. Collect review pointers:**
 
-Choose the review scope from current git state:
-
-- **Committed range:** Use the relevant base commit and head commit when the
-  work is already committed.
-- **Uncommitted work:** Use `git status --short`, `git diff --cached`, and
-  `git diff` when the parent workflow did not commit.
-- **Mixed work:** Include both the committed range and working tree state when
-  there are commits plus staged or unstaged changes.
-
-Collect only facts:
+Two values, not a diff. The reviewer reconstructs the diff itself, so pulling it
+into your own context here pays for it twice.
 
 ```bash
-git status --short
-git diff --cached --stat
-git diff --cached
-git diff --stat
-git diff
+git rev-parse HEAD          # base commit before the work
+git status --porcelain      # names only, to build CHANGED_FILES
 ```
+
+- `BASE_REF` - the commit before the work. Already committed: the branch base or
+  the parent of the first commit. Uncommitted: current `HEAD`
+- `CHANGED_FILES` - paths from `git status --porcelain`, or
+  `git diff --name-only <BASE_REF>...HEAD` once committed. For renames, use the
+  destination path
 
 **2. Dispatch code reviewer subagent:**
 
@@ -59,9 +54,13 @@ Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
 
 - `{DESCRIPTION}` - Brief summary of what you built
 - `{PLAN_OR_REQUIREMENTS}` - What it should do
-- `{REVIEW_SCOPE}` - Committed range, uncommitted work, or mixed work
-- `{GIT_STATUS}` - Output from `git status --short`
-- `{DIFF_COMMANDS}` - Exact diff commands the reviewer should run
+- `{BASE_REF}` - Branch base or commit SHA before the work
+- `{CHANGED_FILES}` - Space-separated paths, for use after `--` in git commands
+
+**Before dispatching:** run the full gate — the project's single validation
+command if it has one (`make validate`), else format + lint + types + full test
+run — and confirm it passes. The reviewer reviews code and will not run it for
+you, so an ungated dispatch reviews code nobody validated.
 
 **3. Act on feedback:**
 
@@ -69,6 +68,8 @@ Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
 - Fix Important issues before proceeding
 - Note Minor issues for later
 - Push back if reviewer is wrong (with reasoning)
+- **Re-run the full gate after any fix**, before committing. The gate you ran
+  before dispatch does not cover code written after it
 
 ## Example
 
@@ -77,18 +78,15 @@ Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
 
 You: Let me request code review before proceeding.
 
-git status --short
-git diff --cached --stat
-git diff --cached
-git diff --stat
-git diff
+pnpm test && pnpm typecheck && pnpm lint   # gate passes
+git rev-parse HEAD
+git status --porcelain
 
 [Dispatch code reviewer subagent]
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
   PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/deployment-plan.md
-  REVIEW_SCOPE: Uncommitted work
-  GIT_STATUS: M src/index.ts, M tests/index.test.ts
-  DIFF_COMMANDS: git diff --cached && git diff
+  BASE_REF: 9f2c1ab
+  CHANGED_FILES: src/index.ts tests/index.test.ts
 
 [Subagent returns]:
   Strengths: Clean architecture, real tests
