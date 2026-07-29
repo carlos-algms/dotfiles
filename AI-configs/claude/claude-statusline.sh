@@ -10,6 +10,9 @@ DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 COST=$(echo "$input" | jq -r '.cost.total_cost_usd')
 COST=$(printf "%.2f" "$COST")
 MODEL_NAME=$(echo "$input" | jq -r '.model.display_name')
+EFFORT=$(echo "$input" | jq -r '.effort.level // empty')
+
+BRANCH=$(git --no-optional-locks -C "$DIR" branch --show-current 2>/dev/null)
 
 # Context window data
 WINDOW_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
@@ -49,7 +52,14 @@ format_tokens() {
 TOKENS_FORMATTED=$(format_tokens $TOTAL_TOKENS)
 WINDOW_FORMATTED=$(format_tokens $WINDOW_SIZE)
 
-echo "[$MODEL_NAME] 📁 ${DIR##*/} | $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
+MODEL_LABEL="$MODEL_NAME"
+[ -n "$EFFORT" ] && MODEL_LABEL="$MODEL_LABEL/$EFFORT"
+
+DIR_LABEL="${DIR##*/}"
+GIT_ICON=$''
+[ -n "$BRANCH" ] && DIR_LABEL="$DIR_LABEL ($GIT_ICON $BRANCH)"
+
+echo "[$MODEL_LABEL] 📁 $DIR_LABEL | $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
 
 ### Don't change from here ###
 # https://code.claude.com/docs/en/statusline
