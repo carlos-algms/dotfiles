@@ -76,6 +76,30 @@ I use kitty as terminal, no tmux.
 - `clear_all_shortcuts yes` is set, so any new keybinding must be added
   explicitly.
 
+## Herdr
+
+Terminal workspace manager for AI agents. Config lives in this repo, symlinked
+out. Not wired into `bootstrap.sh` - link manually:
+
+```bash
+ln -s $(pwd)/herdr/config.toml ~/.config/herdr/config.toml
+```
+
+- `herdr/config.toml` - overrides only; everything else stays on defaults. Full
+  schema: `herdr --default-config`.
+- Prefix is `cmd+b`. `ctrl` is reserved for Neovim, `cmd` for kitty and external
+  apps.
+- Bindings live in `herdr/config.toml`; read it instead of duplicating them
+  here. Some replace a kitty shortcut, whose `map` line in `kitty/kitty.conf` is
+  commented out on purpose and marked with a pointer back to herdr.
+- Kitty consumes any chord it binds and never forwards it to the app inside, so
+  re-enabling one of those `map` lines silently breaks the herdr binding.
+- Actions take no size parameter. A sized split needs a `[[keys.command]]`
+  shell-out to `herdr pane split --ratio`, which sizes the EXISTING pane, not
+  the new one - `0.8` leaves the new pane at 20%.
+- Validate after editing: `herdr config check`. It checks binding syntax, not
+  just TOML. Apply to a running server: `herdr server reload-config`.
+
 ## File Operations Protocol
 
 ### When modifying shell scripts in this project:

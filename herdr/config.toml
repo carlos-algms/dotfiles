@@ -1,0 +1,51 @@
+# Herdr — terminal workspace manager for AI coding agents
+# https://herdr.dev
+#
+# Only overrides live here; everything else stays on herdr defaults.
+# Full annotated schema: `herdr --default-config`
+# Apply changes to a running server: `herdr server reload-config`
+
+[keys]
+# ctrl is reserved for Neovim, cmd for kitty and external apps.
+# Prefix moves to cmd+b so it never collides with Neovim's ctrl bindings.
+prefix = "cmd+b"
+
+# Direct (non-prefix) bindings mirroring the kitty shortcuts they replace.
+# These require the matching `map` lines to stay commented out in
+# kitty/kitty.conf, otherwise kitty consumes the key and herdr never sees it.
+new_tab = "cmd+t"          # was: kitty `map cmd+t new_tab`
+# close_tab intentionally unset: cmd+w belongs to Neovim (close tabpane).
+# Falls back to herdr's default prefix+shift+x; `exit` or ctrl+d also close a pane.
+next_tab = "cmd+]"
+previous_tab = "cmd+["
+switch_tab = "cmd+1..9"    # was: kitty `map cmd+1..9 goto_tab N`
+# Not cmd+shift+1..9: macOS owns cmd+shift+3/4/5 for screenshots.
+# Not ctrl+1..9: ctrl alone is reserved for Neovim.
+switch_workspace = "cmd+alt+1..9"
+
+# k=up=previous, j=down=next, matching the vertical workspace list.
+# was: kitty `map cmd+shift+k/j neighboring_window up/down`
+previous_workspace = "cmd+shift+k"
+next_workspace = "cmd+shift+j"
+
+# Horizontal split, new pane pinned to the bottom 20%.
+# was: kitty `map cmd+enter new_window_with_cwd`
+#
+# The plain `split_horizontal` action takes no size, so this drives the socket
+# API instead. --ratio sizes the EXISTING pane, not the new one, so 0.8 leaves
+# the new bottom pane at 20%. --cwd inherits from the pane that had focus.
+[[keys.command]]
+key = "cmd+enter"
+type = "shell"
+# `description` is undocumented in `herdr --default-config`; it replaces the
+# default "custom command" label in the prefix+? help overlay.
+description = "split pane, bottom 20%"
+command = "herdr pane split --current --direction down --ratio 0.8 --focus"
+
+[ui]
+agent_panel_sort = "spaces"
+
+[experimental]
+# Kitty graphics (image previews) are off by default, locally and over --remote.
+# Read from the client's config, so this covers `herdr --remote hp` too.
+kitty_graphics = true
