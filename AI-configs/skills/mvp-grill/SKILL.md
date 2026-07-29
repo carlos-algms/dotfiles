@@ -195,6 +195,25 @@ Time cost is not a user question unless the user set a strict budget.
 
 Ask one question at a time. Recommend first. Ask for override second.
 
+### Numbering
+
+Top-level blockers are `Q1`, `Q2`, `Q3`. New questions nest, they do not append.
+
+1. A blocker created by an answer becomes a child of that question. `Q2` spawns
+   `Q2.1`, `Q2.2`. `Q2.1` spawns `Q2.1.1`. No depth limit
+2. Ask children depth-first, before the parent's siblings: `Q2`, `Q2.1`, `Q2.2`,
+   `Q2.2.1`, then `Q3`
+3. Append as a new top-level `Q` only when the blocker is independent of every
+   open question and needs no answer for the current MVP path. Park it at the
+   end of the queue
+4. Never renumber, reuse, or reorder an id. Never insert a new top-level
+   mid-sequence
+5. Open count is the top-level count. Children never inflate it. Report them as
+   `Q2: 2 sub-blockers`, not `+2 open`
+
+Appending a child as the next integer is the failure this prevents. `Q2`
+branching into two is `Q2.1` and `Q2.2`, never `Q11` and `Q12`.
+
 Before each question, maintain the open blocker queue internally. If blockers
 were added, removed, or reprioritized since the last turn, show the state-change
 block before the next question.
@@ -208,6 +227,29 @@ Do not show state-change blocks just to prove bookkeeping.
    Never add a forbidden path as a balance option. If only one path remains
    valid, lock it instead of asking
 5. Include a tradeoff only when one exists
+
+### One answer shape per question
+
+Count decides the shape. Alternatives and yes/no are mutually exclusive. Never
+offer both.
+
+1. Lettered options present: no `(y/n)` anywhere in the question. The user
+   answers with a label
+2. Never close a lettered question with `Apply B? (y/n)`, `Proceed? (y/n)`, or
+   any yes/no restating the recommendation. The `Recommendation:` line is the
+   close
+3. `(y/n)` is valid only when exactly one viable path exists, and that question
+   carries no labels and no `Recommendation:` line. The question text is the
+   recommendation, `Apply X? (y/n)` already says to apply X
+4. Close a lettered question with `Choose A/B/C`, listing only offered labels
+
+Anti-examples:
+
+- Bad: `- **A**: ...` / `- **B**: ...` / `Recommendation: **A**. Apply A? (y/n)`
+- Bad: `Apply X? (y/n)` with lettered options above it
+- Bad: `Apply X? (y/n)` followed by `Recommendation: yes`
+- Good: `- **A**: ...` / `- **B**: ...` / `Recommendation: **A**.` then stop
+- Good: `Apply X? (y/n)` alone, no labels, no recommendation
 
 Tradeoff means a concrete cost: bug risk, visual or behavioral regression,
 revert or undo cost, performance impact, lock-in, or data loss. A tradeoff is
@@ -228,8 +270,11 @@ Format (yes/no, one recommended path):
 
 **Q<n>**: <blocking decision>? (y/n)
 
-Recommendation: <answer>. Tradeoff: <real cost, omit if none>.
+Tradeoff: <real cost, omit if none>.
 ```
+
+Use this shape only when exactly one viable path exists. Never add labels or a
+`Recommendation:` line to it.
 
 Format (lettered, two or more peer paths):
 
@@ -238,19 +283,23 @@ Format (lettered, two or more peer paths):
 
 **Q<n>**: <blocking decision>?
 
-- **A** <action> - <when to use or tradeoff>
-- **B** <action> - <when to use or tradeoff>
-- **C** <action> - <when to use or tradeoff>
+- **A**: <action> - <when to use or tradeoff>
 
-Recommendation: <label>. <why, cite file:line if relevant>.
+- **B**: <action> - <when to use or tradeoff>
+
+- **C**: <action> - <when to use or tradeoff>
+
+Recommendation: **<label>**. <why, cite file:line if relevant>.
 ```
 
 Lettered rules:
 
-- Bold each label with no trailing dot: `**A**`, `**B**`, `**C**`
+- Bold each label with a colon: `**A**:`, `**B**:`, `**C**:`
+- Blank line between options, readability over density
 - Recommended option first
 - One option per line as a bullet
-- Close on the `Recommendation:` line naming the label
+- Close on the `Recommendation:` line naming the bolded label
+- No `(y/n)` on a lettered question
 
 ## 6. Handle answers
 
@@ -259,7 +308,8 @@ Each answer shrinks the decision set.
 1. Lock the answered decision
 2. Re-scan every open blocker
 3. Remove questions made moot, redundant, or invalid by the answer
-4. Add a question only if the answer creates a new MVP blocker
+4. Add a question only if the answer creates a new MVP blocker. Nest it under
+   the answered question per Numbering, never append it as the next integer
 5. Keep parking-lot items closed unless the user reopens them
 6. In target-file grill, apply the durable part of the answer immediately
 7. Show visible state changes before the next question
@@ -280,9 +330,13 @@ State-change format:
 Updated blockers:
 
 - Removed: <question> - <why>
-- Added: <question> - <why>
-- Still open: <count>
+- Added: **Q<n>.<m>** - <why>, asked next
+- Appended: **Q<n>** - independent, asked after **Q<n-1>**
+- Still open: <top-level count>
 ```
+
+Sub-blockers do not change `Still open`. Report them as
+`**Q2**: 2 sub-blockers`.
 
 Omit the state-change block when the answer only locks the current question.
 Show it only when the open blocker set changed.

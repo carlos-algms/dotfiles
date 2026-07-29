@@ -156,15 +156,32 @@ Branches to grill:
 ```
 
 User later asks to grill a locked item: reopen it as a new top-level Q, appended
-after the last.
+after the last. Reopening is independent work, so it appends, never nests.
 
 ## Format
 
-One question per turn. Numbered **Q1**, **Q2**... sequentially. Never reuse,
-skip, or reorder **Q<n>** ids. Render `Q<n>` bold everywhere, including the
-header line.
+One question per turn. Render `Q<n>` bold everywhere, including the header line.
 
 Prepend `---` before every **Q<n>** as visual divider.
+
+### Numbering
+
+Top-level branches are `Q1`, `Q2`, `Q3`. New questions nest, they do not append.
+
+1. A question created by an answer becomes a child of that question. `Q2` spawns
+   `Q2.1`, `Q2.2`. `Q2.1` spawns `Q2.1.1`. No depth limit
+2. Ask children depth-first, before the parent's siblings: `Q2`, `Q2.1`, `Q2.2`,
+   `Q2.2.1`, then `Q3`
+3. Append as a new top-level `Q` only when the question is independent of every
+   open question and needs no answer for the current path. Park it at the end of
+   the queue
+4. Never renumber, reuse, or reorder an id. Never insert a new top-level
+   mid-sequence
+5. Open count is the top-level count. Children never inflate it. Report them as
+   `Q2: 2 sub-branches`, not `+2 open`
+
+Appending a child as the next integer is the failure this prevents. `Q2`
+branching into two is `Q2.1` and `Q2.2`, never `Q11` and `Q12`.
 
 Per-turn structure, back-to-back, no prose between blocks:
 
@@ -178,11 +195,31 @@ Per-turn structure, back-to-back, no prose between blocks:
      visibly with evidence or emit an info-only note.
    - Options. Never invent filler. Each option must be a plausible best choice
      for some reader. Drop options dominated on every axis or with no plausible
-     reader. Two cases:
-     - 1 real path: ask yes/no (`Apply X? (y/n)`). No labels, no recommendation.
-     - 2+ real paths: bulleted, no header. Bold label, blank line between,
-       one-line tradeoff each.
+     reader. Count decides the shape, exactly one shape per question:
+     - 1 real path: yes/no (`Apply X? (y/n)`). No labels, no recommendation
+     - 2+ real paths: bulleted, no header. Bold label with colon, blank line
+       between options, one-line tradeoff each. Close on `Recommendation:`
    - `Recommendation:` line - the only inline label permitted.
+
+### One answer shape per question
+
+Alternatives and yes/no are mutually exclusive. Never offer both.
+
+1. Lettered options present: no `(y/n)` anywhere in the question. The user
+   answers with a label
+2. Never close a lettered question with `Apply B? (y/n)`, `Proceed? (y/n)`, or
+   any yes/no restating the recommendation. The `Recommendation:` line is the
+   close
+3. `(y/n)` is valid only when exactly one viable path exists, and that question
+   carries no labels and no `Recommendation:` line
+4. Close a lettered question with `Choose A/B/C`, listing only offered labels
+
+Anti-examples:
+
+- Bad: `- **A**: ...` / `- **B**: ...` / `Recommendation: **A**. Apply A? (y/n)`
+- Bad: `Apply X? (y/n)` followed by `Recommendation: yes`
+- Good: `- **A**: ...` / `- **B**: ...` / `Recommendation: **A**.` then stop
+- Good: `Apply X? (y/n)` alone, no labels, no recommendation
 
 Example:
 
@@ -200,11 +237,22 @@ Recommendation: **A**. Tradeoff: cache lost on restart.
 
 ### Recommendation line
 
-`Recommendation: <choice>.` Optionally followed by `Tradeoff: <...>` or
+`Recommendation: <choice>.` Bold the label when the question is lettered:
+`Recommendation: **A**.` Optionally followed by `Tradeoff: <...>` or
 `Caveats: <...>` when there's a meaningful one. Skip when the recommendation is
 clean.
 
 If you can't pick a recommendation, you haven't explored enough - go back.
+
+Tradeoff means a concrete cost: bug risk, visual or behavioral regression,
+revert or undo cost, performance impact, lock-in, or data loss. A tradeoff is
+not a restatement, summary, or explanation of the option. Omit the tradeoff line
+when the option is self-explanatory or no real cost exists.
+
+- Bad: "Tradeoff: 2 small tests" (restates option)
+- Bad: "Tradeoff: adds a helper function" (restates option)
+- Good: "Tradeoff: breaks existing callers of `foo()`, needs grep+update"
+- Good: "Tradeoff: extra render on every keystroke"
 
 ## Answers found in code
 
@@ -248,17 +296,23 @@ a 30s pause is lower than the cost of grilling on a wrong premise.
 
 ## New questions from findings
 
-Any finding that grows the open count must be announced before the next
-question.
+Any finding that grows the open set must be announced before the next question.
 
-Append every new branch as the next top-level **Q** after the last. Never insert
-mid-sequence. If a finding blocks the current question, ask the new **Q** next.
+Placement follows Numbering. A finding caused by the current question nests
+under it. An independent finding appends as a new top-level `Q`.
 
 ```markdown
-**Q<n>** answer opens new branches:
+**Q2** answer opens sub-branches:
 
-- **Q<m>**: <one-line question>
-- **Q<m+1>**: <one-line question>
+- **Q2.1**: <one-line question>
+- **Q2.2**: <one-line question>
+```
+
+Nested sub-branches are asked next, before `Q3`. An independent finding is
+announced as appended and parked:
+
+```markdown
+Appended: **Q7** - <one-line question>. Independent, asked after **Q6**.
 ```
 
 ## Acknowledging answers
@@ -289,7 +343,8 @@ Updated branches:
 
 - Removed: **Q3** - moot after **Q2**
 - Merged: **Q5** into **Q4** - same decision
-- Added: **Q8** - surfaced by **Q2**
+- Added: **Q2.1** - surfaced by **Q2**, asked next
+- Appended: **Q8** - independent, asked after **Q7**
 ```
 
 Omit empty sections. Skip the block on no-change turns.
