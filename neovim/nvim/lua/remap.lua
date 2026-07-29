@@ -162,11 +162,10 @@ setKeymap(
     { desc = "Close current buffer" }
 )
 
--- Disabled to sue vim-kitty-navigator
--- set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
--- set("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
--- set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
--- set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+setKeymap("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+setKeymap("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+setKeymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+setKeymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
 setKeymap("n", "<Esc>", function()
     if vim.opt.hlsearch then
