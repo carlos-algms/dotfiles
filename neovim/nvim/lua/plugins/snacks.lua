@@ -36,6 +36,28 @@ local M = {
     priority = 1010,
     lazy = false,
 
+    config = function(_, opts)
+        require("snacks").setup(opts)
+
+        -- Inline image flicker on streaming buffers (e.g. AgenticChat):
+        -- find_visible() is treesitter-backed and returns 0 images mid-reparse,
+        -- even when the image is still present. Stock inline:update() reads that
+        -- as "all images gone" and closes/recreates the placement every chunk.
+        -- Swallow empty results so placements survive until a parse reports >=1.
+        -- Tradeoff: N images -> 0 defers closing the last placement until a
+        -- later non-empty parse. Fine for append-only chat.
+        -- Upstream PR: https://github.com/folke/snacks.nvim/pull/2898
+        local doc = require("snacks.image.doc")
+        local find_visible = doc.find_visible
+        function doc.find_visible(buf, cb)
+            find_visible(buf, function(imgs)
+                if #imgs > 0 then
+                    cb(imgs)
+                end
+            end)
+        end
+    end,
+
     opts = function()
         local resume = require("snacks.picker.resume")
         local original_add = resume.add
