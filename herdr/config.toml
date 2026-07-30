@@ -5,6 +5,36 @@
 # Full annotated schema: `herdr --default-config`
 # Apply changes to a running server: `herdr server reload-config`
 
+[theme]
+name = "vesper"
+
+# Colors match the `darcluar` Neovim colorscheme
+# (neovim/nvim/colors/darcluar.lua). `herdr config check` does NOT validate
+# token names, so a typo silently falls back to the base theme.
+[theme.custom]
+panel_bg = "#1c1c1c"    # darcluar bg. Observed to cover the tab bar and
+                        # toasts but NOT the sidebar body, which uses the
+                        # terminal background — hence the matching
+                        # `background` in kitty/kitty.conf. The docs don't
+                        # specify per-token scope, so this is empirical.
+surface0 = "#313335"    # darcluar gutter
+surface1 = "#353435"    # darcluar uiBgInactive
+surface_dim = "#262626" # darcluar menu
+overlay0 = "#606366"    # darcluar lineNumber
+overlay1 = "#808080"    # darcluar comment
+text = "#bac4cf"        # darcluar fg
+subtext0 = "#606060"    # darcluar muted
+accent = "#6897BB"      # darcluar type
+mauve = "#9876AA"       # darcluar constant; the sidebar branch name. Style it
+                        # here, not with an inline `fg` on the branch token —
+                        # inline styles are static and flatten the dim state.
+green = "#6A8759"       # darcluar string
+yellow = "#FFC66D"      # darcluar callable
+red = "#CC666E"         # darcluar error
+blue = "#6897BB"        # darcluar type
+teal = "#96f291"        # darcluar success
+peach = "#CC7832"       # darcluar keyword
+
 [keys]
 # ctrl is reserved for Neovim, cmd for kitty and external apps.
 # Prefix moves to cmd+b so it never collides with Neovim's ctrl bindings.
@@ -41,6 +71,43 @@ type = "shell"
 # default "custom command" label in the prefix+? help overlay.
 description = "split pane, bottom 20%"
 command = "herdr pane split --current --direction down --ratio 0.8 --focus"
+
+# Claude in its own tab; the tab disappears when claude exits.
+#
+# No `type = "pane"` here: that auto-closes but only ever makes a pane. A tab
+# needs the socket API, so this shells out and reads the new pane's id out of
+# `tab create`'s JSON (`--current` would race the focus change).
+#
+# Auto-close is `exec`, not `exit`: exec replaces the shell, so the pane has no
+# shell left to return to and dies with claude — verified, shell_pid == the
+# exec'd pid. `claude && exit` would strand you at a prompt on any non-zero
+# exit (ctrl+c, crash), which is the case that matters most.
+#
+# Deliberately does NOT restore focus to the launching tab. That works (capture
+# `tab list`'s focused id up front, `claude; herdr tab focus $origin; exit`) but
+# costs `exec`: the shell has to survive to run the focus call. It also pins a
+# tab id for the whole session, so closing or replacing that tab mid-run leaves
+# a stale id that silently no-ops. Landing on an adjacent tab is the better
+# trade. Revisit if herdr grows a native focus-previous-tab.
+#
+# send-text, not `herdr pane run`: run takes its pane id positionally, rejects
+# the `--pane` flag, and leaked a literal `-- ` into the terminal when given a
+# `--` separator. send-text just types, which is all this needs. The trailing
+# newline inside the quotes is the Enter press.
+#
+# Multi-line '''…''' and $() work because herdr runs `command` through $SHELL
+# (falling back to /bin/sh); the cmd.exe path in the docs is Windows-only.
+# jq resolves as /usr/bin/jq, so this survives the launchd PATH that made
+# kitty.conf spell out /opt/homebrew/bin/herdr.
+[[keys.command]]
+key = "cmd+shift+a"
+type = "shell"
+description = "claude in new tab"
+command = '''
+pane=$(herdr tab create --label claude --focus | jq -r .result.root_pane.pane_id)
+herdr pane send-text "$pane" 'exec claude
+'
+'''
 
 [ui]
 agent_panel_sort = "spaces"
