@@ -111,6 +111,7 @@ herdr pane send-text "$pane" 'exec claude
 
 [ui]
 agent_panel_sort = "spaces"
+show_agent_labels_on_pane_borders = true
 
 [experimental]
 # Kitty graphics (image previews) are off by default, locally and over --remote.
