@@ -1,3 +1,5 @@
+onboarding = false
+
 # Herdr — terminal workspace manager for AI coding agents
 # https://herdr.dev
 #
@@ -6,6 +8,7 @@
 # Apply changes to a running server: `herdr server reload-config`
 
 [theme]
+## No particular reason for using this theme, my colors below are the actual values
 name = "vesper"
 
 # Colors match the `darcluar` Neovim colorscheme
@@ -71,6 +74,49 @@ type = "shell"
 # default "custom command" label in the prefix+? help overlay.
 description = "split pane, bottom 20%"
 command = "herdr pane split --current --direction down --ratio 0.8 --focus"
+
+# Pick a project dir with fzf, open it as a workspace.
+#
+# herdr has no directory picker: native `new_workspace` only prompts for a name,
+# and `workspace create --cwd` wants the path already resolved. So the picker
+# comes from fzf. `type = "popup"` is what makes that possible — "shell" runs
+# detached with no tty, so fzf would have nothing to draw on.
+#
+# Label is the basename; herdr's own sidebar labels are basenames too.
+# Empty $dir means fzf was cancelled (esc/ctrl+c), so create nothing.
+#
+# Not cmd+shift+n: kitty owns that (`map cmd+shift+n new_tab_with_cwd`) and
+# never forwards a chord it binds. cmd+alt+n has no kitty map, so it arrives.
+[[keys.command]]
+key = "cmd+alt+n"
+type = "popup"
+description = "pick project as workspace"
+width = "60%"
+height = "50%"
+#
+# Listed relative to $HOME via --base-directory, so the list reads `work/foo`
+# rather than the full path; $HOME goes back on for --cwd. No
+# --strip-cwd-prefix: fd rejects it alongside explicit search paths, and
+# combining them silently returned zero rows instead of erroring.
+#
+# --no-preview overrides the global --preview in FZF_DEFAULT_OPTS
+# (shell/zsh/custom.zsh) — it pipes the selection through bat, which errors on a
+# directory. --with-nth would not help; the preview is the problem, not the width.
+#
+# The popup border always reads "popup" and cannot be changed from here.
+# src/ui/panes.rs:422 titles it from the terminal's `manual_label`, else the
+# literal "popup". Popups launch with `without_pane_identity()` (src/app/popup.rs:156)
+# so $HERDR_PANE_ID is unset inside, and the popup pane is absent from
+# `herdr api snapshot` — so the pane cannot rename itself. Only
+# open_plugin_popup_pane sets that label, from a plugin manifest `title`.
+# OSC 2 does nothing: the title is UI state, not the terminal title.
+# fzf's --border-label carries the text instead.
+command = '''
+rel=$(fd -t d -d 1 --base-directory ~ . work projects 2>/dev/null |
+  fzf --no-preview --border --border-label=" pick the new workspace folder " \
+    --prompt="workspace> ")
+[ -n "$rel" ] && herdr workspace create --cwd "$HOME/$rel" --label "$(basename "$rel")" --focus
+'''
 
 # Claude in its own tab; the tab disappears when claude exits.
 #
