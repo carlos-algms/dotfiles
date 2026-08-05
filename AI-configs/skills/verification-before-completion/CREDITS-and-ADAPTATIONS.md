@@ -8,3 +8,6 @@ Original source:
 - Added command-selection rule for mapping claims to direct evidence
 - Added blocked-verification rule
 - Strengthened delegated-work verification rule
+- Added designated-finalizer evidence relay
+- Made the relay prohibitive: exactly one agent runs final verification and the
+  orchestrator never reruns its checks

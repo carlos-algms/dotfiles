@@ -3,9 +3,10 @@ name: replying-to-pr-review-threads
 description: >
   Use when a `discussion_rNNN` URL anchor appears, when replying to a specific
   PR review comment (CodeRabbit, human reviewer), reading all reviews on a PR
-  with their replies as a tree, or resolving review threads from the CLI.
-  Triggers on "reply to coderabbit", "answer this review comment", "read all
-  reviews on PR", "show review threads", "resolve this thread".
+  with their replies as a tree, or resolving review threads from the CLI. Also
+  covers where CodeRabbit puts out-of-diff findings and how to tag it when
+  replying. Triggers on "reply to coderabbit", "answer this review comment",
+  "read all reviews on PR", "show review threads", "resolve this thread".
 ---
 
 # PR review threads
@@ -33,13 +34,15 @@ gh pr view N --comments
 
 # Stream 3: inline threads as a tree
 gh api graphql -f query='
-  query($owner:String!,$repo:String!,$num:Int!){
+  query($owner:String!,$repo:String!,$num:Int!,$cursor:String){
     repository(owner:$owner,name:$repo){
       pullRequest(number:$num){
-        reviewThreads(first:100){
+        reviewThreads(first:100,after:$cursor){
+          pageInfo{ hasNextPage endCursor }
           nodes{
             id isResolved isOutdated path line
-            comments(first:50){
+            comments(first:100){
+              pageInfo{ hasNextPage endCursor }
               nodes{ databaseId author{ login } createdAt body url }
             }
           }
@@ -50,6 +53,27 @@ gh api graphql -f query='
 ```
 
 `-F num=N` (typed Int), not `-f`.
+
+Repeat with `-f cursor=END_CURSOR` until `reviewThreads.pageInfo.hasNextPage` is
+false. For any thread whose `comments.pageInfo.hasNextPage` is true, paginate
+its comments separately:
+
+```bash
+gh api graphql -f query='
+  query($thread:ID!,$cursor:String){
+    node(id:$thread){
+      ... on PullRequestReviewThread{
+        comments(first:100,after:$cursor){
+          pageInfo{ hasNextPage endCursor }
+          nodes{ databaseId author{ login } createdAt body url }
+        }
+      }
+    }
+  }' -f thread=PRRT_xxxx -f cursor=END_CURSOR
+```
+
+Repeat until `comments.pageInfo.hasNextPage` is false. Omit `cursor` on each
+first request.
 
 Shape:
 
@@ -107,6 +131,40 @@ stored learning is correct AND generalizable.
   callers before flagging defensive guards on sync helpers.")
 - Do not include code blocks or diffs unless correcting the suggestion. The
   thread already has the suggested code.
+
+#### Where the handle is required
+
+CodeRabbit's GitHub login is `coderabbitai`, so the summon tag is
+`@coderabbitai`.
+
+- **Inline thread reply** (`/pulls/N/comments/NNN/replies`): no tag. CodeRabbit
+  watches its own threads and picks the reply up unaddressed.
+- **Top-level PR comment** (`gh pr comment`, stream 1): tag `@coderabbitai`.
+  Nothing watches that surface, so an untagged comment is never read.
+
+A tag in a thread reply is harmless noise; a missing tag on a top-level comment
+means the reply silently goes nowhere.
+
+## Out-of-diff findings live in the review body
+
+CodeRabbit anchors what it can to a diff line (stream 3) and puts the rest in
+the review summary body (stream 2, `gh pr view N --comments`):
+
+- "Outside diff range" comments - findings on code the diff did not touch
+- Nitpicks and duplicate findings, inside collapsed `<details>` blocks
+- The actionable-comments count, which covers streams 2 AND 3
+
+Reading only `reviewThreads` therefore misses real findings, and the ones it
+misses skew severe: a finding that could not anchor to a changed line is often
+one about code the change broke elsewhere.
+
+- Read stream 2 to its last line. Collapsed `<details>` content is in the body
+  text `gh` returns; do not stop at the first visible section.
+- Reconcile the count: the body states N actionable comments. Fewer found across
+  both streams means the read was incomplete, not that the rest do not exist.
+- An out-of-diff finding has no thread, so it has no `databaseId` and cannot be
+  replied to or resolved as a thread. Answer it in a top-level comment, tagged
+  per above.
 
 ## Resolving a thread
 

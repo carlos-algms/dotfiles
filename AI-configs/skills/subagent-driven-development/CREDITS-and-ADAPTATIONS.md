@@ -6,16 +6,13 @@ Original source:
 ## Adaptations
 
 - Removed `superpowers` namespace references
-- Added branch safety gate with feature branch, `.worktrees/<branch-name>/`, or
-  explicit `main`/`master` consent
-- Added instruction to ensure `.worktrees/` exists in target repo `.gitignore`
-  when creating worktrees
-- Added plan-file edit permission before checkbox tracking
-- Added immediate task checkbox ticking after implementation, verification, and
-  review approval
-- Added commit policy gate for one commit per task, one commit at the end, or no
-  commits
+- Delegated each complete task/review/commit loop to its implementer
+- Added terse implementer/reviewer result contracts
+- Added a finalizer implementer for whole-plan review and final commit
 - Replaced finishing workflow with `verification-before-completion`
 - Replaced code quality reviewer prompt reference with `requesting-code-review`
 - Removed `test-driven-development` skill reference while keeping TDD references
+- Scoped the `HANDOFF` relay to the finalizer, the only subagent that emits it
+- Barred the orchestrator from running final verification or the full gate
+- Delegated snapshot lifecycle to the shared `executing-plans` rule
 - Removed alternative workflow references

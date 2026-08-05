@@ -6,15 +6,10 @@ Original source:
 ## Adaptations
 
 - Removed `superpowers` namespace references
-- Replaced subagent redirect with optional `subagent-driven-development` offer
-- Replaced worktree requirement with branch safety gate
-- Added `.worktrees/<branch-name>/` worktree preference
-- Added instruction to ensure `.worktrees/` exists in target repo `.gitignore`
-  when creating worktrees
-- Added plan-file edit permission before checkbox tracking
+- Replaced subagent redirect with an inline/subagent execution handoff
 - Added immediate checkbox ticking after verified steps
-- Added commit policy gate for one commit per task, one commit at the end, or no
-  commits
-- Replaced mandatory finishing skill with final verification and report
-- Added explicit `verification-before-completion` use before claiming completion
+- Added plan-owned commit cadence with inline or delegated checkpoint ownership
+- Added final whole-plan review and fresh `verification-before-completion` gate
+- Added a single-runner rule for final verification, owned per execution mode
+- Added a shared baseline-snapshot lifecycle with per-mode cleanup ownership
 - Removed integration section

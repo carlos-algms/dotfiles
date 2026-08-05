@@ -1,135 +1,63 @@
 ---
 name: requesting-code-review
 description: >
-  Use when completing tasks, implementing major features, or before merging to
-  verify work meets requirements
+  Use for ad-hoc code review: after a major feature, before merging to main, or
+  when stuck. Executing a written plan instead? Use executing-plans, which owns
+  the per-task review cycle.
 ---
 
 # Requesting code review
 
-Dispatch a code reviewer subagent to catch issues before they cascade. The
-reviewer gets precisely crafted context for evaluation — never your session's
-history. This keeps the reviewer focused on the work product, not your thought
-process, and preserves your own context for continued work.
+Dispatch a fresh reviewer with pointers, not session history.
 
-**Core principle:** Review early, review often.
+This skill covers AD-HOC review: work not driven by a plan file.
 
-## When to request review
+**Executing a plan? Stop and use `executing-plans`.**
 
-**Mandatory:**
+Use ad-hoc review before merge, after a major unplanned feature, or when stuck.
 
-- After each task in subagent-driven development
-- After completing major feature
-- Before merge to main
+## Dispatch
 
-**Optional but valuable:**
-
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
-
-## How to request
-
-**1. Collect review pointers:**
-
-Two values, not a diff. The reviewer reconstructs the diff itself, so pulling it
-into your own context here pays for it twice.
+1. Run the project's full gate and confirm it passes. Do not dispatch on failure
+2. Collect:
 
 ```bash
-git rev-parse HEAD          # base commit before the work
-git status --porcelain      # names only, to build CHANGED_FILES
-```
-
-- `BASE_REF` - the commit before the work. Already committed: the branch base or
-  the parent of the first commit. Uncommitted: current `HEAD`
-- `CHANGED_FILES` - paths from `git status --porcelain`, or
-  `git diff --name-only <BASE_REF>...HEAD` once committed. For renames, use the
-  destination path
-
-**2. Dispatch code reviewer subagent:**
-
-Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
-
-**Placeholders:**
-
-- `{DESCRIPTION}` - Brief summary of what you built
-- `{PLAN_OR_REQUIREMENTS}` - What it should do
-- `{BASE_REF}` - Branch base or commit SHA before the work
-- `{CHANGED_FILES}` - Space-separated paths, for use after `--` in git commands
-
-**Before dispatching:** run the full gate — the project's single validation
-command if it has one (`make validate`), else format + lint + types + full test
-run — and confirm it passes. The reviewer reviews code and will not run it for
-you, so an ungated dispatch reviews code nobody validated.
-
-**3. Act on feedback:**
-
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
-- Note Minor issues for later
-- Push back if reviewer is wrong (with reasoning)
-- **Re-run the full gate after any fix**, before committing. The gate you ran
-  before dispatch does not cover code written after it
-
-## Example
-
-```text
-[Just completed Task 2: Add verification function]
-
-You: Let me request code review before proceeding.
-
-pnpm test && pnpm typecheck && pnpm lint   # gate passes
 git rev-parse HEAD
 git status --porcelain
-
-[Dispatch code reviewer subagent]
-  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/deployment-plan.md
-  BASE_REF: 9f2c1ab
-  CHANGED_FILES: src/index.ts tests/index.test.ts
-
-[Subagent returns]:
-  Strengths: Clean architecture, real tests
-  Issues:
-    Important: Missing progress indicators
-    Minor: Magic number (100) for reporting interval
-  Assessment: Ready to proceed
-
-You: [Fix progress indicators]
-[Continue to Task 3]
 ```
 
-## Integration with workflows
+- `BASE_REF` - commit before the complete review scope. Resolve it from the
+  target branch or supplied starting commit; use current `HEAD` only for purely
+  uncommitted work
+- `CHANGED_FILES` - deduplicated, newline-delimited exact-path union of
+  committed changes since `BASE_REF` and current staged, unstaged, deleted, and
+  untracked changes. Use rename destinations. These are entry points, not a
+  boundary
 
-**Subagent-Driven Development:**
+3. Dispatch a fresh generic subagent:
 
-- Review after EACH task
-- Catch issues before they compound
-- Fix before moving to next task
+```text
+MUST read instructions at <skill_dir>/code-reviewer.md FIRST.
+Do not act until you have read it. Then apply:
+  plan_or_requirements = <requirements or plan reference>
+  base_ref             = <commit before the work>
+  baseline_snapshot    = none
+  changed_files        = <newline-delimited exact paths>
+  solved_defects       = none
+```
 
-**Executing Plans:**
+Resolve `<skill_dir>` to the directory containing this `SKILL.md`.
 
-- Review after each task or at natural checkpoints
-- Get feedback, apply, continue
+Ad-hoc review has no baseline snapshot and no task scope, so `baseline_snapshot`
+is always `none` and `task_id` and `scope_mode` are omitted. The reviewer
+reviews the full `changed_files` delta. Plan execution supplies those values
+instead.
 
-**Ad-Hoc Development:**
+4. `PASS`: finish
+5. Findings: fix them, re-run the full gate, and dispatch a fresh reviewer
 
-- Review before merge
-- Review when stuck
-
-## Red flags
-
-**Never:**
-
-- Skip review because "it's simple"
-- Ignore Critical issues
-- Proceed with unfixed Important issues
-- Argue with valid technical feedback
-
-**If reviewer wrong:**
-
-- Push back with technical reasoning
-- Show code/tests that prove it works
-- Request clarification
-
-See template at: requesting-code-review/code-reviewer.md
+Reject incorrect findings only with code or test counter-evidence. Use one
+clarification round for ambiguity; escalate unresolved disputes. Keep reviewer
+responses out of the parent context except for `PASS` or the short finding list.
+Allow 3 total attempts for empty, errored, or malformed output. Limit findings
+to 3 fix/re-review rounds; escalate before a fourth.

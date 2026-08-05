@@ -1,120 +1,133 @@
-Subagent instructions. Read this file, then apply the values passed by the
-dispatcher (`task_summary`, `plan_path`, `task_id`, `working_dir`,
-`commit_policy`, plus any scene-setting `context`). `task_summary` is one-line
-context for orientation only.
+Apply dispatcher values: `plan_path`, `task_id`, `working_dir`, `plan_base_ref`,
+`baseline_snapshot`, and optional `context`.
 
-You are implementing task `task_id`. You have no prior session context; rely
-only on dispatcher values and files on disk. Read the plan at `plan_path` and
-locate that task. That is your spec. Do not implement anything outside its
-scope. Work from `working_dir`.
+Own `task_id` completely: implementation, plan checkboxes, verification,
+reviewers, fixes, and commits. A reviewer fix may also update affected completed
+tasks and their checkboxes. Never edit future task state or final checkpoints.
+The plan is the only normative spec; `context` is orientation only. Operate in
+`working_dir`.
 
-**Never edit the plan file.** Read it, do not write it. Its header tells the
-executing agent to tick checkboxes - that is the orchestrator, not you. It ticks
-on your behalf when you report the task done, and un-ticks if a reviewer sends
-it back. Two writers to the plan file corrupt it. Report your results; that is
-your output.
+## Workflow
 
-Skills load at the step that needs them. Each step may include a line like:
+1. Read the plan header, task, convention sources, commit policy, plan-file
+   policy, and available skills
+2. Read the classified `baseline_snapshot`. Treat `No commits` plus a requested
+   PR as commit-bound for scope safety. Before editing any commit-bound target
+   or reviewer-fix path, stop if it carries `baseline-only` content. Under
+   `Per-task commits`, never review or commit another task's initial work.
+   Cumulative scope includes completed earlier tasks and excludes later tasks
+3. Capture `task_base_ref = git rev-parse HEAD`
+4. Execute every task step; tick a step after its `Green:` passes
+5. Run the task-ending full gate
+6. Under `Per-task commits`, load `git-commit-message`, tick the task commit
+   checkpoint immediately before staging, and commit the actual task diff
+7. Run the spec-review loop
+8. Run the code-quality-review loop
+9. Confirm the full gate is still green and the task has no unresolved findings
+10. Return only the output contract below
 
+`One commit at the end` and `No commits` leave task changes uncommitted.
+
+## Reviewer dispatch
+
+Resolve prompt paths relative to this file:
+
+- Spec: `spec-reviewer-prompt.md`
+- Quality: `code-quality-reviewer-prompt.md`
+- Quality checklist: `../requesting-code-review/code-reviewer.md`
+
+Before each dispatch, derive `changed_files` from the current committed, staged,
+unstaged, deleted, and untracked implementation diff. Exclude `execution-state`
+paths and snapshot entries outside the selected scope. Use newline-delimited
+exact paths. Initial plan file lists are hints only.
+
+Use task scope with `task_base_ref` for `Per-task commits`. Use cumulative scope
+with `plan_base_ref` for `One commit at the end` or `No commits`.
+
+Dispatch spec review with:
+
+```text
+MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST.
+Apply:
+  plan_path         = <abs path>
+  task_id           = <current and affected completed task ids>
+  base_ref          = <task_base_ref | plan_base_ref>
+  scope_mode        = <task | cumulative>
+  baseline_snapshot = <abs path to classified snapshot directory>
+  changed_files     = <newline-delimited exact paths>
+  solved_defects    = <plan list or `none`>
 ```
-**Skills (load if not already loaded):** `<skill-a>`, `<skill-b>`
+
+Dispatch quality review with:
+
+```text
+MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
+Apply:
+  plan_or_requirements = <task or cumulative plan reference>
+  task_id             = <current and affected completed task ids>
+  scope_mode          = <task | cumulative>
+  base_ref             = <task_base_ref | plan_base_ref>
+  baseline_snapshot    = <abs path to classified snapshot directory>
+  changed_files        = <newline-delimited exact paths>
+  solved_defects       = <plan list or `none`>
+  checklist_path       = <abs quality-checklist path>
 ```
 
-When you reach such a step, load any listed skill you have not yet loaded in
-this subagent session. Skip skills already loaded - do not pay the token tax
-twice. Steps without this line need no skill load.
+## Review loop
 
-`verification-before-completion` is annotated on the final-verification step;
-apply it there before reporting DONE.
+For spec, then quality:
 
-## Commit Policy
+1. Dispatch a fresh reviewer
+2. `PASS`: continue
+3. Findings: verify each citation, un-tick affected steps, fix substantiated
+   issues, update `Solved defects`, re-run the full gate, and re-tick verified
+   steps
+4. Under `Per-task commits`, commit that review round's actual fixes with
+   `git-commit-message`
+5. Re-dispatch until `PASS`; maximum 3 finding/fix rounds per stage
 
-`commit_policy` is one of `One commit per task`, `One commit at the end`,
-`No commits`.
+A quality fix changing behavior, scope, contracts, or verification reopens spec
+review before quality continues.
 
-- `One commit per task`: after self-review passes AND the full gate is green,
-  commit the task's changes
-- `One commit at the end`: DO NOT commit. Leave changes staged or unstaged
-- `No commits`: DO NOT commit
+Incorrect findings get one clarification re-dispatch with counterevidence.
+Empty, errored, or malformed responses get 3 total attempts. A `<review-input>`
+finding is a failed dispatch; correct the payload. A remaining dispute, third
+failed dispatch, failed gate, unsafe commit scope, or fourth finding round
+returns `BLOCKED`.
 
-**You own the commit for the code you wrote.** Never commit before the full gate
-passes - an ungated commit is the one thing nothing downstream can fix, because
-reviewers are read-only and the orchestrator is not allowed to run gates.
+## Commit integrity
 
-Stage explicit paths. Never `git add -A`, `git add .`, or `git add -u`. Never
-`--amend`, never `--no-verify`, never force-push.
+- Commit from current state, never the plan's initial file list
+- Do not include baseline-only work
+- Include current plan checkbox and `Solved defects` changes only when
+  `Plan file policy` is `Include`
+- Restore a pre-ticked checkpoint when scope resolution, staging, or commit
+  fails
+- One fix commit per reviewer round, not per finding
+- Reviewers never edit, stage, or commit
 
-Do not stage the plan file. The orchestrator owns it.
+## Output
 
-## Before You Begin
+No reviewer transcript, implementation summary, file list, or narration.
 
-If you have questions about requirements, approach, dependencies, or anything
-unclear: ask now. Raise concerns before starting work.
+Success:
 
-## Your Job
+```text
+PASS | <task_id>
+VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
+COMMITS | <sha[,sha...] | none>
+FIXED
+- <path:line> | <problem> | <fix>
+```
 
-1. Implement exactly what the task specifies
-2. Write tests (following TDD if task says to)
-3. Verify implementation works
-4. Self-review (see below)
-5. Run the task's full gate. It must be green before step 6
-6. Commit IFF commit policy is `One commit per task`
-7. Report back, including the gate command and its result
+Emit one `VERIFY` line per full-gate command. Merge duplicate `FIXED` root
+causes. Emit valid compact JSON and escape dynamic strings.
 
-Dispatched to FIX a reviewer finding rather than implement fresh: same sequence.
-Fix, re-run the full gate, then commit the fix. A fix commit of its own is
-expected and fine - the branch squash-merges, so intermediate commits do not
-survive into history.
+Omit `FIXED` when no reviewer finding was fixed.
 
-While you work: if anything is unexpected or unclear, ask. Don't guess.
+Cannot continue:
 
-## Code Organization
-
-- Follow the file structure defined in the plan
-- One responsibility per file
-- File growing beyond plan intent: stop, return DONE_WITH_CONCERNS, don't split
-  on your own
-- Existing file already large/tangled: work carefully, note in report
-- Follow established patterns; don't restructure outside your task
-
-## Escalate before guessing
-
-Return BLOCKED or NEEDS_CONTEXT with: blocker, attempts, what help is needed.
-Triggers:
-
-- Architectural decisions with multiple valid approaches
-- Code beyond what was provided needs understanding and clarity is missing
-- Uncertain whether your approach is correct
-- Task requires restructuring the plan didn't anticipate
-- Reading file after file without progress
-
-## Before Reporting Back: Self-Review
-
-Fresh-eyes review:
-
-- **Completeness:** spec fully implemented? requirements missed? edge cases?
-- **Quality:** clear names? clean and maintainable?
-- **Discipline:** YAGNI respected? only what was requested? existing patterns
-  followed?
-- **Testing:** tests verify behavior (not mocks)? TDD followed if required?
-  comprehensive?
-
-Fix issues during self-review before reporting.
-
-## Report Format
-
-- **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-- What you implemented (or attempted)
-- What you tested and test results
-- **Full gate:** the command you ran — the plan header's `Full gate`, which is
-  the project's single validation command where it has one — and whether it
-  passed. Name a gate you actually ran: the orchestrator is not allowed to run
-  one, so this is its only signal that the tree is green
-- Files changed
-- Self-review findings (if any)
-- Any issues or concerns
-
-Use DONE_WITH_CONCERNS if you completed the work but have doubts about
-correctness. Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if
-you need information that wasn't provided. Never silently produce work you're
-unsure about.
+```text
+BLOCKED | <task_id>
+- <problem> | need <specific input or action>
+```

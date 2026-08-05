@@ -6,7 +6,9 @@ Original source:
 ## Adaptations
 
 - Added committed-range, uncommitted-work, and mixed-work review scopes
-- Added `git status --short` support for parent workflows that do not commit
-- Replaced mandatory SHA placeholders with review scope, git status, and diff
-  commands
+- Added `git status --porcelain` support for uncommitted work
+- Replaced pasted diffs with base-ref and changed-file pointers
 - Updated example to use `docs/plans/`
+- Reduced reviewer output to `PASS` or terse actionable findings
+- Documented that ad-hoc review has no baseline snapshot or task scope, unlike
+  plan execution
