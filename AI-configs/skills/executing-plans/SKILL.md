@@ -20,7 +20,9 @@ Load and validate the plan. Execute inline, or delegate complete task cycles to
 2. Validate `Execution mode` is exactly `Inline` or `Subagent-Driven`. Missing,
    invalid, or conflicting with the current request: stop, ask the user, and
    update the plan before implementation
-3. Review the plan critically. Resolve blocking gaps with the user
+3. Review the plan critically. Resolve blocking gaps with the user. Read
+   `Execution log` before Task 1; a logged entry overrides contradicting task
+   text. Missing field: add the empty heading before implementation
 4. Validate the plan's commit policy and commit checkboxes. Missing or
    inconsistent: stop, ask the user, and update the plan before implementation.
    `Plan file policy` defaults to `Include` when absent; reject other values
@@ -75,10 +77,13 @@ Owner:
 
 ## Plan ownership
 
-- Inline: this executor owns all checkboxes and `Solved defects`
+- Inline: this executor owns all checkboxes, `Solved defects`, and
+  `Execution log`
 - Subagent mode: each task implementer owns its task plus completed tasks
   changed by its reviewer fixes; the finalizer owns final checkpoints and
   completed-task state changed by final-review fixes
+- `Execution log`: the current task owner appends its own entries; never rewrite
+  or delete another owner's entries
 - Never use concurrent writers
 - Tick a step after its `Green:` passes; un-tick before a reviewer fix
 - Tick a commit checkpoint immediately before staging; restore `[ ]` whenever
@@ -119,10 +124,30 @@ For each task:
    `Per-task commits`
 8. Dispatch a fresh code-quality reviewer
 9. Resolve every blocking finding with the same fix-commit loop
-10. Mark the task complete
+10. Append this task's drift, gotchas, and decisions to `Execution log`
+11. Correct stale text in later tasks that this task's drift invalidated
+12. Mark the task complete
 
 Never dispatch onto a red gate or move on with unadjudicated findings. Re-run
 the full gate after every task-review fix.
+
+## Execution log capture
+
+`writing-plans` defines the field, its entry kinds, and its format. Capture is
+mandatory, not optional.
+
+- Append before ticking the task, not at the end of the plan
+- Log a `drift` whenever the repo contradicted a plan fact
+- Log a `gotcha` whenever a non-obvious fact cost time and would cost it again
+- Log a `decision` whenever the plan left a choice open and execution closed it
+- Nothing qualifying: write nothing and leave the section empty. Never record
+  `none`, `no drift`, or any "nothing found" line
+- Never log narration, restated plan text, or findings already in
+  `Solved defects`
+- A drift that invalidates a later task's instructions also gets that task's
+  text corrected in place
+- Under `Plan file policy: Include`, log changes ride the task's commit as
+  `execution-state`
 
 ## Inline review handling
 
@@ -228,7 +253,8 @@ After all tasks complete and verified:
    1. Load `verification-before-completion`
    2. Run each exact automated check once
    3. Perform each exact manual check once
-   4. Tick the final-verification checkpoint
+   4. Append final-review drift, gotchas, and decisions to `Execution log`
+   5. Tick the final-verification checkpoint
 5. Do not run the full gate elsewhere in the final-review fix loop
 6. Execute each remaining written commit checkpoint:
    - `One commit at the end`: commit the actual complete reviewed diff

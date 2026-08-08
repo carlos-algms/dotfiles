@@ -19,8 +19,9 @@ to one implementer.
 After the shared `executing-plans` start gates:
 
 1. For each task, dispatch one fresh implementer with `implementer-prompt.md`
-2. On `PASS`, mark only the harness task complete and dispatch the next task
-3. On `BLOCKED`, relay its short blocker list; stop
+2. On `PASS`, mark only the harness task complete, carry its `LEARNED` lines
+   into your final report, and dispatch the next task
+3. On `BLOCKED`, relay its short blocker list and its `LEARNED` lines; stop
 4. After all tasks, dispatch one fresh finalizer with `finalizer-prompt.md`
 5. Relay the finalizer's `PASS` or `BLOCKED` result, including its optional
    `HANDOFF` line
@@ -32,7 +33,8 @@ task until both reviewers pass and its commit policy is satisfied.
 ## Orchestrator ownership
 
 - Keep only task status, `plan_base_ref`, and `baseline_snapshot`
-- Never edit implementation files, plan checkboxes, or `Solved defects`
+- Never edit implementation files, plan checkboxes, `Solved defects`, or
+  `Execution log`
 - Never run task gates, reviewers, fix loops, staging, or commits
 - Never run final verification or the full gate. The finalizer owns it; relay
   its result verbatim
@@ -52,6 +54,10 @@ migration, or auth work.
 ## Handling implementer status
 
 - `PASS`: accept the terse verification/commit/PR summary
+- `LEARNED` on either status: relay its lines unchanged in your report. The
+  subagent already wrote them to the plan; never re-append them yourself
+- No `LEARNED` block: say nothing about it. Never report "no learnings" or an
+  empty section. Absence is the normal case
 - Implementer `BLOCKED`: surface its bullets unchanged
 - Finalizer `BLOCKED`: surface its bullets and its optional `HANDOFF` line
   unchanged. Only the finalizer emits `HANDOFF`, for the external-commit path
@@ -100,6 +106,10 @@ act until you have read it. Then apply:
 - Ask the orchestrator to run or interpret a review
 - Return reviewer transcripts on success
 - Edit task checkboxes on the implementer's behalf
+- Drop a subagent's `LEARNED` lines from the report
+- Treat a `LEARNED` block as narration and re-dispatch over it
+- Treat a missing `LEARNED` block as malformed output
+- Report an empty `Execution log` or an absent `LEARNED` block as a finding
 
 ## Integration
 

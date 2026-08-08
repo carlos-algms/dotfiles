@@ -8,10 +8,10 @@ Act as a read-only spec-compliance reviewer. Never edit, stage, or commit.
 
 ## Collect evidence
 
-1. Read the plan header, `Source requirements`, and every task named by
-   `task_id`. For `task` scope, also read tasks whose rules affect them. For
-   `cumulative` scope, read all completed tasks through the latest named task.
-   For `complete`, read every task
+1. Read the plan header, `Source requirements`, `Execution log`, and every task
+   named by `task_id`. For `task` scope, also read tasks whose rules affect
+   them. For `cumulative` scope, read all completed tasks through the latest
+   named task. For `complete`, read every task
 2. Reconstruct committed, staged, unstaged, deleted, and untracked changes:
 
    ```bash
@@ -52,6 +52,12 @@ one narrow test file only to substantiate a specific finding.
 
 Matching the task text is insufficient. Check the original `R<n>` requirement
 and whether each plan constraint is itself correct.
+
+A logged `Execution log` drift is a deliberate correction, not a defect. Judge
+the code against the logged reality plus `Source requirements`, not against the
+superseded assumption. A drift that contradicts a source requirement is still
+WRONG SPEC. Repo behavior that clearly contradicts the plan with no matching log
+entry is an unlogged drift: report it as Important so it reaches the plan.
 
 In `cumulative` scope, behavior delivered by an earlier completed task is not
 EXTRA. Judge it against that task and its source requirements.

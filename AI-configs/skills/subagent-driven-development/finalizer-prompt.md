@@ -19,7 +19,7 @@ Resolve prompt paths relative to this file:
 2. Read the commit policy
 3. Read the plan-file policy
 4. Read the convention sources
-5. Read `Solved defects`
+5. Read `Solved defects` and `Execution log`
 6. Locate the remaining plan-level checkpoints
 7. Stop when the plan lacks its final-verification checkpoint
 8. Execute the written final-verification checkpoint:
@@ -42,7 +42,8 @@ Resolve prompt paths relative to this file:
    16. Load `verification-before-completion`
    17. Run each written final automated check once
    18. Perform each written final manual check once
-   19. Tick the final-verification checkpoint
+   19. Append final-review drift, gotchas, and decisions to `Execution log`
+   20. Tick the final-verification checkpoint
 9. Execute each remaining written commit checkpoint
 10. When the plan requests a PR and the branch contains the reviewed committed
     work, load `create-pull-request` and complete it
@@ -71,6 +72,21 @@ review or verification when the branch matches the reviewed manifest exactly.
 Restore a pre-ticked checkpoint whenever scope resolution, staging, or commit
 fails. Never use plan file lists as commit scope. Include current plan checkbox
 and `Solved defects` changes only when `Plan file policy` is `Include`.
+
+## Execution log
+
+Append your own final-review findings to the plan's `Execution log` before
+ticking the final-verification checkpoint. Same contract as the implementers:
+
+- One line per entry:
+  `final | <drift|gotcha|decision> | <what the plan assumed> | <what is true and what changed>`
+- Append only. Never rewrite or delete an implementer's entry
+- Log only cross-task drift, gotchas, and decisions that final review surfaced
+- Nothing qualifies: write nothing and omit `LEARNED`. Never write `none`,
+  `no drift`, or any "nothing found" line. A clean final review is silent
+- Never log narration or findings already in `Solved defects`
+
+Mirror each appended entry as a `LEARNED` line in your output.
 
 ## Reviewer rules
 
@@ -125,6 +141,8 @@ COMMITS | <sha[,sha...] | none>
 PR | <url | none>
 FIXED
 - <path:line> | <problem> | <fix>
+LEARNED
+- final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
 
 Emit one `VERIFY` line per final-verification command or manual check. Merge
@@ -133,12 +151,22 @@ strings; omit the manual form when no manual check exists.
 
 Omit `FIXED` when no reviewer finding was fixed.
 
+`LEARNED` repeats exactly the entries you appended to the plan's
+`Execution log`. Appended nothing: omit the whole block, header included. Never
+emit `LEARNED` followed by `none` or an empty list. Report only your own
+entries, not the implementers'.
+
 Cannot continue:
 
 ```text
 BLOCKED | final
 HANDOFF | <manifest path, external-commit blocker only>
 - <problem> | need <specific input or action>
+LEARNED
+- final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
+
+The same rule applies on the blocked path: report `LEARNED` only when you
+actually appended entries, and omit the block otherwise.
 
 No reviewer transcript, diff summary, file list, or narration.

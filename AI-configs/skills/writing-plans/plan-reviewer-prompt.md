@@ -163,7 +163,11 @@ new steps or prose.
 
 - Missing fields: Goal, Architecture, Tech Stack, Execution mode, Commit policy,
   Plan file policy, Full gate, Convention sources, Solved defects (`none` is
-  valid)
+  valid), Execution log (heading present, body empty in an unexecuted plan)
+- `Execution log` pre-filled by the plan writer: Important. Execution owns it
+- `Execution log` holding `none`, `nothing found`, or any placeholder line:
+  Important. The section stays empty until execution appends a real entry
+- Never flag an empty `Execution log` as missing content
 - Field value is not one of its exact literals: Important. Execution runtime
   matches these verbatim, so an unsubstituted `[A | B]` placeholder blocks
   execution

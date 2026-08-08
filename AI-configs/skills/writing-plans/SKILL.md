@@ -383,6 +383,35 @@ choice in the plan header. Missing or unresolved choice: stop before writing.
 - Collapse families of near-identical base cases (same assertion, different
   input) unless they cover distinct code paths
 
+## Execution log
+
+The plan goes stale during execution. `Execution log` is the record that keeps a
+fresh agent correct when the task text no longer matches the repo.
+
+Log an entry when execution contradicts or outgrows the plan:
+
+- `drift`: a plan fact turned out wrong (signature, path, return type, command,
+  dependency, existing helper)
+- `gotcha`: a non-obvious fact that cost time and would cost it again (required
+  build order, flaky fixture, env var, tool quirk, hidden coupling)
+- `decision`: a choice the plan left open, resolved during execution
+
+Silence is the default. Most tasks log nothing. A task that went as planned
+writes nothing at all: no entry, no placeholder, no `none`, no "no drift found".
+An empty section already says it.
+
+Do not log restated plan text, per-step narration, reviewer findings already in
+`Solved defects`, or work that matched the plan.
+
+Keep each entry to one line. Write what a fresh agent needs, not what happened.
+
+- Wrong: `T2 | drift | had trouble with the parser and fixed it`
+- Right:
+  `T2 | drift | plan assumed parse() -> str | repo returns Result; 3 callers updated`
+
+Correct the stale task text in place when the drift invalidates a later task's
+instructions. The log records the change; the task text stays executable.
+
 ## Tracking
 
 Executing from a plan file: flip a task's `- [ ]` to `- [x]` after all nested
@@ -439,11 +468,14 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 > **For the executing agent:**
 >
-> 1. Execute tasks in plan order
-> 2. Load `executing-plans` when working from a saved plan
-> 3. Tick a task after all its nested steps pass
-> 4. Un-tick a task when a reviewer sends it back
-> 5. Track progress in the harness task list
+> 1. Read `Execution log` before the first task; it overrides stale plan text
+> 2. Execute tasks in plan order
+> 3. Load `executing-plans` when working from a saved plan
+> 4. Append every drift, gotcha, and decision to `Execution log` before ticking
+>    its task
+> 5. Tick a task after all its nested steps pass
+> 6. Un-tick a task when a reviewer sends it back
+> 7. Track progress in the harness task list
 >
 > **Plan ownership:**
 >
@@ -454,6 +486,8 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 >   changed by its reviewer fixes
 > - Finalizer: owns final state
 > - Finalizer: owns completed-task state changed by final review
+> - `Execution log`: the current task owner appends; earlier entries are
+>   append-only history
 
 **Goal:** [One new observable behavior]
 
@@ -500,6 +534,8 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 - none
 
+**Execution log:**
+
 ---
 ```
 
@@ -518,6 +554,14 @@ record each fixed finding once as `severity | path or symbol | invariant`.
   - Keep `none` until a reviewer finding is fixed
   - Replace `none` with unique regression-relevant entries
   - Format each entry as `severity | path or symbol | invariant`
+- `Execution log` is required as a heading, empty
+  - Write the heading with no body when drafting the plan
+  - Execution owners append entries; the plan writer never pre-fills it
+  - Never write `none`, `nothing found`, or any placeholder under it. An empty
+    section already says nothing was found
+  - Format each entry as
+    `<task id> | <kind> | <what the plan assumed> | <what is true and what changed>`
+  - `kind` is `drift`, `gotcha`, or `decision`
 
 Skills are annotated per step, not in the header.
 
@@ -560,6 +604,7 @@ After writing, re-check and fix inline:
    1. Every captured source requirement appears in the header
    2. Every header source requirement maps to a task
    3. Every task maps to verification
+   4. `Execution log` heading is present and empty
 2. **Ambiguity:** remove every "Detail calibration" red flag
 3. **Type consistency:** signatures/names match across tasks (`clearLayers()` in
    Task 3 vs `clearFullLayers()` in Task 7 is a bug)

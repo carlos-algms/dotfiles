@@ -10,7 +10,8 @@ The plan is the only normative spec; `context` is orientation only. Operate in
 ## Workflow
 
 1. Read the plan header, task, convention sources, commit policy, plan-file
-   policy, and available skills
+   policy, `Execution log`, and available skills. A logged entry overrides
+   contradicting task text
 2. Read the classified `baseline_snapshot`. Treat `No commits` plus a requested
    PR as commit-bound for scope safety. Before editing any commit-bound target
    or reviewer-fix path, stop if it carries `baseline-only` content. Under
@@ -24,9 +25,42 @@ The plan is the only normative spec; `context` is orientation only. Operate in
 7. Run the spec-review loop
 8. Run the code-quality-review loop
 9. Confirm the full gate is still green and the task has no unresolved findings
-10. Return only the output contract below
+10. Write the execution log (below) before returning
+11. Return only the output contract below
 
 `One commit at the end` and `No commits` leave task changes uncommitted.
+
+## Execution log
+
+You are the only agent that sees what this task actually cost. The next agent
+starts with zero session memory and a plan that may now be stale. The plan file
+is the sole channel; anything you do not write there is lost.
+
+Append to the plan's `Execution log` before returning:
+
+- `drift`: a plan fact the repo contradicted (signature, path, return type,
+  command, dependency, an existing helper the plan told you to create)
+- `gotcha`: a non-obvious fact that cost you time and would cost it again
+  (required build order, flaky fixture, env var, tool quirk, hidden coupling)
+- `decision`: a choice the plan left open that you closed
+
+Rules:
+
+- One line per entry:
+  `<task_id> | <kind> | <what the plan assumed> | <what is true and what changed>`
+- Append only. Never rewrite or delete an earlier owner's entry
+- Nothing qualifies: write nothing. Leave the section untouched and omit
+  `LEARNED` from your output. Never write `none`, `no drift`, `nothing found`,
+  or any placeholder line. A task that went as planned is silent
+- Never log narration, restated plan text, or findings already in
+  `Solved defects`
+- Correct a later task's stale text in place when your drift invalidated its
+  instructions; log the drift and cite that task id
+- Under `Plan file policy: Include`, these edits ride the task commit as
+  `execution-state`
+- Under `Exclude`, still write them to the plan file; they stay uncommitted
+
+Mirror each appended entry as a `LEARNED` line in your output.
 
 ## Reviewer dispatch
 
@@ -118,6 +152,8 @@ VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
 COMMITS | <sha[,sha...] | none>
 FIXED
 - <path:line> | <problem> | <fix>
+LEARNED
+- <task_id> | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
 
 Emit one `VERIFY` line per full-gate command. Merge duplicate `FIXED` root
@@ -125,9 +161,21 @@ causes. Emit valid compact JSON and escape dynamic strings.
 
 Omit `FIXED` when no reviewer finding was fixed.
 
+`LEARNED` repeats exactly the entries you appended to the plan's
+`Execution log`. Appended nothing: omit the whole block, header included. Never
+emit `LEARNED` followed by `none` or an empty list. The plan file remains the
+source of truth; `LEARNED` never replaces writing it.
+
 Cannot continue:
 
 ```text
 BLOCKED | <task_id>
 - <problem> | need <specific input or action>
+LEARNED
+- <task_id> | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
+
+The same rule applies on the blocked path: report `LEARNED` only when you
+actually appended entries, and omit the block otherwise. What you found before
+blocking is what saves the next agent from the same wall; the blocker itself
+belongs in the bullet above, not in a log entry.
