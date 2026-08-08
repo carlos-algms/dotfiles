@@ -25,15 +25,22 @@ Load and validate the plan. Execute inline, or delegate complete task cycles to
    text. Missing field: add the empty heading before implementation
 4. Validate the plan's commit policy and commit checkboxes. Missing or
    inconsistent: stop, ask the user, and update the plan before implementation.
-   `Plan file policy` defaults to `Include` when absent; reject other values
+   `Plan file policy` defaults to `Include` when absent; reject other values.
+   Read `Additional plan state files`; missing defaults to `none`. Accept either
+   the single item `none` or unique repo-relative paths that exist. Reject the
+   plan path itself, missing paths, duplicates, and mixed `none` plus paths
 5. Capture `plan_base_ref = git rev-parse HEAD` and inventory every pre-existing
    staged, unstaged, deleted, or untracked change in a temporary
    `baseline_snapshot`. Its manifest records each repo-relative path, content or
    deletion state, file mode, and ownership: `baseline-only`, `task:<id>`, or
    `execution-state`. Store present files byte-for-byte beside the manifest. Use
-   an owner-only temporary directory and classify the plan file as
-   `execution-state`; an empty worktree gets an empty manifest. Stop when
-   ownership is unclear
+   an owner-only temporary directory and classify only the plan-owned content of
+   the plan file plus every `Additional plan state files` path as
+   `execution-state`; an empty worktree gets an empty manifest. A listed path
+   does not transfer unrelated existing hunks from `baseline-only` ownership.
+   Preserve the captured bytes of every plan-state file as its pre-execution
+   baseline. `execution-state` permits only edits required by written
+   checkpoints. Stop when ownership or the required delta is unclear
 6. When commits are planned, or `No commits` is combined with a requested PR,
    stop before Task 1 if:
    - one path mixes plan-owned and baseline-only hunks
@@ -43,6 +50,35 @@ Load and validate the plan. Execute inline, or delegate complete task cycles to
 
 `Commit-bound` means commits are planned or `No commits` is combined with a
 requested PR. Its scope guards apply even when the executor cannot commit.
+
+`Plan state` means the plan file plus every `Additional plan state files` path.
+All share the single `Plan file policy`.
+
+## Milestone finalization turns
+
+Resolve `milestone_execution_mode` once at start for every plan: `coordinated`
+only when the written final-verification checkpoint requires the milestone
+handshake and the caller identifies itself as the root milestone execution
+coordinator; otherwise `sequential`.
+
+When a written final-verification checkpoint requires the milestone handshake:
+
+- `Inline` with `milestone_execution_mode = coordinated`: after implementation
+  review and validation pass, resolve the stable plan ID from the written
+  checkpoint, record the reviewed changed-path state under `baseline_snapshot`,
+  send `READY <plan ID>` to the root milestone execution coordinator, and yield
+  without abandoning `baseline_snapshot`. Resume only after the exact
+  `FINALIZE <plan ID>` reply. Re-derive the changed-path state before editing
+  the milestone; repeat affected review and validation when implementation state
+  drifted. Send `FINALIZED <plan ID>` after the written milestone update passes
+- `Inline` with `milestone_execution_mode = sequential`: execute the written
+  milestone update without handshake messages
+- `Subagent-Driven`: let `subagent-driven-development` relay the finalizer's
+  handshake without synthesizing or granting a turn. Pass the resolved mode
+- No root coordinator or no message relay at start: use `sequential`
+- Coordinator or message relay lost after `READY`: retain `baseline_snapshot`,
+  edit no plan state, and report a resumable blocker
+- Never self-grant a finalization turn during parallel execution
 
 The plan's `Execution mode` is authoritative. `Inline` uses the workflow below.
 For `Subagent-Driven`, complete the start gates, then load
@@ -254,7 +290,12 @@ After all tasks complete and verified:
    2. Run each exact automated check once
    3. Perform each exact manual check once
    4. Append final-review drift, gotchas, and decisions to `Execution log`
-   5. Tick the final-verification checkpoint
+   5. Execute any written milestone completion action:
+      - `coordinated`: complete the `READY` -> `FINALIZE` -> `FINALIZED` turn
+        defined above
+      - `sequential`: update the milestone without handshake messages
+   6. Tick the final-verification checkpoint only after the milestone action
+      passes
 5. Do not run the full gate elsewhere in the final-review fix loop
 6. Execute each remaining written commit checkpoint:
    - `One commit at the end`: commit the actual complete reviewed diff
@@ -269,7 +310,8 @@ After all tasks complete and verified:
    2. Hand off only that reviewed change set for an external commit
    3. Verify the resulting branch matches it and contains no baseline-only delta
    4. Stop on any mismatch
-8. Report files, evidence, rejected findings, and remaining risks
+8. Report files, evidence, rejected findings, remaining risks, and modified plan
+   state left uncommitted under `Plan file policy: Exclude`
 
 When `Source requirements` request a PR, load `create-pull-request` after the
 written final-verification and commit checkpoints pass.
@@ -281,5 +323,7 @@ written final-verification and commit checkpoints pass.
 - Verification repeatedly fails
 - A required reviewer cannot be dispatched
 - A review or dispatch exceeds its retry budget
+- A coordinated finalization turn loses its coordinator or message relay after
+  `READY`
 
 Report the blocker. Return to the start gates after the plan changes materially.

@@ -1,5 +1,6 @@
-Apply dispatcher values: `plan_path`, `working_dir`, `plan_base_ref`, and
-`baseline_snapshot`.
+Apply dispatcher values: `plan_path`, `working_dir`, `plan_base_ref`,
+`baseline_snapshot`, `milestone_execution_mode`, and optional
+`milestone_finalize_grant`.
 
 Own the remaining written plan-level checkpoints. The orchestrator only relays
 your result. Operate in `working_dir`.
@@ -17,7 +18,7 @@ Resolve prompt paths relative to this file:
 
 1. Read the complete plan
 2. Read the commit policy
-3. Read the plan-file policy
+3. Read the plan-file policy and `Additional plan state files`
 4. Read the convention sources
 5. Read `Solved defects` and `Execution log`
 6. Locate the remaining plan-level checkpoints
@@ -49,6 +50,33 @@ Resolve prompt paths relative to this file:
     work, load `create-pull-request` and complete it
 11. Return only the output contract below
 
+## Milestone handshake
+
+When the written final-verification checkpoint contains the milestone `READY` ->
+`FINALIZE` -> `FINALIZED` handshake:
+
+- Resolve the stable plan ID from the written checkpoint
+- Missing `milestone_execution_mode`: use `sequential`. Invalid value: return
+  `BLOCKED`
+- `milestone_execution_mode = sequential`: execute the written milestone update
+  without handshake messages
+- `milestone_execution_mode = coordinated` with no matching
+  `milestone_finalize_grant`: complete all preceding review and validation
+  actions, leave the final-verification checkpoint unticked, record the reviewed
+  implementation paths and plan file with their hashes, modes, and deletion
+  states in `baseline_snapshot/milestone-ready.json`, retain
+  `baseline_snapshot`, and return only `READY <plan ID>`
+- Redispatch with exact `FINALIZE <plan ID>`: require
+  `baseline_snapshot/milestone-ready.json` and re-derive its recorded state.
+  Resume at the milestone update without repeating unchanged work. When an
+  implementation path or the plan file drifted, repeat affected review and
+  validation before continuing; return `BLOCKED` on baseline-only or unsafe
+  drift
+- Mismatched grant: return `BLOCKED` without editing plan state
+- Successful milestone update: emit `MILESTONE | FINALIZED <plan ID>` in the
+  final result
+- Never self-grant or reuse a turn for another plan
+
 ## Commit policy
 
 - `Per-task commits`: leave the pre-checked final-fixes checkpoint unchanged
@@ -61,6 +89,12 @@ Resolve prompt paths relative to this file:
   the complete reviewed plan diff with `git-commit-message`
 - `No commits`: do not stage or commit
 
+`Plan state` means the plan file plus every `Additional plan state files` path.
+Apply the single `Plan file policy` to the complete set. Before editing an
+additional state file, execute its written ownership gate. Return `BLOCKED`
+without editing that file when the plan permits concurrent execution but names
+no exclusive owner or turn protocol.
+
 When `No commits` and the plan requests a PR, return `BLOCKED` after successful
 verification while reviewed plan changes remain uncommitted. Record and hand off
 the exact plan-owned paths, hashes, modes, and deletion states in the owner-only
@@ -70,8 +104,8 @@ baseline-only branch delta or mismatch, then return `PASS` without repeating
 review or verification when the branch matches the reviewed manifest exactly.
 
 Restore a pre-ticked checkpoint whenever scope resolution, staging, or commit
-fails. Never use plan file lists as commit scope. Include current plan checkbox
-and `Solved defects` changes only when `Plan file policy` is `Include`.
+fails. Never use implementation file lists as plan-state commit scope. Include
+all modified plan state only when `Plan file policy` is `Include`.
 
 ## Execution log
 
@@ -139,6 +173,8 @@ VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
 VERIFY {"manual":"<check>","status":"PASS","observation":"<observation>"}
 COMMITS | <sha[,sha...] | none>
 PR | <url | none>
+STATE | <comma-separated excluded modified plan-state paths>
+MILESTONE | FINALIZED <plan ID>
 FIXED
 - <path:line> | <problem> | <fix>
 LEARNED
@@ -151,6 +187,12 @@ strings; omit the manual form when no manual check exists.
 
 Omit `FIXED` when no reviewer finding was fixed.
 
+Emit `STATE` only when `Plan file policy` is `Exclude` and plan-state files were
+modified. List exact repo-relative paths. Omit the line otherwise.
+
+Emit `MILESTONE` only after the written milestone update passes. Omit it for
+plans without that update.
+
 `LEARNED` repeats exactly the entries you appended to the plan's
 `Execution log`. Appended nothing: omit the whole block, header included. Never
 emit `LEARNED` followed by `none` or an empty list. Report only your own
@@ -161,6 +203,8 @@ Cannot continue:
 ```text
 BLOCKED | final
 HANDOFF | <manifest path, external-commit blocker only>
+STATE | <comma-separated excluded modified plan-state paths>
+MILESTONE | FINALIZED <plan ID>
 - <problem> | need <specific input or action>
 LEARNED
 - final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
@@ -169,4 +213,13 @@ LEARNED
 The same rule applies on the blocked path: report `LEARNED` only when you
 actually appended entries, and omit the block otherwise.
 
-No reviewer transcript, diff summary, file list, or narration.
+Waiting for a root coordinator turn:
+
+```text
+READY <plan ID>
+```
+
+`READY` is a resumable pause, not `BLOCKED`. Emit nothing else on that path.
+
+No reviewer transcript, implementation diff summary, implementation file list,
+or narration. `STATE` is the only plan-state file list.

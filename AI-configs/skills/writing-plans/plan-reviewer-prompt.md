@@ -41,6 +41,8 @@ new steps or prose.
 - Plan behavior absent from the independent source requirements: Important;
   remove it or add the omitted source requirement
 - Requirement without verification: Important
+- Edit to an `Additional plan state files` path without an explicit independent
+  source requirement naming that behavior: Important
 
 **Contradictions:**
 
@@ -60,7 +62,8 @@ new steps or prose.
   final review; the one-at-end commit checkpoint follows it
 - Any commit checkpoint containing a commit command, message, or fixed file
   list: Important. Runtime derives these from the reviewed diff
-- Checkpoint plan-state scope contradicts `Plan file policy`: Important
+- Checkpoint plan-state scope contradicts `Plan file policy`: Important.
+  `Plan state` means the plan file plus every `Additional plan state files` path
 - Task checkpoint not placed as the task's final item after its full gate:
   Important
 - `No commits` plus requested PR without an exact external-commit scope and
@@ -162,8 +165,9 @@ new steps or prose.
 **Header quality:**
 
 - Missing fields: Goal, Architecture, Tech Stack, Execution mode, Commit policy,
-  Plan file policy, Full gate, Convention sources, Solved defects (`none` is
-  valid), Execution log (heading present, body empty in an unexecuted plan)
+  Plan file policy, Additional plan state files, Full gate, Convention sources,
+  Solved defects (`none` is valid), Execution log (heading present, body empty
+  in an unexecuted plan)
 - `Execution log` pre-filled by the plan writer: Important. Execution owns it
 - `Execution log` holding `none`, `nothing found`, or any placeholder line:
   Important. The section stays empty until execution appends a real entry
@@ -175,6 +179,15 @@ new steps or prose.
   - `Commit policy`: `Per-task commits`, `One commit at the end`, or
     `No commits`
   - `Plan file policy`: `Include` or `Exclude`
+- `Additional plan state files` is neither the single item `none` nor a unique
+  list of exact repo-relative paths: Important
+- A listed additional state path does not exist before execution: Important
+- `Additional plan state files` lists the plan file itself: Important
+- A listed additional state path appears in implementation or review scope:
+  Important. It is `execution-state`
+- A listed state path is shared by concurrent plans without an exclusive owner
+  or exact turn protocol in `Source requirements` and its update checkpoint:
+  Important
 - `Convention sources` lists only the repo root while the plan touches a
   directory holding its own nested `AGENTS.md`/`CLAUDE.md`/`.editorconfig`/lint
   config: flag the missing nested source

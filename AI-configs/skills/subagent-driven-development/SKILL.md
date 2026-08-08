@@ -23,16 +23,24 @@ After the shared `executing-plans` start gates:
    into your final report, and dispatch the next task
 3. On `BLOCKED`, relay its short blocker list and its `LEARNED` lines; stop
 4. After all tasks, dispatch one fresh finalizer with `finalizer-prompt.md`
-5. Relay the finalizer's `PASS` or `BLOCKED` result, including its optional
-   `HANDOFF` line
-6. Own the snapshot lifecycle defined in `executing-plans`
+5. With `milestone_execution_mode = coordinated`, on `READY <plan ID>`, relay it
+   to the root milestone execution coordinator and retain the finalizer plus
+   `baseline_snapshot`
+6. With `milestone_execution_mode = coordinated`, after the exact
+   `FINALIZE <plan ID>` grant, re-dispatch the same finalizer with that grant
+7. Relay the finalizer's `PASS` or `BLOCKED` result, including its optional
+   `HANDOFF`, `STATE`, and `MILESTONE` lines. After a granted turn, a relayed
+   `MILESTONE` returns `FINALIZED`; a relayed `BLOCKED` reports that the open
+   turn failed and must not be reused
+8. Own the snapshot lifecycle defined in `executing-plans`
 
 Do not receive or adjudicate nested reviewer output. The implementer owns its
 task until both reviewers pass and its commit policy is satisfied.
 
 ## Orchestrator ownership
 
-- Keep only task status, `plan_base_ref`, and `baseline_snapshot`
+- Keep only task status, `plan_base_ref`, `baseline_snapshot`, and the resolved
+  `milestone_execution_mode`
 - Never edit implementation files, plan checkboxes, `Solved defects`, or
   `Execution log`
 - Never run task gates, reviewers, fix loops, staging, or commits
@@ -61,6 +69,12 @@ migration, or auth work.
 - Implementer `BLOCKED`: surface its bullets unchanged
 - Finalizer `BLOCKED`: surface its bullets and its optional `HANDOFF` line
   unchanged. Only the finalizer emits `HANDOFF`, for the external-commit path
+- Finalizer `STATE`: relay it unchanged. It lists modified plan-state files left
+  uncommitted under `Plan file policy: Exclude`
+- Finalizer `READY`: relay it unchanged and wait for the exact matching
+  `FINALIZE` grant. It is a resumable pause, not `BLOCKED`
+- Finalizer `MILESTONE`: relay it unchanged. It confirms the granted turn ended
+  with `FINALIZED <plan ID>`
 - Empty, malformed, or verbose output: re-dispatch once with the output contract
 - A second invalid response: stop
 
@@ -95,6 +109,10 @@ act until you have read it. Then apply:
   working_dir   = <abs path>
   plan_base_ref = <SHA captured by executing-plans>
   baseline_snapshot = <abs path to classified snapshot directory>
+  milestone_execution_mode = <coordinated | sequential, resolved by
+                              executing-plans; never self-resolve>
+  milestone_finalize_grant = <exact FINALIZE line copied verbatim from the root
+                              coordinator | none on first dispatch>
 ```
 
 `<skill_dir>` is this file's directory. Pass pointers and values only.
@@ -110,6 +128,10 @@ act until you have read it. Then apply:
 - Treat a `LEARNED` block as narration and re-dispatch over it
 - Treat a missing `LEARNED` block as malformed output
 - Report an empty `Execution log` or an absent `LEARNED` block as a finding
+- Drop a finalizer's `STATE` line from the report
+- Treat `READY` as `BLOCKED` or delete its resumable finalizer
+- Self-grant or alter a root coordinator's `FINALIZE` line
+- Drop a finalizer's `MILESTONE` line from the report
 
 ## Integration
 

@@ -127,9 +127,18 @@ Python here; use the same shape in any language.
 - Already in a plan file: preserve content outside the requested changes
 - Not saved: default `docs/plans/YYYY-MM-DD-<feature-name>.md`. User may pick
   another path
+- A caller-supplied plan path is authoritative and overrides the default
 - User refuses to save to any file: STOP
 - Saving does not commit the plan. Record whether execution commits the plan
   file; default to included unless the user explicitly excludes it
+- `Additional plan state files` are optional tracker documents that execution
+  updates with the plan, such as a milestone index
+- Every additional state path must exist before execution starts
+- When concurrent plans share an additional state file, name its exclusive owner
+  or exact turn protocol in `Source requirements` and the written update
+  checkpoint. Without that ownership gate, require sequential execution
+- `Plan file policy` applies to the plan file and every additional plan state
+  file as one policy
 
 ## Review source
 
@@ -150,6 +159,9 @@ Python here; use the same shape in any language.
 Before writing, resolve the commit policy from the request or ask the user to
 choose: `Per-task commits`, `One commit at the end`, or `No commits`. Record
 `Plan file policy: Include | Exclude`; default to `Include` unless requested.
+Apply it to the plan file and all `Additional plan state files`. Record exact
+repo-relative additional paths, or `none` when no other state file exists.
+`Plan state` means the plan file plus every listed additional state file.
 
 Record the choice in the header and encode it with commit checkboxes:
 
@@ -515,6 +527,10 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 **Plan file policy:** [Include | Exclude]
 
+**Additional plan state files:**
+
+- none
+
 **Full gate:**
 
 1. `[primary full-validation command]`
@@ -544,6 +560,16 @@ record each fixed finding once as `severity | path or symbol | invariant`.
   - Record each acceptance criterion
   - Record each explicit must statement
   - Record each explicit never statement
+- `Additional plan state files` is required
+  - Use `none` as the only item when no additional state file exists
+  - Otherwise list each exact repo-relative path once and omit `none`
+  - List only paths that exist before execution starts
+  - Do not list the plan file itself
+  - Record every required edit to these files in `Source requirements`
+  - For a path shared by concurrent plans, record an exclusive owner or exact
+    turn protocol and require it before the edit
+  - Treat the required update delta as `execution-state`, never implementation
+    scope. Preserve unrelated pre-existing content as `baseline-only`
 - `Convention sources` is required
   - List the closest governing agent instruction file
   - List `.editorconfig` when discovered
@@ -629,9 +655,10 @@ After writing, re-check and fix inline:
    tasks
 9. **Repetition:** move repeated repo rules and conventions to the preamble
 10. **Commit cadence:** checkpoint count and placement match the header policy;
-    the conditional final-review-fixes commit follows final verification;
+    the conditional final-review-fixes commit follows final verification; all
     plan-state inclusion matches `Plan file policy`; no checkpoint freezes
-    commands, messages, or paths
+    commands, messages, or paths; every additional state-file edit maps to a
+    source requirement
 11. **Review duplication:** remove implementation-review steps owned by
     `executing-plans`. For requested external-review work, reject narrowed,
     conformance-only, truncated, or status-only review
