@@ -2,11 +2,14 @@
 name: replying-to-pr-review-threads
 description: >
   Use when a `discussion_rNNN` URL anchor appears, when replying to a specific
-  PR review comment (CodeRabbit, human reviewer), reading all reviews on a PR
-  with their replies as a tree, or resolving review threads from the CLI. Also
-  covers where CodeRabbit puts out-of-diff findings and how to tag it when
-  replying. Triggers on "reply to coderabbit", "answer this review comment",
-  "read all reviews on PR", "show review threads", "resolve this thread".
+  PR review comment from a bot or AI reviewer (CodeRabbit, cubic, Claude,
+  Copilot) or a human reviewer, reading all reviews on a PR with their replies
+  as a tree, or resolving review threads from the CLI. Also covers where AI
+  reviewers put out-of-diff findings and the mandatory `@handle` tag when
+  replying. Triggers on "reply to coderabbit", "reply to cubic", "reply to the
+  bot", "answer the bot review", "address bot reviews", "answer AI review
+  comments", "answer this review comment", "read all reviews on PR", "show
+  review threads", "resolve this thread".
 ---
 
 # PR review threads
@@ -113,14 +116,39 @@ EOF
 )" --jq '.html_url'
 ```
 
-### Replying to an AI reviewer (CodeRabbit, Claude, etc.)
+### Replying to an AI reviewer (CodeRabbit, cubic, Claude, etc.)
 
 AI reviewers persist your reply as a learning for future reviews (CodeRabbit
 shows an "✏️ Learnings added" block confirming it). Write the reply so the
 stored learning is correct AND generalizable.
 
-- Terse and low word count: Facts + rationale, no pleasantries, no closing.
-- Lead with the conclusion ("Skipping. YAGNI." / "Applied as suggested.").
+#### Always tag the bot
+
+Start every reply to an AI reviewer with its handle, on both surfaces (inline
+thread reply and top-level comment). The tag is the bot's GitHub login, prefixed
+`@`.
+
+| Reviewer   | Handle          |
+| ---------- | --------------- |
+| CodeRabbit | `@coderabbitai` |
+| cubic      | `@cubic-dev-ai` |
+| Claude     | `@claude`       |
+| Copilot    | `@copilot`      |
+
+Unknown bot: read its login from the thread (`comments.nodes[0].author.login`)
+and tag that.
+
+A tag in a thread reply is harmless; a missing tag on a top-level comment means
+the reply silently goes nowhere. Tag always - do not reason about which surface
+needs it.
+
+#### Reply style
+
+- Terse, low word count. Facts + rationale only. No pleasantries, no closing, no
+  restating the finding.
+- Lead with the verdict ("Skipping. YAGNI." / "Applied as suggested." / "Wrong -
+  X is never null here.").
+- One or two lines is the target. Prose paragraphs are wrong.
 - Give the verifiable evidence: command run, files inspected, why the rule
   applies or doesn't.
 - Phrase the rationale in terms that generalize beyond this file/line. "For sync
@@ -132,18 +160,13 @@ stored learning is correct AND generalizable.
 - Do not include code blocks or diffs unless correcting the suggestion. The
   thread already has the suggested code.
 
-#### Where the handle is required
+Example:
 
-CodeRabbit's GitHub login is `coderabbitai`, so the summon tag is
-`@coderabbitai`.
-
-- **Inline thread reply** (`/pulls/N/comments/NNN/replies`): no tag. CodeRabbit
-  watches its own threads and picks the reply up unaddressed.
-- **Top-level PR comment** (`gh pr comment`, stream 1): tag `@coderabbitai`.
-  Nothing watches that surface, so an untagged comment is never read.
-
-A tag in a thread reply is harmless noise; a missing tag on a top-level comment
-means the reply silently goes nowhere.
+```text
+@coderabbitai Skipping. All 4 callers of `parse_config` already validate the
+path upstream (`rg 'parse_config\(' src/`). Defensive guards on internal sync
+helpers in this codebase are dead code.
+```
 
 ## Out-of-diff findings live in the review body
 
@@ -164,7 +187,7 @@ one about code the change broke elsewhere.
   both streams means the read was incomplete, not that the rest do not exist.
 - An out-of-diff finding has no thread, so it has no `databaseId` and cannot be
   replied to or resolved as a thread. Answer it in a top-level comment, tagged
-  per above.
+  with the bot's handle.
 
 ## Resolving a thread
 
