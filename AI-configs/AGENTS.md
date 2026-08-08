@@ -22,6 +22,17 @@ at the top, CLI-specific overrides in per-tool subdirs.
   the manifest format, run instructions, and how to add a new source.
 - See ./AI-Config-README.md for the exact symlink commands per agent.
 
+## Codex (`codex/`)
+
+- `codex/config.toml` is the tracked global config, symlinked as
+  `~/.codex/config.toml`
+- Local `[projects."<absolute-path>"]` trust tables contain private machine
+  paths and must stay at the bottom of `codex/config.toml`
+- Never stage or commit the local trust tables. Stage other config changes by
+  hunk and verify the staged diff contains no `[projects.*]` tables or
+  `trust_level` lines
+- The working tree is intentionally dirty when local trust tables are present
+
 ## Pi (`pi/`)
 
 Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:

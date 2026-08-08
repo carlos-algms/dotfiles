@@ -85,10 +85,16 @@ removed; reusable workflows belong in skills.
 ```bash
 mkdir -p ~/.codex
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.codex/AGENTS.md
+ln -s $(pwd)/AI-configs/codex/config.toml ~/.codex/config.toml
 ```
 
 Notes:
 
+- Back up and remove any existing `~/.codex/config.toml` before creating the
+  config symlink
+- Local `[projects."<absolute-path>"]` trust tables belong at the bottom of
+  `AI-configs/codex/config.toml` and remain permanently uncommitted. Stage other
+  config changes by hunk
 - Codex auto-creates `.system/` for managed skills under each skills directory
   it reads. With the cross-tool `~/.agents/skills/` symlink pointing at the
   repo, that folder lands at `AI-configs/skills/.system/` and is gitignored.

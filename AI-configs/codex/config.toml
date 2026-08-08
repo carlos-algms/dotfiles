@@ -1,0 +1,37 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+service_tier = "fast"
+approvals_reviewer = "user"
+default_permissions = ":workspace"
+approval_policy = "on-request"
+
+[features]
+fast_mode = true
+plugins = true
+hooks = true
+plugin_hooks = true
+
+[notice]
+fast_default_opt_out = true
+hide_full_access_warning = true
+
+[notice.model_migrations]
+"gpt-5.1-codex-max" = "gpt-5.2-codex"
+"gpt-5.2" = "gpt-5.3-codex"
+"gpt-5.3-codex" = "gpt-5.5"
+
+[tui]
+status_line = ["model-name", "context-used", "context-window-size", "project-name", "git-branch"]
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+"gpt-5.6-sol" = 3
+
+[plugins."crit@local"]
+enabled = true
+
+[hooks.state]
+
+[hooks.state."crit@local:hooks/hooks.json:stop:0:0"]
+trusted_hash = "sha256:bf6ad428ae7902810fa2d68d8db42228377af118aa18508ad0eccf73a95ed1f8"
