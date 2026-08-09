@@ -55,6 +55,7 @@ switch_tab = "cmd+1..9"    # was: kitty `map cmd+1..9 goto_tab N`
 # Not cmd+shift+1..9: macOS owns cmd+shift+3/4/5 for screenshots.
 # Not ctrl+1..9: ctrl alone is reserved for Neovim.
 switch_workspace = "cmd+alt+1..9"
+focus_agent = "alt+1..9"
 
 # k=up=previous, j=down=next, matching the vertical workspace list.
 # was: kitty `map cmd+shift+k/j neighboring_window up/down`
