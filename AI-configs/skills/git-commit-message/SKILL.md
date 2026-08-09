@@ -63,16 +63,31 @@ override the first-commit format.
 ```markdown
 type(scope): subject
 
-- Explain why the change matters
-- Describe the user-visible behavior
+Explain why the change is important and what problem it solves.
+
+Add a second paragraph only for distinct context or impact.
+
+Add a third paragraph only when it improves reviewer understanding.
+
+- Describe reviewer-relevant behavior
+- Call out important constraints or decisions
 ```
 
-- Subject: imperative, lowercase after the colon, no more than 70 characters in
+- Subject: imperative, lowercase after the colon, no more than 72 characters in
   total
-- Body: optional bullet list only; no prose paragraphs, bold, italics, or code
-  blocks
-- Bullets: 3-7 words; capture the reason, not minor implementation details
-- Body lines: no more than 72 characters
+- Body: optional; use one to three short prose paragraphs followed by an
+  optional bullet list; do not use bold, italics, or code blocks
+- Opening paragraph: explain why the change matters, the problem it solves, and
+  its impact on users or maintainers
+- Additional paragraphs: use only for distinct context, impact, or reviewer
+  understanding
+- Put one blank line between the subject, each paragraph, and the bullet list
+- Bullets: no more than 15 words; give reviewers enough context to understand
+  the reason and relevant behavior
+- Include test coverage when it is part of the change; omit validation steps,
+  pass claims, commands, tool output, and technical details irrelevant to review
+- Body lines: wrap at about 72 characters per line for readability; this is a
+  stylistic per-line guide, not a total body character limit
 - Standard Markdown only: no em-dashes, curly quotes, or special characters
 - Single-change commit: subject only
 
@@ -101,7 +116,7 @@ one.
 - Bare imperative subject only
 - No `type(scope):` prefix
 - No body
-- No more than 70 characters
+- No more than 72 characters
 - One change per commit
 
 ## GitHub references
