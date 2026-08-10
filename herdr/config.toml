@@ -56,6 +56,7 @@ switch_tab = "cmd+1..9"    # was: kitty `map cmd+1..9 goto_tab N`
 # Not ctrl+1..9: ctrl alone is reserved for Neovim.
 switch_workspace = "cmd+alt+1..9"
 focus_agent = "alt+1..9"
+new_worktree = "" # Replaced by the popup command below.
 
 # k=up=previous, j=down=next, matching the vertical workspace list.
 # was: kitty `map cmd+shift+k/j neighboring_window up/down`
@@ -117,6 +118,47 @@ rel=$(fd -t d -d 1 --base-directory ~ . work projects 2>/dev/null |
   fzf --no-preview --border --border-label=" pick the new workspace folder " \
     --prompt="workspace> ")
 [ -n "$rel" ] && herdr workspace create --cwd "$HOME/$rel" --label "$(basename "$rel")" --focus
+'''
+
+# Create a linked worktree from the remote's default branch. Resolve the
+# primary checkout first so this also works when launched from a linked one.
+[[keys.command]]
+key = "prefix+shift+g"
+type = "popup"
+description = "new worktree from default branch"
+width = "60%"
+height = "30%"
+command = '''
+fail() {
+  printf '\n%s\n\nPress Enter to close.' "$1"
+  IFS= read -r _
+  exit 1
+}
+
+source_cwd=${HERDR_ACTIVE_PANE_CWD:-$PWD}
+primary=$(git -C "$source_cwd" worktree list --porcelain 2>/dev/null |
+  sed -n 's/^worktree //p' | head -n 1)
+[ -n "$primary" ] || fail "Not inside a Git worktree."
+
+default_ref=$(git -C "$primary" symbolic-ref --quiet --short refs/remotes/origin/HEAD)
+[ -n "$default_ref" ] || fail "origin/HEAD is not configured."
+git -C "$primary" rev-parse --verify --quiet "$default_ref^{commit}" >/dev/null ||
+  fail "Default branch $default_ref does not resolve to a commit."
+
+printf 'Worktree name: '
+IFS= read -r name || exit 0
+[ -n "$name" ] || exit 0
+git check-ref-format --branch "$name" >/dev/null 2>&1 ||
+  fail "Invalid branch name: $name"
+git -C "$primary" show-ref --verify --quiet "refs/heads/$name" &&
+  fail "Branch already exists: $name"
+
+path="$primary/.worktrees/$name"
+[ ! -e "$path" ] || fail "Path already exists: $path"
+
+output=$(herdr worktree create --cwd "$primary" --branch "$name" \
+  --base "$default_ref" --path "$path" --label "$name" --focus 2>&1)
+[ $? -eq 0 ] || fail "$output"
 '''
 
 # Claude in its own tab; the tab disappears when claude exits.
