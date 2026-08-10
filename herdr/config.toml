@@ -120,8 +120,9 @@ rel=$(fd -t d -d 1 --base-directory ~ . work projects 2>/dev/null |
 [ -n "$rel" ] && herdr workspace create --cwd "$HOME/$rel" --label "$(basename "$rel")" --focus
 '''
 
-# Create a linked worktree from the remote's default branch. Resolve the
-# primary checkout first so this also works when launched from a linked one.
+# Create a linked worktree from the remote's default branch.
+# Resolve the primary checkout first so this also works when launched from a linked one,
+# and avoid nesting `.worktrees/` folders.
 [[keys.command]]
 key = "prefix+shift+g"
 type = "popup"
