@@ -59,7 +59,7 @@ DIR_LABEL="${DIR##*/}"
 GIT_ICON=$''
 [ -n "$BRANCH" ] && DIR_LABEL="$DIR_LABEL ($GIT_ICON $BRANCH)"
 
-echo "[$MODEL_LABEL] 📁 $DIR_LABEL | $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
+echo " $DIR_LABEL | $MODEL_LABEL $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
 
 ### Don't change from here ###
 # https://code.claude.com/docs/en/statusline
