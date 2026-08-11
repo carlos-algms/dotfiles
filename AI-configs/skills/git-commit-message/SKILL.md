@@ -21,6 +21,22 @@ Caller mode: `commit` by default, `pr-title` when requested by
 Always inspect branch history before composing a message. Repository rules
 override this skill when they require a different format.
 
+### Conventional Commits
+
+The `type(scope):` prefix in this skill is a default, not a requirement.
+Repository rules outrank it.
+
+Before composing any subject, confirm the repo's stance:
+
+1. Check `AGENTS.md`, `CLAUDE.md`, if not loaded yet, and contribution docs
+   already in context. A repo that bans the prefix usually says so explicitly
+2. Nothing in context: run `git log --oneline -3` and read the subjects
+3. History uses `type(scope):`: apply the prefix. History uses bare imperative
+   subjects: do not
+
+Keep the result in context for the rest of the session. Do not re-run `git log`
+for the same repository.
+
 ## Hard rules
 
 - Never commit without an explicit user request
@@ -59,6 +75,9 @@ them for context and to avoid repeating intent. Do not let later commits
 override the first-commit format.
 
 ## First commit format
+
+Resolve the Conventional Commits question above before using this format. A repo
+that bans the prefix uses a bare imperative subject with the same body rules.
 
 ```markdown
 type(scope): subject
@@ -143,11 +162,37 @@ In `pr-title` mode, compose the squash commit title for the complete branch
 change. Apply the first-commit subject, type, and scope rules. Do not copy the
 last commit blindly.
 
+## Commit templates
+
+A repository template outranks the formats in this skill. Check once per
+repository, before composing:
+
+```bash
+git config --get commit.template
+```
+
+A path means the repo ships a template. Read it and follow its structure,
+section order, and required trailers.
+
+No `commit.template` setting: check the standard locations GitHub and most
+tooling use.
+
+- `.gitmessage` or `.gitmessage.txt` at the repository root
+- `.github/.gitmessage`
+- `.github/COMMIT_TEMPLATE.md`
+- `.github/commit_template.txt`
+
+Commented lines starting with `#` are instructions to you, not message content.
+Strip them from the final message.
+
+Keep the result in context. Do not re-check for the same repository.
+
 ## Workflow
 
 ### Commit mode
 
-1. Read target repository instructions and detected commit tooling
+1. Read target repository instructions, commit template, and detected commit
+   tooling
 2. Resolve the base branch, count branch commits, and read commit history
 3. Inspect `git status`, staged changes, unstaged changes, and untracked paths
 4. Resolve the exact commit set from current state and requested scope
