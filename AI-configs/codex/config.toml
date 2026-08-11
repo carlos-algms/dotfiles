@@ -2,7 +2,7 @@ model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 personality = "pragmatic"
 service_tier = "fast"
-approvals_reviewer = "user"
+approvals_reviewer = "auto_review"
 default_permissions = ":workspace"
 approval_policy = "on-request"
 
@@ -22,7 +22,8 @@ hide_full_access_warning = true
 "gpt-5.3-codex" = "gpt-5.5"
 
 [tui]
-status_line = ["model-name", "context-used", "context-window-size", "project-name", "git-branch"]
+status_line = ["project-name", "git-branch", "model-name", "context-used", "context-window-size"]
+vim_mode_default = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
