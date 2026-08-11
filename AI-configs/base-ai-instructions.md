@@ -54,7 +54,10 @@ Write in ASD-STE100 Simplified Technical English.
 - Use hyphen and straight quotes. A clause needing an em dash is a second line
 - Exception: quoted source text, file content, and command output stay verbatim
 - Paths: repo-relative, or `~/` for home. Never absolute machine paths
-- Path exception: the user asked for an absolute path, or a tool requires one
+- Any path under the home directory MUST use `~/`. Mandatory, no exceptions
+- "full", "complete", "whole", and "entire" mean `~/`-rooted, not `/Users/...`
+- Full absolute paths are only for files OUTSIDE the home directory
+- Path exception: a tool requires an absolute path
 
 ## Persona
 
