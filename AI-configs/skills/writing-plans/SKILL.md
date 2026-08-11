@@ -33,8 +33,8 @@ implementation plan."
   - Use a separate step only when a later task imports the new symbol
 - **Full gate:** the project's whole validation suite: format, lint, types, and
   full tests. Prefer its single CI command (`make validate`, `pnpm validate`);
-  otherwise list the commands in execution order. Runs once per task and once
-  after any task-reviewer fix
+  otherwise list the commands in execution order inside the task step that runs
+  them. Runs once per task and once after any task-reviewer fix
 - **Narrow gate:** the single test file or single check a step actually affects
 - **Dominated check:** an earlier check fully covered by a later check when
   nothing consumes the earlier result before the later check
@@ -115,9 +115,15 @@ Python here; use the same shape in any language.
      **Edge case:** Unicode normalization can change equality without changing
      the visible value.
 
-  2. **Run the full gate**
+  2. **Run the task full gate**
 
-     Green (task gate): every header `Full gate` command exits 0.
+     1. `[exact full-validation command]`
+        - Expected: exit 0
+     2. `[next required full-suite command]`
+        - Omit when the first command covers it
+        - Expected: exit 0
+
+     Green (task gate): every listed command exits 0.
 ```
 
 ## Plan location
@@ -156,8 +162,8 @@ Python here; use the same shape in any language.
 
 ## Commit policy
 
-Before writing, resolve the commit policy from the request or ask the user to
-choose: `Per-task commits`, `One commit at the end`, or `No commits`. Record
+Before writing, resolve the commit policy from the request. When the request
+does not specify one, use `Per-task commits`. Record
 `Plan file policy: Include | Exclude`; default to `Include` unless requested.
 Apply it to the plan file and all `Additional plan state files`. Record exact
 repo-relative additional paths, or `none` when no other state file exists.
@@ -166,7 +172,7 @@ repo-relative additional paths, or `none` when no other state file exists.
 Record the choice in the header and encode it with commit checkboxes:
 
 - `Per-task commits`: append one unchecked checkpoint to every task, the
-  pre-checked conditional final-review-fixes commit checkpoint after final
+  unchecked conditional final-review-fixes commit checkpoint after final
   verification, then a final-state commit checkpoint when the plan file is
   included
 - `One commit at the end`: append one commit checkpoint after final verification
@@ -175,7 +181,8 @@ Record the choice in the header and encode it with commit checkboxes:
 Every plan ends with one self-contained final-verification checkpoint after all
 tasks.
 
-- Copy every exact full-gate command into the checkpoint
+- Copy the exact non-dominated full-gate command sequence from the task steps
+  into the checkpoint
 - Put the full-plan final review inside the checkpoint
 - Require final-review `PASS` before final validation
 - Run only affected narrow gates while resolving final-review findings
@@ -201,12 +208,10 @@ tasks.
      1. Dispatch a fresh code-quality reviewer over the complete plan diff
      2. Resolve each substantiated finding
         1. Verify its cited evidence
-        2. Uncheck the conditional final-review-fixes commit checkpoint before
-           the first fix under `Per-task commits`
-        3. Apply the narrowest valid fix
-        4. Update `Solved defects`
-        5. Run the affected narrow gates
-        6. Re-run affected spec review when delivered behavior changed
+        2. Apply the narrowest valid fix
+        3. Update `Solved defects`
+        4. Run the affected narrow gates
+        5. Re-run affected spec review when delivered behavior changed
      3. Re-dispatch code-quality review after each fix round
      4. Require `PASS`
 
@@ -279,20 +284,22 @@ For `Per-task commits`, place this immediately after the final-verification
 checkpoint:
 
 ```markdown
-- [x] **Conditional commit checkpoint: final-review fixes**
+- [ ] **Conditional commit checkpoint: final-review fixes**
 
   **Default:** No final-review changes.
 
-  **When the final-verification checkpoint changed files:**
-
   **Skills (load if not already loaded):** `git-commit-message`
 
-  1. Resolve the verified final-review fix set from the current diff
-  2. Include current plan-state changes when `Plan file policy` is `Include`
-  3. Derive the paths from the resolved change set
-  4. Derive the message from the resolved change set
-  5. Tick this checkpoint
-  6. Commit the resolved change set
+  1. Determine whether the final-verification checkpoint changed files
+  2. When no final-review fixes exist, tick this checkpoint without committing
+  3. When final-review fixes exist, resolve their verified change set from the
+     current diff
+  4. Include current plan-state changes when `Plan file policy` is `Include`
+  5. Derive the paths from the resolved change set
+  6. Derive the message from the resolved change set
+  7. When `Plan file policy` is `Include`, tick this checkpoint before staging
+  8. Commit the resolved change set
+  9. When `Plan file policy` is `Exclude`, tick this checkpoint after the commit
 
   Green:
 
@@ -325,8 +332,11 @@ the conditional final-review-fixes commit checkpoint:
 Under `Per-task commits`, the task owner commits after its full gate, then
 summons reviewers. Each task-review fix round gets one follow-up commit. Keep
 final-review fixes uncommitted through re-review. Commit them once after final
-verification passes. Tick immediately before staging; restore `[ ]` whenever
-scope resolution, staging, or commit fails.
+verification passes. On the no-change path, tick after confirming no
+final-review fixes exist. On the fix path with `Plan file policy: Include`, tick
+immediately before staging and restore `[ ]` whenever scope resolution, staging,
+or commit fails. With `Plan file policy: Exclude`, tick only after the commit
+succeeds.
 
 If `No commits` and a PR are both requested, record an external-commit handoff:
 the executor stops before PR creation, supplies the exact reviewed plan-owned
@@ -334,9 +344,9 @@ change set, and verifies the resulting branch contains no baseline-only work.
 
 ## Execution mode
 
-Before writing, resolve the execution mode from the request or ask the user to
-choose: `Subagent-Driven` or `Inline`. Do not infer a default. Record the exact
-choice in the plan header. Missing or unresolved choice: stop before writing.
+Before writing, resolve the execution mode from the request. When the request
+does not specify one, use `Subagent-Driven`. Record the exact choice in the plan
+header.
 
 ## Scope check
 
@@ -531,21 +541,6 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 - none
 
-**Full gate:**
-
-1. `[primary full-validation command]`
-2. `[next required full-suite command]`
-   - Omit when the primary command covers it
-
-**Convention sources:**
-
-- `[closest nested AGENTS.md]`
-- `[closest nested CLAUDE.md]`
-- `[.editorconfig]`
-- `[relevant lint config]`
-- `[relevant format config]`
-- `[relevant type config]`
-
 **Solved defects:**
 
 - none
@@ -570,12 +565,6 @@ record each fixed finding once as `severity | path or symbol | invariant`.
     turn protocol and require it before the edit
   - Treat the required update delta as `execution-state`, never implementation
     scope. Preserve unrelated pre-existing content as `baseline-only`
-- `Convention sources` is required
-  - List the closest governing agent instruction file
-  - List `.editorconfig` when discovered
-  - List each relevant lint config
-  - List each relevant format config
-  - List each relevant type config
 - `Solved defects` is required
   - Keep `none` until a reviewer finding is fixed
   - Replace `none` with unique regression-relevant entries
@@ -591,10 +580,10 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 Skills are annotated per step, not in the header.
 
-- State the full-gate commands once in the header
-- Let task steps reference the header's `Full gate`
-- Copy the exact full-gate commands into the self-contained final-verification
-  checkpoint
+- Put every exact full-gate command directly in the task step that runs it
+- Never point a task's verification step to the header or another plan section
+- Copy the exact non-dominated full-gate command sequence into the
+  self-contained final-verification checkpoint
 
 ## Detail calibration
 
@@ -642,7 +631,7 @@ After writing, re-check and fix inline:
 7. **Verification:**
    1. Remove repeated `Green:` checks
    2. Remove standalone red phases
-   3. Keep the full gate only as each task's last verification
+   3. Require exact full-gate commands in each task's last verification step
    4. Require one plan-level final-verification checkpoint after all tasks
    5. Put full-plan final review inside the final-verification checkpoint
    6. Require final-review `PASS` before final validation
@@ -650,7 +639,7 @@ After writing, re-check and fix inline:
    8. Require exact commands in the final-verification checkpoint
    9. Require exact manual procedures in the final-verification checkpoint
    10. Reject a separate plan-level final-review task
-   11. Reject final validation commands that reference another plan section
+   11. Reject verification commands that reference another plan section
 8. **Task overlap:** list each task's file set. Overlapping sets -> merge the
    tasks
 9. **Repetition:** move repeated repo rules and conventions to the preamble
@@ -724,31 +713,10 @@ Flow:
 public-contract, migration, or auth plans. A cheaper model is acceptable only
 for a short, single-module plan; escalate a thin review.
 
-## Execution mode prompt
+## Execution mode handoff
 
-Before writing, ask when the request does not already select a mode:
-
-**"Before I write the plan, pick how it will execute.**
-
-**Execution options:**
-
-**1. Subagent-Driven**
-
-- Each task implementer owns nested reviews
-- Each task implementer owns its reviewer fixes
-- Each task implementer owns its task commits
-- Orchestrator receives terse outcomes
-
-**2. Inline Execution**
-
-- Execute in this session
-- Use `executing-plans`
-- Run two-stage review per task
-
-**Which approach?"**
-
-Write the selected mode into the plan header, then save the plan. Report the
-plan path and recorded mode. Do not ask again during handoff.
+Write the resolved mode into the plan header, then save the plan. Report the
+plan path and recorded mode. Do not ask during handoff.
 
 - `Subagent-Driven` -> **REQUIRED SUB-SKILL:** `subagent-driven-development`
 - `Inline` -> **REQUIRED SUB-SKILL:** `executing-plans`
