@@ -195,7 +195,7 @@ type = "shell"
 description = "claude in new tab"
 command = '''
 pane=$(herdr tab create --label claude --focus | jq -r .result.root_pane.pane_id)
-herdr pane send-text "$pane" 'exec claude
+herdr pane send-text "$pane" 'exec claude --allow-dangerously-skip-permissions
 '
 '''
 
