@@ -236,6 +236,13 @@ local theme = {
         CursorLineSign = "LineNr",
         Delimiter = "Keyword",
         DiagnosticError = "Error",
+
+        -- Remove after https://github.com/dlyongemallo/diffview-plus.nvim/pull/300 is merged.
+        diffAdded = "Added",
+        diffChanged = "Changed",
+        diffRemoved = "Removed",
+        -- up to here
+
         diffFile = "String",
         diffIndexLine = "Keyword",
         diffLine = "Comment",
