@@ -50,6 +50,18 @@ codex exec --skip-git-repo-check "<prompt>"
 codex exec --skip-git-repo-check "<prompt>" < /dev/null
 ```
 
+## No memory between runs
+
+- Every invocation starts a fresh instance with a clean context. No memory of
+  any previous run, yours or another agent's
+- Write each prompt standalone. Include the file paths, task, constraints, and
+  any earlier findings the agent needs to do the work
+- Forbidden in prompts: "as we discussed", "continue with", "the previous
+  answer", "your earlier review", "remember that", or any reference to a prior
+  run
+- Content from a previous run that the agent needs: paste it inline as data, not
+  as shared history. Never assume it can look it up
+
 ## Defaults
 
 - If user names an agent but not provider, model, or effort, use that CLI's
@@ -192,12 +204,10 @@ cursor-agent --model=gemini-3.1-pro -p "Analyze the architecture in @src/core/ -
 
 ### Comparison Workflows
 
-Get multiple perspectives on the same problem:
+Get multiple perspectives on the same problem. Send the identical standalone
+prompt to each CLI. Neither run sees the other, so you do the comparing:
 
 ```bash
-# Get agy's opinion first
 agy -p "How would you implement feature X?" < /dev/null
-
-# Then compare with Codex
 codex exec --skip-git-repo-check "How would you implement feature X?" < /dev/null
 ```
