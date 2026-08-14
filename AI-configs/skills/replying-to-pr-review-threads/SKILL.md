@@ -122,6 +122,19 @@ AI reviewers persist your reply as a learning for future reviews (CodeRabbit
 shows an "✏️ Learnings added" block confirming it). Write the reply so the
 stored learning is correct AND generalizable.
 
+#### Decide whether to reply
+
+Do not reply to every finding.
+
+- Applied inline finding: do not reply or resolve it. The reviewer can inspect
+  newer commits and resolve the thread automatically
+- Out-of-diff finding: reply in a top-level comment and tag the reviewer
+- Rejected finding: reply in its thread and tag the reviewer. Reject only when
+  the claim is invalid or the fix is not worth its cost
+
+Do not post acknowledgements, "fixed" replies, commit references, or summaries
+of applied findings.
+
 #### Always tag the bot
 
 Start every reply to an AI reviewer with its handle, on both surfaces (inline
@@ -146,8 +159,8 @@ needs it.
 
 - Terse, low word count. Facts + rationale only. No pleasantries, no closing, no
   restating the finding.
-- Lead with the verdict ("Skipping. YAGNI." / "Applied as suggested." / "Wrong -
-  X is never null here.").
+- Lead with the rejection ("Skipping. YAGNI." / "Wrong - X is never null
+  here.").
 - One or two lines is the target. Prose paragraphs are wrong.
 - Give the verifiable evidence: command run, files inspected, why the rule
   applies or doesn't.
@@ -193,6 +206,9 @@ one about code the change broke elsewhere.
 
 REST has no resolve endpoint. Mutation needs the GraphQL thread `id` (`PRRT_*`),
 not the REST comment id - look it up via the `reviewThreads` query above.
+
+Do not manually resolve AI-review threads after applying a finding. Use this
+mutation only when the user explicitly requests manual resolution.
 
 ```bash
 gh api graphql -f query='
