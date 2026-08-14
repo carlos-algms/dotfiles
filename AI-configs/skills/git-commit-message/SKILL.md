@@ -82,11 +82,7 @@ that bans the prefix uses a bare imperative subject with the same body rules.
 ```markdown
 type(scope): subject
 
-Explain why the change is important and what problem it solves.
-
-Add a second paragraph only for distinct context or impact.
-
-Add a third paragraph only when it improves reviewer understanding.
+Explain why the change matters and its impact.
 
 - Describe reviewer-relevant behavior
 - Call out important constraints or decisions
@@ -94,17 +90,21 @@ Add a third paragraph only when it improves reviewer understanding.
 
 - Subject: imperative, lowercase after the colon, no more than 72 characters in
   total
-- Body: optional; use one to three short prose paragraphs followed by an
-  optional bullet list; do not use bold, italics, or code blocks
-- Opening paragraph: explain why the change matters, the problem it solves, and
-  its impact on users or maintainers
-- Additional paragraphs: use only for distinct context, impact, or reviewer
-  understanding
-- Put one blank line between the subject, each paragraph, and the bullet list
-- Bullets: no more than 15 words; give reviewers enough context to understand
-  the reason and relevant behavior
-- Include test coverage when it is part of the change; omit validation steps,
-  pass claims, commands, tool output, and technical details irrelevant to review
+- Body: use concise prose, bullets, or both
+- Prefer a bullet when it conveys the same fact with fewer words
+- Paragraphs: no more than 25 words each
+- First paragraph: state only context that is clearer than a bullet
+- Second paragraph: add only mandatory, important information not captured in
+  the first paragraph or bullets
+- Never add a second paragraph for padding, hedging, or unnecessary explanation
+- Third paragraph: add only mandatory, important information not captured in the
+  first two paragraphs or bullets
+- Put one blank line between paragraphs and before the bullet list
+- Keep bullet items consecutive, without blank lines between them
+- Bullets: no more than 10 words
+- State each fact once: in prose or a bullet, never both
+- Omit standard, expected, or self-evident information
+- Omit verification, test commands, pass claims, commands, and tool output
 - Body lines: wrap at about 72 characters per line for readability; this is a
   stylistic per-line guide, not a total body character limit
 - Standard Markdown only: no em-dashes, curly quotes, or special characters

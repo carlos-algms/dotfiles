@@ -31,17 +31,41 @@ merge-model convention.
 
 - Build PR content from the complete branch diff and commit range against the
   resolved base
-- Treat the last commit, plans, and initial file lists as incomplete summaries
+- Count commits in the branch range before composing the PR
+- For a one-commit branch, use that commit's subject and body as the PR title
+  and body without shortening or rewriting them
+- A repository template may place the commit body inside required sections, but
+  preserve its wording and complete every required section
+- For a multi-commit branch, treat individual commits, plans, and initial file
+  lists as incomplete summaries
 - Detect uncommitted changes; they are not part of the PR
 - Detect unpushed commits and whether the branch has an upstream
 - Refresh branch, base, remote, diff, and push state before generating commands
 
 ## Content
 
-- Title: imperative, no more than 70 characters, and lowercase after the colon
+- Title for a one-commit branch: use the commit subject unchanged
+- Title for a multi-commit branch: imperative, no more than 70 characters, and
+  lowercase after the colon
 - Body with template: fill it without dropping required sections
-- Body without template: bullet list only; no headers or prose paragraphs
-- Bullets: 3-7 words; capture the reason and user-visible behavior
+- Body without template: use concise prose, bullets, or both
+- Prefer a bullet when it conveys the same fact with fewer words
+- Paragraphs: no more than 25 words each
+- First paragraph: state only context that is clearer than a bullet
+- Second paragraph: add only mandatory, important information not captured in
+  the first paragraph or bullets
+- Never add a second paragraph for padding, hedging, or unnecessary explanation
+- Third paragraph: add only mandatory, important information not captured in the
+  first two paragraphs or bullets
+- Put one blank line between paragraphs and before the bullet list
+- Keep bullet items consecutive, without blank lines between them
+- Bullets: no more than 10 words
+- State each fact once: in prose or a bullet, never both
+- Describe only the merge-ready final state. Omit temporary status, pending
+  work, and anything expected to change or be removed before merge
+- Omit standard, expected, or self-evident information
+- Unless the user explicitly requests it, omit testing probes, strategies,
+  commands, validation methods, and validation results
 - Standard Markdown only: no em-dashes or curly quotes
 - Draft status: plain "create PR" means draft; ready requires an explicit
   request
@@ -51,11 +75,11 @@ merge-model convention.
 No-template body example:
 
 ```markdown
-- Describe the user-visible change
-- Explain why the change matters
-- Verify with `command` before submission
-- Fixes #123 for affected users
-- Related work remains in #456
+Explain why the change matters and its impact.
+
+- Describe reviewer-relevant behavior
+- Call out important constraints or decisions
+- Fixes #123
 ```
 
 Include only relevant bullets. Use `Fixes #123` for resolved issues and
@@ -64,10 +88,13 @@ Include only relevant bullets. Use `Fixes #123` for resolved issues and
 ## Workflow
 
 1. Resolve current branch, remote, upstream, base branch, and draft status
-2. Read the full `git diff <base>...HEAD` and `git log <base>..HEAD`
+2. Read the full `git diff <base>...HEAD` and `git log <base>..HEAD`, then count
+   commits in that range
 3. Inspect uncommitted and unpushed state
-4. Load `git-commit-message` in `pr-title` mode and compose the PR title
-5. Compose the body from the current diff and repository template
+4. For one commit, reuse its subject and body; for multiple commits, load
+   `git-commit-message` in `pr-title` mode and compose from the complete branch
+5. Apply the repository template when present without shortening reused commit
+   content
 6. Show the exact title, body, upstream push command, and PR creation command
 7. Get approval before pushing or creating the PR
 8. After approval, run the shown commands with the title and body unchanged
