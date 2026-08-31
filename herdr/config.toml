@@ -58,10 +58,13 @@ switch_workspace = "cmd+alt+1..9"
 focus_agent = "alt+1..9"
 new_worktree = "" # Replaced by the popup command below.
 
-# k=up=previous, j=down=next, matching the vertical workspace list.
+# k=up=previous, j=down=next, matching the vertical lists.
 # was: kitty `map cmd+shift+k/j neighboring_window up/down`
 previous_workspace = "cmd+shift+k"
 next_workspace = "cmd+shift+j"
+# was: kitty `map cmd+alt+j/k move_window bottom/up`
+previous_agent = "cmd+alt+k"
+next_agent = "cmd+alt+j"
 
 # Horizontal split, new pane pinned to the bottom 20%.
 # was: kitty `map cmd+enter new_window_with_cwd`
