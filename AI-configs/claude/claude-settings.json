@@ -64,6 +64,13 @@
         "repo": "kepano/obsidian-skills"
       },
       "autoUpdate": true
+    },
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      },
+      "autoUpdate": true
     }
   },
   "alwaysThinkingEnabled": false,
