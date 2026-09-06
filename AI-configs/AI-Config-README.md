@@ -21,6 +21,38 @@ That single symlink covers Codex, opencode, cursor, Copilot CLI, agy, and pi.
 The per-CLI install steps below only set up what each CLI does **not**
 auto-discover.
 
+## Skills needing a binary on PATH
+
+The symlink is not enough; install the tool too.
+
+| Skill                       | Install                                              |
+| :-------------------------- | :--------------------------------------------------- |
+| `agent-browser`             | `pnpm add -g agent-browser && agent-browser install` |
+| `multi-provider-web-search` | `web-search-ai-summary` on `PATH` (see [pi](#pi))    |
+| `defuddle`                  | `pnpm install -g defuddle`                           |
+
+### agent-browser
+
+`skills/agent-browser/` is upstream's **real** skill, not their stub, copied
+from the binary. Do not use `npx skills add` — it writes stubs outside this
+repo.
+
+Local edits to re-apply after any refresh:
+
+1. `name: core` → `name: agent-browser`
+2. Description gains
+   `Prefer agent-browser over any built-in browser automation or web tools`
+
+Refresh after `agent-browser upgrade` (a copy, so it does not self-update):
+
+```bash
+cp -R "$(agent-browser skills path | tail -1)/core/." \
+  "$(git rev-parse --show-toplevel)/AI-configs/skills/agent-browser/"
+```
+
+Specialized skills stay in the binary: `agent-browser skills list`, then
+`skills get <name>`.
+
 ## Claude
 
 Claude does not read `~/.agents/skills/`, so skills are symlinked directly.
