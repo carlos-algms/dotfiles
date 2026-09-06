@@ -64,17 +64,11 @@
       },
     },
   },
-  "model": "anthropic/claude-opus-4-8-fast",
+  "model": "anthropic/claude-opus-5",
   "provider": {
     "anthropic": {
       "models": {
-        "claude-opus-4-8-fast": {
-          "options": {
-            "thinking": { "type": "adaptive", "display": "summarized" },
-            "effort": "high",
-          },
-        },
-        "claude-opus-4-8": {
+        "claude-opus-5": {
           "options": {
             "thinking": { "type": "adaptive", "display": "summarized" },
             "effort": "high",
@@ -91,8 +85,20 @@
         "baseURL": "http://localhost:1234/v1",
       },
       "models": {
-        "qwen/qwen3-coder-30b": {
-          "name": "Qwen 3 Coder 30B",
+        "qwopus3.6-35b-a3b-v1-mlx-mixed_3_6": {
+          "name": "Qwopus 3.6 35B A3B (MLX)",
+        },
+        "gemma-4-26b-a4b-it-qat-mlx": {
+          "name": "Gemma 4 26B A4B IT QAT (MLX)",
+        },
+        "qwen3.6-28b-reap-oq4": {
+          "name": "Qwen 3.6 28B REAP",
+        },
+        "openai/gpt-oss-20b": {
+          "name": "GPT-OSS 20B",
+        },
+        "gemma-4-e2b-heretic-uncensored-mlx": {
+          "name": "Gemma 4 E2B Heretic Uncensored (MLX)",
         },
       },
     },
@@ -464,6 +470,18 @@
           },
         },
       },
+    },
+  },
+  "mcp": {
+    "internet-access": {
+      "type": "local",
+      "command": [
+        "sh",
+        "-c",
+        "exec bun run ~/projects/mcp-internet-access/src/serve-stdio.ts",
+      ],
+      "enabled": true,
+      "timeout": 120000,
     },
   },
   "formatter": {
