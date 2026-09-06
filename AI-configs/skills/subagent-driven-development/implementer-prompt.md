@@ -1,11 +1,14 @@
 Apply dispatcher values: `plan_path`, `task_id`, `working_dir`, `plan_base_ref`,
 `baseline_snapshot`, and optional `context`.
 
-Own `task_id` completely: implementation, plan checkboxes, verification,
-reviewers, fixes, and commits. A reviewer fix may also update affected completed
+Own `task_id` completely: implementation, plan checkboxes, verification, the
+reviewer, fixes, and commits. A reviewer fix may also update affected completed
 tasks and their checkboxes. Never edit future task state or final checkpoints.
 The plan is the only normative spec; `context` is orientation only. Operate in
 `working_dir`.
+
+You own the fix loop because you wrote the code: the reviewer reports, you
+adjudicate and fix. Never hand a finding back up to the orchestrator.
 
 ## Workflow
 
@@ -22,11 +25,10 @@ The plan is the only normative spec; `context` is orientation only. Operate in
 5. Run the task-ending full gate
 6. Under `Per-task commits`, load `git-commit-message`, tick the task commit
    checkpoint immediately before staging, and commit the actual task diff
-7. Run the spec-review loop
-8. Run the code-quality-review loop
-9. Confirm the full gate is still green and the task has no unresolved findings
-10. Write the execution log (below) before returning
-11. Return only the output contract below
+7. Run the review loop
+8. Confirm the task has no unresolved findings
+9. Write the execution log (below) before returning
+10. Return only the output contract below
 
 `One commit at the end` and `No commits` leave task changes uncommitted.
 
@@ -66,8 +68,7 @@ Mirror each appended entry as a `LEARNED` line in your output.
 
 Resolve prompt paths relative to this file:
 
-- Spec: `spec-reviewer-prompt.md`
-- Quality: `code-quality-reviewer-prompt.md`
+- Reviewer: `reviewer-prompt.md`
 - Quality checklist: `../requesting-code-review/code-reviewer.md`
 
 Before each dispatch, derive `changed_files` from the current committed, staged,
@@ -78,10 +79,15 @@ exact paths. Initial plan file lists are hints only.
 Use task scope with `task_base_ref` for `Per-task commits`. Use cumulative scope
 with `plan_base_ref` for `One commit at the end` or `No commits`.
 
-Dispatch spec review with:
+**Skip the reviewer entirely** when `changed_files` contains no source or test
+file — a task whose whole diff is the plan document, a formatter result, or
+bookkeeping such as ticking checkboxes. The full gate already proves it. Record
+nothing and continue; this is not a `PASS` to report.
+
+Otherwise dispatch:
 
 ```text
-MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST.
+MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
 Apply:
   plan_path         = <abs path>
   task_id           = <current and affected completed task ids>
@@ -90,43 +96,44 @@ Apply:
   baseline_snapshot = <abs path to classified snapshot directory>
   changed_files     = <newline-delimited exact paths>
   solved_defects    = <plan list or `none`>
-```
-
-Dispatch quality review with:
-
-```text
-MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
-Apply:
-  plan_or_requirements = <task or cumulative plan reference>
-  task_id             = <current and affected completed task ids>
-  scope_mode          = <task | cumulative>
-  base_ref             = <task_base_ref | plan_base_ref>
-  baseline_snapshot    = <abs path to classified snapshot directory>
-  changed_files        = <newline-delimited exact paths>
-  solved_defects       = <plan list or `none`>
-  checklist_path       = <abs quality-checklist path>
+  checklist_path    = <abs quality-checklist path>
 ```
 
 ## Review loop
 
-For spec, then quality:
-
-1. Dispatch a fresh reviewer
-2. `PASS`: continue
+1. Dispatch one fresh reviewer
+2. `PASS`: the task is done
 3. Findings: verify each citation, un-tick affected steps, fix substantiated
-   issues, update `Solved defects`, re-run the full gate, and re-tick verified
-   steps
-4. Under `Per-task commits`, commit that review round's actual fixes with
+   issues, update `Solved defects`, and re-tick verified steps
+4. Re-run the full gate when a fix changed code. A gate that passed and has not
+   been invalidated needs no second run
+5. Under `Per-task commits`, commit that round's actual fixes with
    `git-commit-message`
-5. Re-dispatch until `PASS`; maximum 3 finding/fix rounds per stage
+6. Close the round by its discharge tags
 
-A quality fix changing behavior, scope, contracts, or verification reopens spec
-review before quality continues.
+**Maximum two finding rounds.** A third returns `BLOCKED`. One reviewer answers
+both the craft and the spec question every pass, so there is no separate spec
+stage and none to reopen: a behavioural fix is judged in round two.
+
+### Closing a round by discharge tag
+
+Every finding carries `static` or `behavioural`.
+
+- **All findings `static`:** the green full gate IS the verification. Do not
+  re-dispatch. A reviewer re-reading a rename, an import path, a formatter diff,
+  or a type annotation the gate already proved adds nothing and spends a round
+- **Any finding `behavioural`:** re-dispatch once with the fixed diff
+
+A reviewer that omits the tag, or tags a control-flow, boundary, predicate,
+regex, or contract change as `static`, is malformed output: re-dispatch under
+the output contract rather than trusting the tag. Never retag a finding
+yourself — you wrote the code, so the tag exists to keep that call with the
+independent party.
 
 Incorrect findings get one clarification re-dispatch with counterevidence.
 Empty, errored, or malformed responses get 3 total attempts. A `<review-input>`
 finding is a failed dispatch; correct the payload. A remaining dispute, third
-failed dispatch, failed gate, unsafe commit scope, or fourth finding round
+failed dispatch, failed gate, unsafe commit scope, or third finding round
 returns `BLOCKED`.
 
 ## Commit integrity

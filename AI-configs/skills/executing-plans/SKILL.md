@@ -155,17 +155,18 @@ For each task:
 3. Complete each step and tick it when its narrow `Green:` passes
 4. Confirm the plan's task-ending full gate passed
 5. For `Per-task commits`, execute and tick the initial task checkpoint
-6. Dispatch a fresh spec reviewer
+6. Dispatch a fresh reviewer, unless the task's diff contains no source or test
+   file — a plan-doc commit, a formatter result, or checkbox ticks needs none;
+   the full gate already proves it
 7. Resolve every blocking finding; commit each verified fix round under
    `Per-task commits`
-8. Dispatch a fresh code-quality reviewer
-9. Resolve every blocking finding with the same fix-commit loop
-10. Append this task's drift, gotchas, and decisions to `Execution log`
-11. Correct stale text in later tasks that this task's drift invalidated
-12. Mark the task complete
+8. Append this task's drift, gotchas, and decisions to `Execution log`
+9. Correct stale text in later tasks that this task's drift invalidated
+10. Mark the task complete
 
 Never dispatch onto a red gate or move on with unadjudicated findings. Re-run
-the full gate after every task-review fix.
+the full gate after a task-review fix that changed code; a green gate that
+nothing has invalidated needs no second run.
 
 ## Execution log capture
 
@@ -187,7 +188,10 @@ mandatory, not optional.
 
 ## Inline review handling
 
-- Accept only `PASS` or terse Critical/Important findings
+- Accept only `PASS` or terse Critical/Important findings, each carrying a
+  `static` or `behavioural` discharge tag. An untagged finding, or a
+  control-flow, boundary, predicate, regex, or contract change tagged `static`,
+  is a failed dispatch. Never retag a finding yourself
 - Empty, errored, or rate-limited output is a failed dispatch
 - Narration, summaries, or malformed findings are a failed dispatch
 - A `<review-input>` finding is a failed dispatch; correct the payload
@@ -207,13 +211,13 @@ Adjudicate each finding:
 5. Escalate disputes that remain
 
 Record rejected findings and counter-evidence in the final report. Every
-returned finding blocks until fixed or rejected with counter-evidence. Always
-re-dispatch the current review stage after a fix.
+returned finding blocks until fixed or rejected with counter-evidence.
 
-A code-quality fix that changes delivered behavior, scope, contracts, or
-verification reopens spec review. Resolve spec, then resume code-quality review.
-Limit each review/fix cycle to 3 finding rounds; a fourth requires user
-escalation.
+Re-dispatch after a fix round containing any `behavioural` finding. After a
+round whose findings are all `static`, the green gate is the verification: do
+not re-dispatch. One reviewer answers both the craft and the spec question every
+pass, so there is no separate spec stage to reopen. Limit each review/fix cycle
+to 2 finding rounds; a third requires user escalation.
 
 ## Inline reviewer dispatch
 
@@ -235,30 +239,16 @@ history. `changed_files` is a newline-delimited exact-path list, not a review
 boundary. Pass `Solved defects` from the plan; use `none` when empty.
 
 ```text
-MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST.
+MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
 Do not act until you have read it. Then apply:
-  plan_path      = <abs path>
-  task_id        = <task number / heading>
-  base_ref       = <review_base_ref>
-  scope_mode     = <task | cumulative>
+  plan_path         = <abs path>
+  task_id           = <task number / heading>
+  base_ref          = <review_base_ref>
+  scope_mode        = <task | cumulative>
   baseline_snapshot = <abs path to classified snapshot directory>
-  changed_files  = <newline-delimited exact paths>
-  solved_defects = <current solved-defects list, or `none`>
-```
-
-```text
-MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md
-FIRST. Do not act until you have read it. Then apply:
-  plan_or_requirements = <"Task <task_id> from <plan_path>" for task scope;
-                          "Tasks completed through <task_id> from <plan_path>"
-                          for cumulative scope>
-  task_id             = <task number / heading>
-  scope_mode          = <task | cumulative>
-  base_ref             = <review_base_ref>
-  baseline_snapshot    = <abs path to classified snapshot directory>
-  changed_files        = <newline-delimited exact paths>
-  solved_defects       = <current solved-defects list, or `none`>
-  checklist_path       = <abs path to requesting-code-review/code-reviewer.md>
+  changed_files     = <newline-delimited exact paths>
+  solved_defects    = <current solved-defects list, or `none`>
+  checklist_path    = <abs path to requesting-code-review/code-reviewer.md>
 ```
 
 `<skill_dir>` is the resolved `subagent-driven-development` directory. Final
@@ -282,9 +272,10 @@ After all tasks complete and verified:
       first fix under `Per-task commits`
    5. Resolve findings with the adjudication and retry rules
    6. Run only affected narrow gates during the final-review fix loop
-   7. Re-run affected spec review when delivered behavior changed
-   8. Re-dispatch final code-quality review after each fix round
-   9. Require `PASS`
+   7. Re-dispatch the final review after a fix round containing any
+      `behavioural` finding; after an all-`static` round, the green narrow gates
+      are the verification
+   8. Require `PASS`
 4. When the written final-verification checkpoint reaches final validation:
    1. Load `verification-before-completion`
    2. Run each exact automated check once

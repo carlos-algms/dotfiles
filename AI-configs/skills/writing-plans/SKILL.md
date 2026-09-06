@@ -398,6 +398,15 @@ header.
 - Run the full gate only as each task's last verification
 - Merge tasks whose file sets overlap
 - One task per file set, not one task per concern
+- A task delivers one slice of working behavior plus its tests. Everything that
+  behavior needs to run — schema, storage, migration, table, helper, type —
+  belongs in the task that uses it, not a preceding one
+- Never write a task whose only deliverable is a type, a schema, a constant, or
+  a stub that a later task consumes. Merge it into its consumer. Bookkeeping
+  tasks (commit the plan, tick the boxes) are exempt: they deliver no behavior
+  by design
+- Every task dispatches a fresh implementer that reads this plan cold, so a
+  task that ships nothing still costs a full plan read
 - Past ~8 tasks: merge or split into separate plans
 - Rationale capped at 2 lines per constraint. Cite `path:line` instead of
   restating the argument
@@ -603,6 +612,29 @@ Use verbatim content only for tricky config, signatures, and shell commands.
 Describe test cases as inputs, outputs, and key assertions. Describe
 implementation and layout as intent plus constraints.
 
+### Length
+
+Every task's body is re-read cold by its implementer and its reviewer, so plan
+length is paid per task, not once. Cut what no agent acts on:
+
+- Design rationale for a decision already settled belongs in the slice's own
+  notes or an ADR, not in the plan body. Keep the decision, drop the argument
+  for it
+- Repo rules, tool invocations, and conventions appear once in the shared
+  preamble, never restated per task
+- Do not restate what a `path:line` citation already shows
+
+**Floor — never cut into these.** An implementer must reach `Green:` without
+asking a question or re-deriving a decision:
+
+- Signatures, types, exact constants, and named files
+- Every constraint that changes behavior, and every base and edge case
+- Anything a `## Detail calibration` ban above would otherwise catch
+
+If cutting a line would make a task ambiguous, keep the line. A short plan that
+forces an implementer to guess costs a round trip and a drift entry; it does not
+save time.
+
 ## Cross-cutting constraints
 
 - Commit and test-file conventions come from the target repo. Do not invent
@@ -709,9 +741,8 @@ Flow:
    expectations. Skip for surgical/wording/style fixes
 4. Cap at 3 dispatches. Blocking issues remain after the 3rd -> escalate
 
-**Model:** use a capable reviewer for multi-task, cross-module, destructive,
-public-contract, migration, or auth plans. A cheaper model is acceptable only
-for a short, single-module plan; escalate a thin review.
+**Review depth:** a dispatched review must be a good review. Escalate a thin
+one rather than accepting it.
 
 ## Execution mode handoff
 

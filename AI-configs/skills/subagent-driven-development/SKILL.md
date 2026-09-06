@@ -35,7 +35,7 @@ After the shared `executing-plans` start gates:
 8. Own the snapshot lifecycle defined in `executing-plans`
 
 Do not receive or adjudicate nested reviewer output. The implementer owns its
-task until both reviewers pass and its commit policy is satisfied.
+task until its reviewer passes and its commit policy is satisfied.
 
 ## Orchestrator ownership
 
@@ -49,15 +49,6 @@ task until both reviewers pass and its commit policy is satisfied.
 - Never create the PR; the finalizer owns requested PR creation
 - Never paste nested review output into orchestrator context
 - Dispatch tasks sequentially; implementers share one worktree
-
-## Model selection
-
-- 1-2 files, complete spec, mechanical implementation → cheap/fast model
-- Multi-file integration, debugging → standard model
-- Architecture, design, broad codebase reasoning → most capable model
-
-Use capable reviewers. Escalate for cross-module, destructive, public-contract,
-migration, or auth work.
 
 ## Handling implementer status
 
@@ -135,8 +126,8 @@ act until you have read it. Then apply:
 
 ## Integration
 
-- **./code-quality-reviewer-prompt.md** - Code review template (wraps
-  `requesting-code-review`)
+- **./reviewer-prompt.md** - Per-task craft + spec reviewer, dispatched by the
+  implementer
 - **./finalizer-prompt.md** - Full-plan review, verification, and final commit
 - **verification-before-completion** - Verifies before claiming completion
 - **create-pull-request** - Required before the finalizer opens a requested PR

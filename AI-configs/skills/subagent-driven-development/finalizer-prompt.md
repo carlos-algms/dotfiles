@@ -10,8 +10,7 @@ not add a review, verification, or commit step that the plan does not contain.
 
 Resolve prompt paths relative to this file:
 
-- Spec: `spec-reviewer-prompt.md`
-- Quality: `code-quality-reviewer-prompt.md`
+- Reviewer: `reviewer-prompt.md`
 - Quality checklist: `../requesting-code-review/code-reviewer.md`
 
 ## Workflow
@@ -27,7 +26,7 @@ Resolve prompt paths relative to this file:
    1. Derive the complete changed-path set from current repository state
    2. Exclude baseline-only paths from review scope
    3. Exclude `execution-state` paths from review scope
-   4. Dispatch the written full-plan code-quality review
+   4. Dispatch the written full-plan review
    5. On findings, verify each citation
    6. Stop before editing a baseline-only fix path in commit-bound execution
    7. Uncheck affected plan state
@@ -37,14 +36,15 @@ Resolve prompt paths relative to this file:
    10. Update `Solved defects`
    11. Run only the affected narrow gates
    12. Re-tick verified task state
-   13. Re-run affected spec review when delivered behavior changed
-   14. Re-dispatch code-quality review after each fix round
-   15. Require `PASS`
-   16. Load `verification-before-completion`
-   17. Run each written final automated check once
-   18. Perform each written final manual check once
-   19. Append final-review drift, gotchas, and decisions to `Execution log`
-   20. Tick the final-verification checkpoint
+   13. Re-dispatch the review after a fix round containing any `behavioural`
+       finding. After an all-`static` fix round, the green narrow gates are the
+       verification: do not re-dispatch
+   14. Require `PASS`
+   15. Load `verification-before-completion`
+   16. Run each written final automated check once
+   17. Perform each written final manual check once
+   18. Append final-review drift, gotchas, and decisions to `Execution log`
+   19. Tick the final-verification checkpoint
 9. Execute each remaining written commit checkpoint
 10. When the plan requests a PR and the branch contains the reviewed committed
     work, load `create-pull-request` and complete it
@@ -129,37 +129,29 @@ Mirror each appended entry as a `LEARNED` line in your output.
 - One clarification re-dispatch for an incorrect finding
 - Empty, errored, or malformed responses get 3 total attempts
 - A `<review-input>` finding is a failed dispatch; correct the payload
+- Every finding carries a `static` or `behavioural` discharge tag. Never retag
+  one yourself
 - Any unresolved dispute, third failed dispatch, failed gate, unsafe scope, or
-  fourth finding round returns `BLOCKED`
+  third finding round returns `BLOCKED`
 
-Quality dispatch:
-
-```text
-MUST read instructions at <skill_dir>/code-quality-reviewer-prompt.md FIRST.
-Do not act until you have read it. Then apply:
-  plan_or_requirements = complete plan at <plan_path>
-  task_id             = all tasks
-  scope_mode          = complete
-  base_ref             = <plan_base_ref>
-  baseline_snapshot    = <abs path to classified snapshot directory>
-  changed_files        = <newline-delimited exact paths>
-  solved_defects       = <plan list or `none`>
-  checklist_path       = <abs path to quality checklist>
-```
-
-Affected spec re-review:
+Review dispatch:
 
 ```text
-MUST read instructions at <skill_dir>/spec-reviewer-prompt.md FIRST.
+MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
 Do not act until you have read it. Then apply:
   plan_path         = <abs path>
-  task_id           = <affected task IDs>
+  task_id           = all tasks
+  scope_mode        = complete
   base_ref          = <plan_base_ref>
-  scope_mode        = task
   baseline_snapshot = <abs path to classified snapshot directory>
-  changed_files     = <newline-delimited affected paths>
+  changed_files     = <newline-delimited exact paths>
   solved_defects    = <plan list or `none`>
+  checklist_path    = <abs path to quality checklist>
 ```
+
+One reviewer answers both the craft and the spec question every pass. There is
+no separate spec stage to re-run. Re-dispatch the same payload with the fixed
+diff, narrowing `task_id` and `changed_files` to the affected work.
 
 `<skill_dir>` is this file's directory. Use absolute resolved paths.
 

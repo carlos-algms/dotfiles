@@ -112,6 +112,11 @@ new steps or prose.
 - Failing test as a step deliverable (red must live INSIDE the implementation
   step, not as a separate ticked step)
 - The task's last verification is not its full gate
+- The plan's own code fences break the full gate. When the repo's formatter or
+  linter covers markdown, it reads fenced code in the plan file itself, so a
+  mis-formatted fence leaves the gate red before any implementation exists.
+  Check the repo's format/lint configuration for markdown coverage, then flag
+  any fence that would fail it: Critical, since it blocks the first task
 
 **Redundant verification:**
 
