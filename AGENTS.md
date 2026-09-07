@@ -41,6 +41,7 @@ editing this repo. Mandatory: load `AI-configs/AGENTS.md` before any work in:
 - `~/.config/opencode/` - opencode config, `AGENTS.md`, commands, agents
 - `~/.pi/agent/` - `AGENTS.md`, prompts, settings, mcp, extensions
 - `~/.agents/skills/` - cross-tool skills dir
+- `~/.opencodereview/rule.json` - `ocr` global review rules
 
 See `AI-configs/AI-Config-README.md` for exact symlink commands.
 

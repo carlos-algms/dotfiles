@@ -1,0 +1,9 @@
+{
+  "include": ["**/*.md", "**/*.markdown", "**/*.mdx"],
+  "rules": [
+    {
+      "path": "**/*.{md,markdown,mdx}",
+      "rule": "State the file's intended job in one line, then check the content against it. Flag: claims that contradict the repo's conventions or other docs; stale or wrong instructions; commands, flags or paths that do not exist; missing context a first-time reader needs; sections that restate each other; wording that could be cut without losing meaning; broken links, wrong paths, unlabelled or mislabelled code fences; heading hierarchy that skips levels; inconsistent terminology for the same concept; grammar and spelling errors. Flag every non-ASCII character an LLM leaks into prose, one finding per occurrence, quoting it: em dash, en dash, curly single and double quotes, ellipsis, non-breaking space, zero-width space. Rewrite the clause instead of swapping in another separator; a clause needing an em dash becomes a second sentence or line. Straight quotes and hyphens only. Exempt: code fences, inline code, links, and text quoted verbatim from a command, file, or external source."
+    }
+  ]
+}

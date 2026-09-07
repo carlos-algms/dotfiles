@@ -25,11 +25,12 @@ auto-discover.
 
 The symlink is not enough; install the tool too.
 
-| Skill                       | Install                                              |
-| :-------------------------- | :--------------------------------------------------- |
-| `agent-browser`             | `pnpm add -g agent-browser && agent-browser install` |
-| `multi-provider-web-search` | `web-search-ai-summary` on `PATH` (see [pi](#pi))    |
-| `defuddle`                  | `pnpm install -g defuddle`                           |
+| Skill                       | Install                                                                                   |
+| :-------------------------- | :---------------------------------------------------------------------------------------- |
+| `agent-browser`             | `pnpm add -g agent-browser && agent-browser install`                                      |
+| `multi-provider-web-search` | `web-search-ai-summary` on `PATH` (see [pi](#pi))                                         |
+| `defuddle`                  | `pnpm install -g defuddle`                                                                |
+| `open-code-review`          | `pnpm add -g @alibaba-group/open-code-review` (see [Open Code Review](#open-code-review)) |
 
 ### agent-browser
 
@@ -214,3 +215,28 @@ Rules live in Cursor IDE settings).
 mkdir -p ~/.config/crush
 ln -s $(pwd)/AI-configs/crush-ai/crush.json ~/.config/crush/crush.json
 ```
+
+## Open Code Review
+
+<https://github.com/alibaba/open-code-review>
+
+Not an agent CLI. `ocr` is a review tool the `open-code-review` skill drives.
+
+```bash
+mkdir -p ~/.opencodereview
+ln -s $(pwd)/AI-configs/opencodereview/rule.json ~/.opencodereview/rule.json
+```
+
+Link the file, not the folder: `config.json` sits beside it and holds the API
+key, so it stays a real local file and never enters the repo. Set it up with
+`ocr config provider`, then `ocr config set language English` (it defaults to
+Chinese).
+
+Markdown is not in `ocr`'s built-in extension allowlist, and there is no CLI
+flag to add it. The `include` array in `rule.json` is the only override, which
+is why this file exists: it makes `.md`, `.markdown`, and `.mdx` reviewable
+everywhere and gives them a docs rule instead of the generic code checklist.
+
+Rule resolution, first match wins: `--rule <path>`, then
+`<repo>/.opencodereview/rule.json`, then this file, then `ocr`'s built-in
+defaults.
