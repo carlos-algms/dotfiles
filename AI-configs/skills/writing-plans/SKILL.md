@@ -244,7 +244,7 @@ Commit checkpoints contain no command, message, or fixed file list. The owner
 derives all three from the actual diff at checkpoint time.
 
 ```markdown
-- [ ] **Initial commit checkpoint: Task N**
+- [ ] **Commit task N**
 
   **Skills (load if not already loaded):** `git-commit-message`
 
@@ -405,8 +405,8 @@ header.
   a stub that a later task consumes. Merge it into its consumer. Bookkeeping
   tasks (commit the plan, tick the boxes) are exempt: they deliver no behavior
   by design
-- Every task dispatches a fresh implementer that reads this plan cold, so a
-  task that ships nothing still costs a full plan read
+- Every task dispatches a fresh implementer that reads this plan cold, so a task
+  that ships nothing still costs a full plan read
 - Past ~8 tasks: merge or split into separate plans
 - Rationale capped at 2 lines per constraint. Cite `path:line` instead of
   restating the argument
@@ -741,8 +741,8 @@ Flow:
    expectations. Skip for surgical/wording/style fixes
 4. Cap at 3 dispatches. Blocking issues remain after the 3rd -> escalate
 
-**Review depth:** a dispatched review must be a good review. Escalate a thin
-one rather than accepting it.
+**Review depth:** a dispatched review must be a good review. Escalate a thin one
+rather than accepting it.
 
 ## Execution mode handoff
 

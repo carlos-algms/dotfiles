@@ -51,9 +51,9 @@ new steps or prose.
 
 **Commit cadence:**
 
-- `Per-task commits`: exactly one unchecked initial checkpoint per task plus one
-  pre-checked conditional final-review-fixes checkpoint after all tasks and one
-  final-state commit checkpoint after final verification only when
+- `Per-task commits`: exactly one unchecked task commit checkpoint per task plus
+  one pre-checked conditional final-review-fixes checkpoint after all tasks and
+  one final-state commit checkpoint after final verification only when
   `Plan file policy` is `Include`
 - `One commit at the end`: exactly one commit checkpoint after final
   verification
