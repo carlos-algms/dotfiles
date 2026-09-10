@@ -44,7 +44,6 @@
     "ask": [],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
   "disableClaudeAiConnectors": true,
   "hooks": {},
   "statusLine": {
@@ -57,7 +56,7 @@
     "code-simplifier@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
     "ponytail@ponytail": true,
-    "i-have-adhd@i-have-adhd": true,
+    "i-have-adhd@i-have-adhd": false,
     "crit@crit": true
   },
   "extraKnownMarketplaces": {
@@ -90,6 +89,8 @@
       "autoUpdate": true
     }
   },
+  "outputStyle": "Terse",
+  "feedbackDrafts": "off",
   "alwaysThinkingEnabled": false,
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
@@ -98,5 +99,6 @@
   "preferredNotifChannel": "notifications_disabled",
   "switchModelsOnFlag": false,
   "remoteControlAtStartup": false,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "model": "opus[1m]"
 }

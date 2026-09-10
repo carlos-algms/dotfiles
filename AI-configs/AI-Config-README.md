@@ -64,6 +64,7 @@ mkdir -p ~/.claude
 ln -s $(pwd)/AI-configs/claude/claude-settings.json ~/.claude/settings.json
 ln -s $(pwd)/AI-configs/claude/claude-statusline.sh ~/.claude/statusline.sh
 ln -s $(pwd)/AI-configs/claude/hooks                ~/.claude/hooks
+ln -s $(pwd)/AI-configs/claude/output-styles        ~/.claude/output-styles
 
 ln -s $(pwd)/AI-configs/skills    ~/.claude/skills
 ln -s $(pwd)/AI-configs/agents    ~/.claude/agents
