@@ -212,6 +212,16 @@ herdr pane send-text "$pane" 'exec codex
 '
 '''
 
+[[keys.command]]
+key = "cmd+shift+r"
+type = "shell"
+description = "cursor agent in new tab"
+command = '''
+pane=$(herdr tab create --label cursor --focus | jq -r .result.root_pane.pane_id)
+herdr pane send-text "$pane" 'exec cursor-agent --yolo
+'
+'''
+
 [ui]
 agent_panel_sort = "spaces"
 show_agent_labels_on_pane_borders = true
