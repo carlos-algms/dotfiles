@@ -19,8 +19,9 @@ to one implementer.
 After the shared `executing-plans` start gates:
 
 1. For each task, dispatch one fresh implementer with `implementer-prompt.md`
-2. On `PASS`, mark only the harness task complete, carry its `LEARNED` lines
-   into your final report, and dispatch the next task
+2. On `PASS`, mark only the harness task complete, retain its exact `REVIEW` and
+   `VERIFY` lines grouped by task ID for final evidence reuse, carry its
+   `LEARNED` lines into your final report, and dispatch the next task
 3. On `BLOCKED`, relay its short blocker list and its `LEARNED` lines; stop
 4. After all tasks, dispatch one fresh finalizer with `finalizer-prompt.md`
 5. With `milestone_execution_mode = coordinated`, on `READY <plan ID>`, relay it
@@ -39,7 +40,8 @@ task until its reviewer passes and its commit policy is satisfied.
 
 ## Orchestrator ownership
 
-- Keep only task status, `plan_base_ref`, `baseline_snapshot`, and the resolved
+- Keep only task status, exact implementer `REVIEW` and `VERIFY` lines grouped
+  by task ID, `plan_base_ref`, `baseline_snapshot`, and the resolved
   `milestone_execution_mode`
 - Never edit implementation files, plan checkboxes, `Solved defects`, or
   `Execution log`
@@ -53,6 +55,10 @@ task until its reviewer passes and its commit policy is satisfied.
 ## Handling implementer status
 
 - `PASS`: accept the terse verification/commit/PR summary
+- Preserve every valid `REVIEW` line with its task ID for the finalizer; never
+  repeat review already covering the complete unchanged implementation
+- Preserve every valid `VERIFY` line with its task ID for the finalizer; never
+  summarize or discard reusable evidence
 - `LEARNED` on either status: relay its lines unchanged in your report. The
   subagent already wrote them to the plan; never re-append them yourself
 - No `LEARNED` block: say nothing about it. Never report "no learnings" or an
@@ -100,6 +106,10 @@ act until you have read it. Then apply:
   working_dir   = <abs path>
   plan_base_ref = <SHA captured by executing-plans>
   baseline_snapshot = <abs path to classified snapshot directory>
+  review_evidence = <successful task IDs with their exact REVIEW lines,
+                     or `none`>
+  verification_evidence = <successful task IDs with their exact VERIFY lines,
+                           or `none`>
   milestone_execution_mode = <coordinated | sequential, resolved by
                               executing-plans; never self-resolve>
   milestone_finalize_grant = <exact FINALIZE line copied verbatim from the root

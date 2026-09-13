@@ -153,11 +153,11 @@ For each task:
      discovered target or reviewer-fix path with baseline-only changes
 2. Mark the task in progress
 3. Complete each step and tick it when its narrow `Green:` passes
-4. Confirm the plan's task-ending full gate passed
+4. Confirm the plan's task-ending impact-appropriate task gate passed
 5. For `Per-task commits`, execute and tick the initial task checkpoint
 6. Dispatch a fresh reviewer, unless the task's diff contains no source or test
    file — a plan-doc commit, a formatter result, or checkbox ticks needs none;
-   the full gate already proves it
+   the task gate already proves it
 7. Resolve every blocking finding; commit each verified fix round under
    `Per-task commits`
 8. Append this task's drift, gotchas, and decisions to `Execution log`
@@ -165,8 +165,13 @@ For each task:
 10. Mark the task complete
 
 Never dispatch onto a red gate or move on with unadjudicated findings. Re-run
-the full gate after a task-review fix that changed code; a green gate that
-nothing has invalidated needs no second run.
+only invalidated task-gate commands after a task-review fix; valid evidence
+needs no second run.
+
+Semantic-neutral comment-only and canonical formatter-only changes do not
+invalidate tests, type checks, builds, or full gates. Directives, suppressions,
+pragmas, doctests, generated-documentation inputs, shebangs, encoding
+declarations, and format-sensitive metadata are not semantic-neutral comments.
 
 ## Execution log capture
 
@@ -223,11 +228,11 @@ to 2 finding rounds; a third requires user escalation.
 
 **Preconditions before dispatching:**
 
-- Task-scope dispatch: task full gate is green
-- Cumulative task dispatch: current task full gate is green
-- Complete-scope first dispatch: final task full gate is green
-- Complete-scope re-dispatch after a final-review fix: affected narrow gates are
-  green
+- Task-scope dispatch: task gate is green
+- Cumulative task dispatch: current task gate is green
+- Complete-scope first dispatch: final task gate is green
+- Complete-scope re-dispatch after a final-review fix: affected invalidated
+  gates are green
 - Complete-scope re-dispatch does not require another full gate
 - `changed_files` is the deduplicated union of committed, staged, unstaged, and
   untracked implementation paths in scope. Exclude `execution-state` paths and
@@ -265,21 +270,25 @@ After all tasks complete and verified:
 3. When the written final-verification checkpoint requests full-plan review:
    1. Use `plan_base_ref`, `complete` scope, and all plan-changed implementation
       files
-   2. Dispatch the requested reviewer
+   2. Reuse a prior task-review result when it covers the complete current
+      implementation; otherwise dispatch the requested reviewer
    3. Recheck each fix path against `baseline_snapshot` before editing in
       commit-bound execution
    4. Uncheck the conditional final-review-fixes commit checkpoint before the
       first fix under `Per-task commits`
    5. Resolve findings with the adjudication and retry rules
-   6. Run only affected narrow gates during the final-review fix loop
+   6. Run only checks invalidated by final-review fixes; prefer narrow checks
+      and rerun a full gate only when narrower evidence cannot restore required
+      coverage
    7. Re-dispatch the final review after a fix round containing any
-      `behavioural` finding; after an all-`static` round, the green narrow gates
-      are the verification
-   8. Require `PASS`
+      `behavioural` finding; after an all-`static` round, the green affected
+      gates are the verification
+   8. Require `PASS` or fully discharged findings
 4. When the written final-verification checkpoint reaches final validation:
    1. Load `verification-before-completion`
-   2. Run each exact automated check once
-   3. Perform each exact manual check once
+   2. Reuse each task-gate or reviewer-fix result that still covers the current
+      implementation state and semantic scope
+   3. Run or perform only written final checks whose scope remains uncovered
    4. Append final-review drift, gotchas, and decisions to `Execution log`
    5. Execute any written milestone completion action:
       - `coordinated`: complete the `READY` -> `FINALIZE` -> `FINALIZED` turn

@@ -1,6 +1,6 @@
 Apply dispatcher values: `plan_path`, `working_dir`, `plan_base_ref`,
-`baseline_snapshot`, `milestone_execution_mode`, and optional
-`milestone_finalize_grant`.
+`baseline_snapshot`, `review_evidence`, `verification_evidence`,
+`milestone_execution_mode`, and optional `milestone_finalize_grant`.
 
 Own the remaining written plan-level checkpoints. The orchestrator only relays
 your result. Operate in `working_dir`.
@@ -18,7 +18,7 @@ Resolve prompt paths relative to this file:
 1. Read the complete plan
 2. Read the commit policy
 3. Read the plan-file policy and `Additional plan state files`
-4. Read the convention sources
+4. Read the governing repo instructions and config for changed paths
 5. Read `Solved defects` and `Execution log`
 6. Locate the remaining plan-level checkpoints
 7. Stop when the plan lacks its final-verification checkpoint
@@ -26,7 +26,9 @@ Resolve prompt paths relative to this file:
    1. Derive the complete changed-path set from current repository state
    2. Exclude baseline-only paths from review scope
    3. Exclude `execution-state` paths from review scope
-   4. Dispatch the written full-plan review
+   4. Reuse a non-`SKIPPED` dispatcher `review_evidence` result when it covers
+      the complete current implementation; otherwise dispatch the written
+      full-plan review
    5. On findings, verify each citation
    6. Stop before editing a baseline-only fix path in commit-bound execution
    7. Uncheck affected plan state
@@ -34,15 +36,23 @@ Resolve prompt paths relative to this file:
       first fix under `Per-task commits`
    9. Fix each substantiated finding
    10. Update `Solved defects`
-   11. Run only the affected narrow gates
+   11. Run only checks invalidated by the fix. Prefer affected narrow gates;
+       rerun a full gate only when narrower evidence cannot restore required
+       coverage
+       - Semantic-neutral comment-only and canonical formatter-only fixes do not
+         invalidate tests, type checks, builds, or full gates
+       - Directives, suppressions, pragmas, doctests, generated-documentation
+         inputs, shebangs, encoding declarations, and format-sensitive metadata
+         are not semantic-neutral comments
    12. Re-tick verified task state
    13. Re-dispatch the review after a fix round containing any `behavioural`
-       finding. After an all-`static` fix round, the green narrow gates are the
-       verification: do not re-dispatch
-   14. Require `PASS`
+       finding. After an all-`static` fix round, the green affected gates are
+       the verification: do not re-dispatch
+   14. Require `PASS` or fully discharged findings
    15. Load `verification-before-completion`
-   16. Run each written final automated check once
-   17. Perform each written final manual check once
+   16. Reuse each dispatcher `verification_evidence` result that still covers
+       the current implementation state and semantic scope
+   17. Run or perform only written final checks whose scope remains uncovered
    18. Append final-review drift, gotchas, and decisions to `Execution log`
    19. Tick the final-verification checkpoint
 9. Execute each remaining written commit checkpoint
@@ -79,14 +89,14 @@ When the written final-verification checkpoint contains the milestone `READY` ->
 
 ## Commit policy
 
-- `Per-task commits`: leave the pre-checked final-fixes checkpoint unchanged
-  when review passes without edits. Before the first final-review fix, uncheck
-  it. After final verification, execute it once for the combined verified fix
-  set. Execute the final-state commit checkpoint only when `Plan file policy` is
-  `Include`
-- `One commit at the end`: after all reviewers pass and final verification is
-  green, tick the whole-plan checkpoint immediately before staging and commit
-  the complete reviewed plan diff with `git-commit-message`
+- `Per-task commits`: when review passes without edits, tick the unchecked
+  conditional final-fixes checkpoint without committing. When fixes exist, leave
+  it unchecked until final verification, then execute it once for the combined
+  verified fix set. Execute the final-state commit checkpoint only when
+  `Plan file policy` is `Include`
+- `One commit at the end`: after all reviews have no unresolved findings and
+  final verification is green, tick the whole-plan checkpoint immediately before
+  staging and commit the complete reviewed plan diff with `git-commit-message`
 - `No commits`: do not stage or commit
 
 `Plan state` means the plan file plus every `Additional plan state files` path.
@@ -173,9 +183,10 @@ LEARNED
 - final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
 
-Emit one `VERIFY` line per final-verification command or manual check. Merge
-duplicate `FIXED` root causes. Emit valid compact JSON and escape dynamic
-strings; omit the manual form when no manual check exists.
+Emit every reused implementer `VERIFY` line unchanged, then one `VERIFY` line
+per newly run final command or manual check. Merge duplicate `FIXED` root
+causes. Emit valid compact JSON and escape dynamic strings; omit the manual form
+when no manual check exists.
 
 Omit `FIXED` when no reviewer finding was fixed.
 

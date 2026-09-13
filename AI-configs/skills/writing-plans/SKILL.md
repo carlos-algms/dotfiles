@@ -31,10 +31,13 @@ implementation plan."
   - Put empty bodies, `NotImplementedError`, or wrong defaults inside the
     implementation step
   - Use a separate step only when a later task imports the new symbol
-- **Full gate:** the project's whole validation suite: format, lint, types, and
-  full tests. Prefer its single CI command (`make validate`, `pnpm validate`);
-  otherwise list the commands in execution order inside the task step that runs
-  them. Runs once per task and once after any task-reviewer fix
+- **Task gate:** the smallest non-dominated set of checks that proves one task's
+  changed files and behavior are commit-safe
+- **Full gate:** the project's whole validation suite. Run it no more than once
+  per relevant implementation state and only when the diff or repo policy
+  requires it. A one-task or last-task gate may own it when that result covers
+  the complete implementation; final verification reuses it while that state
+  remains unchanged
 - **Narrow gate:** the single test file or single check a step actually affects
 - **Dominated check:** an earlier check fully covered by a later check when
   nothing consumes the earlier result before the later check
@@ -115,15 +118,19 @@ Python here; use the same shape in any language.
      **Edge case:** Unicode normalization can change equality without changing
      the visible value.
 
-  2. **Run the task full gate**
+  2. **Run the task gate once**
 
-     1. `[exact full-validation command]`
+     1. `[one formatter command listing every applicable task file]`
+        - Omit when no changed file is covered by that tool
         - Expected: exit 0
-     2. `[next required full-suite command]`
-        - Omit when the first command covers it
+     2. `[one linter command listing every applicable task file]`
+        - Omit when no changed file is covered by that tool
+        - Expected: exit 0
+     3. `[affected test command]`
+        - Omit when an unchanged valid result already covers the final task diff
         - Expected: exit 0
 
-     Green (task gate): every listed command exits 0.
+     Green: every applicable non-dominated check exits 0.
 ```
 
 ## Plan location
@@ -181,17 +188,42 @@ Record the choice in the header and encode it with commit checkboxes:
 Every plan ends with one self-contained final-verification checkpoint after all
 tasks.
 
-- Copy the exact non-dominated full-gate command sequence from the task steps
-  into the checkpoint
-- Put the full-plan final review inside the checkpoint
-- Require final-review `PASS` before final validation
-- Run only affected narrow gates while resolving final-review findings
-- Reuse a valid task full-gate result when it covers the unchanged final diff
-- Run the copied full-gate command when final review changed relevant state
-- Run the copied full-gate command when valid prior evidence is unavailable
-- Add an exact build command only when the full gate does not build
-- Add an exact documentation command only when the full gate does not generate
-  required documentation
+- Build a review-evidence map from completed task reviews before dispatching a
+  final reviewer
+- Reuse a task review when it covers the complete current implementation. This
+  is normally true for a one-task plan and for the last cumulative task review
+  when no implementation content or semantic input changed afterward
+- Dispatch a final reviewer only for review scope not already covered
+- Build an evidence map from completed task gates and reviewer-fix gates before
+  adding final commands
+- Add a final command only for applicable scope not already covered by valid
+  evidence
+- A commit, read-only review, checkbox update, or other bookkeeping does not
+  invalidate evidence unless it changes implementation content or the check's
+  semantic inputs
+- For a one-task plan, list no final automated or manual checks when the task
+  gate covers the complete implementation and the review-fix loop reruns every
+  check invalidated by a fix
+- Apply the same rule when the last task gate already covers the complete
+  implementation: do not repeat it at final verification
+- Do not copy task-gate commands into final verification as fallback commands
+- Batch all files accepted by the same formatter, linter, or checker into one
+  invocation
+- Put final review coverage inside the checkpoint
+- Require no unresolved final-review findings before final validation
+- Run only checks invalidated by final-review fixes; prefer narrow checks and
+  rerun a full gate only when narrower evidence cannot restore required coverage
+- Reuse a valid task-gate or reviewer-fix result when it covers the current
+  implementation state and semantic scope
+- Run the project's full gate only when source, tests, build inputs, tool
+  config, generated artifacts, repo policy, or uncovered cross-task integration
+  makes it relevant
+- When one full-gate command covers selected checks, omit every contained
+  formatter, linter, type-check, build, and test command
+- Do not run unit tests, type checks, or builds for documentation-only changes
+  unless the repo explicitly makes those checks applicable
+- Add an exact build command only when relevant and not already covered
+- Add an exact documentation command only when relevant and not already covered
 - Add each required manual check as an exact procedure
 - Give each manual check one expected observation
 - Remove every unused command or check placeholder
@@ -200,44 +232,54 @@ tasks.
 ```markdown
 - [ ] **Final verification checkpoint**
 
-  **Skills (load if not already loaded):** `requesting-code-review`,
-  `verification-before-completion`
+  1. **Close final review coverage**
 
-  1. **Review the complete plan diff**
+     **Skills (load if not already loaded):** `requesting-code-review`
 
-     1. Dispatch a fresh code-quality reviewer over the complete plan diff
-     2. Resolve each substantiated finding
+     Omit the skills line and dispatch step when reusable task-review evidence
+     already covers the complete current implementation.
+
+     1. Reuse a task-review result when it covers the complete current
+        implementation
+     2. Dispatch a fresh code-quality reviewer only when complete review
+        coverage remains missing
+     3. Resolve each substantiated finding
         1. Verify its cited evidence
         2. Apply the narrowest valid fix
         3. Update `Solved defects`
-        4. Run the affected narrow gates
-        5. Re-run affected spec review when delivered behavior changed
-     3. Re-dispatch code-quality review after each fix round
-     4. Require `PASS`
+        4. Run only checks invalidated by the fix
+           - Prefer affected narrow gates
+           - Rerun a full gate only when narrower evidence cannot restore its
+             required coverage
+     4. Re-dispatch after a behavioral fix round
+     5. Do not re-dispatch after an all-static fix round when its affected gates
+        pass
+     6. Require reusable review coverage, `PASS`, or fully discharged findings
 
-  2. **Establish final automated evidence once**
+  2. **Close uncovered automated evidence**
 
-     **Reuse:** Accept an existing result only when it covers the exact current
-     diff.
+     **Skills (load if not already loaded):** `verification-before-completion`
 
-     1. `[exact full-gate command]`
-        - Run only when no reusable full-gate result exists
+     1. Reuse every task-gate and reviewer-fix result that covers the current
+        implementation state and semantic scope
+     2. Run `[exact command for uncovered applicable scope]`
+        - Omit this step when reusable evidence covers all applicable scope
         - Expected: exit 0
-     2. `[exact build command not covered by the full gate]`
-        - Expected: exit 0
-     3. `[exact documentation command not covered by the full gate]`
-        - Expected: exit 0
 
-  3. **Perform the final manual checks**
+  3. **Close uncovered manual evidence**
 
-     1. `[exact manual procedure]`
+     1. Reuse every valid task or reviewer-fix observation that covers the
+        current implementation state
+     2. Perform `[exact manual procedure for uncovered applicable behavior]`
+        - Omit this step when reusable observations cover all applicable
+          behavior
         - Expected: `[observable result]`
 
   Green:
 
-  - Final code-quality review returned `PASS`
-  - Every listed command has a valid result for the exact final diff
-  - Every listed manual procedure produced its expected observation
+  - Final code-quality review has no unresolved findings
+  - Reused and newly collected evidence covers every applicable check for the
+    current implementation state
 ```
 
 Commit checkpoints contain no command, message, or fixed file list. The owner
@@ -329,7 +371,7 @@ the conditional final-review-fixes commit checkpoint:
   - No intended checkpoint changes remain uncommitted
 ```
 
-Under `Per-task commits`, the task owner commits after its full gate, then
+Under `Per-task commits`, the task owner commits after its task gate, then
 summons reviewers. Each task-review fix round gets one follow-up commit. Keep
 final-review fixes uncommitted through re-review. Commit them once after final
 verification passes. On the no-change path, tick after confirming no
@@ -356,8 +398,28 @@ header.
 
 ## Verification deduplication
 
+- Classify each changed file before selecting commands: documentation, source,
+  test, build/tool config, generated artifact, or other
+- Map each command to the changed paths or behavior that justify it
+- Omit a command when no changed path or repo rule makes it applicable
+- Documentation-only changes do not justify unit tests, type checks, or builds
+  by default
+- A test-only change justifies the affected tests, not an unrelated full suite
+- Build or tool-config changes justify only the checks whose behavior they can
+  alter
+- A comment-only source change does not justify tests, type checks, builds, or a
+  full gate when comments have no executable role
+- Treat directives, suppressions, pragmas, doctests, generated-documentation
+  inputs, shebangs, encoding declarations, and format-sensitive metadata as
+  executable rather than comment-only
+- Canonical formatter-only output does not justify tests, type checks, builds,
+  or a full gate when formatter configuration and semantic inputs are unchanged
+- Formatting or lint checks may still be applicable to comment-only and
+  formatter-only changes
 - List verification and formatting commands in execution order before writing
   them into tasks
+- Batch all applicable files into one formatter/linter invocation when the tool
+  accepts multiple paths; never emit one invocation per file
 - Remove an earlier command when a later command covers the same scope plus more
 - Remove an earlier command when nothing consumes its result before the broader
   command
@@ -372,12 +434,27 @@ header.
   formatting action
   - Keep the containing formatting action
   - Remove the one-file action
+- Treat a post-write existence/read-back check as dominated when the write
+  command already reports failure and a later formatter, parser, test, diff, or
+  review consumes the file
+- Treat a final command or manual check as dominated when a task gate or
+  reviewer-fix gate covers the same current implementation state and semantic
+  scope
+- In a one-task plan, presume the task gate remains valid through commit and
+  read-only review unless implementation content or semantic inputs change
+- Do not preserve duplicate final commands as hypothetical fallback paths;
+  reviewer fixes run invalidated checks inside their fix loop
 - Keep a focused TDD red run when implementation depends on its expected failure
+- Keep a focused green run mid-implementation only when the next action depends
+  on it; do not repeat it as a pre-commit validation immediately before a
+  containing suite
 - Keep both commands when the broader command does not execute the narrow check
 - Keep both commands when an intervening action consumes the narrow result
-- Reuse a valid full-gate result when it covers the exact current diff
-- Re-run the full gate only after relevant state changed or prior evidence is
-  unavailable
+- Reuse valid evidence when it covers the exact current content and semantic
+  scope
+- Run a relevant full gate no more than once per implementation state; never
+  rerun it after read-only review or bookkeeping, and rerun it after a fix only
+  when narrower evidence cannot restore the required coverage
 
 ## Decomposition
 
@@ -387,15 +464,32 @@ header.
   file only when modifying it
 - Search the codebase for existing components/helpers/hooks/utilities first.
   Reuse mandatory. Extend before creating
-- Prefer surgical edits. Don't bundle unrelated changes because they touch
-  nearby code
-- Every task ends with the narrowest non-dominated `Green:` proof
+- Apply YAGNI. Prefer the fewest files and the smallest root-cause diff that
+  satisfies the source requirements
+- Prefer existing code, then standard-library or native platform features, then
+  installed dependencies. Add an abstraction, dependency, configuration point,
+  fallback, or extension hook only when a current requirement needs it
+- Do not prescribe unsolicited comments or documentation. Add a comment only
+  when required by the request or repo rules, or when a non-obvious invariant
+  cannot be expressed clearly in code
+- Cover behavior realistically reachable through the supported UI, API, job, or
+  ordinary system operation
+- Do not invent paranoid cases based on impossible states, deliberate internal
+  tampering, unsupported misuse, or hypothetical hacking mechanisms
+- Include adversarial security cases only when explicitly required, when
+  untrusted input crosses a real trust boundary, or when evidence shows a
+  recognized industry exploit with credible impact in this application
+- Never simplify away validation at a real trust boundary, data-loss prevention,
+  or an explicitly requested security measure
+- Don't bundle unrelated changes because they touch nearby code
+- Every task ends with the narrowest non-dominated `Green:` proof selected from
+  its actual change impact
 - Add an intermediate `Green:` only when a later action consumes its result
 - Prefer a paste-able command and observable token
 - Use an exact procedure only for manual-only checks
 - Keep TDD red inside its implementation step. Require assertion failure; fix
   import/runtime setup before proceeding
-- Run the full gate only as each task's last verification
+- Run the task gate only as each task's last verification
 - Merge tasks whose file sets overlap
 - One task per file set, not one task per concern
 - A task delivers one slice of working behavior plus its tests. Everything that
@@ -446,7 +540,7 @@ instructions. The log records the change; the task text stays executable.
 ## Tracking
 
 Executing from a plan file: flip a task's `- [ ]` to `- [x]` after all nested
-steps pass, including its full gate. Flip the task back before a reviewer fix.
+steps pass, including its task gate. Flip the task back before a reviewer fix.
 Inline execution owns all boxes; in subagent mode, the current task implementer
 owns its task and completed tasks changed by its reviewer fixes; the finalizer
 owns final boxes and completed tasks changed by final-review fixes. Tasks
@@ -464,9 +558,13 @@ Also track progress in the harness native task/todo list.
   Obsidian, Slack, Jira, CI, Neovim, browsers)
 - Add `**Skills (load if not already loaded):**` line only on steps with a
   match. No match -> no line
-- Final-verification checkpoint always:
-  `**Skills (load if not already loaded):** requesting-code-review, verification-before-completion`
-- Load `verification-before-completion` only after final review returns `PASS`
+- Final-verification automated-evidence step always:
+  `**Skills (load if not already loaded):** verification-before-completion`
+- Add `requesting-code-review` only to a final-review step that can dispatch a
+  reviewer; omit it when reusable review evidence already supplies complete
+  coverage
+- Load `verification-before-completion` only after final review coverage has no
+  unresolved findings
 - Any step that reads or replies to a bot review always:
   `**Skills (load if not already loaded):** replying-to-pr-review-threads`
 
@@ -529,17 +627,6 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 3. `R3`: [Explicit must statement]
 4. `R4`: [Explicit never statement]
 
-**Architecture:**
-
-- [Primary approach]
-- [Key boundary]
-- [Required ownership rule]
-
-**Tech Stack:**
-
-- [Technology]
-- [Library]
-
 **Execution mode:** [Subagent-Driven | Inline]
 
 **Commit policy:** [Per-task commits | One commit at the end | No commits]
@@ -589,10 +676,10 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 Skills are annotated per step, not in the header.
 
-- Put every exact full-gate command directly in the task step that runs it
+- Put every exact task-gate command directly in the task step that runs it
 - Never point a task's verification step to the header or another plan section
-- Copy the exact non-dominated full-gate command sequence into the
-  self-contained final-verification checkpoint
+- Put only exact commands for uncovered scope into the self-contained
+  final-verification checkpoint; record evidence reuse without copying commands
 
 ## Detail calibration
 
@@ -607,6 +694,8 @@ Never write:
 - "Similar to Task N" (steps may be read out of order)
 - Vague instructions such as "build the component"
 - References to types/functions/methods not defined in any task
+- Comments, abstractions, defensive branches, or tests for speculative future
+  needs and unreachable scenarios
 
 Use verbatim content only for tricky config, signatures, and shell commands.
 Describe test cases as inputs, outputs, and key assertions. Describe
@@ -660,37 +749,59 @@ After writing, re-check and fix inline:
 5. **Reuse:** anything created that already exists -> import or extend instead
 6. **Safety:** destructive operations match source requirements and target-repo
    rules; every named error mapping has a step that handles it
-7. **Verification:**
+7. **Scope discipline:** remove unrequested comments, abstractions,
+   dependencies, configuration, fallback paths, defensive branches, and tests
+8. **Reachability:** every case is reachable through a supported flow or a real
+   trust boundary; speculative tampering requires an explicit requirement or
+   evidence of a recognized exploit with credible impact
+9. **Verification:**
    1. Remove repeated `Green:` checks
    2. Remove standalone red phases
-   3. Require exact full-gate commands in each task's last verification step
+   3. Require exact impact-appropriate commands in each task's last verification
+      step
    4. Require one plan-level final-verification checkpoint after all tasks
-   5. Put full-plan final review inside the final-verification checkpoint
-   6. Require final-review `PASS` before final validation
-   7. Run final validation once after the final-review fix loop
-   8. Require exact commands in the final-verification checkpoint
-   9. Require exact manual procedures in the final-verification checkpoint
-   10. Reject a separate plan-level final-review task
-   11. Reject verification commands that reference another plan section
-8. **Task overlap:** list each task's file set. Overlapping sets -> merge the
-   tasks
-9. **Repetition:** move repeated repo rules and conventions to the preamble
-10. **Commit cadence:** checkpoint count and placement match the header policy;
+   5. Put final review coverage inside the final-verification checkpoint
+   6. Reuse a one-task or final cumulative task review when it covers the
+      unchanged complete implementation
+   7. Dispatch final review only for uncovered review scope
+   8. Require no unresolved final-review findings before final validation
+   9. Establish complete final evidence once after the final-review fix loop,
+      reusing valid task and reviewer-fix evidence
+   10. Require every newly listed final command to be exact
+   11. Require every newly listed final manual procedure to be exact
+   12. Reject a separate plan-level final-review task
+   13. Reject verification commands that reference another plan section
+   14. Reject checks unrelated to the changed file categories or behavior
+   15. Combine per-file formatter/linter invocations by tool
+   16. Reject post-write existence/read-back checks already proved downstream
+   17. Reject a narrow green check immediately followed by a containing suite
+       when no intervening action consumes it
+   18. Reject a full gate before final verification unless a one-task or
+       last-task gate covers the complete implementation and final verification
+       reuses it
+   19. Reject final commands or manual checks already covered by still-valid
+       task-gate or reviewer-fix evidence
+   20. Require a zero-command final-validation path for one-task plans whose
+       task gate covers the complete implementation
+10. **Task overlap:** list each task's file set. Overlapping sets -> merge the
+    tasks
+11. **Repetition:** move repeated repo rules and conventions to the preamble
+12. **Commit cadence:** checkpoint count and placement match the header policy;
     the conditional final-review-fixes commit follows final verification; all
     plan-state inclusion matches `Plan file policy`; no checkpoint freezes
     commands, messages, or paths; every additional state-file edit maps to a
     source requirement
-11. **Review duplication:** remove implementation-review steps owned by
+13. **Review duplication:** remove implementation-review steps owned by
     `executing-plans`. For requested external-review work, reject narrowed,
     conformance-only, truncated, or status-only review
-12. **Readability:**
+14. **Readability:**
     1. Every task is a checkbox
     2. Every step is a nested numbered item
     3. Every action has its own list item
     4. Every idea has its own list item or justified paragraph
     5. Every paragraph is correctly indented
     6. Every paragraph adds necessary non-action context
-13. **Duplicate work:**
+15. **Duplicate work:**
     1. Build the ordered command sequence for every task
     2. Compare test scopes
     3. Compare formatting scopes
@@ -699,6 +810,12 @@ After writing, re-check and fix inline:
     6. Compare build scopes
     7. Remove each dominated command
     8. Keep an earlier command only when a later action consumes its result
+    9. Group applicable paths into one invocation per tool
+    10. Confirm every remaining command is justified by the change impact
+    11. Compare task and reviewer-fix evidence with final-validation scope
+    12. Remove final fallback copies of already-covered commands and procedures
+    13. Remove tests, type checks, builds, and full gates invalidated only by
+        semantic-neutral comments or canonical formatter output
 
 ## Plan reviewer
 
@@ -729,6 +846,18 @@ The reviewer audits the concrete plan for dominated work:
 - Compare commands by semantic scope
 - Check execution order
 - Check whether an intervening action consumes the earlier result
+- Check every command against the file categories and behavior it validates
+- Reject per-file invocations when one invocation can cover the same files
+- Reject existence/read-back checks already proved by a downstream consumer
+- Reject tests, type checks, and builds unrelated to the planned diff
+- Reject a full gate before final verification unless a one-task or last-task
+  gate covers the complete implementation and final verification reuses it
+- Reject checks separately repeated immediately before a full-gate command that
+  contains them
+- Reject final commands and procedures already covered by valid task or
+  reviewer-fix evidence, especially in one-task plans
+- Reject final review dispatch already covered by a valid one-task or cumulative
+  task review
 - Report an earlier dominated command as at least Important
 - Do not limit this audit to identical command text
 

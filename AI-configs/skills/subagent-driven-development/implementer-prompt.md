@@ -12,9 +12,9 @@ adjudicate and fix. Never hand a finding back up to the orchestrator.
 
 ## Workflow
 
-1. Read the plan header, task, convention sources, commit policy, plan-file
-   policy, `Execution log`, and available skills. A logged entry overrides
-   contradicting task text
+1. Read the plan header, task, governing repo instructions and config, commit
+   policy, plan-file policy, `Execution log`, and available skills. A logged
+   entry overrides contradicting task text
 2. Read the classified `baseline_snapshot`. Treat `No commits` plus a requested
    PR as commit-bound for scope safety. Before editing any commit-bound target
    or reviewer-fix path, stop if it carries `baseline-only` content. Under
@@ -22,7 +22,7 @@ adjudicate and fix. Never hand a finding back up to the orchestrator.
    Cumulative scope includes completed earlier tasks and excludes later tasks
 3. Capture `task_base_ref = git rev-parse HEAD`
 4. Execute every task step; tick a step after its `Green:` passes
-5. Run the task-ending full gate
+5. Run the task-ending impact-appropriate task gate
 6. Under `Per-task commits`, load `git-commit-message`, tick the task commit
    checkpoint immediately before staging, and commit the actual task diff
 7. Run the review loop
@@ -81,7 +81,7 @@ with `plan_base_ref` for `One commit at the end` or `No commits`.
 
 **Skip the reviewer entirely** when `changed_files` contains no source or test
 file — a task whose whole diff is the plan document, a formatter result, or
-bookkeeping such as ticking checkboxes. The full gate already proves it. Record
+bookkeeping such as ticking checkboxes. The task gate already proves it. Record
 nothing and continue; this is not a `PASS` to report.
 
 Otherwise dispatch:
@@ -105,8 +105,13 @@ Apply:
 2. `PASS`: the task is done
 3. Findings: verify each citation, un-tick affected steps, fix substantiated
    issues, update `Solved defects`, and re-tick verified steps
-4. Re-run the full gate when a fix changed code. A gate that passed and has not
-   been invalidated needs no second run
+4. Re-run only task-gate commands invalidated by the fix. Valid evidence needs
+   no second run
+   - Semantic-neutral comment-only and canonical formatter-only fixes do not
+     invalidate tests, type checks, builds, or full gates
+   - Directives, suppressions, pragmas, doctests, generated-documentation
+     inputs, shebangs, encoding declarations, and format-sensitive metadata are
+     not semantic-neutral comments
 5. Under `Per-task commits`, commit that round's actual fixes with
    `git-commit-message`
 6. Close the round by its discharge tags
@@ -119,16 +124,16 @@ stage and none to reopen: a behavioural fix is judged in round two.
 
 Every finding carries `static` or `behavioural`.
 
-- **All findings `static`:** the green full gate IS the verification. Do not
+- **All findings `static`:** the green task gate IS the verification. Do not
   re-dispatch. A reviewer re-reading a rename, an import path, a formatter diff,
   or a type annotation the gate already proved adds nothing and spends a round
 - **Any finding `behavioural`:** re-dispatch once with the fixed diff
 
 A reviewer that omits the tag, or tags a control-flow, boundary, predicate,
 regex, or contract change as `static`, is malformed output: re-dispatch under
-the output contract rather than trusting the tag. Never retag a finding
-yourself — you wrote the code, so the tag exists to keep that call with the
-independent party.
+the output contract rather than trusting the tag. Never retag a finding yourself
+— you wrote the code, so the tag exists to keep that call with the independent
+party.
 
 Incorrect findings get one clarification re-dispatch with counterevidence.
 Empty, errored, or malformed responses get 3 total attempts. A `<review-input>`
@@ -155,7 +160,9 @@ Success:
 
 ```text
 PASS | <task_id>
+REVIEW | <task|cumulative> | <PASS|DISCHARGED|SKIPPED>
 VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
+VERIFY {"manual":"<check>","status":"PASS","observation":"<observation>"}
 COMMITS | <sha[,sha...] | none>
 FIXED
 - <path:line> | <problem> | <fix>
@@ -163,8 +170,12 @@ LEARNED
 - <task_id> | <drift|gotcha|decision> | <plan assumed> | <actual and change>
 ```
 
-Emit one `VERIFY` line per full-gate command. Merge duplicate `FIXED` root
-causes. Emit valid compact JSON and escape dynamic strings.
+Emit `REVIEW | ... | SKIPPED` only when the no-source-or-test rule skipped
+dispatch. Otherwise emit `PASS` for an explicit reviewer `PASS`, or `DISCHARGED`
+when an all-static fix round closed without redispatch. Emit one `VERIFY` line
+per task-gate command or manual check. Omit the manual form when no manual check
+exists. Merge duplicate `FIXED` root causes. Emit valid compact JSON and escape
+dynamic strings.
 
 Omit `FIXED` when no reviewer finding was fixed.
 

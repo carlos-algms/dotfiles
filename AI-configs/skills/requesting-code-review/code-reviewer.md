@@ -52,9 +52,10 @@ For a classified plan snapshot:
 
 ## Validation boundary
 
-The dispatcher already ran the full gate. Do not run the suite, lint, types, or
-build. Run one narrow test file only to substantiate a specific test finding. A
-green suite does not prove requirement coverage.
+The dispatcher already ran the applicable task or final gate. Do not run the
+suite, lint, types, formatters, or build. Run one narrow test file only to
+substantiate a specific test finding. A green gate does not prove requirement
+coverage.
 
 ## What to check
 
@@ -83,8 +84,7 @@ For async, shared state, file I/O, or network I/O also check:
 
 ### Project fit
 
-- Read the closest `AGENTS.md`/`CLAUDE.md`, `.editorconfig`, lint config, and
-  plan `Convention sources`
+- Read the closest `AGENTS.md`/`CLAUDE.md`, `.editorconfig`, and lint config
 - Read up to three available representative sibling files when applicable
 - Match naming, file placement, imports, errors, tests, fixtures, and assertions
 - Reuse existing helpers before adding abstractions
