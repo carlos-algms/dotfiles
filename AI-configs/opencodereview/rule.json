@@ -1,4 +1,5 @@
 {
+  "exclude": ["docs/**"],
   "include": ["**/*.md", "**/*.markdown", "**/*.mdx"],
   "rules": [
     {
