@@ -229,20 +229,25 @@ Do not adopt:
 
 ## Apply gate
 
+- The gate starts open for every action that changes files or external state
+- Read-only investigation does not require approval
+- Before acting, show the exact proposed content, scope, and target
+- Ask for confirmation after showing the proposal. Do not act in the same turn
+- Only explicit approval in a later user message closes the gate: `y`, `yes`,
+  `go`, `do it`, `ship it`, or a label pick from offered options (`A`, `B`, `C`)
+- The initial request never closes the gate, including a clear imperative
+- "Auto", "bypass permissions", "yolo", and similar harness modes never close
+  the gate
 - Use `y/n` only for one concrete action
 - The prompt must name the exact scope and target
 - Good: `Apply A: rewrite AI-configs/base-ai-instructions.md only? (y/n)`
 - Bad: `Apply? (y/n)` after a plan, options, or mixed scope
-- Only explicit approval closes the gate: `y`, `yes`, `go`, `do it`, `ship it`,
-  a label pick from offered options (`A`, `B`, `C`), or a clear imperative
 - Anything else leaves the gate open
-- Refinement, sub-question, alternative, premise correction, or scope change:
-  update the plan and ask again with the exact action
-- Single imperative orders need no gate
-- Gate required for multi-step plans, multi-file edits, deletions, symlinks,
-  installs, commits, pushes
+- A refinement, sub-question, alternative, premise correction, or scope change
+  reopens the gate. Update the proposal and ask again
 - Two or more distinct options: do not use this gate. Use `## Alternatives`
-- A label pick (`B`) closes that choice as accept; execute that option
+- A label pick (`B`) closes that choice as accepted
+- While the gate is open, do not perform the action
 
 ## Alternatives
 
