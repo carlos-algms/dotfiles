@@ -1,15 +1,15 @@
 ---
-name: milestone-planner
+name: plan-a-milestone
 description: >
   Create or update a terse milestone file composed of delegated implementation
-  plans. Use only when the user directly invokes milestone-planner or explicitly
+  plans. Use only when the user directly invokes plan-a-milestone or explicitly
   asks to create or update a milestone plan. Do not infer use from large
   features, multiple plans, parallel work, sequential work, or PR decomposition.
 ---
 
-# Milestone planner
+# Plan a milestone
 
-**Announce at start:** "I'm using the milestone-planner skill to compose the
+**Announce at start:** "I'm using the plan-a-milestone skill to compose the
 implementation plans."
 
 Create a dependency graph of implementation plans. Keep the milestone file as a
