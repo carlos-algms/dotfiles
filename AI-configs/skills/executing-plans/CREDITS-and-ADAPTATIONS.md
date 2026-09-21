@@ -9,7 +9,8 @@ Original source:
 - Replaced subagent redirect with an inline/subagent execution handoff
 - Added immediate checkbox ticking after verified steps
 - Added plan-owned commit cadence with inline or delegated checkpoint ownership
-- Added final whole-plan review and fresh `verification-before-completion` gate
+- Added final whole-plan review and a reuse-first gate instead of
+  `verification-before-completion`
 - Added a single-runner rule for final verification, owned per execution mode
 - Added a shared baseline-snapshot lifecycle with per-mode cleanup ownership
 - Removed integration section

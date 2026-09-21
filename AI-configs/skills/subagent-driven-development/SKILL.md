@@ -139,5 +139,4 @@ act until you have read it. Then apply:
 - **./reviewer-prompt.md** - Per-task craft + spec reviewer, dispatched by the
   implementer
 - **./finalizer-prompt.md** - Full-plan review, verification, and final commit
-- **verification-before-completion** - Verifies before claiming completion
 - **create-pull-request** - Required before the finalizer opens a requested PR

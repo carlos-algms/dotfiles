@@ -292,8 +292,6 @@ Skills are annotated per step, not in the header. For each step:
   it: flag as missing
 - Step's Skills line lists a skill irrelevant to that step's footprint: flag as
   irrelevant (drop it)
-- The final-verification checkpoint does NOT list
-  `verification-before-completion`: flag (always required there)
 
 Cite the signal (plan:line) and the matching skill name.
 

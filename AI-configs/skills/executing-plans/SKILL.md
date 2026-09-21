@@ -302,16 +302,15 @@ After all tasks complete and verified:
       gates are the verification
    8. Require `PASS` or fully discharged findings
 4. When the written final-verification checkpoint reaches final validation:
-   1. Load `verification-before-completion`
-   2. Reuse each task-gate or reviewer-fix result that still covers the current
+   1. Reuse each task-gate or reviewer-fix result that still covers the current
       implementation state and semantic scope
-   3. Run or perform only written final checks whose scope remains uncovered
-   4. Append final-review drift, gotchas, and decisions to `Execution log`
-   5. Execute any written milestone completion action:
+   2. Run or perform only written final checks whose scope remains uncovered
+   3. Append final-review drift, gotchas, and decisions to `Execution log`
+   4. Execute any written milestone completion action:
       - `coordinated`: complete the `READY` -> `FINALIZE` -> `FINALIZED` turn
         defined above
       - `sequential`: update the milestone without handshake messages
-   6. Tick the final-verification checkpoint only after the milestone action
+   5. Tick the final-verification checkpoint only after the milestone action
       passes
 5. Do not run the full gate elsewhere in the final-review fix loop
 6. Execute each remaining written commit checkpoint:

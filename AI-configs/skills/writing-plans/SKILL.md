@@ -258,8 +258,6 @@ tasks.
 
   2. **Close uncovered automated evidence**
 
-     **Skills (load if not already loaded):** `verification-before-completion`
-
      1. Reuse every task-gate and reviewer-fix result that covers the current
         implementation state and semantic scope
      2. Run `[exact command for uncovered applicable scope]`
@@ -569,13 +567,9 @@ Also track progress in the harness native task/todo list.
   Obsidian, Slack, Jira, CI, Neovim, browsers)
 - Add `**Skills (load if not already loaded):**` line only on steps with a
   match. No match -> no line
-- Final-verification automated-evidence step always:
-  `**Skills (load if not already loaded):** verification-before-completion`
 - Add `requesting-code-review` only to a final-review step that can dispatch a
   reviewer; omit it when reusable review evidence already supplies complete
   coverage
-- Load `verification-before-completion` only after final review coverage has no
-  unresolved findings
 - Any step that reads or replies to a bot review always:
   `**Skills (load if not already loaded):** replying-to-pr-review-threads`
 

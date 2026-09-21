@@ -49,12 +49,11 @@ Resolve prompt paths relative to this file:
        finding. After an all-`static` fix round, the green affected gates are
        the verification: do not re-dispatch
    14. Require `PASS` or fully discharged findings
-   15. Load `verification-before-completion`
-   16. Reuse each dispatcher `verification_evidence` result that still covers
+   15. Reuse each dispatcher `verification_evidence` result that still covers
        the current implementation state and semantic scope
-   17. Run or perform only written final checks whose scope remains uncovered
-   18. Append final-review drift, gotchas, and decisions to `Execution log`
-   19. Tick the final-verification checkpoint
+   16. Run or perform only written final checks whose scope remains uncovered
+   17. Append final-review drift, gotchas, and decisions to `Execution log`
+   18. Tick the final-verification checkpoint
 9. Execute each remaining written commit checkpoint
 10. When the plan requests a PR and the branch contains the reviewed committed
     work, load `create-pull-request` and complete it
