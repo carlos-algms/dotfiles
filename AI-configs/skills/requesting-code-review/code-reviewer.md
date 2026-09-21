@@ -57,6 +57,44 @@ suite, lint, types, formatters, or build. Run one narrow test file only to
 substantiate a specific test finding. A green gate does not prove requirement
 coverage.
 
+The prohibition is capability-based, not name-based. Never invoke a test runner,
+linter, type checker, formatter, compiler, or build — directly or through Make,
+a package script, a task runner, a wrapper, an alias, a subprocess, or a loop.
+These names are examples, not the boundary: `make test`, `make typecheck`,
+`make format`, `make lint`, `make check`, `pytest tests/`, `uv run pytest` with
+no path, `tox`, `nox`, `pnpm run test`, `pnpm run lint`, `pnpm run typecheck`,
+`pnpm exec vitest`, `npx vitest`, `vitest run` with no path, and any loop that
+repeats a suite (`for i in ...`, `seq`). A different spelling of a forbidden
+capability is still forbidden.
+
+Re-running the gate does not make you more certain; it repeats work the
+dispatcher already paid for. A flaky test is a finding, reported once from the
+evidence you have, not a thing to reproduce across 12 runs.
+
+### Probe budget
+
+Do not probe by default. Read the code and existing tests first.
+
+Write a probe only to substantiate a finding you will report, and only when that
+finding is not inferable from the code or from existing unit tests: the suite
+does not cover the path, or the path needs a sequence of events a probe can
+reproduce, or reproduce faster, than a committed test. A probe you would not
+turn into a bullet is wasted time: skip it.
+
+- At most ONE probe file per review.
+- The probe goes in the scratchpad. Placing it inside the source tree is
+  permitted ONLY when the probe cannot resolve its imports from there, and you
+  have tried the scratchpad first and seen it fail. State that in the finding.
+- Delete the probe before returning. A probe left in the tree is a Critical
+  defect you created.
+- Restore any mutated source in the SAME command that mutates it, so an aborted
+  review cannot leave the tree dirty:
+  `cp f f.bak && <mutate> && <test>; cp f.bak f && rm f.bak`
+- Never mutate source to explore a hypothesis. Mutate only to prove a claim you
+  have already written down.
+
+Read-only means the tree you were given is the tree you hand back.
+
 ## What to check
 
 ### Requirements
@@ -68,10 +106,13 @@ coverage.
 
 ### Correctness
 
+Judge the code under normal application execution: the inputs, states, and call
+sequences the running app actually produces. A defect needs a path a user or a
+caller can reach.
+
 - Each modified branch, including error/nil/fallback paths
 - Empty, zero, missing, negative, and boundary inputs
 - Error propagation, cleanup, resource release, and data preservation
-- External input validation before query, shell, path, or template sinks
 - Limits, pagination, timeouts, and backpressure where applicable
 - Precision, coercion, truncation, and overflow
 
@@ -80,7 +121,29 @@ For async, shared state, file I/O, or network I/O also check:
 - Atomicity and check-then-act races
 - Awaited calls and handled rejections
 - Lock ordering and locks held across I/O
-- Cross-request/task state isolation
+
+### Threat model
+
+Match the checks to the application's real shape. Read the closest
+`AGENTS.md`/`CLAUDE.md` to establish it; when they do not say, infer it from the
+code and state your reading in the finding.
+
+Apply these ONLY where the shape warrants them:
+
+- Input validation before query, shell, path, or template sinks: where input
+  crosses a trust boundary the app actually has
+- Cross-request/tenant state isolation: where the app serves more than one user
+  or tenant
+- Authentication, authorization, session, and credential handling: where the app
+  has accounts
+
+A local, single-user application with no accounts, no untrusted input, and no
+PII does not face those scenarios. Do not invent an attacker it does not have.
+
+Report a security finding only when a recognized industry-standard control
+applies to this application's shape, and name the control. Contrived tampering,
+a hand-crafted malicious payload on a path no caller can reach, or a threat that
+presumes infrastructure the app lacks is not a finding.
 
 ### Project fit
 

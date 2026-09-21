@@ -412,8 +412,15 @@ header.
 - Treat directives, suppressions, pragmas, doctests, generated-documentation
   inputs, shebangs, encoding declarations, and format-sensitive metadata as
   executable rather than comment-only
-- Canonical formatter-only output does not justify tests, type checks, builds,
-  or a full gate when formatter configuration and semantic inputs are unchanged
+- Never write a test, type check, build, or full gate as the check that follows
+  a formatter step. A formatter run is not an invalidating edit: it reports its
+  own success, and a reflow does not change behaviour. A formatter step's own
+  `Green:` (exit 0, or `--check` clean) is the whole check it needs
+- A formatter step touching only `.md`, `.mdx`, or docs paths gets no code check
+  of any kind
+- The one exception: when the step changes formatter configuration
+  (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), treat it as a real edit and
+  give it a real check
 - Formatting or lint checks may still be applicable to comment-only and
   formatter-only changes
 - List verification and formatting commands in execution order before writing
@@ -490,6 +497,10 @@ header.
 - Keep TDD red inside its implementation step. Require assertion failure; fix
   import/runtime setup before proceeding
 - Run the task gate only as each task's last verification
+- Never write an aggregate command (`make test`, `pnpm run test`, a pathless
+  `pytest`) as a step's `Green:`. A step's `Green:` is the narrowest command
+  that proves that step — one test file, one `-k` selector, one type check.
+  Aggregates belong to the task gate, which runs once at the end
 - Merge tasks whose file sets overlap
 - One task per file set, not one task per concern
 - A task delivers one slice of working behavior plus its tests. Everything that

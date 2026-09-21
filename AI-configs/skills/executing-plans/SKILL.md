@@ -166,12 +166,29 @@ For each task:
 
 Never dispatch onto a red gate or move on with unadjudicated findings. Re-run
 only invalidated task-gate commands after a task-review fix; valid evidence
-needs no second run.
+needs no second run. Invalidation is mechanical: a command that passed is stale
+only if an `Edit` or `Write` landed after it. No edit in between means no
+re-run, and a passing command is never repeated to confirm it.
 
-Semantic-neutral comment-only and canonical formatter-only changes do not
-invalidate tests, type checks, builds, or full gates. Directives, suppressions,
-pragmas, doctests, generated-documentation inputs, shebangs, encoding
-declarations, and format-sensitive metadata are not semantic-neutral comments.
+The task gate runs once, after every step in the task has a passing `Green:`, as
+the task's last verification. A step's narrow `Green:` is that step's check. An
+aggregate gate (`make test`, `pnpm run test`, a pathless `pytest`) is not a step
+check and never belongs inside the step loop.
+
+A formatter run is NOT an invalidating edit. Running `oxfmt`, `prettier`,
+`ruff format`, `black`, or `make format` never authorises a test, type check,
+build, or gate re-run: the formatter reports its own success, and a reflow does
+not change behaviour. A formatter that touched only `.md`, `.mdx`, or docs paths
+invalidates nothing at all. The only exception is the formatter's own
+configuration changing (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), or the
+formatter reporting a parse error or non-zero exit; then treat it as a real
+edit.
+
+Semantic-neutral comment-only changes likewise do not invalidate tests, type
+checks, builds, or full gates. Directives, suppressions, pragmas, doctests,
+generated-documentation inputs, shebangs, encoding declarations, and
+format-sensitive metadata are not semantic-neutral comments: those DO
+invalidate.
 
 ## Execution log capture
 

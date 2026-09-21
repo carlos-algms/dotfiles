@@ -22,7 +22,10 @@ adjudicate and fix. Never hand a finding back up to the orchestrator.
    Cumulative scope includes completed earlier tasks and excludes later tasks
 3. Capture `task_base_ref = git rev-parse HEAD`
 4. Execute every task step; tick a step after its `Green:` passes
-5. Run the task-ending impact-appropriate task gate
+5. Run the task-ending impact-appropriate task gate — ONCE, here, as the task's
+   last verification. Never mid-task. A step's narrow `Green:` is that step's
+   check; an aggregate gate (`make test`, `pnpm run test`, a pathless `pytest`)
+   is not a step check and does not belong inside the step loop
 6. Under `Per-task commits`, load `git-commit-message`, tick the task commit
    checkpoint immediately before staging, and commit the actual task diff
 7. Run the review loop
@@ -99,19 +102,51 @@ Apply:
   checklist_path    = <abs quality-checklist path>
 ```
 
+## Probing your own work
+
+Prefer TDD. If a path needs proof, add a real test to the suite and keep it.
+
+A throwaway probe is only for a claim you cannot settle by reading the code or
+by an existing or new unit test: a path the suite does not cover, or a sequence
+of events a probe reproduces faster than a committed test. Proving a guard is
+load-bearing by asserting the opposite of the shipped contract stays in a probe,
+never in the suite.
+
+- ONE probe file per task, in the scratchpad. Inside the source tree only when
+  imports cannot resolve from the scratchpad, and then deleted before the gate
+- Restore mutated source in the SAME command that mutates it:
+  `cp f f.bak && <mutate> && <test>; cp f.bak f && rm f.bak`
+- Budget: 3 probe runs. If three runs have not settled the question, the design
+  is the problem — record it as a `gotcha` and state what stayed unproven
+
+Do not probe to explore. Probe to settle a question you have already written
+down, and say in the execution log what it answered.
+
 ## Review loop
 
 1. Dispatch one fresh reviewer
 2. `PASS`: the task is done
 3. Findings: verify each citation, un-tick affected steps, fix substantiated
    issues, update `Solved defects`, and re-tick verified steps
-4. Re-run only task-gate commands invalidated by the fix. Valid evidence needs
-   no second run
-   - Semantic-neutral comment-only and canonical formatter-only fixes do not
-     invalidate tests, type checks, builds, or full gates
+4. Re-run only task-gate commands invalidated by the fix. The test is
+   mechanical, not a judgment: a command that passed needs a second run ONLY if
+   an `Edit` or `Write` landed after it. No edit in between means no re-run,
+   whatever your confidence. Never re-run a passing command to confirm it, and
+   never repeat one to hunt a flake — a suspected flake is a finding, reported
+   once, capped at 3 characterizing runs
+   - A formatter run is NOT an invalidating edit. Running `oxfmt`, `prettier`,
+     `ruff format`, `black`, or `make format` never authorises a test, type
+     check, build, or gate re-run. The formatter already reports its own
+     success; a reflow does not change behaviour
+   - A formatter that touched only `.md`, `.mdx`, or docs paths invalidates
+     nothing at all. v9 ran a code suite after a markdown reflow 13 times
+   - Exception, and the only one: the formatter's own configuration changed
+     (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), or it reported a parse error
+     or a non-zero exit. Then treat it as a real edit
+   - Semantic-neutral comment-only fixes likewise do not invalidate anything
    - Directives, suppressions, pragmas, doctests, generated-documentation
      inputs, shebangs, encoding declarations, and format-sensitive metadata are
-     not semantic-neutral comments
+     not semantic-neutral comments: those DO invalidate
 5. Under `Per-task commits`, commit that round's actual fixes with
    `git-commit-message`
 6. Close the round by its discharge tags
