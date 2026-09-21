@@ -33,7 +33,8 @@ merge-model convention.
   resolved base
 - Count commits in the branch range before composing the PR
 - For a one-commit branch, use that commit's subject and body as the PR title
-  and body without shortening or rewriting them
+  and body without shortening or changing the wording; join hard-wrapped lines
+  within each paragraph or bullet
 - A repository template may place the commit body inside required sections, but
   preserve its wording and complete every required section
 - For a multi-commit branch, treat individual commits, plans, and initial file
@@ -50,6 +51,10 @@ merge-model convention.
 - Body with template: fill it without dropping required sections
 - Body without template: use concise prose, bullets, or both
 - Prefer a bullet when it conveys the same fact with fewer words
+- Write for human readers in plain, direct language
+- Describe outcomes, purpose, and impact; omit implementation details
+- Avoid jargon, difficult language, padding, hedges, and invented content
+- Do not add words to approach a word limit
 - Paragraphs: no more than 25 words each
 - First paragraph: state only context that is clearer than a bullet
 - Second paragraph: add only mandatory, important information not captured in
@@ -59,7 +64,9 @@ merge-model convention.
   first two paragraphs or bullets
 - Put one blank line between paragraphs and before the bullet list
 - Keep bullet items consecutive, without blank lines between them
-- Bullets: no more than 10 words
+- Bullets: no more than 16 words; this is a limit, not a target
+- Do not hard-wrap body prose or bullets; keep each paragraph and list item on
+  one full source line
 - State each fact once: in prose or a bullet, never both
 - Describe only the merge-ready final state. Omit temporary status, pending
   work, and anything expected to change or be removed before merge
@@ -77,8 +84,8 @@ No-template body example:
 ```markdown
 Explain why the change matters and its impact.
 
-- Describe reviewer-relevant behavior
-- Call out important constraints or decisions
+- Describe what changes for users or reviewers
+- Add only essential context
 - Fixes #123
 ```
 

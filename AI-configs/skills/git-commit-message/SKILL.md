@@ -84,14 +84,18 @@ type(scope): subject
 
 Explain why the change matters and its impact.
 
-- Describe reviewer-relevant behavior
-- Call out important constraints or decisions
+- Describe what changes for users or reviewers
+- Add only essential context
 ```
 
 - Subject: imperative, lowercase after the colon, no more than 72 characters in
   total
 - Body: use concise prose, bullets, or both
 - Prefer a bullet when it conveys the same fact with fewer words
+- Write for human readers in plain, direct language
+- Describe outcomes, purpose, and impact; omit implementation details
+- Avoid jargon, difficult language, padding, hedges, and invented content
+- Do not add words to approach a word limit
 - Paragraphs: no more than 25 words each
 - First paragraph: state only context that is clearer than a bullet
 - Second paragraph: add only mandatory, important information not captured in
@@ -101,12 +105,12 @@ Explain why the change matters and its impact.
   first two paragraphs or bullets
 - Put one blank line between paragraphs and before the bullet list
 - Keep bullet items consecutive, without blank lines between them
-- Bullets: no more than 10 words
+- Bullets: no more than 16 words; this is a limit, not a target
 - State each fact once: in prose or a bullet, never both
 - Omit standard, expected, or self-evident information
 - Omit verification, test commands, pass claims, commands, and tool output
-- Body lines: wrap at about 72 characters per line for readability; this is a
-  stylistic per-line guide, not a total body character limit
+- Do not hard-wrap body prose or bullets; keep each paragraph and list item on
+  one full source line
 - Standard Markdown only: no em-dashes, curly quotes, or special characters
 - Single-change commit: subject only
 
