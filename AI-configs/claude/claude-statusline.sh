@@ -28,12 +28,12 @@ if [ $PERCENTAGE -gt 100 ]; then
   PERCENTAGE=100
 fi
 
-# Generate 20-char bar (0-20 filled chars)
-FILLED=$((PERCENTAGE / 5))
-if [ $FILLED -gt 20 ]; then
-  FILLED=20
+# Generate 10-char bar (0-10 filled chars)
+FILLED=$((PERCENTAGE / 10))
+if [ $FILLED -gt 10 ]; then
+  FILLED=10
 fi
-UNFILLED=$((20 - FILLED))
+UNFILLED=$((10 - FILLED))
 
 BAR=""
 for ((i = 0; i < FILLED; i++)); do BAR="${BAR}█"; done
@@ -59,7 +59,8 @@ DIR_LABEL="${DIR##*/}"
 GIT_ICON=$''
 [ -n "$BRANCH" ] && DIR_LABEL="$DIR_LABEL ($GIT_ICON $BRANCH)"
 
-echo " $DIR_LABEL | $MODEL_LABEL $COST USD | $BAR ${PERCENTAGE}% | ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
+echo " $DIR_LABEL"
+echo "$MODEL_LABEL | $COST USD | $BAR ${PERCENTAGE}% ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
 
 ### Don't change from here ###
 # https://code.claude.com/docs/en/statusline
