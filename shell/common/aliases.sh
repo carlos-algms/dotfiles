@@ -75,11 +75,12 @@ if command -v kitten >/dev/null 2>&1; then
   alias s="kitten ssh --kitten forward_remote_control=yes "
 fi
 
-if command -v bat >/dev/null 2>&1; then
-  alias cat="bat "
-  _manpager_cmd="bat -l man -p"
-elif command -v batcat >/dev/null 2>&1; then
-  alias cat="batcat "
+# Disabled, it confuses agents, as they use native cat flags
+# if command -v bat >/dev/null 2>&1; then
+#   alias cat="bat "
+#   _manpager_cmd="bat -l man -p"
+if command -v batcat >/dev/null 2>&1; then
+  alias bat="batcat "
   _manpager_cmd="batcat -l man -p"
 fi
 
