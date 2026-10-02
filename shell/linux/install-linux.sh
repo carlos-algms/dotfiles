@@ -18,7 +18,6 @@ sudo apt install -y \
     htop \
     jq \
     luajit \
-    ripgrep \
     tree \
     watch \
     wget \
@@ -47,6 +46,24 @@ if [[ -n "$FZF_URL" ]]; then
     tar -xzf "$TMPDIR/fzf.tar.gz" -C "$TMPDIR"
     mv "$TMPDIR/fzf" "$HOME/.local/bin/fzf"
     chmod +x "$HOME/.local/bin/fzf"
+    rm -rf "$TMPDIR"
+fi
+
+# ripgrep most recent
+if [[ "$ARCH" == "x86_64" ]]; then
+    RG_URL=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep browser_download_url | grep 'x86_64-unknown-linux-musl.tar.gz"' | cut -d '"' -f 4)
+elif [[ "$ARCH" == "aarch64" ]]; then
+    RG_URL=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep browser_download_url | grep 'aarch64-unknown-linux-musl.tar.gz"' | cut -d '"' -f 4)
+else
+    echo "ripgrep Install: Unsupported architecture: $ARCH"
+fi
+
+if [[ -n "$RG_URL" ]]; then
+    TMPDIR=$(mktemp -d)
+    curl -L "$RG_URL" -o "$TMPDIR/rg.tar.gz"
+    tar -xzf "$TMPDIR/rg.tar.gz" -C "$TMPDIR" --strip-components=1 --wildcards '*/rg'
+    mv "$TMPDIR/rg" "$HOME/.local/bin/rg"
+    chmod +x "$HOME/.local/bin/rg"
     rm -rf "$TMPDIR"
 fi
 
