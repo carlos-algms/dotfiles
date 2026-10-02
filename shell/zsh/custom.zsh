@@ -30,10 +30,6 @@ ZSH_THEME_TERM_TITLE_IDLE="%~"
 # default one in case a batcat is not available
 export MANPAGER="less -R --use-color -Dd+r -Du+b"
 
-if command -v brew &>/dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-
 ## set VSCode as default editor if it is in the path and I'm running from VSCode terminal
 if command -v code &>/dev/null && [[ "$TERM_PROGRAM" == "vscode" ]]; then
   export EDITOR='code --wait'
@@ -125,6 +121,8 @@ if command -v fzf &>/dev/null; then
   source <(fzf --zsh)
 fi
 
-if command -v oh-my-posh >/dev/null 2>&1; then
-  eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
-fi
+# oh-my-posh is nice, but slower than native bira (omz theme),
+# and I no longer need all its features
+# if command -v oh-my-posh >/dev/null 2>&1; then
+#   eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
+# fi
