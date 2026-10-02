@@ -7,339 +7,210 @@ description: >
 
 # Executing plans
 
-**Announce at start:** "I'm using the executing-plans skill to implement this
-plan."
+Validate one saved plan, then execute it inline or delegate complete task cycles
+to `subagent-driven-development`.
 
-Load and validate the plan. Execute inline, or delegate complete task cycles to
-`subagent-driven-development`.
+Resolve helper scripts and `review-loop.md` from
+`../subagent-driven-development/`.
 
 ## Start gates
 
-1. Read `plan_path`. Missing, empty, or unspecified: stop and request a valid
-   path
-2. Validate `Execution mode` is exactly `Inline` or `Subagent-Driven`. Missing,
-   invalid, or conflicting with the current request: stop, ask the user, and
-   update the plan before implementation
-3. Review the plan critically. Resolve blocking gaps with the user. Read
-   `Execution log` before Task 1; a logged entry overrides contradicting task
-   text. Missing field: add the empty heading before implementation
-4. Validate the plan's commit policy and commit checkboxes. Missing or
-   inconsistent: stop, ask the user, and update the plan before implementation.
-   `Plan file policy` defaults to `Include` when absent; reject other values.
-   Read `Additional plan state files`; missing defaults to `none`. Accept either
-   the single item `none` or unique repo-relative paths that exist. Reject the
-   plan path itself, missing paths, duplicates, and mixed `none` plus paths
-5. Capture `plan_base_ref = git rev-parse HEAD` and inventory every pre-existing
-   staged, unstaged, deleted, or untracked change in a temporary
-   `baseline_snapshot`. Its manifest records each repo-relative path, content or
-   deletion state, file mode, and ownership: `baseline-only`, `task:<id>`, or
-   `execution-state`. Store present files byte-for-byte beside the manifest. Use
-   an owner-only temporary directory and classify only the plan-owned content of
-   the plan file plus every `Additional plan state files` path as
-   `execution-state`; an empty worktree gets an empty manifest. A listed path
-   does not transfer unrelated existing hunks from `baseline-only` ownership.
-   Preserve the captured bytes of every plan-state file as its pre-execution
-   baseline. `execution-state` permits only edits required by written
-   checkpoints. Stop when ownership or the required delta is unclear
-6. When commits are planned, or `No commits` is combined with a requested PR,
-   stop before Task 1 if:
-   - one path mixes plan-owned and baseline-only hunks
-   - the index contains baseline-only changes
-   - under `Per-task commits`, a staged change belongs to a later checkpoint
-7. Create the harness task/todo list
+1. Require a readable `plan_path`
+2. Read the plan's `Spec` path when it is not `none`
+3. Require `Execution mode: Inline | Subagent-Driven`
+4. Require `Commit policy: Checkpoint commits | No commits`
+5. Require `Plan file policy: Include | Exclude`
+6. Require `Additional plan state files` as the single item `none` or unique,
+   existing, repo-relative paths that exclude the plan itself
+7. Resolve the workspace with `scripts/plan-workspace PLAN_FILE`
+8. Read its initialized `progress.md` and resume at the first task without a
+   matching completion line
+9. Extract the shared preamble with `scripts/plan-preamble PLAN_FILE`
+10. Capture `plan_base_ref = git rev-parse HEAD`
+11. Run the interface scan below
+12. Create the harness task list
 
-`Commit-bound` means commits are planned or `No commits` is combined with a
-requested PR. Its scope guards apply even when the executor cannot commit.
+Reject missing fields instead of supplying defaults. Resolve a request that
+conflicts with the saved plan before implementation.
 
-`Plan state` means the plan file plus every `Additional plan state files` path.
-All share the single `Plan file policy`.
+`Plan state` means the plan file plus every additional plan state path. Apply
+one `Plan file policy` to all of them.
 
-## Milestone finalization turns
+## Owned paths
 
-Resolve `milestone_execution_mode` once at start for every plan: `coordinated`
-only when the written final-verification checkpoint requires the milestone
-handshake and the caller identifies itself as the root milestone execution
-coordinator; otherwise `sequential`.
+The active reviewer dispatcher writes one plain file containing exact
+repo-relative paths, one per line.
 
-When a written final-verification checkpoint requires the milestone handshake:
+- Seed task scope from its `Files` section
+- Add a discovered path before editing it and record one ledger `Ruling:`
+- Treat each listed path as wholly task-owned, including all its hunks
+- Include listed untracked files
+- Ignore every unlisted worktree path
+- Never infer ownership from `git status`
+- Reject duplicates, directories, missing paths, and paths outside the repo
 
-- `Inline` with `milestone_execution_mode = coordinated`: after implementation
-  review and validation pass, resolve the stable plan ID from the written
-  checkpoint, record the reviewed changed-path state under `baseline_snapshot`,
-  send `READY <plan ID>` to the root milestone execution coordinator, and yield
-  without abandoning `baseline_snapshot`. Resume only after the exact
-  `FINALIZE <plan ID>` reply. Re-derive the changed-path state before editing
-  the milestone; repeat affected review and validation when implementation state
-  drifted. Send `FINALIZED <plan ID>` after the written milestone update passes
-- `Inline` with `milestone_execution_mode = sequential`: execute the written
-  milestone update without handshake messages
-- `Subagent-Driven`: let `subagent-driven-development` relay the finalizer's
-  handshake without synthesizing or granting a turn. Pass the resolved mode
-- No root coordinator or no message relay at start: use `sequential`
-- Coordinator or message relay lost after `READY`: retain `baseline_snapshot`,
-  edit no plan state, and report a resumable blocker
-- Never self-grant a finalization turn during parallel execution
+Build review packages with:
 
-The plan's `Execution mode` is authoritative. `Inline` uses the workflow below.
-For `Subagent-Driven`, complete the start gates, then load
-`subagent-driven-development`; do not run the inline workflow below. Direct
-invocation never supplies a default.
+```text
+scripts/review-package BASE HEAD OUTFILE PATHS_FILE
+```
 
-Skills load only on the annotated step that needs them.
+Retain the printed `state: sha256:<digest>` with every `REVIEW` and `VERIFY`
+line. Reuse evidence only while rebuilding the same scoped package produces the
+same digest.
 
-The plan owns task actions and plan-level checkpoints. This skill supplies
-mechanics for written checkpoints; it never inserts a plan-level review, final
-verification, or commit checkpoint. Stop and return an incomplete plan for
-correction instead of synthesizing missing plan-level work.
+## Interface scan
 
-Exactly one agent runs final verification:
+Before Task 1, compare every present `Interfaces` block. Record one pre-flight
+ledger row for each cross-task contract, including any ruling required to make
+producer and consumer signatures match. Tasks without cross-task contracts need
+no row.
 
-- `Inline`: this executor
-- `Subagent-Driven`: the finalizer
+## Ledger
 
-Never both. A relayed finalizer result is the evidence; do not re-run its
-checks.
+`plan-workspace` creates `<workspace>/progress.md` with:
 
-## Snapshot lifecycle
+```text
+# Plan ledger - plan: <repo-relative plan path>
+```
 
-The `baseline_snapshot` holds pre-execution copies of work the user never
-committed. Delete it after `PASS` or when execution is abandoned; retain it
-while a blocker remains resumable.
+Append only:
 
-Owner:
+- `Task <N>: complete (...)`, written by `scripts/task-done`
+- `Task <N>: Ruling: <decision> - <why> - <cost if wrong>`
+- `final: Ruling: <decision> - <why> - <cost if wrong>`
+- `Pre-flight: <contract check>`
 
-- `Inline`: this executor
-- `Subagent-Driven`: the orchestrator
+The ledger is authoritative resume state. A checked task without a matching
+completion line must pass its gate again.
 
-## Plan ownership
+Record only plan drift, non-obvious gotchas, and decisions the plan left open.
+Write nothing when execution follows the plan.
 
-- Inline: this executor owns all checkboxes, `Solved defects`, and
-  `Execution log`
-- Subagent mode: each task implementer owns its task plus completed tasks
-  changed by its reviewer fixes; the finalizer owns final checkpoints and
-  completed-task state changed by final-review fixes
-- `Execution log`: the current task owner appends its own entries; never rewrite
-  or delete another owner's entries
-- Never use concurrent writers
-- Tick a step after its `Green:` passes; un-tick before a reviewer fix
-- Tick a commit checkpoint immediately before staging; restore `[ ]` whenever
-  scope resolution, staging, or commit fails
-- Track task status in the harness todo list
+## Execution ownership
+
+The caller supplies these values for milestone execution:
+
+- `workspace_mode`: `shared`, `isolated`, or `sequential`
+- `git_owner`: `coordinator` or `executor`
+- `milestone_owner`: `coordinator` or `executor`
+- `pr_owner`: `coordinator` or `executor`
+
+Direct execution defaults to `sequential` with the executor owning Git, any
+milestone update, and any requested PR.
+
+Shared parallel execution requires disjoint owned paths and command outputs.
+Only the coordinator stages, commits, or integrates while shared workers run.
+
+Isolated workers use `git_owner=executor` for mechanical checkpoint commits and
+`pr_owner=coordinator`. The coordinator squashes each result into the active
+feature branch serially, rebuilds the package from the same owned path list, and
+requires the integrated digest to equal the worker's reviewed digest.
+`No commits` disables isolated execution; use safe shared execution or run
+sequentially.
+
+The milestone owner validates the completed plan's link, checks its one box,
+preserves every other entry, formats the file, and verifies the link after the
+plan passes. Workers never edit a coordinator-owned milestone.
 
 ## Commit ownership
 
-- The plan owns cadence; agents never infer or override it
-- `No commits`: no agent commits
-- `Per-task commits`: inline executor or task implementer commits the initial
-  task, one follow-up commit per task-review fix round, one combined
-  final-review-fix commit after final verification, then final plan state
-- `One commit at the end`: inline executor or finalizer commits after final
-  review and verification
-- At every commit, load `git-commit-message` and derive message and paths from
-  current state; never rely on the plan's initial file list
-- Include the plan's current `execution-state` changes only when
-  `Plan file policy` is `Include`
-- Reviewers never commit
+- `Checkpoint commits`: create mechanical state commits at written checkpoints
+- `No commits`: never stage or commit
+- Load `git-commit-message` at each commit
+- Derive commit paths from the current owned path list, never from `git status`
+- Include plan state only under `Plan file policy: Include`
+- Reviewers never edit, stage, or commit
+- A requested PR requires committed reviewed work
 
-## Inline per-task workflow
+## Execution modes
+
+For `Subagent-Driven`, load `subagent-driven-development` after all start gates
+and never run the inline workflow.
+
+For `Inline`, execute the workflow below.
+
+Exactly one agent runs final verification:
+
+- Inline: this executor
+- Subagent-Driven: the finalizer
+
+## Inline task workflow
 
 For each task:
 
-1. Set the review range:
-   - `Per-task commits`: `review_base_ref = git rev-parse HEAD`, scope `task`
-   - `One commit at the end` or `No commits`: `review_base_ref = plan_base_ref`,
-     scope `cumulative`
-   - In commit-bound execution, stop before editing any planned or newly
-     discovered target or reviewer-fix path with baseline-only changes
-2. Mark the task in progress
-3. Complete each step and tick it when its narrow `Green:` passes
-4. Confirm the plan's task-ending impact-appropriate task gate passed
-5. For `Per-task commits`, execute and tick the initial task checkpoint
-6. Dispatch a fresh reviewer, unless the task's diff contains no source or test
-   file — a plan-doc commit, a formatter result, or checkbox ticks needs none;
-   the task gate already proves it
-7. Resolve every blocking finding; commit each verified fix round under
-   `Per-task commits`
-8. Append this task's drift, gotchas, and decisions to `Execution log`
-9. Correct stale text in later tasks that this task's drift invalidated
-10. Mark the task complete
+1. Run `scripts/task-start PLAN_FILE N`
+2. Read the generated brief and shared preamble
+3. Write `<workspace>/task-<N>-paths.txt`
+4. Implement every step
+5. Run the task gate once as the last implementation verification
+6. Write `<workspace>/task-<N>-report.md` with built behavior and `VERIFY` lines
+7. Build the scoped review package
+8. Apply `review-loop.md` unless every owned change is proven bookkeeping or
+   canonical formatter-only output
+9. Rebuild the package and retain its final digest
+10. Under `Checkpoint commits`, execute the written checkpoint when this
+    executor owns Git
+11. Run record-only `scripts/task-done` with the ledger, refs, digest, and
+    report
+12. Tick the task; tick its checkpoint only after its Git owner committed
 
-Never dispatch onto a red gate or move on with unadjudicated findings. Re-run
-only invalidated task-gate commands after a task-review fix; valid evidence
-needs no second run. Invalidation is mechanical: a command that passed is stale
-only if an `Edit` or `Write` landed after it. No edit in between means no
-re-run, and a passing command is never repeated to confirm it.
+Never dispatch review on a red gate. Never rerun a passing gate without an
+invalidating semantic edit.
 
-The task gate runs once, after every step in the task has a passing `Green:`, as
-the task's last verification. A step's narrow `Green:` is that step's check. An
-aggregate gate (`make test`, `pnpm run test`, a pathless `pytest`) is not a step
-check and never belongs inside the step loop.
+## Review dispatch
 
-A formatter run is NOT an invalidating edit. Running `oxfmt`, `prettier`,
-`ruff format`, `black`, or `make format` never authorises a test, type check,
-build, or gate re-run: the formatter reports its own success, and a reflow does
-not change behaviour. A formatter that touched only `.md`, `.mdx`, or docs paths
-invalidates nothing at all. The only exception is the formatter's own
-configuration changing (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), or the
-formatter reporting a parse error or non-zero exit; then treat it as a real
-edit.
-
-Semantic-neutral comment-only changes likewise do not invalidate tests, type
-checks, builds, or full gates. Directives, suppressions, pragmas, doctests,
-generated-documentation inputs, shebangs, encoding declarations, and
-format-sensitive metadata are not semantic-neutral comments: those DO
-invalidate.
-
-## Execution log capture
-
-`writing-plans` defines the field, its entry kinds, and its format. Capture is
-mandatory, not optional.
-
-- Append before ticking the task, not at the end of the plan
-- Log a `drift` whenever the repo contradicted a plan fact
-- Log a `gotcha` whenever a non-obvious fact cost time and would cost it again
-- Log a `decision` whenever the plan left a choice open and execution closed it
-- Nothing qualifying: write nothing and leave the section empty. Never record
-  `none`, `no drift`, or any "nothing found" line
-- Never log narration, restated plan text, or findings already in
-  `Solved defects`
-- A drift that invalidates a later task's instructions also gets that task's
-  text corrected in place
-- Under `Plan file policy: Include`, log changes ride the task's commit as
-  `execution-state`
-
-## Inline review handling
-
-- Accept only `PASS` or terse Critical/Important findings, each carrying a
-  `static` or `behavioural` discharge tag. An untagged finding, or a
-  control-flow, boundary, predicate, regex, or contract change tagged `static`,
-  is a failed dispatch. Never retag a finding yourself
-- Empty, errored, or rate-limited output is a failed dispatch
-- Narration, summaries, or malformed findings are a failed dispatch
-- A `<review-input>` finding is a failed dispatch; correct the payload
-- Allow 3 total attempts for a failed dispatch, then escalate
-- For bot/PR reviews, load `replying-to-pr-review-threads`
-- Fix all sibling call sites sharing the defect, not only the cited line
-- Add validated fixes to `Solved defects` as
-  `severity | path or symbol | invariant`
-- Never add rejected findings to that list
-
-Adjudicate each finding:
-
-1. Verify its `path:line` evidence
-2. Fix substantiated findings
-3. Reject incorrect findings with counter-evidence
-4. Use one clarification round for genuine ambiguity
-5. Escalate disputes that remain
-
-Record rejected findings and counter-evidence in the final report. Every
-returned finding blocks until fixed or rejected with counter-evidence.
-
-Re-dispatch after a fix round containing any `behavioural` finding. After a
-round whose findings are all `static`, the green gate is the verification: do
-not re-dispatch. One reviewer answers both the craft and the spec question every
-pass, so there is no separate spec stage to reopen. Limit each review/fix cycle
-to 2 finding rounds; a third requires user escalation.
-
-## Inline reviewer dispatch
-
-**Preconditions before dispatching:**
-
-- Task-scope dispatch: task gate is green
-- Cumulative task dispatch: current task gate is green
-- Complete-scope first dispatch: final task gate is green
-- Complete-scope re-dispatch after a final-review fix: affected invalidated
-  gates are green
-- Complete-scope re-dispatch does not require another full gate
-- `changed_files` is the deduplicated union of committed, staged, unstaged, and
-  untracked implementation paths in scope. Exclude `execution-state` paths and
-  paths whose current state still matches an excluded snapshot entry
-- Rename entries use the destination path
-
-Use absolute template paths. Pass pointers, never template contents or session
-history. `changed_files` is a newline-delimited exact-path list, not a review
-boundary. Pass `Solved defects` from the plan; use `none` when empty.
+Use the contract in `review-loop.md`. Pass:
 
 ```text
-MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
-Do not act until you have read it. Then apply:
-  plan_path         = <abs path>
-  task_id           = <task number / heading>
-  base_ref          = <review_base_ref>
-  scope_mode        = <task | cumulative>
-  baseline_snapshot = <abs path to classified snapshot directory>
-  changed_files     = <newline-delimited exact paths>
-  solved_defects    = <current solved-defects list, or `none`>
-  checklist_path    = <abs path to requesting-code-review/code-reviewer.md>
+requirements_path = <task brief or complete plan>
+requirements_kind = <task | plan>
+spec_path          = <complete-plan spec path | none>
+report_path        = <task or final report>
+package_path       = <scoped package>
+review_paths_file  = <dispatcher-owned path list>
+state_digest       = <digest printed by review-package>
+scope_mode         = <task | cumulative | complete>
+task_id            = <task number | all>
+checklist_path      = <requesting-code-review/code-reviewer.md>
 ```
 
-`<skill_dir>` is the resolved `subagent-driven-development` directory. Final
-review uses `plan_base_ref`, `complete` scope, and all plan-changed
-implementation files. If any base ref is unclear, ask.
+The dispatcher may skip review only when every owned change is execution-state
+bookkeeping, checkbox-only, or canonical formatter-only output. Configuration,
+manifests, migrations, CI, build scripts, generated contracts, and instruction
+files are behavior-bearing unless repository evidence proves otherwise.
 
-## Inline finish
+## Finish
 
-After all tasks complete and verified:
+After all tasks complete:
 
-1. Execute each remaining plan-level checkpoint in written order
-2. Do not synthesize a review, verification, or commit step missing from the
-   plan
-3. When the written final-verification checkpoint requests full-plan review:
-   1. Use `plan_base_ref`, `complete` scope, and all plan-changed implementation
-      files
-   2. Reuse a prior task-review result when it covers the complete current
-      implementation; otherwise dispatch the requested reviewer
-   3. Recheck each fix path against `baseline_snapshot` before editing in
-      commit-bound execution
-   4. Uncheck the conditional final-review-fixes commit checkpoint before the
-      first fix under `Per-task commits`
-   5. Resolve findings with the adjudication and retry rules
-   6. Run only checks invalidated by final-review fixes; prefer narrow checks
-      and rerun a full gate only when narrower evidence cannot restore required
-      coverage
-   7. Re-dispatch the final review after a fix round containing any
-      `behavioural` finding; after an all-`static` round, the green affected
-      gates are the verification
-   8. Require `PASS` or fully discharged findings
-4. When the written final-verification checkpoint reaches final validation:
-   1. Reuse each task-gate or reviewer-fix result that still covers the current
-      implementation state and semantic scope
-   2. Run or perform only written final checks whose scope remains uncovered
-   3. Append final-review drift, gotchas, and decisions to `Execution log`
-   4. Execute any written milestone completion action:
-      - `coordinated`: complete the `READY` -> `FINALIZE` -> `FINALIZED` turn
-        defined above
-      - `sequential`: update the milestone without handshake messages
-   5. Tick the final-verification checkpoint only after the milestone action
-      passes
-5. Do not run the full gate elsewhere in the final-review fix loop
-6. Execute each remaining written commit checkpoint:
-   - `One commit at the end`: commit the actual complete reviewed diff
-   - `Per-task commits`: commit the combined final-review fix set when its
-     conditional checkpoint is unchecked. Execute the final-state commit
-     checkpoint only when `Plan file policy` is `Include`
-   - `No commits`: no checkpoint
-7. For `No commits` plus a requested PR:
-   1. Record the exact plan-owned paths, content hashes, modes, and deletion
-      states under `baseline_snapshot/pr-handoff.json`; include plan state only
-      when `Plan file policy` is `Include`
-   2. Hand off only that reviewed change set for an external commit
-   3. Verify the resulting branch matches it and contains no baseline-only delta
-   4. Stop on any mismatch
-8. Report files, evidence, rejected findings, remaining risks, and modified plan
-   state left uncommitted under `Plan file policy: Exclude`
-
-When `Source requirements` request a PR, load `create-pull-request` after the
-written final-verification and commit checkpoints pass.
+1. Build the complete owned path list from task path lists
+2. Execute the written final-verification checkpoint
+3. Reuse task evidence only when each task package's state entries match the
+   same paths in the complete package; combine matching task packages when their
+   union covers the complete scope
+4. Review uncovered behavior through `review-loop.md`
+5. Run only final checks whose semantic scope remains uncovered
+6. Append final rulings and tick final verification
+7. Execute the final state checkpoint under `Checkpoint commits`
+8. After isolated integration, require the integrated package digest to match
+   the worker's final reviewed digest
+9. Let the milestone owner update the milestone
+10. Let the PR owner create a requested PR only from committed reviewed work
+11. Delete the plan workspace after `PASS`
+12. Report changed files, evidence, rulings, dismissals, remaining risks, and
+    excluded modified plan state
 
 ## Stop conditions
 
-- Hit a blocker (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
-- Verification repeatedly fails
-- A required reviewer cannot be dispatched
-- A review or dispatch exceeds its retry budget
-- A coordinated finalization turn loses its coordinator or message relay after
-  `READY`
+- Missing or conflicting plan fields
+- Unsafe or ambiguous owned paths
+- A red task gate
+- Unresolved review findings
+- Exhausted review or dispatch attempts
+- Unsafe shared execution or integration
+- A required reviewer, coordinator, Git owner, milestone owner, or PR owner is
+  unavailable
 
-Report the blocker. Return to the start gates after the plan changes materially.
+Report the exact blocker and required action. Resume from the ledger after it is
+resolved.

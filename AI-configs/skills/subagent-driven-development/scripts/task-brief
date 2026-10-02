@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Extract one task's full text from an implementation plan into a file the
+# implementer reads in one call, so the task text never passes through the
+# orchestrator's context.
+#
+# Plan format: tasks are top-level checkboxes, `- [ ] **Task N: ...**`.
+# A task block runs to the next top-level `- [ ] **Task`, and carries the
+# commit checkpoint that follows it (`- [ ] **Commit task N**`), which the
+# implementer owns. A trailing `---` separator is dropped.
+#
+# Usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE]
+# Default OUTFILE: <workspace>/task-<N>-brief.md
+set -euo pipefail
+
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+  echo "usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE]" >&2
+  exit 2
+fi
+
+plan=$1
+n=$2
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+case "$n" in
+  ''|*[!0-9]*) echo "TASK_NUMBER must be a positive integer: $n" >&2; exit 2 ;;
+esac
+
+if [ $# -eq 3 ]; then
+  out=$3
+else
+  # Invoke via bash rather than direct exec: some archive extractors strip
+  # Unix exec bits when unpacking.
+  dir=$("${BASH:-bash}" "$(cd "$(dirname "$0")" && pwd)/plan-workspace" "$plan")
+  out="$dir/task-${n}-brief.md"
+fi
+
+awk -v n="$n" '
+  # Track fenced blocks so a checkbox inside an example fence never starts or
+  # ends a task. A fence may be indented and may open a list item
+  # ("- ```text"), and its length varies (```, ````): match the run of
+  # backticks after any leading list/indent prefix, and close only on a fence
+  # at least as long as the one that opened.
+  {
+    line = $0
+    probe = line
+    sub(/^[ \t]*([-*+][ \t]+|[0-9]+\.[ \t]+)?/, "", probe)
+    if (probe ~ /^`{3,}/) {
+      match(probe, /^`+/)
+      len = RLENGTH
+      if (!infence) { infence = 1; fencelen = len; if (intask) print; next }
+      # A closing fence carries no info string; an inner opener does.
+      if (len >= fencelen && probe ~ /^`+[ \t]*$/) { infence = 0; if (intask) print; next }
+      if (intask) print
+      next
+    }
+  }
+  !infence && /^- \[[ xX]\] \*\*Task[ \t]+[0-9]+/ {
+    intask = ($0 ~ ("^- \\[[ xX]\\] \\*\\*Task[ \t]+" n "([^0-9]|$)"))
+    if (intask) { print; next }
+  }
+  # Any other top-level checkbox that is not this task, and not a commit
+  # checkpoint, ends the block. A commit checkpoint belongs to the task above.
+  !infence && intask && /^- \[[ xX]\] / {
+    if ($0 ~ /^- \[[ xX]\] \*\*([A-Za-z]+[ \t]+)?[Cc]ommit/) { print; next }
+    intask = 0
+    next
+  }
+  intask { print }
+' "$plan" > "$out.raw"
+
+if [ ! -s "$out.raw" ]; then
+  rm -f "$out.raw"
+  echo "task ${n} not found in ${plan} (no '- [ ] **Task ${n}' heading)" >&2
+  exit 3
+fi
+
+# Drop trailing blank lines and a trailing `---` separator.
+awk '
+  { lines[NR] = $0 }
+  END {
+    last = NR
+    while (last > 0 && (lines[last] ~ /^[ \t]*$/ || lines[last] ~ /^-{3,}[ \t]*$/)) last--
+    for (i = 1; i <= last; i++) print lines[i]
+  }
+' "$out.raw" > "$out"
+rm -f "$out.raw"
+
+echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines"

@@ -7,136 +7,131 @@ description: >
 
 # Subagent-driven development
 
-**Announce at start:** "I'm using subagent-driven development to execute this
-plan."
-
-**Requires `executing-plans`.** Load it first for plan validation, baseline
-capture, and dirty-work ownership. This skill delegates each complete task cycle
-to one implementer.
+Use only after `executing-plans` completes its start gates. Delegate each full
+task cycle to one fresh implementer.
 
 ## Workflow
 
-After the shared `executing-plans` start gates:
+For each incomplete task:
 
-1. For each task, dispatch one fresh implementer with `implementer-prompt.md`
-2. On `PASS`, mark only the harness task complete, retain its exact `REVIEW` and
-   `VERIFY` lines grouped by task ID for final evidence reuse, carry its
-   `LEARNED` lines into your final report, and dispatch the next task
-3. On `BLOCKED`, relay its short blocker list and its `LEARNED` lines; stop
-4. After all tasks, dispatch one fresh finalizer with `finalizer-prompt.md`
-5. With `milestone_execution_mode = coordinated`, on `READY <plan ID>`, relay it
-   to the root milestone execution coordinator and retain the finalizer plus
-   `baseline_snapshot`
-6. With `milestone_execution_mode = coordinated`, after the exact
-   `FINALIZE <plan ID>` grant, re-dispatch the same finalizer with that grant
-7. Relay the finalizer's `PASS` or `BLOCKED` result, including its optional
-   `HANDOFF`, `STATE`, and `MILESTONE` lines. After a granted turn, a relayed
-   `MILESTONE` returns `FINALIZED`; a relayed `BLOCKED` reports that the open
-   turn failed and must not be reused
-8. Own the snapshot lifecycle defined in `executing-plans`
+1. Run `scripts/task-start PLAN_FILE N`
+2. Seed `<workspace>/task-<N>-paths.txt` from the task's `Files` section
+3. Dispatch one implementer with the payload below
+4. On `PASS`, retain its exact `PACKAGE`, `REVIEW`, `VERIFY`, `LEARNED`, and
+   `DISMISSED` lines
+5. Under `Checkpoint commits` with `git_owner=coordinator`, stage only the
+   task's owned path list, create its mechanical commit, and verify the commit
+   contains no other path
+6. Tick the task; tick its checkpoint only after its Git owner committed
+7. Dispatch the next task
+8. On `BLOCKED`, relay its blocker and stop
 
-Do not receive or adjudicate nested reviewer output. The implementer owns its
-task until its reviewer passes and its commit policy is satisfied.
+After all tasks, dispatch one fresh finalizer. Relay its result without
+rerunning review or verification. Delete the workspace only after final `PASS`.
 
-## Orchestrator ownership
+The implementer owns implementation, verification, review fixes, path-list
+updates, task recording, and executor-owned checkpoint commits. The orchestrator
+never edits implementation files, runs gates, reads review packages, or
+interprets nested reviewer output.
 
-- Keep only task status, exact implementer `REVIEW` and `VERIFY` lines grouped
-  by task ID, `plan_base_ref`, `baseline_snapshot`, and the resolved
-  `milestone_execution_mode`
-- Never edit implementation files, plan checkboxes, `Solved defects`, or
-  `Execution log`
-- Never run task gates, reviewers, fix loops, staging, or commits
-- Never run final verification or the full gate. The finalizer owns it; relay
-  its result verbatim
-- Never create the PR; the finalizer owns requested PR creation
-- Never paste nested review output into orchestrator context
-- Dispatch tasks sequentially; implementers share one worktree
+## Model selection
 
-## Handling implementer status
+Map each task's `Difficulty` to the current harness:
 
-- `PASS`: accept the terse verification/commit/PR summary
-- Preserve every valid `REVIEW` line with its task ID for the finalizer; never
-  repeat review already covering the complete unchanged implementation
-- Preserve every valid `VERIFY` line with its task ID for the finalizer; never
-  summarize or discard reusable evidence
-- `LEARNED` on either status: relay its lines unchanged in your report. The
-  subagent already wrote them to the plan; never re-append them yourself
-- No `LEARNED` block: say nothing about it. Never report "no learnings" or an
-  empty section. Absence is the normal case
-- Implementer `BLOCKED`: surface its bullets unchanged
-- Finalizer `BLOCKED`: surface its bullets and its optional `HANDOFF` line
-  unchanged. Only the finalizer emits `HANDOFF`, for the external-commit path
-- Finalizer `STATE`: relay it unchanged. It lists modified plan-state files left
-  uncommitted under `Plan file policy: Exclude`
-- Finalizer `READY`: relay it unchanged and wait for the exact matching
-  `FINALIZE` grant. It is a resumable pause, not `BLOCKED`
-- Finalizer `MILESTONE`: relay it unchanged. It confirms the granted turn ended
-  with `FINALIZED <plan ID>`
-- Empty, malformed, or verbose output: re-dispatch once with the output contract
-- A second invalid response: stop
+- `low`: cheapest reliable editing model
+- `medium`: default coding model
+- `high`: most capable available model
 
-## Dispatch payloads
+Use a reviewer one tier above the implementer, capped at the most capable model.
+Name every dispatched model. Treat missing or invalid difficulty as `high` and
+report it.
 
-Pass absolute template paths and values. Never paste template bodies or full
-task text. Subagents read the task from `plan_path`.
+## Orchestrator state
 
-**Implementer:**
+Keep only:
+
+- Task status and task ID
+- Exact `PACKAGE`, `REVIEW`, `VERIFY`, `LEARNED`, and `DISMISSED` lines
+- `plan_base_ref`, workspace path, and execution ownership values
+- Implementer and finalizer handles while active
+
+The ledger is authoritative resume state. Re-run a checked task's gate when its
+completion line is missing.
+
+Malformed or verbose subagent output gets one corrective redispatch. Stop on a
+second invalid response.
+
+## Implementer payload
+
+Pass absolute paths and values. Never paste task, prompt, report, or package
+contents.
 
 ```text
-MUST read instructions at <skill_dir>/implementer-prompt.md FIRST. Do not
-act until you have read it. Then apply:
-  plan_path     = <abs path>
-  task_id       = <task number / heading>
-  working_dir   = <abs path>
-  plan_base_ref = <SHA captured by executing-plans>
-  baseline_snapshot = <abs path to classified snapshot directory>
-  context       = <NON-NORMATIVE orientation only: where this task fits,
-                   which prior tasks already landed. Nothing here may be a
-                   requirement, constraint, or design decision>
+MUST read <skill_dir>/implementer-prompt.md and
+<skill_dir>/review-loop.md before acting.
+
+brief_path         = <path printed by task-start>
+preamble_path      = <workspace>/preamble.md
+task_id            = <task number>
+working_dir        = <absolute repo or worktree path>
+workspace_dir      = <absolute plan workspace path>
+ledger_path        = <workspace>/progress.md
+review_paths_file  = <workspace>/task-<N>-paths.txt
+plan_base_ref      = <SHA captured by executing-plans>
+task_base_ref      = <SHA printed by task-start>
+commit_policy      = <Checkpoint commits | No commits>
+git_owner          = <coordinator | executor>
+context            = <non-normative orientation only>
 ```
 
-Put every normative fact in the plan. `context` is orientation only.
+Put every requirement in the brief or shared preamble. `context` never carries
+requirements or design decisions.
 
-**Finalizer:**
+## Finalizer payload
 
 ```text
-MUST read instructions at <skill_dir>/finalizer-prompt.md FIRST. Do not
-act until you have read it. Then apply:
-  plan_path     = <abs path>
-  working_dir   = <abs path>
-  plan_base_ref = <SHA captured by executing-plans>
-  baseline_snapshot = <abs path to classified snapshot directory>
-  review_evidence = <successful task IDs with their exact REVIEW lines,
-                     or `none`>
-  verification_evidence = <successful task IDs with their exact VERIFY lines,
-                           or `none`>
-  milestone_execution_mode = <coordinated | sequential, resolved by
-                              executing-plans; never self-resolve>
-  milestone_finalize_grant = <exact FINALIZE line copied verbatim from the root
-                              coordinator | none on first dispatch>
+MUST read <skill_dir>/finalizer-prompt.md and
+<skill_dir>/review-loop.md before acting.
+
+plan_path            = <absolute plan path>
+working_dir           = <absolute repo or worktree path>
+workspace_dir         = <absolute plan workspace path>
+ledger_path           = <workspace>/progress.md
+plan_base_ref         = <SHA captured by executing-plans>
+review_evidence       = <exact retained REVIEW lines | none>
+verification_evidence = <exact retained VERIFY lines | none>
+review_packages       = <task ids with absolute PACKAGE paths | none>
+commit_policy         = <Checkpoint commits | No commits>
+git_owner             = <coordinator | executor>
+milestone_owner       = <coordinator | executor>
+pr_owner              = <coordinator | executor>
+plan_id               = <stable milestone plan ID | none>
 ```
 
-`<skill_dir>` is this file's directory. Pass pointers and values only.
+The finalizer is the only subagent receiving `plan_path`.
 
-## Red flags
+## Scripts
 
-- Dispatch multiple implementation subagents in parallel (conflicts)
-- Put requirements in dispatch `context`
-- Ask the orchestrator to run or interpret a review
-- Return reviewer transcripts on success
-- Edit task checkboxes on the implementer's behalf
-- Drop a subagent's `LEARNED` lines from the report
-- Treat a `LEARNED` block as narration and re-dispatch over it
-- Treat a missing `LEARNED` block as malformed output
-- Report an empty `Execution log` or an absent `LEARNED` block as a finding
-- Drop a finalizer's `STATE` line from the report
-- Treat `READY` as `BLOCKED` or delete its resumable finalizer
-- Self-grant or alter a root coordinator's `FINALIZE` line
-- Drop a finalizer's `MILESTONE` line from the report
+Resolve relative to this file:
+
+- `scripts/plan-workspace PLAN_FILE`
+- `scripts/plan-preamble PLAN_FILE`
+- `scripts/task-start PLAN_FILE N`
+- `scripts/task-done LEDGER N BASE HEAD STATE EVIDENCE_FILE`
+- `scripts/review-package BASE HEAD OUTFILE PATHS_FILE`
+
+## Output handling
+
+- Preserve every `PACKAGE`, `REVIEW`, and `VERIFY` line with its task ID
+- Relay every `LEARNED`, `DISMISSED`, `STATE`, and `MILESTONE` line unchanged
+- Do not report absent optional blocks
+- Never synthesize evidence or grant Git or milestone ownership
+- Create a requested PR only when `pr_owner=executor`; otherwise relay
+  `PR | coordinator`
 
 ## Integration
 
-- **./reviewer-prompt.md** - Per-task craft + spec reviewer, dispatched by the
-  implementer
-- **./finalizer-prompt.md** - Full-plan review, verification, and final commit
-- **create-pull-request** - Required before the finalizer opens a requested PR
+- `review-loop.md`: shared review mechanics
+- `reviewer-prompt.md`: read-only craft and requirements reviewer
+- `finalizer-prompt.md`: complete-plan review, verification, and final state
+- `create-pull-request`: required before a requested PR

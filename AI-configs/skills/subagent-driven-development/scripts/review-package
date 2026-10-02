@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Package the dispatcher-owned paths exactly as they exist in the working tree.
+# Include committed, staged, unstaged, deleted, and listed untracked content.
+#
+# Usage: review-package BASE HEAD OUTFILE PATHS_FILE
+# PATHS_FILE contains one repo-relative file path per line.
+set -euo pipefail
+
+if [ $# -ne 4 ]; then
+  echo "usage: review-package BASE HEAD OUTFILE PATHS_FILE" >&2
+  exit 2
+fi
+
+base=$1
+head=$2
+out=$3
+paths_file=$4
+
+git rev-parse --verify --quiet "$base" >/dev/null || { echo "bad BASE: $base" >&2; exit 2; }
+git rev-parse --verify --quiet "$head" >/dev/null || { echo "bad HEAD: $head" >&2; exit 2; }
+[ -f "$paths_file" ] || { echo "no such paths file: $paths_file" >&2; exit 2; }
+[ -s "$paths_file" ] || { echo "empty paths file: $paths_file" >&2; exit 2; }
+
+git merge-base --is-ancestor "$base" "$head" || { echo "HEAD is not a descendant of BASE: ${base}..${head}" >&2; exit 3; }
+
+paths=()
+while IFS= read -r path || [ -n "$path" ]; do
+  [ -n "$path" ] || { echo "blank path in $paths_file" >&2; exit 2; }
+  case "$path" in
+    /*|../*|*/../*|*/..) echo "path must stay repo-relative: $path" >&2; exit 2 ;;
+  esac
+  for existing in "${paths[@]:-}"; do
+    [ "$existing" != "$path" ] || { echo "duplicate path: $path" >&2; exit 2; }
+  done
+  if [ ! -e "$path" ] && ! git ls-files --error-unmatch -- "$path" >/dev/null 2>&1; then
+    echo "path is neither present nor tracked: $path" >&2
+    exit 2
+  fi
+  [ ! -d "$path" ] || { echo "path must name a file: $path" >&2; exit 2; }
+  paths+=("$path")
+done < "$paths_file"
+
+mkdir -p "$(dirname "$out")"
+
+hash_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+
+hash_stdin() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum | awk '{print $1}'
+  else
+    shasum -a 256 | awk '{print $1}'
+  fi
+}
+
+state_file="${out}.state"
+: > "$state_file"
+for path in "${paths[@]}"; do
+  if [ -L "$path" ]; then
+    printf '%s\tsymlink\t%s\n' "$path" "$(printf '%s' "$(readlink "$path")" | hash_stdin)" >> "$state_file"
+  elif [ -f "$path" ]; then
+    mac_mode=$(stat -f '%Lp' "$path" 2>/dev/null || true)
+    if printf '%s\n' "$mac_mode" | grep -Eq '^[0-9]+$'; then
+      mode=$mac_mode
+    else
+      mode=$(stat -c '%a' "$path")
+    fi
+    printf '%s\t%s\t%s\n' "$path" "$mode" "$(hash_file "$path")" >> "$state_file"
+  else
+    printf '%s\tdeleted\t-\n' "$path" >> "$state_file"
+  fi
+done
+digest=$(hash_file "$state_file")
+
+{
+  echo "# Review package from base: $(git rev-parse "$base")"
+  echo
+  echo "## Owned paths"
+  printf '%s\n' "${paths[@]}"
+  echo
+  echo "## State"
+  cat "$state_file"
+  echo "state: sha256:$digest"
+  echo
+  echo "## Files changed"
+  git diff --stat "$base" -- "${paths[@]}"
+  echo
+  echo "## Diff"
+  git diff -U10 "$base" -- "${paths[@]}"
+  for path in "${paths[@]}"; do
+    if ! git ls-files --error-unmatch -- "$path" >/dev/null 2>&1; then
+      rc=0
+      git diff --no-index -U10 -- /dev/null "$path" || rc=$?
+      [ "$rc" -eq 1 ] || exit "$rc"
+    fi
+  done
+} > "$out"
+rm -f "$state_file"
+
+commits=$(git rev-list --count "${base}..${head}")
+echo "package: $out"
+echo "state: sha256:$digest"
+echo "commits: $commits"

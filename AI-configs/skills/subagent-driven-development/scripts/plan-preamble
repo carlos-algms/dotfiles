@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Extract the plan's shared header into a file every implementer reads
+# alongside its own task brief: the header fields, the spec link, and the
+# `## Shared preamble` section. Everything above the first task checkbox,
+# minus the task list itself.
+#
+# Usage: plan-preamble PLAN_FILE [OUTFILE]
+# Default OUTFILE: <workspace>/preamble.md
+set -euo pipefail
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+  echo "usage: plan-preamble PLAN_FILE [OUTFILE]" >&2
+  exit 2
+fi
+
+plan=$1
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+
+if [ $# -eq 2 ]; then
+  out=$2
+else
+  dir=$("${BASH:-bash}" "$(cd "$(dirname "$0")" && pwd)/plan-workspace" "$plan")
+  out="$dir/preamble.md"
+fi
+
+awk '
+  {
+    line = $0
+    probe = line
+    sub(/^[ \t]*([-*+][ \t]+|[0-9]+\.[ \t]+)?/, "", probe)
+    if (probe ~ /^`{3,}/) {
+      match(probe, /^`+/)
+      len = RLENGTH
+      if (!infence) { infence = 1; fencelen = len; print; next }
+      if (len >= fencelen && probe ~ /^`+[ \t]*$/) { infence = 0; print; next }
+      print
+      next
+    }
+  }
+  # The first task checkbox ends the preamble.
+  !infence && /^- \[[ xX]\] \*\*Task[ \t]+[0-9]+/ { exit }
+  # Drop the `## Tasks` heading that would otherwise trail the preamble.
+  !infence && /^##[ \t]+Tasks[ \t]*$/ { next }
+  { print }
+' "$plan" > "$out.raw"
+
+if [ ! -s "$out.raw" ]; then
+  rm -f "$out.raw"
+  echo "empty preamble extracted from ${plan}" >&2
+  exit 3
+fi
+
+awk '
+  { lines[NR] = $0 }
+  END {
+    last = NR
+    while (last > 0 && (lines[last] ~ /^[ \t]*$/ || lines[last] ~ /^-{3,}[ \t]*$/)) last--
+    for (i = 1; i <= last; i++) print lines[i]
+  }
+' "$out.raw" > "$out"
+rm -f "$out.raw"
+
+echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines"

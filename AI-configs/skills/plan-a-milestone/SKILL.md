@@ -9,9 +9,6 @@ description: >
 
 # Plan a milestone
 
-**Announce at start:** "I'm using the plan-a-milestone skill to compose the
-implementation plans."
-
 Create a dependency graph of implementation plans. Keep the milestone file as a
 small index, not a specification. Delegate every plan to a fresh subagent that
 uses `writing-plans`. Never write or revise plan files in the main agent.
@@ -22,10 +19,15 @@ uses `writing-plans`. Never write or revise plan files in the main agent.
 - Plans: the main agent selects each exact path. Pass it to the plan writer as
   an authoritative override of the `writing-plans` default
 - Default plan path override:
-  `docs/plans/YYYY-MM-DD-<milestone-name>-<plan-name>.md`
+  `docs/plans/YYYY-MM-DD-<milestone-name>-<plan-name>-plan.md`
+- Every plan path ends in `-plan.md`; never a bare `<name>.md`
+- Spec files are optional and off by default, as in `writing-plans`. A plan
+  writer proposes one only for a gain its plan file cannot reproduce, and waits
+  for the user. A spec sits beside its plan, same stem with `-plan` replaced by
+  `-spec`
 
 Honor user-selected paths. Resolve every milestone link relative to the
-milestone file.
+milestone file. Milestone checkbox links point at the plan file.
 
 ## Document commit gate
 
@@ -33,8 +35,8 @@ Default `Plan file policy` to `Exclude`. This policy covers the plan file and
 the milestone file listed under `Additional plan state files`.
 
 Treat both files as local execution state. Exclude them from staging, commits,
-PR diffs, and external-commit handoffs. A request to commit implementation, push
-a branch, or create a PR does not include planning documents.
+and PR diffs. A request to commit implementation, push a branch, or create a PR
+does not include planning documents.
 
 `Exclude` preserves tracking state only in the current workspace. A fresh clone
 cannot recover excluded milestone or plan state. Never claim otherwise.
@@ -102,24 +104,33 @@ text and revisions.
 
 ## Parallel execution coordinator
 
-The agent that dispatches more than one plan execution is the root milestone
-execution coordinator. It owns this handshake for one milestone file:
+The agent dispatching more than one plan is the root coordinator. It owns Git
+integration and every milestone edit.
 
-1. Dispatch each plan with `milestone_execution_mode = coordinated`
-2. Receive `READY <plan ID>` from a plan executor after implementation review
-   and validation pass
-3. Grant `FINALIZE <plan ID>` to one ready executor
-4. Grant no other finalization turn for that milestone file
-5. Receive `FINALIZED <plan ID>` after the checkbox update completes
-6. Grant the next ready executor
+Classify each parallel-ready plan pair before dispatch:
 
-Track at most one open grant. Keep the root coordinator active until each open
-turn returns `FINALIZED` or a blocker. A blocker after `FINALIZE`, a terminated
-executor, or lost message relay closes that routing turn as failed and halts new
-grants. Re-read and validate the milestone file before resuming the same plan;
-do not grant another plan until the blocker and any partial milestone edit are
-resolved. When the harness cannot relay these messages at start, execute plans
-sequentially.
+- `shared`: owned paths and command outputs are disjoint; workers never stage or
+  commit concurrently
+- `isolated`: overlap or independent Git state makes shared execution unsafe;
+  create one branch and worktree per plan from committed dependency state
+- `sequential`: required state is uncommitted, isolation is unavailable, or
+  safety is unclear
+
+For shared execution, serialize all coordinator-owned Git operations.
+
+For isolated execution, workers may create mechanical commits. After review, the
+coordinator squashes each branch into the active feature branch one at a time.
+Rebuild the package from the worker's owned path list after each squash and
+require its digest to equal the worker's reviewed digest. Stop before the
+milestone update on mismatch. `No commits` plans never use isolated execution.
+
+Require each isolated worker to return its final owned path-list path, package
+path, and reviewed digest.
+
+After a plan passes and its result is integrated, validate its milestone link,
+check only that plan's box, format the milestone, and verify the link again.
+Workers never edit the milestone file. Under `Plan file policy: Include`, the
+coordinator commits the milestone update after integration.
 
 ## Plan boundaries
 
@@ -134,8 +145,9 @@ sequentially.
 - Permit plans with no unmet dependency to run in parallel
 - Treat parallel-ready as implementation and merge independence
 - Run parallel plans only under one root milestone execution coordinator
-- Let that root coordinator grant one `FINALIZE <plan ID>` turn at a time
-- Never let two plan executors hold a finalization turn concurrently
+- Give each shared worker a disjoint owned path and command-output list
+- Give each unsafe parallel plan an isolated branch and worktree
+- Serialize every stage, commit, squash, and milestone edit
 - Execute plans sequentially when no root coordinator exists
 - Treat the milestone file as the only expected shared file between parallel
   plans
@@ -153,36 +165,28 @@ pass them into `writing-plans`. Do not replace or relax that workflow.
       whose resolved link target is this plan path as complete
    2. Preserve every other milestone entry
    3. Apply `Plan file policy` to both the plan and milestone files
-   4. Under parallel execution, request and receive `FINALIZE <plan ID>` from
-      the root milestone execution coordinator before editing the milestone
+   4. Under coordinated execution, the root coordinator integrates the plan and
+      owns the milestone update
 2. Record `Plan file policy: Exclude` unless the document commit gate changed it
    to `Include`
 3. List the milestone path under `Additional plan state files`
-4. Exclude both files from every commit, PR, and external-commit handoff when
-   `Plan file policy` is `Exclude`
-5. Under `No commits` plus a requested PR, preserve the `writing-plans`
-   external-commit scope and post-commit baseline audit; include plan state only
-   when `Plan file policy` is `Include`
-6. Add a final action to the plan's final-verification checkpoint, after review
-   and implementation validation:
-   1. Send `READY <plan ID>` to the root milestone execution coordinator
-   2. Wait for the exact reply `FINALIZE <plan ID>`
-      - No coordinator or messaging support: require sequential execution
-   3. Re-read the milestone file
-   4. Resolve every checkbox link target relative to the milestone file
-   5. Require exactly one target to resolve to the executing plan path
-      - Zero or multiple matches: edit no milestone state, report the blocker to
-        the root coordinator, and fail the open finalization turn
-   6. Change its `[ ]` to `[x]`; leave an existing `[x]` unchanged on resume
-   7. Preserve every other milestone box and link
-   8. Run the repository formatter on the milestone file
-   9. Verify the link still resolves to the executing plan
-   10. Send `FINALIZED <plan ID>` to the root coordinator
+4. Exclude both files from every commit and PR when `Plan file policy` is
+   `Exclude`
+5. Reject `No commits` when the source requirements request a PR
+6. Add a final action after implementation review and validation:
+   1. Return `PASS | <plan ID>` to the active coordinator
+   2. The coordinator re-reads the milestone after integration
+   3. Resolve every checkbox link target relative to the milestone file
+   4. Require exactly one target to resolve to the completed plan
+   5. Change its `[ ]` to `[x]`; leave an existing `[x]` unchanged on resume
+   6. Preserve every other milestone box and link
+   7. Run the repository formatter on the milestone file
+   8. Verify the link still resolves to the completed plan
 7. Do not check the box when review or implementation validation fails
 8. Report excluded plan and milestone changes as local uncommitted execution
    state at completion
 
-This embedded plan action owns milestone completion.
+The active coordinator owns milestone completion.
 
 ## Milestone format
 
@@ -196,7 +200,7 @@ narration.
 <One-line milestone goal>
 
 Plans with no unmet dependency can run in parallel under one root coordinator.
-Completion handshake: `READY` -> `FINALIZE` -> `FINALIZED`.
+The coordinator owns Git integration and milestone completion.
 
 - [ ] [P1 <Plan title>](relative-path-to-plan)
 - [ ] [P2 <Plan title>](relative-path-to-plan)
@@ -215,12 +219,12 @@ in the suffix. Do not add descriptions after links.
 - Dependency graph is acyclic
 - Parallel plans have disjoint implementation file sets
 - Parallel plan finalization has one named root coordinator
-- Each plan completes one `READY` -> `FINALIZE` -> `FINALIZED` handshake
+- Each completed plan returns its stable plan ID to the coordinator
 - Every plan contains its exact milestone path and stable link target
 - Every plan contains the mandatory checkbox completion action
 - Every plan records the resolved `Plan file policy`
 - Every plan lists the milestone under `Additional plan state files`
-- Every excluded document has explicit commit, PR, and handoff guards
+- Every excluded document has explicit commit and PR guards
 - Every writer attests to the path, link target, policy, implementation file
   set, and review result
 - Checked boxes remain checked during milestone updates

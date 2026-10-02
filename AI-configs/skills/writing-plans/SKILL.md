@@ -9,619 +9,596 @@ description: >
 
 # Writing plans
 
-Write self-contained implementation plans for an agent with zero repo context.
-Assume a skilled engineer who does not know the repo or domain. Name files,
-behavior, constraints, and verification. Keep tasks bite-sized and apply DRY,
-YAGNI, and TDD.
-
-**Announce at start:** "I'm using the writing-plans skill to create the
-implementation plan."
+Write a plan each task's implementer can execute after reading only that task
+plus the shared header. Assume a skilled engineer with zero repo context.
 
 ## Terms
 
-- **Green:** a paste-able command emits an observable success token (exit 0,
-  `PASS`, `0 errors`, artifact). Manual-only checks name an exact procedure and
-  expected observation. Every task and checkpoint ends green
+- **Green:** a paste-able command emitting an observable success token (exit 0,
+  `PASS`, `0 errors`, artifact). A manual-only check names an exact procedure
+  and expected observation
 - **Task:** one checkbox-tracked, committable unit with a shared file set
-- **Step:** one numbered action nested under its task. A later task-level check
-  may verify it
-- **Substep:** one numbered action nested under a step when that step needs an
-  ordered breakdown
-- **Bootstrap stubs:** minimal types/signatures that make tests _run_ (not pass)
-  - Put empty bodies, `NotImplementedError`, or wrong defaults inside the
-    implementation step
-  - Use a separate step only when a later task imports the new symbol
-- **Task gate:** the smallest non-dominated set of checks that proves one task's
+- **Step:** one numbered action nested under its task
+- **Substep:** one numbered action nested under a step
+- **Task gate:** the smallest non-dominated set of checks proving one task's
   changed files and behavior are commit-safe
-- **Full gate:** the project's whole validation suite. Run it no more than once
-  per relevant implementation state and only when the diff or repo policy
-  requires it. A one-task or last-task gate may own it when that result covers
-  the complete implementation; final verification reuses it while that state
-  remains unchanged
-- **Narrow gate:** the single test file or single check a step actually affects
-- **Dominated check:** an earlier check fully covered by a later check when
-  nothing consumes the earlier result before the later check
-- **Footprint:** the files, frameworks, runtimes, imports, and tooling a step
-  touches - scanned to match skills
+- **Full gate:** the project's whole validation suite
+- **Narrow gate:** the single test file or check a step affects
+- **Dominated check:** a check fully covered by a later check when nothing
+  consumes the earlier result
+- **Footprint:** files, frameworks, runtimes, imports, and tooling a step
+  touches
+
+## Plan file, and the optional spec
+
+Default to one file: `<name>-plan.md`. Most plans need nothing else.
+
+A created spec file is a separate `<name>-spec.md` in the same folder, holding
+acceptance criteria, out of scope, research findings, settled decisions, and ADR
+links. The plan cites its requirements by stable ID or `path:line` and never
+copies their prose.
+
+Never create a bare `<name>.md` for either. User-supplied requirement documents
+may use any filename.
+
+**Never create a spec on your own judgment.** Propose it, name the gain a single
+plan file cannot deliver, and wait for the user to agree. Write the plan alone
+when they decline or do not answer.
+
+The user may also ask for a spec directly at any time. Then write one without
+proposing.
+
+Propose a spec only for a gain the plan file cannot reproduce:
+
+- Acceptance criteria too many to sit in the header without burying the tasks
+- Research findings several tasks share, which would otherwise repeat
+- Settled decisions with rationale that every implementer re-reads and no task
+  acts on
+- A document the user wants to review or circulate on its own
+
+Do not propose one for: a short criteria list, a handful of tasks, a single
+subsystem, or because the topic feels large. Those belong in the plan header.
+
+When a spec exists, cite each source requirement by stable ID or `path:line`.
+The spec is authoritative.
+
+A user-supplied document already holding requirements is the spec regardless of
+its filename. Cite it without copying it. Splitting it creates a new spec file,
+so propose that split first.
+
+When none exists, the header reads `**Spec:** none` and the plan carries its own
+acceptance criteria in `Source requirements`.
+
+## Plan location
+
+- The plan ALWAYS lives in a file. Subagents have no session memory
+- A caller-supplied path overrides the default
+- Default: `docs/plans/YYYY-MM-DD-<feature-name>-plan.md`
+- A spec, when the user agreed to one, sits beside the plan: same folder, same
+  stem with `-plan` replaced by `-spec`
+- Editing an existing plan: preserve content outside the requested change
+- User refuses to save: STOP
+- Saving does not commit. Record whether execution commits the plan file
+- `Additional plan state files` are tracker documents execution updates, such as
+  a milestone index. Each must exist before execution starts
+- When concurrent plans share a state file, name its exclusive owner or exact
+  turn protocol in `Source requirements` and the update checkpoint. Without that
+  gate, require sequential execution
+- `Plan file policy` covers the plan file and every additional state file
+
+## Source requirements
+
+- Capture `review_source_requirements` before drafting
+- Preserve the user's original asks, acceptance criteria, every explicit must,
+  every explicit never, and each source-spec path
+- Keep the capture independent from the drafted plan. Never reconstruct it from
+  the finished plan
+- After context compaction with no capture available: stop and request it
+- Without a spec, copy the captured requirements into the header
+- With a spec, cite each captured requirement by stable ID or `path:line`
+
+## Assumption gate
+
+Verify every asserted fact before drafting tasks. Ask only about intent or facts
+that discovery cannot resolve.
+
+Run this before writing any task.
+
+1. List every fact the plan asserts: a command's behavior, a file's contents, a
+   symbol's signature, a template's output, a tool's default, a dependency's
+   version, a config's effect
+2. Mark each `verified` or `open`
+3. Resolve every `open` fact discovery can reach. Never ask what you can read
+4. Ask the user every `open` fact discovery cannot reach
+5. Write a `**Constraint:**` only for what neither resolved
+
+Verification is the planner's job, not the implementer's. Reading a file,
+running `--help`, scaffolding into a temp directory, or checking an installed
+version costs one tool call here and a full task cycle there.
+
+### 1. Discover
+
+Exhaust discovery before asking. Never ask permission to investigate; run these
+and report findings, not intentions.
+
+- Read the target files, their neighbors, callers, and tests
+- Read signatures, types, schemas, config, and lock files
+- Read the governing `AGENTS.md`, `CLAUDE.md`, and contributing guide
+- Read existing ADRs and project docs
+- Run `--help`, `--version`, and read-only subcommands
+- Scaffold a generator into a temp directory and read its real output
+- Fetch the current official docs when external behavior matters
+- Search upstream issues and PRs when repo research is inconclusive and upstream
+  behavior changes the plan
+
+Stop discovering when more reading cannot change a task.
+
+### 2. Ask
+
+Discovery settles facts. It does not settle intent. Ask the user for what
+remains.
+
+Ask when:
+
+- The answer is a preference, a priority, or an accepted tradeoff
+- Two valid approaches lead to materially different plans
+- Verifying needs a destructive action, missing access, a paid call, or
+  credentials you do not have
+- The requirement itself is ambiguous and a wrong reading wastes the plan
+
+Never ask:
+
+- Anything a file, a lock file, `--help`, or the official docs answers
+- Permission to read, search, fetch, or probe
+- A choice a project convention, a repo pattern, or an obvious default already
+  settles
+- A detail that does not change the plan
+
+#### How to ask
+
+Ask before drafting tasks.
+
+1. Show the full numbered list of open questions first, so the user sees the
+   scope
+2. Ask them one at a time, in list order
+3. Use the harness question tool when one exists; otherwise ask in chat
+4. Give each question a recommended answer, so the user confirms rather than
+   composes
+5. Wait for the answer before the next question
+
+Never batch several questions into one message. A batched answer loses detail
+against the question it belongs to.
+
+An answer that settles or removes a later question drops it. Say which, and
+continue with the next.
+
+An answer that raises a genuinely new blocker adds it to the list, asked after
+the current one. Never let this run long; this is a planning gate, not an
+interview.
+
+A user who declines to answer, or a run that forbids questions, sends that fact
+to step 3.
+
+### 3. Constrain, last resort
+
+Only a fact neither discovery nor the user settled becomes a `**Constraint:**`
+in the task that depends on it, naming what was not verified, how the
+implementer checks it in one step, and what to do when it proves false.
+
+Never write an unresolved fact as plain instruction text. A constraint is the
+exception, not a substitute for asking.
+
+### Verify before asserting
+
+These facts are wrong often enough to check every time:
+
+- A scaffolding command's behavior in a non-empty directory
+- Whether a named config file actually affects the check you attach to it
+- A type check, lint, or test command that silently passes over zero files
+- The installed major version of a dependency you pin or call
+- A template's or generator's real output, not its documented output
+- A symbol's current signature in this repo
+- Whether a test can fail for the reason the task claims
+
+### Forbidden assertion shapes
+
+Never write these. Each hides an unverified fact as instruction:
+
+1. "Run `<cmd>`, which will <behavior you did not observe>"
+2. "The template ships `<file>`" without having read it
+3. "`<check>` catches `<error class>`" without confirming it runs at all
+4. "This should work if `<condition>`"
+5. "Assuming `<X>` holds, ..."
+
+Catching yourself drafting one: stop, verify, then write the observed fact.
+
+### Report what stayed open
+
+State every remaining unverified fact at handoff, each naming the task it
+affects and why it stayed open: discovery could not reach it, or the user
+declined to settle it. An unreported assumption is a defect the implementer
+inherits blind.
+
+## Scope check
+
+- Spec covering multiple independent subsystems: split into one plan per
+  subsystem
+- Each plan produces working, testable software on its own
+
+## Decomposition
+
+- Map files to create or modify with their responsibilities before defining
+  tasks
+- One responsibility per file. Group files that change together
+- Follow existing patterns. Split an unwieldy file only when modifying it
+- Search the repo for existing components, helpers, hooks, and utilities first.
+  Reuse is mandatory. Extend before creating
+- Prefer existing code, then standard-library or native platform features, then
+  installed dependencies
+- Add an abstraction, dependency, configuration point, fallback, or extension
+  hook only when a current requirement needs it
+- Prefer the fewest files and the smallest root-cause diff satisfying the source
+  requirements
+- Do not prescribe unsolicited comments or documentation
+- Cover behavior reachable through the supported UI, API, job, or ordinary
+  operation
+- Do not invent cases based on impossible states, internal tampering,
+  unsupported misuse, or hypothetical hacking
+- Include adversarial security cases only when explicitly required, when
+  untrusted input crosses a real trust boundary, or when evidence shows a
+  recognized exploit with credible impact here
+- Never simplify away trust-boundary validation, data-loss prevention, or an
+  explicitly requested security measure
+- Do not bundle unrelated changes because they touch nearby code
+- Merge tasks whose file sets overlap. One task per file set
+- A task delivers one slice of working behavior plus its tests. Everything that
+  behavior needs to run belongs in the task that uses it
+- Never write a task whose only deliverable is a type, schema, constant, or stub
+  a later task consumes. Merge it into its consumer
+- Never write a task that only formats, commits, or ticks boxes. Fold formatting
+  into the task that edits the file
+- Split only where a reviewer could reject one task while approving its neighbor
+- Past ~8 tasks: merge, or split into separate plans
 
 ## Task formatting
 
-- Write each task as one top-level checkbox item: `- [ ] **Task N: ...**`
-- Give each task title one umbrella outcome
-- Never join separate task outcomes with `and`
-- Split tasks when no single outcome covers their steps and their file sets do
-  not overlap
-- State one observable behavior in `Goal`
-- Nest every step under its task as a numbered list
-- Nest ordered substeps under the step they implement
-- Put one action or idea in each list item. Never join actions in a prose line
-  or paragraph
-- Indent all task content under the task checkbox. Indent all step content under
-  its numbered item
-- Use a paragraph only for non-action context that materially helps execution,
-  such as an edge case, constraint rationale, caveat, or justification
-- Keep each paragraph to one idea. Place it directly under the task, step, or
-  substep it qualifies; do not use it to hide a sequence of actions
-- Prefer a labeled paragraph such as `**Edge case:**`, `**Constraint:**`, or
-  `**Why:**` when the relationship is not obvious
-- Apply this structure to every plan section, including tasks, checkpoints,
-  header fields, and handoff text
+- One top-level checkbox per task: `- [ ] **Task N: ...**`
+- One umbrella outcome per title. Never join outcomes with `and`
+- One observable behavior in `Goal`
+- Nest every step as a numbered list under its task
+- One action per list item. Never join actions in a prose line
+- Indent task content under the checkbox, step content under its number
+- Use a paragraph only for non-action context that changes execution: an edge
+  case, a constraint rationale, a caveat
+- One idea per paragraph, placed under what it qualifies
+- Label a paragraph `**Edge case:**`, `**Constraint:**`, or `**Why:**` when the
+  relationship is not obvious
 
-## Worked example (the shape every task follows)
+## Task template
 
-Python here; use the same shape in any language.
-
-```markdown
+````markdown
 - [ ] **Task N: [Observable outcome]**
 
   **Goal:** [One new observable behavior]
 
-  **Files:**
+  **Difficulty:** low | medium | high
 
+  **Interfaces:**
+  - Consumes: `func(a: str) -> Result` from Task M
+  - Produces: `other(b: Result) -> None`
+
+  **Files:**
   - `exact/path/to/file.py`
     - Responsibility: validate input
-    - Output: `Result`
     - Reuse: `LibraryThing` from `exact/path/to/lib.py`
   - `exact/path/to/file.test.py`
-    - Base-case coverage for `function()`
-    - Edge-case coverage for `function()`
+    - Base-case and edge-case coverage for `function()`
   1. **Implement `function()` with TDD**
 
-     **Skills (load if not already loaded):** `<test-runner-skill>`,
-     `<language-skill>`
+     **Skills (load if not already loaded):** `<language-skill>`
 
-     1. Stub the final `Result` signature
-     2. Stub the final `function()` signature with a wrong body
-     3. Write tests for the base cases
-     4. Run the narrow gate
-        - Require assertion failures
-        - Require no import errors
-        - Require no runtime errors
-     5. Implement the constraints
+     1. Stub `Result` and `function()` with `raise NotImplementedError`
+     2. Write the cases below
+     3. Run the narrow gate
+        - Require assertion or `NotImplementedError` failures
+        - Require no import or collection errors
+     4. Implement the constraints
 
-     **Signature:** `def function(input: str) -> Result`
+     ```python
+     def function(input: str) -> Result: ...
+
+     @dataclass(frozen=True)
+     class Result:
+         value: str
+     ```
 
      **Constraints:**
-
-     - Accept X
-     - Validate Y
-     - Return Z
-     - Use `LibraryThing` for heavy lifting
      - Return `Result.empty()` for empty input
+     - Use `LibraryThing` for heavy lifting
 
-     **Base cases:**
+     **Cases:**
 
-     - `function("valid")` -> `Result(value="valid")`
-     - `function("")` -> `Result.empty()`
-     - `function(None)` raises `ValueError`
+     | input     | expect                  |
+     | --------- | ----------------------- |
+     | `"valid"` | `Result(value="valid")` |
+     | `""`      | `Result.empty()`        |
+     | `None`    | raises `ValueError`     |
 
-     **Edge case:** Unicode normalization can change equality without changing
-     the visible value.
+     **Edge case:** Unicode normalization changes equality without changing the
+     visible value.
 
   2. **Run the task gate once**
-
      1. `[one formatter command listing every applicable task file]`
         - Omit when no changed file is covered by that tool
         - Expected: exit 0
      2. `[one linter command listing every applicable task file]`
-        - Omit when no changed file is covered by that tool
         - Expected: exit 0
      3. `[affected test command]`
-        - Omit when an unchanged valid result already covers the final task diff
+        - Omit when an unchanged valid result already covers the final diff
         - Expected: exit 0
 
      Green: every applicable non-dominated check exits 0.
-```
+````
 
-## Plan location
+## Difficulty
 
-- Plan ALWAYS lives in a file. Subagents have no session memory; the file is the
-  only source of truth
-- Already in a plan file: preserve content outside the requested changes
-- Not saved: default `docs/plans/YYYY-MM-DD-<feature-name>.md`. User may pick
-  another path
-- A caller-supplied plan path is authoritative and overrides the default
-- User refuses to save to any file: STOP
-- Saving does not commit the plan. Record whether execution commits the plan
-  file; default to included unless the user explicitly excludes it
-- `Additional plan state files` are optional tracker documents that execution
-  updates with the plan, such as a milestone index
-- Every additional state path must exist before execution starts
-- When concurrent plans share an additional state file, name its exclusive owner
-  or exact turn protocol in `Source requirements` and the written update
-  checkpoint. Without that ownership gate, require sequential execution
-- `Plan file policy` applies to the plan file and every additional plan state
-  file as one policy
+Set `**Difficulty:**` on every task. The dispatcher maps it to a model.
 
-## Review source
+- `low`: mechanical. Single file, no design decision, derivable from the
+  constraints alone
+- `medium`: one module. Signatures and constraints given, some judgment in the
+  implementation
+- `high`: cross-module contract, an ambiguity the plan could not close, or a
+  case the writer flagged as risky
 
-- Capture `review_source_requirements` before drafting the plan
-- Preserve the user's original asks
-- Preserve the user's acceptance criteria
-- Preserve every explicit must statement
-- Preserve every explicit never statement
-- Preserve each user-provided source-spec path
-- Keep this capture independent from the drafted plan
-- Do not reconstruct it from the finished plan
-- After context compaction, stop and request the source again when the capture
-  is unavailable
-- Derive the header's `Source requirements` from this capture
+Rate the implementation work, not the diff size.
+
+## Interfaces
+
+Add `**Interfaces:**` only when a task consumes or produces a cross-task
+contract. An implementer sees only its own task.
+
+- `Consumes`: exact signatures this task calls, each naming its producing task
+- `Produces`: exact signatures later tasks call
+- Names and types MUST match verbatim across the producing and consuming tasks
+
+## Code over prose
+
+Write the artifact when the plan is its source of truth. Write the constraint
+when it is not.
+
+**Write as code:**
+
+- Function and method signatures
+- Type, model, dataclass, and schema definitions with their exact field names,
+  types, aliases, and defaults
+- Named constants with their values
+- Regexes
+- Exact error messages and their format strings
+- Shell commands
+- Config fragments
+- Test cases, as a table of input and expectation
+
+**Write as prose:**
+
+- Behavior constraints with no literal form
+- Ordering and invariants
+- Why an alternative was rejected
+- A trap an implementer would otherwise fall into
+- Anything negative: what not to reuse, what not to add
+
+**Never write:** function bodies, full test functions, component
+implementations. The signature plus the constraints plus the case table is the
+contract; the body is the implementer's work.
+
+A prose sentence describing a signature, field list, or regex is a defect.
+Replace it with the code.
+
+## Detail calibration
+
+Every step states what to build, its constraints, and its cases without
+dictating derivable implementation.
+
+Never write:
+
+- "TBD", "TODO", "implement later", "fill in details"
+- "Add appropriate error handling", "handle edge cases", "style nicely"
+- "Write tests for the above" without the cases
+- "Similar to Task N". Steps are read out of order
+- "Build the component" and other vague instructions
+- References to types, functions, or methods no task defines and the repo cannot
+  import
+- Comments, abstractions, defensive branches, or tests for speculative needs
+
+### Length
+
+Every task body is re-read cold by its implementer and its reviewer. Cut what no
+agent acts on:
+
+- Design rationale for a settled decision belongs in the spec, not the plan
+- Repo rules, tool invocations, and conventions appear once in the shared
+  preamble
+- Never restate what a `path:line` citation shows
+- Never justify absent work. A check you did not add needs no explanation
+
+**Floor.** An implementer reaches `Green:` without asking a question or
+re-deriving a decision. Never cut:
+
+- Signatures, types, exact constants, named files
+- Every constraint that changes behavior, and every case
+- Anything a `## Detail calibration` ban would otherwise catch
+
+Keep a line whose removal makes a task ambiguous.
+
+## Shared preamble
+
+State repo rules once, above the tasks, under `## Shared preamble`. Never repeat
+them per task.
+
+## Verification
+
+- Classify each changed file before selecting commands: documentation, source,
+  test, build or tool config, generated artifact, other
+- Map each command to the changed path or behavior justifying it
+- Omit a command when no changed path or repo rule makes it applicable
+- Documentation-only changes do not justify unit tests, type checks, or builds
+- A test-only change justifies the affected tests, not an unrelated full suite
+- Build or tool-config changes justify only the checks they can alter
+- A comment-only source change justifies nothing when comments have no
+  executable role
+- Treat directives, suppressions, pragmas, doctests, generated-documentation
+  inputs, shebangs, encoding declarations, and format-sensitive metadata as
+  executable, not comment-only
+- Never write a test, type check, build, or full gate as the check following a
+  formatter step. A formatter reports its own success and a reflow does not
+  change behavior. Its `Green:` is exit 0 or a clean `--check`
+- A formatter step touching only `.md`, `.mdx`, or docs paths gets no code check
+- One exception: the step changed formatter configuration. Then give it a real
+  check
+- Batch every file a tool accepts into one invocation. Never one per file
+- Remove a command a later command covers plus more, unless an intervening
+  action consumes its result
+- Treat a result as consumed only when a later action depends on its output,
+  pass state, fail state, or artifact
+- Compare semantic scope, not command text
+- Focused tests immediately followed by a containing suite: keep the suite
+- One-file formatting followed by containing multi-file formatting: keep the
+  containing one
+- A post-write existence or read-back check is dominated when the write reports
+  its own failure and a later formatter, parser, test, diff, or review consumes
+  the file
+- Keep a focused TDD red run when implementation depends on its failure
+- Keep a focused green run mid-implementation only when the next action consumes
+  it
+- Run the task gate only as each task's last verification
+- Never write an aggregate command (`make test`, `pnpm run test`, a pathless
+  `pytest`) as a step's `Green:`. Aggregates belong to the task gate
+- Run a relevant full gate at most once per implementation state
 
 ## Commit policy
 
-Before writing, resolve the commit policy from the request. When the request
-does not specify one, use `Per-task commits`. Record
-`Plan file policy: Include | Exclude`; default to `Include` unless requested.
-Apply it to the plan file and all `Additional plan state files`. Record exact
-repo-relative additional paths, or `none` when no other state file exists.
-`Plan state` means the plan file plus every listed additional state file.
+Ask whether execution may create mechanical commits. Record the answer as
+`Checkpoint commits` or `No commits`. Record
+`Plan file policy: Include | Exclude`, default `Include`, and apply it to the
+plan file plus every `Additional plan state files` path.
 
-Record the choice in the header and encode it with commit checkboxes:
+Encode the policy with checkpoints:
 
-- `Per-task commits`: append one unchecked checkpoint to every task, the
-  unchecked conditional final-review-fixes commit checkpoint after final
-  verification, then a final-state commit checkpoint when the plan file is
-  included
-- `One commit at the end`: append one commit checkpoint after final verification
-- `No commits`: write no commit checkpoints
+- `Checkpoint commits`: one checkpoint per task and one final-state checkpoint
+  after final verification when plan state is included
+- `No commits`: no checkpoints
 
-Every plan ends with one self-contained final-verification checkpoint after all
-tasks.
+Write each checkpoint as a bare line. The executing skill owns the mechanics:
+
+```markdown
+- [ ] **Commit task N**
+```
+
+```markdown
+- [ ] **Final state commit checkpoint**
+```
+
+Never write a commit command, message, or file list into a checkpoint. The owner
+derives all three from the diff at checkpoint time.
+
+`No commits` plus a requested PR is invalid. Resolve the conflict while writing
+the plan.
+
+## Final verification
+
+Every plan ends with one final-verification checkpoint after all tasks.
 
 - Build a review-evidence map from completed task reviews before dispatching a
   final reviewer
-- Reuse a task review when it covers the complete current implementation. This
-  is normally true for a one-task plan and for the last cumulative task review
-  when no implementation content or semantic input changed afterward
-- Dispatch a final reviewer only for review scope not already covered
-- Build an evidence map from completed task gates and reviewer-fix gates before
-  adding final commands
-- Add a final command only for applicable scope not already covered by valid
-  evidence
-- A commit, read-only review, checkbox update, or other bookkeeping does not
-  invalidate evidence unless it changes implementation content or the check's
-  semantic inputs
-- For a one-task plan, list no final automated or manual checks when the task
-  gate covers the complete implementation and the review-fix loop reruns every
-  check invalidated by a fix
-- Apply the same rule when the last task gate already covers the complete
-  implementation: do not repeat it at final verification
-- Do not copy task-gate commands into final verification as fallback commands
-- Batch all files accepted by the same formatter, linter, or checker into one
-  invocation
-- Put final review coverage inside the checkpoint
-- Require no unresolved final-review findings before final validation
-- Run only checks invalidated by final-review fixes; prefer narrow checks and
-  rerun a full gate only when narrower evidence cannot restore required coverage
-- Reuse a valid task-gate or reviewer-fix result when it covers the current
-  implementation state and semantic scope
-- Run the project's full gate only when source, tests, build inputs, tool
-  config, generated artifacts, repo policy, or uncovered cross-task integration
-  makes it relevant
-- When one full-gate command covers selected checks, omit every contained
-  formatter, linter, type-check, build, and test command
-- Do not run unit tests, type checks, or builds for documentation-only changes
-  unless the repo explicitly makes those checks applicable
-- Add an exact build command only when relevant and not already covered
-- Add an exact documentation command only when relevant and not already covered
-- Add each required manual check as an exact procedure
-- Give each manual check one expected observation
-- Remove every unused command or check placeholder
-- Never point final validation commands or manual checks to another plan section
+- Reuse a task review covering the complete current implementation. This holds
+  for a one-task plan, and for the last cumulative task review when no
+  implementation content or semantic input changed afterward
+- Dispatch a final reviewer only for uncovered review scope
+- Build an evidence map from task gates and reviewer-fix gates before adding
+  final commands
+- Add a final command only for applicable scope no valid evidence covers
+- A commit, read-only review, or checkbox update does not invalidate evidence
+- List no final checks when the task gates already cover the complete
+  implementation
+- Never copy task-gate commands into final verification as fallbacks
+- Never point a final command at another plan section
+- Add each manual check as an exact procedure with one expected observation
+- Remove every unused placeholder
 
 ```markdown
 - [ ] **Final verification checkpoint**
-
   1. **Close final review coverage**
 
      **Skills (load if not already loaded):** `requesting-code-review`
 
-     Omit the skills line and dispatch step when reusable task-review evidence
-     already covers the complete current implementation.
-
-     1. Reuse a task-review result when it covers the complete current
-        implementation
-     2. Dispatch a fresh code-quality reviewer only when complete review
-        coverage remains missing
+     Omit the skills line and the dispatch step when task-review evidence covers
+     the complete current implementation.
+     1. Reuse a task-review result covering the complete implementation
+     2. Dispatch a fresh reviewer only for missing coverage
      3. Resolve each substantiated finding
         1. Verify its cited evidence
         2. Apply the narrowest valid fix
-        3. Update `Solved defects`
-        4. Run only checks invalidated by the fix
-           - Prefer affected narrow gates
-           - Rerun a full gate only when narrower evidence cannot restore its
-             required coverage
+        3. Run only checks the fix invalidated
      4. Re-dispatch after a behavioral fix round
-     5. Do not re-dispatch after an all-static fix round when its affected gates
-        pass
-     6. Require reusable review coverage, `PASS`, or fully discharged findings
+     5. Do not re-dispatch after an all-static fix round whose gates pass
 
   2. **Close uncovered automated evidence**
-
-     1. Reuse every task-gate and reviewer-fix result that covers the current
-        implementation state and semantic scope
-     2. Run `[exact command for uncovered applicable scope]`
-        - Omit this step when reusable evidence covers all applicable scope
+     1. Reuse every task-gate and reviewer-fix result covering the current state
+        and semantic scope
+     2. Run `[exact command for uncovered scope]`
+        - Omit when reusable evidence covers all applicable scope
         - Expected: exit 0
 
-  3. **Close uncovered manual evidence**
-
-     1. Reuse every valid task or reviewer-fix observation that covers the
-        current implementation state
-     2. Perform `[exact manual procedure for uncovered applicable behavior]`
-        - Omit this step when reusable observations cover all applicable
-          behavior
-        - Expected: `[observable result]`
-
   Green:
-
-  - Final code-quality review has no unresolved findings
-  - Reused and newly collected evidence covers every applicable check for the
-    current implementation state
+  - Final review has no unresolved findings
+  - Evidence covers every applicable check for the current state
 ```
-
-Commit checkpoints contain no command, message, or fixed file list. The owner
-derives all three from the actual diff at checkpoint time.
-
-```markdown
-- [ ] **Commit task N**
-
-  **Skills (load if not already loaded):** `git-commit-message`
-
-  1. Resolve the checkpoint's verified change set from the current diff
-  2. Include current plan-state changes when `Plan file policy` is `Include`
-  3. Derive the paths from the resolved change set
-  4. Derive the message from the resolved change set
-  5. Commit the resolved change set
-
-  Green:
-
-  - New commit contains the checkpoint's complete verified diff
-  - No intended checkpoint changes remain uncommitted
-```
-
-For `One commit at the end`, place this immediately after the final-verification
-checkpoint:
-
-```markdown
-- [ ] **Final commit checkpoint: whole plan**
-
-  **Skills (load if not already loaded):** `git-commit-message`
-
-  1. Resolve the complete reviewed change set from the current diff
-  2. Include current plan-state changes when `Plan file policy` is `Include`
-  3. Derive the paths from the resolved change set
-  4. Derive the message from the resolved change set
-  5. Commit the resolved change set
-
-  Green:
-
-  - New commit contains the complete reviewed plan diff
-  - No intended plan changes remain uncommitted
-```
-
-For `Per-task commits`, place this immediately after the final-verification
-checkpoint:
-
-```markdown
-- [ ] **Conditional commit checkpoint: final-review fixes**
-
-  **Default:** No final-review changes.
-
-  **Skills (load if not already loaded):** `git-commit-message`
-
-  1. Determine whether the final-verification checkpoint changed files
-  2. When no final-review fixes exist, tick this checkpoint without committing
-  3. When final-review fixes exist, resolve their verified change set from the
-     current diff
-  4. Include current plan-state changes when `Plan file policy` is `Include`
-  5. Derive the paths from the resolved change set
-  6. Derive the message from the resolved change set
-  7. When `Plan file policy` is `Include`, tick this checkpoint before staging
-  8. Commit the resolved change set
-  9. When `Plan file policy` is `Exclude`, tick this checkpoint after the commit
-
-  Green:
-
-  - No-change path
-    - No final-review changes exist
-  - Fix path
-    - One commit contains all verified final-review fixes
-    - No intended checkpoint changes remain uncommitted
-```
-
-Under `Per-task commits`, when `Plan file policy` is `Include`, place this after
-the conditional final-review-fixes commit checkpoint:
-
-```markdown
-- [ ] **Final state commit checkpoint**
-
-  **Skills (load if not already loaded):** `git-commit-message`
-
-  1. Resolve the final verified plan-state change set from the current diff
-  2. Derive the paths from the resolved change set
-  3. Derive the message from the resolved change set
-  4. Commit the resolved change set
-
-  Green:
-
-  - Final plan state is committed
-  - No intended checkpoint changes remain uncommitted
-```
-
-Under `Per-task commits`, the task owner commits after its task gate, then
-summons reviewers. Each task-review fix round gets one follow-up commit. Keep
-final-review fixes uncommitted through re-review. Commit them once after final
-verification passes. On the no-change path, tick after confirming no
-final-review fixes exist. On the fix path with `Plan file policy: Include`, tick
-immediately before staging and restore `[ ]` whenever scope resolution, staging,
-or commit fails. With `Plan file policy: Exclude`, tick only after the commit
-succeeds.
-
-If `No commits` and a PR are both requested, record an external-commit handoff:
-the executor stops before PR creation, supplies the exact reviewed plan-owned
-change set, and verifies the resulting branch contains no baseline-only work.
 
 ## Execution mode
 
-Before writing, resolve the execution mode from the request. When the request
-does not specify one, use `Subagent-Driven`. Record the exact choice in the plan
-header.
+Resolve before writing. Default `Subagent-Driven`. Record the exact literal in
+the header.
 
-## Scope check
+## Progress tracking
 
-- Spec covers multiple independent subsystems: suggest splitting into separate
-  plans, one per subsystem
-- Each plan must produce working, testable software on its own
+Tasks carry `- [ ]` checkboxes.
 
-## Verification deduplication
+The execution ledger, not the box, is authoritative resume state. A `[x]` with
+no matching ledger line means the ledger was lost: re-verify by running that
+task's gate before skipping the task.
 
-- Classify each changed file before selecting commands: documentation, source,
-  test, build/tool config, generated artifact, or other
-- Map each command to the changed paths or behavior that justify it
-- Omit a command when no changed path or repo rule makes it applicable
-- Documentation-only changes do not justify unit tests, type checks, or builds
-  by default
-- A test-only change justifies the affected tests, not an unrelated full suite
-- Build or tool-config changes justify only the checks whose behavior they can
-  alter
-- A comment-only source change does not justify tests, type checks, builds, or a
-  full gate when comments have no executable role
-- Treat directives, suppressions, pragmas, doctests, generated-documentation
-  inputs, shebangs, encoding declarations, and format-sensitive metadata as
-  executable rather than comment-only
-- Never write a test, type check, build, or full gate as the check that follows
-  a formatter step. A formatter run is not an invalidating edit: it reports its
-  own success, and a reflow does not change behaviour. A formatter step's own
-  `Green:` (exit 0, or `--check` clean) is the whole check it needs
-- A formatter step touching only `.md`, `.mdx`, or docs paths gets no code check
-  of any kind
-- The one exception: when the step changes formatter configuration
-  (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), treat it as a real edit and
-  give it a real check
-- Formatting or lint checks may still be applicable to comment-only and
-  formatter-only changes
-- List verification and formatting commands in execution order before writing
-  them into tasks
-- Batch all applicable files into one formatter/linter invocation when the tool
-  accepts multiple paths; never emit one invocation per file
-- Remove an earlier command when a later command covers the same scope plus more
-- Remove an earlier command when nothing consumes its result before the broader
-  command
-- Treat a result as consumed only when a later action depends on its output,
-  pass state, fail state, or produced artifact
-- Compare semantic scope instead of command text
-- Treat focused tests followed immediately by a containing test suite as one
-  check
-  - Keep the containing suite
-  - Remove the focused green run
-- Treat one-file formatting followed by containing multi-file formatting as one
-  formatting action
-  - Keep the containing formatting action
-  - Remove the one-file action
-- Treat a post-write existence/read-back check as dominated when the write
-  command already reports failure and a later formatter, parser, test, diff, or
-  review consumes the file
-- Treat a final command or manual check as dominated when a task gate or
-  reviewer-fix gate covers the same current implementation state and semantic
-  scope
-- In a one-task plan, presume the task gate remains valid through commit and
-  read-only review unless implementation content or semantic inputs change
-- Do not preserve duplicate final commands as hypothetical fallback paths;
-  reviewer fixes run invalidated checks inside their fix loop
-- Keep a focused TDD red run when implementation depends on its expected failure
-- Keep a focused green run mid-implementation only when the next action depends
-  on it; do not repeat it as a pre-commit validation immediately before a
-  containing suite
-- Keep both commands when the broader command does not execute the narrow check
-- Keep both commands when an intervening action consumes the narrow result
-- Reuse valid evidence when it covers the exact current content and semantic
-  scope
-- Run a relevant full gate no more than once per implementation state; never
-  rerun it after read-only review or bookkeeping, and rerun it after a fix only
-  when narrower evidence cannot restore the required coverage
+Record deviations as ledger `Ruling:` lines, never in the plan.
 
-## Decomposition
+## Skills per step
 
-- Map files to create/modify + their responsibilities before defining tasks
-- One responsibility per file. Group files that change together
-- Follow existing patterns. Don't restructure unilaterally. Split an unwieldy
-  file only when modifying it
-- Search the codebase for existing components/helpers/hooks/utilities first.
-  Reuse mandatory. Extend before creating
-- Apply YAGNI. Prefer the fewest files and the smallest root-cause diff that
-  satisfies the source requirements
-- Prefer existing code, then standard-library or native platform features, then
-  installed dependencies. Add an abstraction, dependency, configuration point,
-  fallback, or extension hook only when a current requirement needs it
-- Do not prescribe unsolicited comments or documentation. Add a comment only
-  when required by the request or repo rules, or when a non-obvious invariant
-  cannot be expressed clearly in code
-- Cover behavior realistically reachable through the supported UI, API, job, or
-  ordinary system operation
-- Do not invent paranoid cases based on impossible states, deliberate internal
-  tampering, unsupported misuse, or hypothetical hacking mechanisms
-- Include adversarial security cases only when explicitly required, when
-  untrusted input crosses a real trust boundary, or when evidence shows a
-  recognized industry exploit with credible impact in this application
-- Never simplify away validation at a real trust boundary, data-loss prevention,
-  or an explicitly requested security measure
-- Don't bundle unrelated changes because they touch nearby code
-- Every task ends with the narrowest non-dominated `Green:` proof selected from
-  its actual change impact
-- Add an intermediate `Green:` only when a later action consumes its result
-- Prefer a paste-able command and observable token
-- Use an exact procedure only for manual-only checks
-- Keep TDD red inside its implementation step. Require assertion failure; fix
-  import/runtime setup before proceeding
-- Run the task gate only as each task's last verification
-- Never write an aggregate command (`make test`, `pnpm run test`, a pathless
-  `pytest`) as a step's `Green:`. A step's `Green:` is the narrowest command
-  that proves that step — one test file, one `-k` selector, one type check.
-  Aggregates belong to the task gate, which runs once at the end
-- Merge tasks whose file sets overlap
-- One task per file set, not one task per concern
-- A task delivers one slice of working behavior plus its tests. Everything that
-  behavior needs to run — schema, storage, migration, table, helper, type —
-  belongs in the task that uses it, not a preceding one
-- Never write a task whose only deliverable is a type, a schema, a constant, or
-  a stub that a later task consumes. Merge it into its consumer. Bookkeeping
-  tasks (commit the plan, tick the boxes) are exempt: they deliver no behavior
-  by design
-- Every task dispatches a fresh implementer that reads this plan cold, so a task
-  that ships nothing still costs a full plan read
-- Past ~8 tasks: merge or split into separate plans
-- Rationale capped at 2 lines per constraint. Cite `path:line` instead of
-  restating the argument
-- State repo rules once in the shared preamble
-- Collapse families of near-identical base cases (same assertion, different
-  input) unless they cover distinct code paths
-
-## Execution log
-
-The plan goes stale during execution. `Execution log` is the record that keeps a
-fresh agent correct when the task text no longer matches the repo.
-
-Log an entry when execution contradicts or outgrows the plan:
-
-- `drift`: a plan fact turned out wrong (signature, path, return type, command,
-  dependency, existing helper)
-- `gotcha`: a non-obvious fact that cost time and would cost it again (required
-  build order, flaky fixture, env var, tool quirk, hidden coupling)
-- `decision`: a choice the plan left open, resolved during execution
-
-Silence is the default. Most tasks log nothing. A task that went as planned
-writes nothing at all: no entry, no placeholder, no `none`, no "no drift found".
-An empty section already says it.
-
-Do not log restated plan text, per-step narration, reviewer findings already in
-`Solved defects`, or work that matched the plan.
-
-Keep each entry to one line. Write what a fresh agent needs, not what happened.
-
-- Wrong: `T2 | drift | had trouble with the parser and fixed it`
-- Right:
-  `T2 | drift | plan assumed parse() -> str | repo returns Result; 3 callers updated`
-
-Correct the stale task text in place when the drift invalidates a later task's
-instructions. The log records the change; the task text stays executable.
-
-## Tracking
-
-Executing from a plan file: flip a task's `- [ ]` to `- [x]` after all nested
-steps pass, including its task gate. Flip the task back before a reviewer fix.
-Inline execution owns all boxes; in subagent mode, the current task implementer
-owns its task and completed tasks changed by its reviewer fixes; the finalizer
-owns final boxes and completed tasks changed by final-review fixes. Tasks
-execute sequentially, so the plan has one writer at a time.
-
-Also track progress in the harness native task/todo list.
-
-## Required skills (per step)
-
-- Skills load at the step that needs them, not upfront
+- Skills load at the step needing them, not upfront
 - Scan each step's footprint against skills listed in the current environment.
-  Use exact names. Do not invent or rename
-- Signals: file extensions touched; frameworks/runtimes named; test
-  runners/config; specific imports; build/package managers; domain tooling (Git,
-  Obsidian, Slack, Jira, CI, Neovim, browsers)
-- Add `**Skills (load if not already loaded):**` line only on steps with a
-  match. No match -> no line
-- Add `requesting-code-review` only to a final-review step that can dispatch a
-  reviewer; omit it when reusable review evidence already supplies complete
-  coverage
-- Any step that reads or replies to a bot review always:
-  `**Skills (load if not already loaded):** replying-to-pr-review-threads`
+  Use exact names. Never invent or rename
+- Signals: file extensions, frameworks, runtimes, test runners, specific
+  imports, build and package managers, domain tooling
+- Add `**Skills (load if not already loaded):**` only on a matching step
+- Add `requesting-code-review` only to a final-review step that can dispatch
+- Any step reading or replying to a bot review gets
+  `replying-to-pr-review-threads`
 
 ## Review-related steps
 
 Execution skills own implementation-review mechanics and PR creation. The plan
-owns the final-review step inside its final-verification checkpoint. In subagent
-mode, the finalizer executes that written checkpoint. Preserve a PR request in
-`Source requirements`; the final execution owner loads `create-pull-request`
-after final verification.
+owns only the final-review step inside its final-verification checkpoint.
+Preserve a PR request in `Source requirements`.
 
-If the requested work itself reads external review output:
+When the requested work itself reads external review output:
 
-- Never narrow the applicable reviewer template or replace defect review with
-  plan conformance
-- Read the full output, reconcile stated and observed finding counts, and do not
-  treat a green status as proof that review occurred
-- Annotate bot-review steps with `replying-to-pr-review-threads`; leave its
-  mechanics to that skill
+- Never narrow the reviewer template or replace defect review with conformance
+- Read the full output and reconcile stated against observed finding counts
+- Never treat a green status as proof review occurred
 
-Fresh reviewers receive the header's **Solved defects** list. Execution owners
-record each fixed finding once as `severity | path or symbol | invariant`.
-
-## Plan document header
-
-**Every plan MUST start with this header:**
+## Plan header
 
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For the executing agent:**
->
-> 1. Read `Execution log` before the first task; it overrides stale plan text
-> 2. Execute tasks in plan order
-> 3. Load `executing-plans` when working from a saved plan
-> 4. Append every drift, gotcha, and decision to `Execution log` before ticking
->    its task
-> 5. Tick a task after all its nested steps pass
-> 6. Un-tick a task when a reviewer sends it back
-> 7. Track progress in the harness task list
->
-> **Plan ownership:**
->
-> - One writer at a time
-> - Inline execution: executing agent owns all plan state
-> - Subagent execution: current task implementer owns its task state
-> - Subagent execution: current task implementer owns completed-task state
->   changed by its reviewer fixes
-> - Finalizer: owns final state
-> - Finalizer: owns completed-task state changed by final review
-> - `Execution log`: the current task owner appends; earlier entries are
->   append-only history
+**Spec:** [path to the spec file this plan implements | none]
 
 **Goal:** [One new observable behavior]
 
@@ -632,9 +609,11 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 3. `R3`: [Explicit must statement]
 4. `R4`: [Explicit never statement]
 
+**Architecture:** [2-3 sentences: the approach and its boundaries]
+
 **Execution mode:** [Subagent-Driven | Inline]
 
-**Commit policy:** [Per-task commits | One commit at the end | No commits]
+**Commit policy:** [Checkpoint commits | No commits]
 
 **Plan file policy:** [Include | Exclude]
 
@@ -642,192 +621,86 @@ record each fixed finding once as `severity | path or symbol | invariant`.
 
 - none
 
-**Solved defects:**
-
-- none
-
-**Execution log:**
-
 ---
 ```
 
+- `Spec` is required as a field. Give the repo-relative path when a spec file
+  exists, otherwise `none`
 - `Source requirements` is required
-  - Record each original user ask
-  - Record each acceptance criterion
-  - Record each explicit must statement
-  - Record each explicit never statement
+  - Without a spec, record each original ask, acceptance criterion, explicit
+    must, and explicit never
+  - With a spec, cite each requirement by stable ID or `path:line`
 - `Additional plan state files` is required
-  - Use `none` as the only item when no additional state file exists
-  - Otherwise list each exact repo-relative path once and omit `none`
-  - List only paths that exist before execution starts
-  - Do not list the plan file itself
+  - `none` as the only item when no additional file exists
+  - Otherwise each exact repo-relative path once, and omit `none`
+  - List only paths existing before execution starts
+  - Never list the plan file itself
   - Record every required edit to these files in `Source requirements`
   - For a path shared by concurrent plans, record an exclusive owner or exact
-    turn protocol and require it before the edit
-  - Treat the required update delta as `execution-state`, never implementation
-    scope. Preserve unrelated pre-existing content as `baseline-only`
-- `Solved defects` is required
-  - Keep `none` until a reviewer finding is fixed
-  - Replace `none` with unique regression-relevant entries
-  - Format each entry as `severity | path or symbol | invariant`
-- `Execution log` is required as a heading, empty
-  - Write the heading with no body when drafting the plan
-  - Execution owners append entries; the plan writer never pre-fills it
-  - Never write `none`, `nothing found`, or any placeholder under it. An empty
-    section already says nothing was found
-  - Format each entry as
-    `<task id> | <kind> | <what the plan assumed> | <what is true and what changed>`
-  - `kind` is `drift`, `gotcha`, or `decision`
-
-Skills are annotated per step, not in the header.
-
-- Put every exact task-gate command directly in the task step that runs it
-- Never point a task's verification step to the header or another plan section
-- Put only exact commands for uncovered scope into the self-contained
-  final-verification checkpoint; record evidence reuse without copying commands
-
-## Detail calibration
-
-Every step states what to build, constraints, and tests without dictating
-derivable implementation.
-
-Never write:
-
-- "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling", "handle edge cases", "style nicely"
-- "Write tests for the above" (without listing what to test)
-- "Similar to Task N" (steps may be read out of order)
-- Vague instructions such as "build the component"
-- References to types/functions/methods not defined in any task
-- Comments, abstractions, defensive branches, or tests for speculative future
-  needs and unreachable scenarios
-
-Use verbatim content only for tricky config, signatures, and shell commands.
-Describe test cases as inputs, outputs, and key assertions. Describe
-implementation and layout as intent plus constraints.
-
-### Length
-
-Every task's body is re-read cold by its implementer and its reviewer, so plan
-length is paid per task, not once. Cut what no agent acts on:
-
-- Design rationale for a decision already settled belongs in the slice's own
-  notes or an ADR, not in the plan body. Keep the decision, drop the argument
-  for it
-- Repo rules, tool invocations, and conventions appear once in the shared
-  preamble, never restated per task
-- Do not restate what a `path:line` citation already shows
-
-**Floor — never cut into these.** An implementer must reach `Green:` without
-asking a question or re-deriving a decision:
-
-- Signatures, types, exact constants, and named files
-- Every constraint that changes behavior, and every base and edge case
-- Anything a `## Detail calibration` ban above would otherwise catch
-
-If cutting a line would make a task ambiguous, keep the line. A short plan that
-forces an implementer to guess costs a round trip and a drift entry; it does not
-save time.
+    turn protocol
+  - Treat the update delta as `execution-state`, never implementation scope
+- Annotate skills per step, never in the header
+- Put every exact task-gate command in the step that runs it
+- Never point a task's verification at the header or another section
 
 ## Cross-cutting constraints
 
-- Commit and test-file conventions come from the target repo. Do not invent
+- Commit and test-file conventions come from the target repo. Never invent
   either
-- Design decisions affecting test assertions (ARIA roles, landmarks, semantic
-  HTML) locked in the plan. Styling can stay open
-- Same constraint-detail level across steps of the same type
+- Lock design decisions affecting test assertions (ARIA roles, landmarks,
+  semantic HTML) in the plan. Leave styling open
+- Hold the same constraint detail level across steps of the same type
 
-## Self-review (run yourself, not a subagent)
+## Self-review
 
-After writing, re-check and fix inline:
+After writing, check and fix inline:
 
-1. **Coverage:**
-   1. Every captured source requirement appears in the header
-   2. Every header source requirement maps to a task
-   3. Every task maps to verification
-   4. `Execution log` heading is present and empty
-2. **Ambiguity:** remove every "Detail calibration" red flag
-3. **Type consistency:** signatures/names match across tasks (`clearLayers()` in
-   Task 3 vs `clearFullLayers()` in Task 7 is a bug)
-4. **Implementation leak:** replace derivable bodies/tests with signatures,
-   constraints, and cases
-5. **Reuse:** anything created that already exists -> import or extend instead
-6. **Safety:** destructive operations match source requirements and target-repo
-   rules; every named error mapping has a step that handles it
-7. **Scope discipline:** remove unrequested comments, abstractions,
-   dependencies, configuration, fallback paths, defensive branches, and tests
-8. **Reachability:** every case is reachable through a supported flow or a real
-   trust boundary; speculative tampering requires an explicit requirement or
-   evidence of a recognized exploit with credible impact
-9. **Verification:**
-   1. Remove repeated `Green:` checks
-   2. Remove standalone red phases
-   3. Require exact impact-appropriate commands in each task's last verification
-      step
-   4. Require one plan-level final-verification checkpoint after all tasks
-   5. Put final review coverage inside the final-verification checkpoint
-   6. Reuse a one-task or final cumulative task review when it covers the
-      unchanged complete implementation
-   7. Dispatch final review only for uncovered review scope
-   8. Require no unresolved final-review findings before final validation
-   9. Establish complete final evidence once after the final-review fix loop,
-      reusing valid task and reviewer-fix evidence
-   10. Require every newly listed final command to be exact
-   11. Require every newly listed final manual procedure to be exact
-   12. Reject a separate plan-level final-review task
-   13. Reject verification commands that reference another plan section
-   14. Reject checks unrelated to the changed file categories or behavior
-   15. Combine per-file formatter/linter invocations by tool
-   16. Reject post-write existence/read-back checks already proved downstream
-   17. Reject a narrow green check immediately followed by a containing suite
-       when no intervening action consumes it
-   18. Reject a full gate before final verification unless a one-task or
-       last-task gate covers the complete implementation and final verification
-       reuses it
-   19. Reject final commands or manual checks already covered by still-valid
-       task-gate or reviewer-fix evidence
-   20. Require a zero-command final-validation path for one-task plans whose
-       task gate covers the complete implementation
-10. **Task overlap:** list each task's file set. Overlapping sets -> merge the
-    tasks
-11. **Repetition:** move repeated repo rules and conventions to the preamble
-12. **Commit cadence:** checkpoint count and placement match the header policy;
-    the conditional final-review-fixes commit follows final verification; all
-    plan-state inclusion matches `Plan file policy`; no checkpoint freezes
-    commands, messages, or paths; every additional state-file edit maps to a
-    source requirement
-13. **Review duplication:** remove implementation-review steps owned by
-    `executing-plans`. For requested external-review work, reject narrowed,
-    conformance-only, truncated, or status-only review
-14. **Readability:**
-    1. Every task is a checkbox
-    2. Every step is a nested numbered item
-    3. Every action has its own list item
-    4. Every idea has its own list item or justified paragraph
-    5. Every paragraph is correctly indented
-    6. Every paragraph adds necessary non-action context
-15. **Duplicate work:**
-    1. Build the ordered command sequence for every task
-    2. Compare test scopes
-    3. Compare formatting scopes
-    4. Compare lint scopes
-    5. Compare type-check scopes
-    6. Compare build scopes
-    7. Remove each dominated command
-    8. Keep an earlier command only when a later action consumes its result
-    9. Group applicable paths into one invocation per tool
-    10. Confirm every remaining command is justified by the change impact
-    11. Compare task and reviewer-fix evidence with final-validation scope
-    12. Remove final fallback copies of already-covered commands and procedures
-    13. Remove tests, type checks, builds, and full gates invalidated only by
-        semantic-neutral comments or canonical formatter output
+1. **Coverage:** every captured source requirement is in the header; every
+   header requirement maps to a task; every task maps to verification
+2. **Spec split:** with a spec file, the plan carries no acceptance criteria,
+   research findings, or settled rationale the spec owns. Without one, no spec
+   file was created unasked, and `**Spec:**` reads `none`
+3. **Assumptions:** no `## Assumption gate` forbidden shape remains; every fact
+   discovery could reach was resolved, every one it could not was asked, and
+   each still open is a `**Constraint:**` naming what was not verified
+4. **Ambiguity:** no `## Detail calibration` red flag remains
+5. **Code over prose:** every signature, model, constant, regex, and error
+   message is a code block; every case list is a table; no function body or full
+   test function appears
+6. **Interfaces:** every cross-task contract has matching `Produces` and
+   `Consumes` signatures
+7. **Difficulty:** every task carries one of the three literals
+8. **Type consistency:** signatures and names match across tasks
+9. **Reuse:** nothing created that already exists in the repo
+10. **Safety:** destructive operations match source requirements and repo rules;
+    every named error mapping has a step handling it
+11. **Scope:** no unrequested comment, abstraction, dependency, configuration,
+    fallback, defensive branch, or test
+12. **Reachability:** every case is reachable through a supported flow or a real
+    trust boundary
+13. **Task overlap:** list each task's file set; merge overlapping sets
+14. **No deliverable-free tasks:** no task whose only output is a commit, a
+    format run, or a checkbox tick
+15. **Repetition:** repeated repo rules live in the shared preamble
+16. **Verification:**
+    1. Remove repeated `Green:` checks and standalone red phases
+    2. Each task's last step is its smallest non-dominated gate
+    3. One final-verification checkpoint after all tasks, holding final review
+    4. Reuse a task review covering the unchanged complete implementation
+    5. Every final command is exact; no final command repeats covered evidence
+    6. No full gate before final verification unless a task gate covers the
+       complete implementation and final verification reuses it
+    7. One invocation per tool, all applicable paths
+    8. No post-write existence check already proved downstream
+    9. No narrow green check immediately followed by a containing suite
+17. **Commit policy:** checkpoint count and placement match the header policy;
+    no checkpoint holds a command, message, or path list
+18. **Readability:** every task is a checkbox; every step a nested numbered
+    item; every action its own item; every paragraph indented and necessary
 
 ## Plan reviewer
 
-After self-review, dispatch one subagent using `plan-reviewer-prompt.md`.
-
-Dispatch payload. Do NOT read or open `plan-reviewer-prompt.md` yourself, the
-subagent reads it; reading it into your own context defeats the offload:
+After self-review, dispatch one subagent with `plan-reviewer-prompt.md`.
 
 ```text
 1. Read <skill_dir>/plan-reviewer-prompt.md first
@@ -835,53 +708,34 @@ subagent reads it; reading it into your own context defeats the offload:
 3. Apply these values
    - skill_path = <abs path to this SKILL.md>
    - plan_path = <abs path>
+   - spec_path = <abs path, or `none`>
    - repo_root = <abs path>
    - source_requirements = <review_source_requirements captured before drafting>
 ```
 
 - `<skill_dir>` is this file's directory
 - Substitute absolute paths
-- Pass `review_source_requirements` directly
-- Do not derive reviewer input from the finished plan
-- Pass the pointer and values
-- Do not pass the template body
-
-The reviewer audits the concrete plan for dominated work:
-
-- Compare commands by semantic scope
-- Check execution order
-- Check whether an intervening action consumes the earlier result
-- Check every command against the file categories and behavior it validates
-- Reject per-file invocations when one invocation can cover the same files
-- Reject existence/read-back checks already proved by a downstream consumer
-- Reject tests, type checks, and builds unrelated to the planned diff
-- Reject a full gate before final verification unless a one-task or last-task
-  gate covers the complete implementation and final verification reuses it
-- Reject checks separately repeated immediately before a full-gate command that
-  contains them
-- Reject final commands and procedures already covered by valid task or
-  reviewer-fix evidence, especially in one-task plans
-- Reject final review dispatch already covered by a valid one-task or cumulative
-  task review
-- Report an earlier dominated command as at least Important
-- Do not limit this audit to identical command text
+- Pass `review_source_requirements` directly. Never derive it from the plan
+- Pass the pointer and values. Never the template body
 
 Flow:
 
-1. Reviewer returns `PASS` or terse Critical/Important findings
+1. The reviewer returns `PASS` or terse Critical and Important findings
 2. Fix blocking issues inline
-3. Re-review only if fixes could introduce new defects: changed architecture,
-   direction, tasks, boundaries, ordering, file ownership, verification, or test
-   expectations. Skip for surgical/wording/style fixes
-4. Cap at 3 dispatches. Blocking issues remain after the 3rd -> escalate
+3. Re-review only when a fix could introduce a new defect: changed architecture,
+   tasks, boundaries, ordering, file ownership, verification, or test
+   expectations. Skip for wording and style fixes
+4. Cap at 3 dispatches. Blocking issues after the third: escalate
 
-**Review depth:** a dispatched review must be a good review. Escalate a thin one
-rather than accepting it.
+Escalate a thin review rather than accepting it.
 
-## Execution mode handoff
+## Handoff
 
-Write the resolved mode into the plan header, then save the plan. Report the
-plan path and recorded mode. Do not ask during handoff.
+Write the resolved mode into the header, save the plan and its spec when one
+exists, then report the plan path, the spec path or `none`, the recorded mode,
+and every fact still open with the task it affects. Do not ask during handoff;
+the assumption gate already asked.
 
-- `Subagent-Driven` -> **REQUIRED SUB-SKILL:** `subagent-driven-development`
-- `Inline` -> **REQUIRED SUB-SKILL:** `executing-plans`
+- Both modes -> **REQUIRED SUB-SKILL:** `executing-plans`
+- `executing-plans` loads `subagent-driven-development` only for
+  `Subagent-Driven`

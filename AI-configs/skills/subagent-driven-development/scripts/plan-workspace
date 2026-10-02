@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Resolve and ensure the working-tree directory one plan uses for its
+# short-lived artifacts: task briefs, implementer reports, review packages,
+# test logs, and the progress ledger. Prints the directory's absolute path.
+#
+# One directory per plan (.plans/<plan-basename>/) so a second plan in the
+# same working tree can never read or overwrite another plan's artifacts. A
+# stale ledger misread as current progress makes an orchestrator skip whole
+# task sequences.
+#
+# Basenames collide when two plans share a filename (docs/a/plan.md vs
+# docs/b/plan.md), so each workspace records its owning plan path in a marker
+# file. A workspace owned by a different plan is skipped and the slug is
+# disambiguated with the plan's parent directory name, then a counter.
+#
+# The workspace lives in the working tree, not under .git/, because agent
+# harnesses deny writes there, which would block an implementer writing its
+# report. A self-ignoring .gitignore keeps it out of `git status`.
+#
+# Usage: plan-workspace PLAN_FILE
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "usage: plan-workspace PLAN_FILE" >&2
+  exit 2
+fi
+
+plan=$1
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || root=$(dirname "$plan")
+# Resolve through symlinks so the prefix match below holds; on macOS /tmp is a
+# symlink to /private/tmp, which would otherwise defeat it.
+root=$(cd "$root" && pwd -P)
+base="$root/.plans"
+
+# Record the plan path relative to the repo when it lives inside it, so the
+# marker survives the repo being moved or cloned to another path.
+plan_abs=$(cd "$(dirname "$plan")" && pwd -P)/$(basename "$plan")
+case "$plan_abs" in
+  "$root"/*) plan_id=${plan_abs#"$root"/} ;;
+  *) plan_id=$plan_abs ;;
+esac
+
+slug=$(basename "$plan" .md)
+parent=$(basename "$(dirname "$plan_abs")")
+
+finish() {
+  dir=$1
+  marker="$dir/.plan-path"
+  ledger="$dir/progress.md"
+  printf '*\n' > "$base/.gitignore"
+  if [ ! -f "$ledger" ]; then
+    printf '# Plan ledger - plan: %s\n' "$plan_id" > "$ledger"
+  elif ! head -n 1 "$ledger" | grep -Fqx "# Plan ledger - plan: $plan_id"; then
+    echo "ledger belongs to another plan: $ledger" >&2
+    exit 3
+  fi
+  printf '%s\n' "$dir"
+}
+
+# Try the plain slug, then parent-qualified, then a counter, until one is
+# unowned or owned by this plan.
+try_dirs="$slug ${parent}-${slug}"
+n=2
+while [ "$n" -le 99 ]; do
+  try_dirs="$try_dirs ${slug}-${n}"
+  n=$((n + 1))
+done
+
+for cand in $try_dirs; do
+  dir="$base/$cand"
+  marker="$dir/.plan-path"
+  if [ ! -d "$dir" ]; then
+    mkdir -p "$dir"
+    printf '%s\n' "$plan_id" > "$marker"
+    finish "$dir"
+    exit 0
+  fi
+  if [ ! -f "$marker" ]; then
+    # Predates the marker scheme: adopt it for this plan.
+    printf '%s\n' "$plan_id" > "$marker"
+    finish "$dir"
+    exit 0
+  fi
+  if [ "$(cat "$marker")" = "$plan_id" ]; then
+    finish "$dir"
+    exit 0
+  fi
+done
+
+echo "could not resolve a workspace for $plan: 100 candidate slugs taken" >&2
+exit 1

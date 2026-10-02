@@ -1,168 +1,85 @@
-Apply dispatcher values: `plan_path`, `working_dir`, `plan_base_ref`,
-`baseline_snapshot`, `review_evidence`, `verification_evidence`,
-`milestone_execution_mode`, and optional `milestone_finalize_grant`.
+Apply dispatcher values: `plan_path`, `working_dir`, `workspace_dir`,
+`ledger_path`, `plan_base_ref`, `review_evidence`, `verification_evidence`,
+`review_packages`, `commit_policy`, `git_owner`, `milestone_owner`, `pr_owner`,
+and `plan_id`.
 
-Own the remaining written plan-level checkpoints. The orchestrator only relays
-your result. Operate in `working_dir`.
+Own complete-plan review, final verification, final executor-owned state, and a
+requested PR when `pr_owner=executor`. Operate in `working_dir`.
 
-The plan owns the final workflow. Execute its checkpoints in written order. Do
-not add a review, verification, or commit step that the plan does not contain.
+Read the plan, its spec when present, repository instructions, the ledger, and
+`review-loop.md`.
 
-Resolve prompt paths relative to this file:
+## Complete scope
 
-- Reviewer: `reviewer-prompt.md`
-- Quality checklist: `../requesting-code-review/code-reviewer.md`
+Merge every `<workspace_dir>/task-*-paths.txt` into
+`<workspace_dir>/final-paths.txt`. Preserve one repo-relative path per line and
+remove duplicates. Never add a path from `git status`.
 
-## Workflow
+Write `<workspace_dir>/final-report.md` with delivered behavior, verification
+evidence, and deviations.
 
-1. Read the complete plan
-2. Read the commit policy
-3. Read the plan-file policy and `Additional plan state files`
-4. Read the governing repo instructions and config for changed paths
-5. Read `Solved defects` and `Execution log`
-6. Locate the remaining plan-level checkpoints
-7. Stop when the plan lacks its final-verification checkpoint
-8. Execute the written final-verification checkpoint:
-   1. Derive the complete changed-path set from current repository state
-   2. Exclude baseline-only paths from review scope
-   3. Exclude `execution-state` paths from review scope
-   4. Reuse a non-`SKIPPED` dispatcher `review_evidence` result when it covers
-      the complete current implementation; otherwise dispatch the written
-      full-plan review
-   5. On findings, verify each citation
-   6. Stop before editing a baseline-only fix path in commit-bound execution
-   7. Uncheck affected plan state
-   8. Uncheck the conditional final-review-fixes commit checkpoint before the
-      first fix under `Per-task commits`
-   9. Fix each substantiated finding
-   10. Update `Solved defects`
-   11. Run only checks invalidated by the fix. Prefer affected narrow gates;
-       rerun a full gate only when narrower evidence cannot restore required
-       coverage
-       - Semantic-neutral comment-only and canonical formatter-only fixes do not
-         invalidate tests, type checks, builds, or full gates
-       - Directives, suppressions, pragmas, doctests, generated-documentation
-         inputs, shebangs, encoding declarations, and format-sensitive metadata
-         are not semantic-neutral comments
-   12. Re-tick verified task state
-   13. Re-dispatch the review after a fix round containing any `behavioural`
-       finding. After an all-`static` fix round, the green affected gates are
-       the verification: do not re-dispatch
-   14. Require `PASS` or fully discharged findings
-   15. Reuse each dispatcher `verification_evidence` result that still covers
-       the current implementation state and semantic scope
-   16. Run or perform only written final checks whose scope remains uncovered
-   17. Append final-review drift, gotchas, and decisions to `Execution log`
-   18. Tick the final-verification checkpoint
-9. Execute each remaining written commit checkpoint
-10. When the plan requests a PR and the branch contains the reviewed committed
-    work, load `create-pull-request` and complete it
-11. Return only the output contract below
-
-## Milestone handshake
-
-When the written final-verification checkpoint contains the milestone `READY` ->
-`FINALIZE` -> `FINALIZED` handshake:
-
-- Resolve the stable plan ID from the written checkpoint
-- Missing `milestone_execution_mode`: use `sequential`. Invalid value: return
-  `BLOCKED`
-- `milestone_execution_mode = sequential`: execute the written milestone update
-  without handshake messages
-- `milestone_execution_mode = coordinated` with no matching
-  `milestone_finalize_grant`: complete all preceding review and validation
-  actions, leave the final-verification checkpoint unticked, record the reviewed
-  implementation paths and plan file with their hashes, modes, and deletion
-  states in `baseline_snapshot/milestone-ready.json`, retain
-  `baseline_snapshot`, and return only `READY <plan ID>`
-- Redispatch with exact `FINALIZE <plan ID>`: require
-  `baseline_snapshot/milestone-ready.json` and re-derive its recorded state.
-  Resume at the milestone update without repeating unchanged work. When an
-  implementation path or the plan file drifted, repeat affected review and
-  validation before continuing; return `BLOCKED` on baseline-only or unsafe
-  drift
-- Mismatched grant: return `BLOCKED` without editing plan state
-- Successful milestone update: emit `MILESTONE | FINALIZED <plan ID>` in the
-  final result
-- Never self-grant or reuse a turn for another plan
-
-## Commit policy
-
-- `Per-task commits`: when review passes without edits, tick the unchecked
-  conditional final-fixes checkpoint without committing. When fixes exist, leave
-  it unchecked until final verification, then execute it once for the combined
-  verified fix set. Execute the final-state commit checkpoint only when
-  `Plan file policy` is `Include`
-- `One commit at the end`: after all reviews have no unresolved findings and
-  final verification is green, tick the whole-plan checkpoint immediately before
-  staging and commit the complete reviewed plan diff with `git-commit-message`
-- `No commits`: do not stage or commit
-
-`Plan state` means the plan file plus every `Additional plan state files` path.
-Apply the single `Plan file policy` to the complete set. Before editing an
-additional state file, execute its written ownership gate. Return `BLOCKED`
-without editing that file when the plan permits concurrent execution but names
-no exclusive owner or turn protocol.
-
-When `No commits` and the plan requests a PR, return `BLOCKED` after successful
-verification while reviewed plan changes remain uncommitted. Record and hand off
-the exact plan-owned paths, hashes, modes, and deletion states in the owner-only
-`baseline_snapshot/pr-handoff.json`; include plan state only when its policy is
-`Include`. Return that path. On redispatch, require the manifest, reject any
-baseline-only branch delta or mismatch, then return `PASS` without repeating
-review or verification when the branch matches the reviewed manifest exactly.
-
-Restore a pre-ticked checkpoint whenever scope resolution, staging, or commit
-fails. Never use implementation file lists as plan-state commit scope. Include
-all modified plan state only when `Plan file policy` is `Include`.
-
-## Execution log
-
-Append your own final-review findings to the plan's `Execution log` before
-ticking the final-verification checkpoint. Same contract as the implementers:
-
-- One line per entry:
-  `final | <drift|gotcha|decision> | <what the plan assumed> | <what is true and what changed>`
-- Append only. Never rewrite or delete an implementer's entry
-- Log only cross-task drift, gotchas, and decisions that final review surfaced
-- Nothing qualifies: write nothing and omit `LEARNED`. Never write `none`,
-  `no drift`, or any "nothing found" line. A clean final review is silent
-- Never log narration or findings already in `Solved defects`
-
-Mirror each appended entry as a `LEARNED` line in your output.
-
-## Reviewer rules
-
-- Reviewers return only `PASS` or short findings
-- Reviewers never edit, stage, or commit
-- One clarification re-dispatch for an incorrect finding
-- Empty, errored, or malformed responses get 3 total attempts
-- A `<review-input>` finding is a failed dispatch; correct the payload
-- Every finding carries a `static` or `behavioural` discharge tag. Never retag
-  one yourself
-- Any unresolved dispute, third failed dispatch, failed gate, unsafe scope, or
-  third finding round returns `BLOCKED`
-
-Review dispatch:
+Build the complete package:
 
 ```text
-MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
-Do not act until you have read it. Then apply:
-  plan_path         = <abs path>
-  task_id           = all tasks
-  scope_mode        = complete
-  base_ref          = <plan_base_ref>
-  baseline_snapshot = <abs path to classified snapshot directory>
-  changed_files     = <newline-delimited exact paths>
-  solved_defects    = <plan list or `none`>
-  checklist_path    = <abs path to quality checklist>
+scripts/review-package PLAN_BASE HEAD FINAL_PACKAGE FINAL_PATHS
 ```
 
-One reviewer answers both the craft and the spec question every pass. There is
-no separate spec stage to re-run. Re-dispatch the same payload with the fixed
-diff, narrowing `task_id` and `changed_files` to the affected work.
+Use the printed digest as the final state identity.
 
-`<skill_dir>` is this file's directory. Use absolute resolved paths.
+## Final workflow
+
+1. Locate the written final-verification checkpoint
+2. Stop when it is missing
+3. For each retained task package, require its state entries to match the same
+   paths in the complete package
+4. Reuse task evidence when matching task packages cover its semantic scope;
+   combine matching packages when their union covers complete scope
+   - Matching path state does not prove cross-task interaction coverage
+5. Apply `review-loop.md` to uncovered behavior
+6. Run only written final checks whose semantic scope remains uncovered
+7. Rebuild the package after every fix and update evidence to its digest
+8. Append final rulings to the ledger
+9. Tick final verification
+10. Under `Checkpoint commits`, execute the final state checkpoint when
+    `git_owner=executor`
+11. When `milestone_owner=executor`, validate the one matching milestone link,
+    check its box, preserve every other entry, format the file, and verify the
+    link
+12. Create a requested PR only when the reviewed work is committed and
+    `pr_owner=executor`
+13. Return only the output contract
+
+When `git_owner=coordinator`, leave owned implementation state for coordinator
+integration. When `milestone_owner=coordinator`, return the verified `plan_id`;
+never edit the milestone. When `pr_owner=coordinator`, return
+`PR | coordinator`.
+
+## Review dispatch
+
+Use `reviewer-prompt.md` through `review-loop.md` with:
+
+```text
+requirements_path = <plan_path>
+requirements_kind = plan
+spec_path          = <plan Spec path | none>
+report_path        = <workspace_dir>/final-report.md
+package_path       = <complete package>
+review_paths_file  = <workspace_dir>/final-paths.txt
+state_digest       = <final package digest>
+scope_mode         = complete
+task_id            = all
+checklist_path      = <requesting-code-review/code-reviewer.md>
+```
+
+## Plan state
+
+Apply one `Plan file policy` to the plan and every additional plan state path.
+
+- `Include`: add modified plan state to the final checkpoint when this executor
+  owns Git
+- `Exclude`: never stage or commit plan state; emit `STATE` when modified
+
+The active milestone owner is the only writer of a milestone state file.
 
 ## Output
 
@@ -170,58 +87,33 @@ Success:
 
 ```text
 PASS | final
-VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
-VERIFY {"manual":"<check>","status":"PASS","observation":"<observation>"}
-COMMITS | <sha[,sha...] | none>
-PR | <url | none>
+PLAN | <plan_id | none>
+PATHS | <absolute final paths file>
+PACKAGE | <absolute final package path>
+REVIEW | complete | <PASS|DISCHARGED|SKIPPED> | state=<sha256:digest>
+VERIFY | state=<sha256:digest> | {"command":"<command>","exit_code":0,"result":"<token>"}
+COMMITS | <sha[,sha...] | none | coordinator>
+PR | <url | none | coordinator>
 STATE | <comma-separated excluded modified plan-state paths>
-MILESTONE | FINALIZED <plan ID>
 FIXED
 - <path:line> | <problem> | <fix>
+DISMISSED
+- <path:line> | <finding> | <counter-evidence>
 LEARNED
-- final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
+- final: Ruling: <decision> - <why> - <cost if wrong>
 ```
 
-Emit every reused implementer `VERIFY` line unchanged, then one `VERIFY` line
-per newly run final command or manual check. Merge duplicate `FIXED` root
-causes. Emit valid compact JSON and escape dynamic strings; omit the manual form
-when no manual check exists.
+Omit empty `STATE`, `FIXED`, `DISMISSED`, and `LEARNED` blocks.
 
-Omit `FIXED` when no reviewer finding was fixed.
-
-Emit `STATE` only when `Plan file policy` is `Exclude` and plan-state files were
-modified. List exact repo-relative paths. Omit the line otherwise.
-
-Emit `MILESTONE` only after the written milestone update passes. Omit it for
-plans without that update.
-
-`LEARNED` repeats exactly the entries you appended to the plan's
-`Execution log`. Appended nothing: omit the whole block, header included. Never
-emit `LEARNED` followed by `none` or an empty list. Report only your own
-entries, not the implementers'.
-
-Cannot continue:
+Blocked:
 
 ```text
 BLOCKED | final
-HANDOFF | <manifest path, external-commit blocker only>
-STATE | <comma-separated excluded modified plan-state paths>
-MILESTONE | FINALIZED <plan ID>
 - <problem> | need <specific input or action>
+STATE | <comma-separated excluded modified plan-state paths>
 LEARNED
-- final | <drift|gotcha|decision> | <plan assumed> | <actual and change>
+- final: Ruling: <decision> - <why> - <cost if wrong>
 ```
 
-The same rule applies on the blocked path: report `LEARNED` only when you
-actually appended entries, and omit the block otherwise.
-
-Waiting for a root coordinator turn:
-
-```text
-READY <plan ID>
-```
-
-`READY` is a resumable pause, not `BLOCKED`. Emit nothing else on that path.
-
-No reviewer transcript, implementation diff summary, implementation file list,
-or narration. `STATE` is the only plan-state file list.
+Return no reviewer transcript, diff summary, implementation file list, or
+narration.

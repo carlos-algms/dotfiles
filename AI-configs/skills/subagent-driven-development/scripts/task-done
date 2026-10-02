@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Record one already-verified task. The implementer owns verification; this
+# helper validates the completion evidence and appends one ledger line.
+#
+# Usage: task-done LEDGER TASK_NUMBER BASE HEAD STATE_DIGEST EVIDENCE_FILE
+set -euo pipefail
+
+if [ $# -ne 6 ]; then
+  echo "usage: task-done LEDGER TASK_NUMBER BASE HEAD STATE_DIGEST EVIDENCE_FILE" >&2
+  exit 2
+fi
+
+ledger=$1
+n=$2
+base=$3
+head=$4
+state=$5
+evidence=$6
+
+case "$n" in
+  ''|*[!0-9]*) echo "TASK_NUMBER must be a positive integer: $n" >&2; exit 2 ;;
+esac
+[ "$n" -gt 0 ] || { echo "TASK_NUMBER must be a positive integer: $n" >&2; exit 2; }
+git rev-parse --verify --quiet "$base" >/dev/null || { echo "bad BASE: $base" >&2; exit 2; }
+git rev-parse --verify --quiet "$head" >/dev/null || { echo "bad HEAD: $head" >&2; exit 2; }
+git merge-base --is-ancestor "$base" "$head" || { echo "HEAD is not a descendant of BASE: ${base}..${head}" >&2; exit 3; }
+printf '%s\n' "$state" | grep -Eq '^sha256:[0-9a-fA-F]{64}$' || { echo "bad STATE_DIGEST: $state" >&2; exit 2; }
+[ -f "$ledger" ] || { echo "missing ledger: $ledger" >&2; exit 2; }
+head -n 1 "$ledger" | grep -q '^# Plan ledger - plan: ' || { echo "invalid ledger header: $ledger" >&2; exit 2; }
+[ -f "$evidence" ] || { echo "missing evidence file: $evidence" >&2; exit 2; }
+grep -F "VERIFY | state=$state | " "$evidence" | grep -q '"exit_code":0' || { echo "no passing VERIFY evidence for $state: $evidence" >&2; exit 3; }
+
+line="Task $n: complete (commits $(git rev-parse --short=7 "$base")..$(git rev-parse --short=7 "$head"), state: $state, evidence: $evidence)"
+existing=$(grep "^Task $n: complete " "$ledger" || true)
+if [ -n "$existing" ]; then
+  [ "$existing" = "$line" ] || { echo "conflicting completion for Task $n" >&2; exit 3; }
+  echo "ledger: $line"
+  exit 0
+fi
+
+printf '%s\n' "$line" >> "$ledger"
+echo "ledger: $line"

@@ -1,234 +1,122 @@
-Apply dispatcher values: `plan_path`, `task_id`, `working_dir`, `plan_base_ref`,
-`baseline_snapshot`, and optional `context`.
+Apply dispatcher values: `brief_path`, `preamble_path`, `task_id`,
+`working_dir`, `workspace_dir`, `ledger_path`, `review_paths_file`,
+`plan_base_ref`, `task_base_ref`, `commit_policy`, `git_owner`, and optional
+`context`.
 
-Own `task_id` completely: implementation, plan checkboxes, verification, the
-reviewer, fixes, and commits. A reviewer fix may also update affected completed
-tasks and their checkboxes. Never edit future task state or final checkpoints.
-The plan is the only normative spec; `context` is orientation only. Operate in
-`working_dir`.
+Own the complete task cycle. Operate in `working_dir`.
 
-You own the fix loop because you wrote the code: the reviewer reports, you
-adjudicate and fix. Never hand a finding back up to the orchestrator.
+Read `brief_path`, `preamble_path`, repository instructions, `ledger_path`, and
+`review-loop.md`. Never read the plan or another task brief. Treat `context` as
+orientation only.
+
+## Owned paths
+
+`review_paths_file` is the exact task scope.
+
+- Treat every listed path as wholly task-owned
+- Include listed untracked files
+- Ignore unlisted worktree changes
+- Add a required path before editing it
+- Append one ledger `Ruling:` explaining every added path
+- Never infer scope from `git status`
+
+Stop when a required edit belongs to another active task or cannot be claimed
+safely.
 
 ## Workflow
 
-1. Read the plan header, task, governing repo instructions and config, commit
-   policy, plan-file policy, `Execution log`, and available skills. A logged
-   entry overrides contradicting task text
-2. Read the classified `baseline_snapshot`. Treat `No commits` plus a requested
-   PR as commit-bound for scope safety. Before editing any commit-bound target
-   or reviewer-fix path, stop if it carries `baseline-only` content. Under
-   `Per-task commits`, never review or commit another task's initial work.
-   Cumulative scope includes completed earlier tasks and excludes later tasks
-3. Capture `task_base_ref = git rev-parse HEAD`
-4. Execute every task step; tick a step after its `Green:` passes
-5. Run the task-ending impact-appropriate task gate — ONCE, here, as the task's
-   last verification. Never mid-task. A step's narrow `Green:` is that step's
-   check; an aggregate gate (`make test`, `pnpm run test`, a pathless `pytest`)
-   is not a step check and does not belong inside the step loop
-6. Under `Per-task commits`, load `git-commit-message`, tick the task commit
-   checkpoint immediately before staging, and commit the actual task diff
-7. Run the review loop
-8. Confirm the task has no unresolved findings
-9. Write the execution log (below) before returning
-10. Return only the output contract below
+1. Implement every brief step
+2. Run the task gate once as the last implementation verification
+3. Write `<workspace_dir>/task-<task_id>-report.md`
+4. Build the scoped package with:
 
-`One commit at the end` and `No commits` leave task changes uncommitted.
+   ```text
+   scripts/review-package TASK_BASE HEAD PACKAGE REVIEW_PATHS_FILE
+   ```
 
-## Execution log
+5. Add the printed digest to every `VERIFY` line in the report
+6. Apply `review-loop.md` unless every owned change is proven bookkeeping or
+   canonical formatter-only output
+7. Rebuild the package after fixes and update evidence to its final digest
+8. Under `Checkpoint commits`, commit only owned paths when `git_owner` is
+   `executor`; otherwise leave Git state to the coordinator
+9. Record completion with:
 
-You are the only agent that sees what this task actually cost. The next agent
-starts with zero session memory and a plan that may now be stale. The plan file
-is the sole channel; anything you do not write there is lost.
+   ```text
+   scripts/task-done LEDGER TASK_ID TASK_BASE HEAD STATE REPORT
+   ```
 
-Append to the plan's `Execution log` before returning:
+10. Return only the output contract
 
-- `drift`: a plan fact the repo contradicted (signature, path, return type,
-  command, dependency, an existing helper the plan told you to create)
-- `gotcha`: a non-obvious fact that cost you time and would cost it again
-  (required build order, flaky fixture, env var, tool quirk, hidden coupling)
-- `decision`: a choice the plan left open that you closed
+## Report
 
-Rules:
+```markdown
+# Task <task_id> report
 
-- One line per entry:
-  `<task_id> | <kind> | <what the plan assumed> | <what is true and what changed>`
-- Append only. Never rewrite or delete an earlier owner's entry
-- Nothing qualifies: write nothing. Leave the section untouched and omit
-  `LEARNED` from your output. Never write `none`, `no drift`, `nothing found`,
-  or any placeholder line. A task that went as planned is silent
-- Never log narration, restated plan text, or findings already in
-  `Solved defects`
-- Correct a later task's stale text in place when your drift invalidated its
-  instructions; log the drift and cite that task id
-- Under `Plan file policy: Include`, these edits ride the task commit as
-  `execution-state`
-- Under `Exclude`, still write them to the plan file; they stay uncommitted
+## Built
 
-Mirror each appended entry as a `LEARNED` line in your output.
+- <observable delivered behavior>
 
-## Reviewer dispatch
+## Verification
 
-Resolve prompt paths relative to this file:
+VERIFY | state=<sha256:digest> |
+{"command":"<command>","exit_code":0,"result":"<token>"}
 
-- Reviewer: `reviewer-prompt.md`
-- Quality checklist: `../requesting-code-review/code-reviewer.md`
+## Deviations
 
-Before each dispatch, derive `changed_files` from the current committed, staged,
-unstaged, deleted, and untracked implementation diff. Exclude `execution-state`
-paths and snapshot entries outside the selected scope. Use newline-delimited
-exact paths. Initial plan file lists are hints only.
-
-Use task scope with `task_base_ref` for `Per-task commits`. Use cumulative scope
-with `plan_base_ref` for `One commit at the end` or `No commits`.
-
-**Skip the reviewer entirely** when `changed_files` contains no source or test
-file — a task whose whole diff is the plan document, a formatter result, or
-bookkeeping such as ticking checkboxes. The task gate already proves it. Record
-nothing and continue; this is not a `PASS` to report.
-
-Otherwise dispatch:
-
-```text
-MUST read instructions at <skill_dir>/reviewer-prompt.md FIRST.
-Apply:
-  plan_path         = <abs path>
-  task_id           = <current and affected completed task ids>
-  base_ref          = <task_base_ref | plan_base_ref>
-  scope_mode        = <task | cumulative>
-  baseline_snapshot = <abs path to classified snapshot directory>
-  changed_files     = <newline-delimited exact paths>
-  solved_defects    = <plan list or `none`>
-  checklist_path    = <abs quality-checklist path>
+- <brief said X; implementation uses Y because Z>
 ```
 
-## Probing your own work
+Omit `Deviations` when none exist. Record plan drift as ledger `Ruling:` lines
+before returning.
 
-Prefer TDD. If a path needs proof, add a real test to the suite and keep it.
+## Review
 
-A throwaway probe is only for a claim you cannot settle by reading the code or
-by an existing or new unit test: a path the suite does not cover, or a sequence
-of events a probe reproduces faster than a committed test. Proving a guard is
-load-bearing by asserting the opposite of the shipped contract stays in a probe,
-never in the suite.
+Resolve these paths relative to this prompt:
 
-- ONE probe file per task, in the scratchpad. Inside the source tree only when
-  imports cannot resolve from the scratchpad, and then deleted before the gate
-- Restore mutated source in the SAME command that mutates it:
-  `cp f f.bak && <mutate> && <test>; cp f.bak f && rm f.bak`
-- Budget: 3 probe runs. If three runs have not settled the question, the design
-  is the problem — record it as a `gotcha` and state what stayed unproven
+- Reviewer: `reviewer-prompt.md`
+- Review contract: `review-loop.md`
+- Checklist: `../requesting-code-review/code-reviewer.md`
 
-Do not probe to explore. Probe to settle a question you have already written
-down, and say in the execution log what it answered.
+The dispatcher is this implementer. Pass the task brief as `requirements_path`,
+`spec_path=none`, the report, package, owned path list, final digest, task
+scope, task ID, and checklist to the reviewer.
 
-## Review loop
-
-1. Dispatch one fresh reviewer
-2. `PASS`: the task is done
-3. Findings: verify each citation, un-tick affected steps, fix substantiated
-   issues, update `Solved defects`, and re-tick verified steps
-4. Re-run only task-gate commands invalidated by the fix. The test is
-   mechanical, not a judgment: a command that passed needs a second run ONLY if
-   an `Edit` or `Write` landed after it. No edit in between means no re-run,
-   whatever your confidence. Never re-run a passing command to confirm it, and
-   never repeat one to hunt a flake — a suspected flake is a finding, reported
-   once, capped at 3 characterizing runs
-   - A formatter run is NOT an invalidating edit. Running `oxfmt`, `prettier`,
-     `ruff format`, `black`, or `make format` never authorises a test, type
-     check, build, or gate re-run. The formatter already reports its own
-     success; a reflow does not change behaviour
-   - A formatter that touched only `.md`, `.mdx`, or docs paths invalidates
-     nothing at all. v9 ran a code suite after a markdown reflow 13 times
-   - Exception, and the only one: the formatter's own configuration changed
-     (`pyproject.toml`, `.oxfmtrc`, `.prettierrc`), or it reported a parse error
-     or a non-zero exit. Then treat it as a real edit
-   - Semantic-neutral comment-only fixes likewise do not invalidate anything
-   - Directives, suppressions, pragmas, doctests, generated-documentation
-     inputs, shebangs, encoding declarations, and format-sensitive metadata are
-     not semantic-neutral comments: those DO invalidate
-5. Under `Per-task commits`, commit that round's actual fixes with
-   `git-commit-message`
-6. Close the round by its discharge tags
-
-**Maximum two finding rounds.** A third returns `BLOCKED`. One reviewer answers
-both the craft and the spec question every pass, so there is no separate spec
-stage and none to reopen: a behavioural fix is judged in round two.
-
-### Closing a round by discharge tag
-
-Every finding carries `static` or `behavioural`.
-
-- **All findings `static`:** the green task gate IS the verification. Do not
-  re-dispatch. A reviewer re-reading a rename, an import path, a formatter diff,
-  or a type annotation the gate already proved adds nothing and spends a round
-- **Any finding `behavioural`:** re-dispatch once with the fixed diff
-
-A reviewer that omits the tag, or tags a control-flow, boundary, predicate,
-regex, or contract change as `static`, is malformed output: re-dispatch under
-the output contract rather than trusting the tag. Never retag a finding yourself
-— you wrote the code, so the tag exists to keep that call with the independent
-party.
-
-Incorrect findings get one clarification re-dispatch with counterevidence.
-Empty, errored, or malformed responses get 3 total attempts. A `<review-input>`
-finding is a failed dispatch; correct the payload. A remaining dispute, third
-failed dispatch, failed gate, unsafe commit scope, or third finding round
-returns `BLOCKED`.
-
-## Commit integrity
-
-- Commit from current state, never the plan's initial file list
-- Do not include baseline-only work
-- Include current plan checkbox and `Solved defects` changes only when
-  `Plan file policy` is `Include`
-- Restore a pre-ticked checkpoint when scope resolution, staging, or commit
-  fails
-- One fix commit per reviewer round, not per finding
-- Reviewers never edit, stage, or commit
+Skip review only when every owned change is execution-state bookkeeping,
+checkbox-only, or canonical formatter-only output. Treat configuration,
+manifests, migrations, CI, build scripts, generated contracts, and instruction
+files as behavior-bearing unless repository evidence proves otherwise.
 
 ## Output
-
-No reviewer transcript, implementation summary, file list, or narration.
 
 Success:
 
 ```text
 PASS | <task_id>
-REVIEW | <task|cumulative> | <PASS|DISCHARGED|SKIPPED>
-VERIFY {"command":"<command>","exit_code":0,"result":"<success token>"}
-VERIFY {"manual":"<check>","status":"PASS","observation":"<observation>"}
-COMMITS | <sha[,sha...] | none>
+REPORT | <absolute report path>
+PACKAGE | <absolute review package path>
+REVIEW | <task|cumulative> | <PASS|DISCHARGED|SKIPPED> | state=<sha256:digest>
+VERIFY | state=<sha256:digest> | {"command":"<command>","exit_code":0,"result":"<token>"}
+COMMITS | <sha[,sha...] | none | coordinator>
 FIXED
 - <path:line> | <problem> | <fix>
+DISMISSED
+- <path:line> | <finding> | <counter-evidence>
 LEARNED
-- <task_id> | <drift|gotcha|decision> | <plan assumed> | <actual and change>
+- Task <task_id>: Ruling: <decision> - <why> - <cost if wrong>
 ```
 
-Emit `REVIEW | ... | SKIPPED` only when the no-source-or-test rule skipped
-dispatch. Otherwise emit `PASS` for an explicit reviewer `PASS`, or `DISCHARGED`
-when an all-static fix round closed without redispatch. Emit one `VERIFY` line
-per task-gate command or manual check. Omit the manual form when no manual check
-exists. Merge duplicate `FIXED` root causes. Emit valid compact JSON and escape
-dynamic strings.
+Omit empty `FIXED`, `DISMISSED`, and `LEARNED` blocks. Emit `SKIPPED` only for
+the allowed no-review case.
 
-Omit `FIXED` when no reviewer finding was fixed.
-
-`LEARNED` repeats exactly the entries you appended to the plan's
-`Execution log`. Appended nothing: omit the whole block, header included. Never
-emit `LEARNED` followed by `none` or an empty list. The plan file remains the
-source of truth; `LEARNED` never replaces writing it.
-
-Cannot continue:
+Blocked:
 
 ```text
 BLOCKED | <task_id>
+REPORT | <absolute report path>
 - <problem> | need <specific input or action>
 LEARNED
-- <task_id> | <drift|gotcha|decision> | <plan assumed> | <actual and change>
+- Task <task_id>: Ruling: <decision> - <why> - <cost if wrong>
 ```
 
-The same rule applies on the blocked path: report `LEARNED` only when you
-actually appended entries, and omit the block otherwise. What you found before
-blocking is what saves the next agent from the same wall; the blocker itself
-belongs in the bullet above, not in a log entry.
+Return no reviewer transcript, diff summary, file list, or narration.
