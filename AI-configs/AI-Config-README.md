@@ -138,10 +138,11 @@ Notes:
 Pi reads `AGENTS.md` and `~/.agents/skills/` natively. Pi-specific config
 (settings, mcp, extensions) lives under `AI-configs/pi/`.
 
-Install:
+Install with the managed script. This is the recommended method. A global
+pnpm/npm install conflicts with the `@agentclientprotocol/*-acp` packages.
 
 ```bash
-pnpm add -g @earendil-works/pi-coding-agent
+curl -fsSL https://pi.dev/install.sh | sh
 pi install npm:pi-mcp-adapter
 pnpm add -g pi-acp
 ```

@@ -1,24 +1,20 @@
 {
-  "lastChangelogVersion": "0.80.2",
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-8",
-  "defaultThinkingLevel": "high",
+  "lastChangelogVersion": "0.87.1",
+  "defaultProvider": "omlx",
+  "defaultModel": "Ornith-1.5-35B-A3B-REAP192-mxfp4-MLX",
+  "defaultThinkingLevel": "off",
+  "modelThinkingLevels": {
+    "lmstduio/ornith-1.5-35b-a3b-reap192-mlx": "off"
+  },
   "packages": [
     {
       "source": "npm:pi-mcp-adapter",
-      "extensions": [
-        "-index.ts"
-      ]
+      "extensions": ["-index.ts"]
     },
     {
       "source": "npm:pi-subagents",
-      "skills": [
-        "-skills/pi-subagents/SKILL.md"
-      ],
-      "prompts": [],
-      "extensions": [
-        "-src/extension/index.ts"
-      ]
+      "skills": ["-skills/council-mode/SKILL.md"],
+      "prompts": []
     },
     "npm:@vanillagreen/pi-task-panel"
   ],

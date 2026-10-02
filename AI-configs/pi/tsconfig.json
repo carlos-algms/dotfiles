@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -17,19 +16,22 @@
     "noEmit": true,
     "isolatedModules": true,
     "types": ["node"],
-    "typeRoots": ["../../../../.local/share/pnpm/global/5/node_modules/@types"],
+    // ponytail: pinned to the managed pi release version, bump on each pi update
+    "typeRoots": [
+      "../../../../.pi/agent/install/releases/0.87.1/node_modules/@types"
+    ],
     "paths": {
       "@earendil-works/pi-coding-agent": [
-        "../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent"
+        "../../../../.pi/agent/install/releases/0.87.1/node_modules/@earendil-works/pi-coding-agent"
       ],
       "@earendil-works/pi-coding-agent/*": [
-        "../../../../.local/share/pnpm/global/5/node_modules/@earendil-works/pi-coding-agent/*"
+        "../../../../.pi/agent/install/releases/0.87.1/node_modules/@earendil-works/pi-coding-agent/*"
       ],
       "@earendil-works/pi-tui": [
-        "../../../../.local/share/pnpm/global/5/.pnpm/@earendil-works+pi-tui@0.74.0/node_modules/@earendil-works/pi-tui"
+        "../../../../.pi/agent/install/releases/0.87.1/node_modules/@earendil-works/pi-tui"
       ],
       "typebox": [
-        "../../../../.local/share/pnpm/global/5/.pnpm/typebox@1.1.38/node_modules/typebox"
+        "../../../../.pi/agent/install/releases/0.87.1/node_modules/typebox"
       ]
     }
   },

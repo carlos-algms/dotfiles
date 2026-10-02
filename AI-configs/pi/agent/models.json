@@ -1,56 +1,30 @@
 {
   "providers": {
-    "omlx": {
-      "baseUrl": "http://127.0.0.1:8000/v1",
-      "api": "openai-completions",
-      "apiKey": "1",
-      "compat": {
-        "supportsDeveloperRole": false,
-        "supportsReasoningEffort": false,
-        "maxTokensField": "max_tokens"
-      },
-      "models": [
-        {
-          "id": "Qwen3.6-35B-A3B-4bit-DWQ",
-          "contextWindow": 75000,
-          "maxTokens": 32768
+    "openrouter": {
+      "modelOverrides": {
+        "z-ai/glm-5.3-flash": {
+          "compat": {
+            "openRouterRouting": {
+              "order": ["baseten", "together", "crusoe", "coreweave"],
+              "allow_fallbacks": false
+            }
+          }
         },
-        {
-          "id": "Qwen3.6-28B-REAP-oQ4",
-          "contextWindow": 85000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "gemma-4-26B-A4B-it-4bit-DWQ",
-          "contextWindow": 80000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "gemma-4-26B-A4B-it-QAT-MLX-4bit",
-          "contextWindow": 80000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "gemma-4-26B-A4B-it-heretic-4bit",
-          "contextWindow": 75000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "gemma-4-E2B-Heretic-Uncensored-mlx-4bit",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "Qwen3.6-35B-A3B-Uncensored-Heretic-MLX-4bit",
-          "contextWindow": 128000,
-          "maxTokens": 32768
-        },
-        {
-          "id": "Qwopus3.6-35B-A3B-v1-MLX-3bit-mixed_3_6",
-          "contextWindow": 75000,
-          "maxTokens": 32768
+        "deepseek/deepseek-v4.1-flash": {
+          "compat": {
+            "openRouterRouting": {
+              "order": [
+                "together",
+                "makora",
+                "krea",
+                "atlas-cloud",
+                "coreweave"
+              ],
+              "allow_fallbacks": false
+            }
+          }
         }
-      ]
+      }
     },
     "nvidia": {
       "baseUrl": "https://integrate.api.nvidia.com/v1",
@@ -85,26 +59,51 @@
         }
       ]
     },
-    "cerebras": {
-      "baseUrl": "https://api.cerebras.ai/v1",
-      "api": "openai-completions",
-      "apiKey": "$CEREBRAS_API_KEY",
-      "models": [
-        {
-          "id": "zai-glm-4.7",
-          "name": "GLM 4.7"
-        }
-      ]
-    },
-
     "lmstduio": {
       "baseUrl": "http://localhost:1234/v1",
-      "apiKey": "",
+      "apiKey": "no-key-needed",
       "api": "openai-completions",
       "models": [
         {
           "id": "Qwen3.6-28B-REAP-oQ4",
           "name": "Qwen3.6 28B REAP oQ4"
+        },
+        {
+          "id": "ornith-1.5-35b-a3b-reap192-mlx",
+          "name": "Ornith 1.5 35B A3B REAP192",
+          "contextWindow": 262144,
+          "reasoning": true
+        }
+      ]
+    },
+    "omlx": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "apiKey": "no-key-needed",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "Ornith-1.5-35B-A3B-REAP192-mxfp4-MLX",
+          "name": "Ornith 1.5 35B A3B REAP192",
+          "contextWindow": 262144,
+          "reasoning": true
+        },
+        {
+          "id": "gemma-4-E2B-Heretic-Uncensored-mlx-4bit",
+          "name": "Gemma 4 E2B Heretic Uncensored",
+          "contextWindow": 32000,
+          "reasoning": true
+        },
+        {
+          "id": "Qwen3.6-28B-REAP-oQ4",
+          "name": "Qwen3.6 28B REAP oQ4",
+          "contextWindow": 85000,
+          "reasoning": true
+        },
+        {
+          "id": "Qwopus3.6-35B-A3B-v1-MLX-3bit-mixed_3_6",
+          "name": "Qwopus3.6 35B A3B",
+          "contextWindow": 75000,
+          "reasoning": true
         }
       ]
     }

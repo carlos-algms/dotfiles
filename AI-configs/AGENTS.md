@@ -45,7 +45,8 @@ Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
 - `pi/extensions-disabled/` - extensions kept around but not loaded.
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
   `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to
-  the pnpm global install. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
+  the managed pi install (`~/.pi/agent/install/releases/<version>/`); bump the
+  version on each pi update. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
   from any directory to type-check all extensions.
 
 Per-extension docs (read on demand, don't pre-emptively load):
