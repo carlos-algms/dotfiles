@@ -123,9 +123,9 @@ Inspect a version before restoring it.
 
 These apply only when writing Markdown; load `obsidian-markdown` first.
 
-- 80-character lines, strict line breaks and British English
-- Dashes for unordered lists; no em or en dashes
-- Short code-fence identifiers such as `md`, `ts`, `py` and `bash`
+- Dashes for unordered lists
+- Forbidden: em or en dashes
+- Short code-fence identifiers such as `markdown`, `ts`, `py` and `bash`
 - Wikilinks for vault files; Markdown links for external URLs
 - No colons in wikilink display text
 - In `related` frontmatter, use quoted pipe links:
