@@ -5,6 +5,7 @@
     "IS_AI_TERMINAL": "1"
   },
   "includeCoAuthoredBy": false,
+  "autoMemoryEnabled": false,
   "permissions": {
     "allow": [
       "Bash(cat:*)",
@@ -44,8 +45,12 @@
     "ask": [],
     "defaultMode": "auto"
   },
+  "model": "opus",
   "disableClaudeAiConnectors": true,
-  "hooks": {},
+  "worktree": {
+    "baseRef": "fresh"
+  },
+  "workflowKeywordTriggerEnabled": false,
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
@@ -57,7 +62,10 @@
     "superpowers@claude-plugins-official": false,
     "ponytail@ponytail": true,
     "i-have-adhd@i-have-adhd": false,
-    "crit@crit": true
+    "crit@crit": true,
+    "engineering@synced": false,
+    "productivity@synced": false,
+    "slack-by-salesforce@synced": false
   },
   "extraKnownMarketplaces": {
     "obsidian-skills": {
@@ -93,12 +101,20 @@
   "feedbackDrafts": "off",
   "alwaysThinkingEnabled": false,
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "editorMode": "vim",
   "preferredNotifChannel": "notifications_disabled",
   "switchModelsOnFlag": false,
   "remoteControlAtStartup": false,
-  "skipAutoPermissionPrompt": true,
-  "model": "opus[1m]"
+  "inputNeededNotifEnabled": false,
+  "skipAutoPermissionPrompt": true
 }
