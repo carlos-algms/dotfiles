@@ -40,7 +40,6 @@ brew install \
     luajit \
     monitorcontrol \
     neovim \
-    oh-my-posh \
     pkg-config \
     ripgrep \
     tree \
