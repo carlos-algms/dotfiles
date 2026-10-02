@@ -233,9 +233,13 @@ Do not adopt:
 
 ## Apply gate
 
-- The gate starts open for every action that changes files or external state
+- The gate starts open for every change to an existing file or external state
+- A new file the user or a loaded skill asked for needs no gate
 - Read-only investigation does not require approval
-- Before acting, show the exact proposed content, scope, and target
+- Before acting, show scope, target, and an ordered list of actions
+- New text of 10 lines or fewer: show it as the proposal, fenced with the target
+  file's language
+- Larger changes: never paste file content; the edit tool diff shows it
 - Ask for confirmation after showing the proposal. Do not act in the same turn
 - Only explicit approval in a later user message closes the gate: `y`, `yes`,
   `go`, `do it`, `ship it`, or a label pick from offered options (`A`, `B`, `C`)
@@ -372,7 +376,9 @@ Do not adopt:
   command output, not task status
 - Task status is always reported: what now works, what step you are on
 - Do not echo back what a command already showed
-- Verify before claiming complete, fixed, or passing
+- Verify before claiming complete, fixed, or passing. A tool result that already
+  proves it counts; do not re-check it
+- A formatter exit 0 is proof. Reflow is expected; do not read the file back
 - Over ~50 lines of expected output goes to a temp log: installs, builds, Docker
   pulls, codegen, bulk formatters, long test output
 - On logged failure: report command, exit code, log path, excerpt
@@ -425,7 +431,6 @@ Recap. These decay first on long sessions. Re-read before answering.
 5. Never commit, push, or rewrite history without an explicit request
 6. Gate before multi-file edits, deletions, symlinks, installs
 7. Question means answer, not patch. Read-only tools allowed
-8. Never write to persistent or global memory
 
 Pre-send gate. Run on every response, no exceptions:
 

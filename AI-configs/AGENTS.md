@@ -22,6 +22,12 @@ at the top, CLI-specific overrides in per-tool subdirs.
   top-level directories via a single sync script. See ./COMPONENTS-sync.md for
   the manifest format, run instructions, and how to add a new source.
 - See ./AI-Config-README.md for the exact symlink commands per agent.
+- Symlinks are per-directory, not per-file. `~/.claude/output-styles`,
+  `~/.claude/hooks`, `~/.claude/agents`, and `~/.claude/skills` are directory
+  symlinks into this repo. A file inside one of them is already tracked here.
+  Never symlink an individual file inside an already-linked directory, and never
+  "fix divergence" between the two paths: they are one file. Check the parent
+  with `ls -la ~/.claude/` before touching any link.
 
 ## Codex (`codex/`)
 
