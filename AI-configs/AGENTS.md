@@ -7,6 +7,7 @@ at the top, CLI-specific overrides in per-tool subdirs.
   main instructions file for each agent:
   - `~/.claude/CLAUDE.md`
   - `~/.gemini/GEMINI.md` (read by agy, Google's Antigravity CLI)
+  - `~/.cursor/rules/agents-md.mdc` (Cursor Agent CLI)
   - `~/.config/opencode/AGENTS.md`
   - `~/.codex/AGENTS.md`
   - `~/.pi/agent/AGENTS.md`

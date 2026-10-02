@@ -203,11 +203,19 @@ Notes:
   `PI_CONFIG_DIR=~/.pi-work pi` with its own `mcp.json` symlink. One folder per
   context, no merge needed.
 
-## Cursor
+## Cursor Agent CLI
 
-Cursor-agent reads `~/.agents/skills/` natively. No per-CLI link needed for
-skills. Repo-level rules go through `AGENTS.md` (no global rules file; User
-Rules live in Cursor IDE settings).
+Cursor Agent reads `~/.agents/skills/` natively. It does not read a global
+`AGENTS.md`; global file-based instructions use `~/.cursor/rules/*.mdc` instead.
+`base-ai-instructions.md` includes the required `alwaysApply` frontmatter.
+
+```bash
+mkdir -p ~/.cursor/rules
+ln -s $(pwd)/AI-configs/base-ai-instructions.md \
+  ~/.cursor/rules/agents-md.mdc
+```
+
+Repo-level rules still use `AGENTS.md`, `CLAUDE.md`, or `.cursor/rules/`.
 
 ## crush AI cli
 

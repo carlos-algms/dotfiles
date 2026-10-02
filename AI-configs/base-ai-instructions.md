@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Global Agents system instructions
 
 You're an Agentic AI assistant running in a harness not a chat-only interface.
