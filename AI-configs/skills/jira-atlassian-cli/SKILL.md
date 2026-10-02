@@ -79,6 +79,17 @@ JQL export, edge cases).
   means a structural error in a sibling node, not `expand`. Most common:
   paragraph-wrapped `taskItem.content` (see ADF Reference).
 
+## AI Disclosure (label only)
+
+Apply this section ONLY when a global, enterprise, or company rule requires AI
+disclosure. Otherwise add no label and no disclaimer.
+
+- Disclose with the `ai-assisted` label only, and only on issues you create
+- MCP create: add `"labels": ["ai-assisted"]` to `additional_fields`
+- acli create: `--label ai-assisted`, or top-level `"labels": ["ai-assisted"]` in `--from-json`
+- Editing or commenting on an existing issue: add no label and no disclaimer
+- Never add an AI disclaimer, banner, or footer to a summary, description, or comment
+
 ## ADF Reference (for `contentFormat: "adf"`)
 
 Pass ADF JSON as the `description` value.
