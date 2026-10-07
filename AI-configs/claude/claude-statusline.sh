@@ -62,6 +62,12 @@ GIT_ICON=$''
 echo " $DIR_LABEL"
 echo "$MODEL_LABEL | $COST USD | $BAR ${PERCENTAGE}% ${TOKENS_FORMATTED}/${WINDOW_FORMATTED}"
 
+LIMITS=$(echo "$input" | jq -r '.rate_limits // {} | [
+  (.five_hour | select(.) | "5h \(.used_percentage | round)% (resets \(.resets_at | strflocaltime("%H:%M")))"),
+  (.seven_day | select(.) | "7d \(.used_percentage | round)%")
+] | join(" | ")')
+if [ -n "$LIMITS" ]; then echo "$LIMITS"; fi
+
 ### Don't change from here ###
 # https://code.claude.com/docs/en/statusline
 #
