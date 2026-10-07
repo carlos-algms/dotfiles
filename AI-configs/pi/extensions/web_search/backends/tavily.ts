@@ -35,7 +35,7 @@ export const tavily: SearchBackend = {
         query,
         max_results: numResults,
         search_depth: 'advanced',
-        chunks_per_source: 3,
+        chunks_per_source: 2,
       }),
       signal,
     });

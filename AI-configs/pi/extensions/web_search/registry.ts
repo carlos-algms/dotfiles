@@ -14,6 +14,8 @@ export const PRIORITY_ORDER: BackendName[] = [
 ];
 
 export const DEFAULT_PARALLEL = 2;
+export const DEFAULT_NUM_RESULTS = 3;
+export const MAX_NUM_RESULTS = 5;
 
 const ALL: Record<BackendName, SearchBackend> = {
   langsearch,

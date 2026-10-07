@@ -2,14 +2,16 @@ import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { keyHint } from '@earendil-works/pi-coding-agent';
 import { Text } from '@earendil-works/pi-tui';
 import { Type } from 'typebox';
-import { summarizeResults } from './ai-summary.ts';
 import { formatFooter, formatResults } from './format.ts';
 import { orchestrate } from './orchestrator.ts';
-import { PRIORITY_ORDER } from './registry.ts';
+import {
+  DEFAULT_NUM_RESULTS,
+  MAX_NUM_RESULTS,
+  PRIORITY_ORDER,
+} from './registry.ts';
 import type { BackendName } from './types.ts';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_NUM_RESULTS = 10;
 
 export default function piWebSearchTool(pi: ExtensionAPI) {
   pi.registerTool({
@@ -19,14 +21,15 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
       'Search the web for open-ended questions, current facts, keyword lookups, ' +
       'documentations, definitions, and source discovery.',
     promptSnippet:
-      'Search the web via parallel providers with fallback and ai dedupe and returns Markdown results.',
+      'Search the web (2 providers in parallel, URL-deduped). Returns Markdown results with provider summaries/snippets.',
     promptGuidelines: [
-      'Use web_search for open-ended web lookup; prefer web_search over curl or guessed URLs.',
-      'web_search searches 2 providers in parallel and dedupes, do not repeat the same query to compare backends.',
-      'Use web_search again with better keywords when results are weak or confidence is low.',
-      'You can use web_fetch on web_search result URLs when summaries are insufficient or user ask for details',
-      'Use gh for github.com lookups; web_search is not for direct-source fetches.',
-      'Use web_search provider only for backend debugging or clear fit: exa code/docs/repos, semantic, find-similar, papers; tavily current web, RAG snippets, extract/crawl; brave independent mainstream; langsearch free broad; marginalia indie/small-web long-tail.',
+      'Use web_search for open-ended web lookup; prefer it over curl or guessed URLs.',
+      'Runs 2 providers in parallel and dedupes by URL; do not repeat the same query to compare providers.',
+      'Default numResults is enough. If results miss, rephrase with different keywords (max 2-3 attempts, then report what is missing). More results do not improve relevance.',
+      'Results are provider snippets/summaries, not full pages. Use web_fetch on a result URL for details.',
+      'No pagination, domain or date filters.',
+      'For github.com use gh; for a known URL use web_fetch.',
+      'Omit provider by default. Set only for a clear fit: exa code/docs/papers (semantic), tavily current events, brave mainstream, langsearch broad, marginalia indie/small-web.',
     ],
     parameters: Type.Object({
       query: Type.String({
@@ -35,12 +38,18 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
       numResults: Type.Optional(
         Type.Integer({
           minimum: 1,
-          maximum: 20,
-          description: `Results per backend (default ${DEFAULT_NUM_RESULTS}). Multiply by 2 for the parallel-backend total before dedupe.`,
+          maximum: MAX_NUM_RESULTS,
+          description: `Results per provider (default ${DEFAULT_NUM_RESULTS}, max ${MAX_NUM_RESULTS}). Keep the default; rephrasing the query improves results, more results do not.`,
         }),
       ),
       provider: Type.Optional(
-        Type.Union(PRIORITY_ORDER.map((name) => Type.Literal(name))),
+        Type.Union(
+          PRIORITY_ORDER.map((name) => Type.Literal(name)),
+          {
+            description:
+              'Force a single backend. Omit unless there is a clear fit; falls back to the default pair if unavailable.',
+          },
+        ),
       ),
       timeoutMs: Type.Optional(
         Type.Integer({
@@ -71,12 +80,7 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         provider: params.provider as BackendName | undefined,
         signal: combinedSignal,
       });
-      const aiBody = await summarizeResults(
-        query,
-        outcome.results,
-        combinedSignal,
-      );
-      const body = aiBody ?? formatResults(outcome.results);
+      const body = formatResults(outcome.results);
       const durationMs = Date.now() - startedAt;
 
       const footer = formatFooter(
@@ -85,7 +89,6 @@ export default function piWebSearchTool(pi: ExtensionAPI) {
         durationMs,
         outcome.results.length,
         outcome.providerBypassed,
-        aiBody !== null,
       );
 
       return {

@@ -2,7 +2,7 @@
 name: multi-provider-web-search
 description: >
   Multi-provider web search fanout across Exa, Tavily, Brave, LangSearch, and
-  Marginalia with parallel dispatch, dedupe, and AI summary. Use ONLY on
+  Marginalia with parallel dispatch, dedupe, and provider summaries. Use ONLY on
   explicit user intent for a named provider (Exa, Tavily, Brave, LangSearch,
   Marginalia), cross-provider fanout, semantic code/paper search, indie
   small-web search, or when native web search returned weak results. Do NOT
@@ -33,7 +33,7 @@ web-search-ai-summary "<query>"
 Options:
 
 - `--provider exa|tavily|brave|langsearch|marginalia`
-- `--num-results N` from 1 to 20, default 10 per backend
+- `--num-results N` from 1 to 5, default 3 per backend
 - `--timeout-ms N` from 1000 to 300000, default 30000
 
 ## Guidance

@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 
 import { parseArgs } from 'node:util';
-import { summarizeResults } from './ai-summary.ts';
 import { formatFooter, formatResults } from './format.ts';
 import { orchestrate } from './orchestrator.ts';
+import { DEFAULT_NUM_RESULTS, MAX_NUM_RESULTS } from './registry.ts';
 import { BACKEND_NAMES, isBackendName } from './types.ts';
 import type { BackendName } from './types.ts';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_NUM_RESULTS = 10;
 const MIN_TIMEOUT_MS = 1_000;
 const MAX_TIMEOUT_MS = 300_000;
 const MIN_NUM_RESULTS = 1;
-const MAX_NUM_RESULTS = 20;
 
 try {
   await runCli(process.argv.slice(2));
@@ -37,12 +35,7 @@ async function runCli(args: string[]): Promise<void> {
     provider: parsed.provider,
     signal: timeoutSignal,
   });
-  const aiBody = await summarizeResults(
-    parsed.query,
-    outcome.results,
-    timeoutSignal,
-  );
-  const body = aiBody ?? formatResults(outcome.results);
+  const body = formatResults(outcome.results);
   const durationMs = Date.now() - startedAt;
   const footer = formatFooter(
     parsed.query,
@@ -50,7 +43,6 @@ async function runCli(args: string[]): Promise<void> {
     durationMs,
     outcome.results.length,
     outcome.providerBypassed,
-    aiBody !== null,
   );
   console.log(`${body}\n\n${footer}`);
 }

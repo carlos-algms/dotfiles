@@ -1,7 +1,7 @@
 # web_search
 
-Pi extension. Fans out to N backends in parallel, dedupes by URL, runs Haiku
-post-pass, returns markdown + provenance footer.
+Pi extension. Fans out to 2 backends in parallel, dedupes by URL, returns
+markdown (provider summaries/snippets) + provenance footer.
 
 Also exposes a standalone CLI at `run.ts` (symlinked to
 `~/.local/bin/web-search-ai-summary`) so non-pi agents can shell out to the
@@ -19,10 +19,9 @@ in-process; CLI imports the same modules and prints to stdout.
 - Dedupe normalises URL: strip `utm_*`/`gclid`/`fbclid`, sort remaining params,
   drop fragment, trim trailing `/`. Scheme/host NOT normalised. Same URL from 2
   backends -> `sources: [exa, tavily]`. Snippets concatenated with `\n\n---\n\n`
-  (skip if already a substring of existing). Haiku post-pass dedupes overlapping
-  prose.
-- ai-summary: Haiku 4.5 pass filters, ranks, rewrites bodies. On failure -> raw
-  `formatResults`. Footer: `ai-summary: ok | fallback (raw results)`.
+  (skip if already a substring of existing).
+- No post-processing: results are returned in backend order (exa first), as the
+  providers send them. No relevance filter, no rewrite.
 - Output: `## Result N: <title>` + `- URL:` + `- provider:` + blank + body.
   Blocks joined by `\n========\n`. Footer prefixed `---`.
 - TUI fold: snippet preview per result, footer + expand hint shown.
@@ -41,7 +40,7 @@ in-process; CLI imports the same modules and prints to stdout.
 
 Ordering rationale:
 
-- exa: semantic, query-aware summary + highlights + 2000-char text in one call.
+- exa: semantic, query-aware summary + highlights in one call.
   Best on technical/niche.
 - tavily: general/current events, freshness. Loses to exa on niche.
 - brave: independent ~30B-page index (not Google/Bing). Mainstream English. Free
@@ -56,9 +55,9 @@ Ordering rationale:
 | Name         | Type        | Default | Notes                                           |
 | ------------ | ----------- | ------- | ----------------------------------------------- |
 | `query`      | string      | -       | required                                        |
-| `numResults` | int 1-20    | 10      | per backend; total pre-dedupe = N x parallel    |
+| `numResults` | int 1-5     | 3       | per backend; total pre-dedupe = N x parallel    |
 | `provider`   | enum        | -       | force single backend; bypasses to queue on fail |
-| `timeoutMs`  | int 1k-300k | 30000   | backend fetch only; ai-summary has own 60s      |
+| `timeoutMs`  | int 1k-300k | 30000   | backend fetch                                   |
 
 ## File layout
 
@@ -69,65 +68,43 @@ Ordering rationale:
 - Usage counter: `~/.pi/web-search-usage.json`. Shape per backend:
   `{day, monthKey, today, month}`. Lazy reset on stale day/monthKey. Per-minute
   window in-memory only.
-- ai-summary prompt: `ai-summary-prompt.md` read at module load via
-  `readFileSync`, passed inline through `--system-prompt`.
 
 ## ADRs (load-bearing why)
 
-### numResults default 10
+### numResults default 3, max 5
 
-Backend quotas are request-based, not result-count-based. 10 costs same API
-as 3. Canonical answer often at rank 4-8. Token cost paid downstream to cheap
-Haiku pass.
+Raw provider content goes to the agent with no compression, so context size is
+the constraint. 3 per backend = ~6 results per call. Max 5 (~10 per call) is a
+hard guard: if results miss, rephrase the query; more results of the same query
+do not improve relevance. Constants live in `registry.ts`, shared by
+`index.ts` and `run.ts`.
 
-### Tavily `search_depth: advanced` + `chunks_per_source: 3`
+### Tavily `search_depth: advanced` + `chunks_per_source: 2`
 
-Basic returns ~250-char synth blob; advanced returns 3 x 500-char chunks from
+Basic returns ~250-char synth blob; advanced returns 2 x 500-char chunks from
 relevant sections. 2cr/req halves monthly free to 500. Worth it for content
 density; `usage.ts` reflects halved cap. See
 `../../decisions/web_search/2026-05-14-provider-mix-per-query-type.md`.
 
-### Exa max content
+### Exa content: summary + highlights, no text
 
-`contents: { summary:true, highlights:{numSentences:3, highlightsPerUrl:1}, text:{maxCharacters:2000} }`.
-Multi-axis coverage in one call.
+`contents: { summary:true, highlights:{maxCharacters:800} }`.
+Highlights capped at 800 chars (Exa ignores numSentences: ~3-4k chars/result uncapped). Full `text` dropped (was 2000 chars/result) since nothing compresses output
+anymore; agent uses `web_fetch` for depth.
 
-### LangSearch keeps `summary: true`
+### LangSearch: `snippet` only
 
-11x payload vs `snippet`. Body has broken tokenization upstream; Haiku post-pass
-strips noise. Snippet alone too short to answer agent queries on long-form
-pages. See `../../decisions/web_search/2026-05-14-langsearch-summary-kept.md`.
+Tested 2026-10: `summary: true` returns the same text as `snippet` (20/20
+results identical, same total chars), so the flag is a no-op and is not sent.
+LangSearch returns ~1.3k chars/result and sometimes off-topic results (no
+filter anymore). It is 4th in priority, spillover only.
 
-### ai-summary uses Haiku 4.5, `--thinking off`
+### Haiku summary pass removed
 
-Three reasons the Haiku post-pass exists, not just "rewrite bodies":
-
-- Token reduction: exa returns ~2000 chars text + summary + highlights per
-  result; 10 results = ~25-40k chars raw. Haiku rewrites to ~200-400 chars each.
-  ~5-10x reduction before the main agent sees it. Pays for itself once caller is
-  on Sonnet/Opus input pricing.
-- Relevance filter: Haiku ranks by query fit and drops off-topic results.
-  Pre-pass 10 -> post-pass often 4-7.
-- Normalization: salvages langsearch (tokenization noise, HTML residue,
-  non-English duplicates) into the same shape as exa/tavily/brave. Main agent
-  sees uniform "Result N: title + URL + body" regardless of backend. Without the
-  Haiku pass langsearch is unusable as a primary backend.
-
-Model + flags:
-
-- Haiku: ~16s for 10 results, ~$0.01-0.02/call. Sonnet adds latency, no quality
-  delta on this task.
-- `--thinking off`: tested off/low/medium. off matches low; medium is 2x slower.
-  See `../../decisions/web_search/2026-05-14-thinking-level-tested.md`.
-- Flags used:
-  `--no-tools --no-extensions --no-session --no-skills --provider anthropic --print`.
-- Failure modes: blank output, child error, 60s timeout -> raw `formatResults`
-  fallback.
-- `--system-prompt` takes string only. Prompt loaded with `readFileSync` and
-  passed inline. See
-  `../../decisions/web_search/2026-05-14-ai-summary-prompt-loading.md`.
-- Requires `pi` on PATH + Anthropic key in pi auth
-  (`~/.pi/agent/auth.json -> anthropic.key`). Missing -> fallback.
+Previously a nested `pi --print` (Haiku 4.5) filtered, ranked and rewrote
+results. Removed to cut latency (~16-30s), cost and the nested-pi dependency.
+Consequences: raw provider text reaches the main agent (no injection buffer),
+no relevance filter, duplicate-URL snippets are concatenated unmerged.
 
 ### URL normalisation scope
 
@@ -140,8 +117,7 @@ Same URL from N backends -> one row, `sources: [exa, tavily, ...]`, snippets
 joined with `\n\n---\n\n` (skip if substring of existing). No length/priority
 heuristic to pick "best" snippet. Each backend often complements the others
 (exa semantic summary, tavily chunk picks, brave description); merging
-preserves all angles. Haiku post-pass dedupes overlapping prose. Worst-case
-cost ~3-5k extra chars in Haiku input on 1-3 overlaps per call.
+preserves all angles.
 
 ### Auth in OneDrive JSON
 
@@ -182,7 +158,7 @@ Different separators avoid collision when bodies contain markdown `---` rules or
 
 ### Provenance footer every call
 
-Mirrors `web_fetch`. Reports query, dedupe count, ai-summary state, total ms,
+Mirrors `web_fetch`. Reports query, dedupe count, total ms,
 per-backend status (ok/skipped-quota/skipped-rate/error + count + ms). `details`
 object mirrors structurally for pi UI.
 
@@ -192,7 +168,6 @@ object mirrors structurally for pi UI.
   `../../decisions/web_search/2026-05-14-no-pagination.md`.
 - Tavily 500/month + Exa 1000/month -> heavy days exhaust. LangSearch 1000/day
   covers spillover.
-- ai-summary adds ~16-30s latency. End-to-end ~25-45s.
 - Marginalia English + BM25; bad for natural-language or non-English.
 - Per-minute window resets on pi restart.
 - No domain filter, no time-range, no pagination.

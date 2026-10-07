@@ -5,7 +5,6 @@ interface LangSearchRaw {
   name?: unknown;
   url?: unknown;
   snippet?: unknown;
-  summary?: unknown;
 }
 
 function mapResult(raw: unknown): SearchResult | null {
@@ -15,9 +14,7 @@ function mapResult(raw: unknown): SearchResult | null {
     return null;
   }
   const title = asString(r.name);
-  const summary = asString(r.summary);
-  const snippet = summary || asString(r.snippet);
-  return { title, url, snippet, sources: ['langsearch'] };
+  return { title, url, snippet: asString(r.snippet), sources: ['langsearch'] };
 }
 
 export const langsearch: SearchBackend = {
@@ -35,7 +32,6 @@ export const langsearch: SearchBackend = {
       body: JSON.stringify({
         query,
         count: numResults,
-        summary: true,
       }),
       signal,
     });

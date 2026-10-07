@@ -6,7 +6,6 @@ interface ExaRaw {
   url?: unknown;
   summary?: unknown;
   highlights?: unknown;
-  text?: unknown;
 }
 
 function mapResult(raw: unknown): SearchResult | null {
@@ -19,8 +18,7 @@ function mapResult(raw: unknown): SearchResult | null {
   const highlights = Array.isArray(r.highlights)
     ? r.highlights.filter((h): h is string => typeof h === 'string').join(' ... ')
     : '';
-  const text = asString(r.text);
-  const snippet = [summary, highlights, text].filter(Boolean).join('\n\n') || text;
+  const snippet = [summary, highlights].filter(Boolean).join('\n\n');
   return {
     title: asString(r.title),
     url,
@@ -46,8 +44,7 @@ export const exa: SearchBackend = {
         numResults,
         contents: {
           summary: true,
-          highlights: { numSentences: 3, highlightsPerUrl: 1 },
-          text: { maxCharacters: 2000 },
+          highlights: { maxCharacters: 800 },
         },
       }),
       signal,

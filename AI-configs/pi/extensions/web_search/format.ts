@@ -29,7 +29,6 @@ export function formatFooter(
   durationMs: number,
   resultCount: number,
   providerBypassed: BackendName | null,
-  aiSummarised: boolean,
 ): string {
   const summary = outcomes
     .map((o) => {
@@ -45,7 +44,6 @@ export function formatFooter(
     '',
     `query: ${query}`,
     `results: ${resultCount} after dedupe`,
-    `ai-summary: ${aiSummarised ? 'ok' : 'fallback (raw results)'}`,
     `total duration: ${durationMs}ms`,
     'backends:',
     summary || '  (none)',
