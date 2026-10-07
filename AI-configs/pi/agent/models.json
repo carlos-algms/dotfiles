@@ -78,12 +78,12 @@
     },
     "omlx": {
       "baseUrl": "http://127.0.0.1:8000/v1",
-      "apiKey": "no-key-needed",
+      "apiKey": "$OMLX_API_KEY",
       "api": "openai-completions",
       "models": [
         {
-          "id": "Ornith-1.5-35B-A3B-REAP192-mxfp4-MLX",
-          "name": "Ornith 1.5 35B A3B REAP192",
+          "id": "Ornith-1.5-35B-A3B-MLX-4bit",
+          "name": "Ornith 1.5 35B A3B 4bit",
           "contextWindow": 262144,
           "reasoning": true
         },
@@ -91,18 +91,6 @@
           "id": "gemma-4-E2B-Heretic-Uncensored-mlx-4bit",
           "name": "Gemma 4 E2B Heretic Uncensored",
           "contextWindow": 32000,
-          "reasoning": true
-        },
-        {
-          "id": "Qwen3.6-28B-REAP-oQ4",
-          "name": "Qwen3.6 28B REAP oQ4",
-          "contextWindow": 85000,
-          "reasoning": true
-        },
-        {
-          "id": "Qwopus3.6-35B-A3B-v1-MLX-3bit-mixed_3_6",
-          "name": "Qwopus3.6 35B A3B",
-          "contextWindow": 75000,
           "reasoning": true
         }
       ]
