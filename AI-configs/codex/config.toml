@@ -1,10 +1,10 @@
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 model_context_window = 872000
 model_reasoning_effort = "medium"
 personality = "pragmatic"
 # service_tier = "fast"
 approvals_reviewer = "auto_review"
-default_permissions = ":workspace"
+default_permissions = "workspace-net"
 approval_policy = "on-request"
 
 [features]
@@ -37,6 +37,7 @@ screen_reader_detection_done = true
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 3
+"gpt-6.1-sol" = 1
 
 [plugins."crit@local"]
 enabled = true
@@ -59,3 +60,9 @@ additionalContextLimit = 0
 
 [hooks.state."crit@local:hooks/hooks.json:stop:0:0"]
 trusted_hash = "sha256:bf6ad428ae7902810fa2d68d8db42228377af118aa18508ad0eccf73a95ed1f8"
+
+[permissions.workspace-net]
+extends = ":workspace"
+
+[permissions.workspace-net.network]
+enabled = true
