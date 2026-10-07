@@ -47,6 +47,14 @@ enabled = false
 [plugins."slack@openai-curated-remote"]
 enabled = true
 
+[[hooks.SessionStart]]
+matcher = "^(startup|resume|clear|compact)$"
+
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = 'cat "$HOME/.claude/output-styles/terse.md"'
+additionalContextLimit = 0
+
 [hooks.state]
 
 [hooks.state."crit@local:hooks/hooks.json:stop:0:0"]

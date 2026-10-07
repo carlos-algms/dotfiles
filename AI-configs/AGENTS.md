@@ -53,6 +53,9 @@ at the top, CLI-specific overrides in per-tool subdirs.
 
 Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
 
+- `~/.pi/agent/APPEND_SYSTEM.md` links to `~/.claude/output-styles/terse.md`; Pi
+  loads it automatically
+- A trusted project's `.pi/APPEND_SYSTEM.md` replaces the global append file
 - `pi/agent/settings.json` - pi user settings (provider defaults, theme, etc).
 - `pi/agent/mcp.json` - MCP servers wired into pi.
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module

@@ -161,6 +161,10 @@ Notes:
 Pi reads `AGENTS.md` and `~/.agents/skills/` natively. Pi-specific config
 (settings, mcp, extensions) lives under `AI-configs/pi/`.
 
+Pi also loads `~/.pi/agent/APPEND_SYSTEM.md` automatically. Link it to Claude's
+terse output style to share the output rules. A trusted project's
+`.pi/APPEND_SYSTEM.md` replaces the global append file; they are not combined.
+
 Install with the managed script. This is the recommended method. A global
 pnpm/npm install conflicts with the `@agentclientprotocol/*-acp` packages.
 
@@ -176,6 +180,7 @@ Symlink:
 mkdir -p ~/.pi/agent
 
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.pi/agent/AGENTS.md
+ln -s ~/.claude/output-styles/terse.md ~/.pi/agent/APPEND_SYSTEM.md
 
 ln -s $(pwd)/AI-configs/pi/agent/settings.json  ~/.pi/agent/settings.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp.json       ~/.pi/agent/mcp.json
