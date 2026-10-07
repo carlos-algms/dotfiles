@@ -188,7 +188,7 @@ the review summary body (stream 2, `gh pr view N --comments`):
 
 - "Outside diff range" comments - findings on code the diff did not touch
 - Nitpicks and duplicate findings, inside collapsed `<details>` blocks
-- The actionable-comments count, which covers streams 2 AND 3
+- The "Actionable comments posted: N" header. It counts inline threads (stream 3) only, never out-of-diff findings, and some review passes with findings print no header
 
 Reading only `reviewThreads` therefore misses real findings, and the ones it
 misses skew severe: a finding that could not anchor to a changed line is often
@@ -196,8 +196,7 @@ one about code the change broke elsewhere.
 
 - Read stream 2 to its last line. Collapsed `<details>` content is in the body
   text `gh` returns; do not stop at the first visible section.
-- Reconcile the count: the body states N actionable comments. Fewer found across
-  both streams means the read was incomplete, not that the rest do not exist.
+- Treat N as a lower bound only. On every review pass, read all inline threads AND the full review body, including every collapsed `<details>` block. A pass without a header can still have findings
 - An out-of-diff finding has no thread, so it has no `databaseId` and cannot be
   replied to or resolved as a thread. Answer it in a top-level comment, tagged
   with the bot's handle.
