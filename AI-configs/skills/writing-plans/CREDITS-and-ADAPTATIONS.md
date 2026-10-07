@@ -42,6 +42,23 @@ against the sync point above; update that line after each comparison.
   the ledger
 - Rewrote the skill body and reviewer prompt as imperative instructions with
   no narration or rationale
+- Targeted a cheap, no-context implementer: verbatim-anchored edits, `Uses`
+  signatures, full bodies up to 15 lines, one pattern test per test file, exact
+  red and green expectations, a stop rule in the preamble, header `Goal` with
+  `Out of scope` and `Call chain`, and an explicit Markdown layout with
+  `## Tasks`
+- Removed the per-task `Files` list. Executors derive owned paths from edit
+  labels and `Changes` lines
+- Limited planner verification to what exists. The plan's new code first runs
+  in the implementer's red and green steps, so planning never pays for the
+  implementation. Manual checks moved out of task gates to the user
+- The writer reads and the implementer runs: no code, test, build, or check
+  runs during planning; runtime behavior is a labeled prediction. The plan
+  reviewer reads only, trusts the writer's `discovery_context`, and gets at
+  most 2 dispatches
+- The writer reads library internals only when public types and docs leave a
+  design choice open. The reviewer never reads dependency source
+- Re-review only after a `Critical` fix. `Important` fixes get self-review
 
 ## Ported back from upstream (2026-09-23)
 
@@ -49,7 +66,7 @@ against the sync point above; update that line after each comparison.
   only its own task learns neighboring names and types
 - Code blocks mandated for signatures, models, constants, regexes, and error
   messages; test cases as tables. Upstream requires code in every code step;
-  this fork's `## Code over prose` names what stays prose
+  this fork's `## Code detail` names what stays prose
 - `**Spec:**` header field
 - Task right-sizing: split only where a reviewer could reject one task while
   approving its neighbor

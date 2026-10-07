@@ -1,7 +1,7 @@
 Apply dispatcher values: `brief_path`, `preamble_path`, `task_id`,
 `working_dir`, `workspace_dir`, `ledger_path`, `review_paths_file`,
-`plan_base_ref`, `task_base_ref`, `commit_policy`, `git_owner`, and optional
-`context`.
+`plan_base_ref`, `task_base_ref`, `commit_policy`, `git_owner`, `prior_report`,
+`escalated_from`, and optional `context`.
 
 Own the complete task cycle. Operate in `working_dir`.
 
@@ -22,6 +22,15 @@ orientation only.
 
 Stop when a required edit belongs to another active task or cannot be claimed
 safely.
+
+## Escalation
+
+- `prior_report` not `none`: read it, then continue from the current working
+  tree. Never restart the task
+- `escalated_from` not `none`: the plan's stop rule for a check failing for a
+  reason the step does not name does not apply. Find the cause, fix it inside
+  owned paths, and append one ledger `Ruling:`
+- A missing or non-unique anchor still stops
 
 ## Workflow
 

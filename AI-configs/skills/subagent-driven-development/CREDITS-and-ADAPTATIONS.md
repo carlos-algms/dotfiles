@@ -31,6 +31,10 @@ Original source:
   `[Scene-setting]` placeholder invites requirements into the dispatch
 - Added `**Difficulty:**`-driven model selection with tiers, not model names,
   so one skill serves Claude, Codex, Cursor, and Pi
+- Added one-tier escalation on `BLOCKED`: a fresh implementer one tier up
+  continues from the blocked report, until the top tier. Blockers needing user
+  input, access, or a fresh anchor stop at once
+- Relayed `Manual check (user)` items to the user after the finalizer's `PASS`
 - Added dismissal recording: a `static` finding may be dismissed only with
   counter-evidence, surfaced as a `DISMISSED` line; a `behavioural` finding
   can never be dismissed, only fixed or escalated

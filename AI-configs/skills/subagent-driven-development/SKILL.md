@@ -15,7 +15,8 @@ task cycle to one fresh implementer.
 For each incomplete task:
 
 1. Run `scripts/task-start PLAN_FILE N`
-2. Seed `<workspace>/task-<N>-paths.txt` from the task's `Files` section
+2. Seed `<workspace>/task-<N>-paths.txt` from the paths in the task's
+   `**Edit <label>:**` and `**Changes:**` lines, each once
 3. Dispatch one implementer with the payload below
 4. On `PASS`, retain its exact `PACKAGE`, `REVIEW`, `VERIFY`, `LEARNED`, and
    `DISMISSED` lines
@@ -24,10 +25,18 @@ For each incomplete task:
    contains no other path
 6. Tick the task; tick its checkpoint only after its Git owner committed
 7. Dispatch the next task
-8. On `BLOCKED`, relay its blocker and stop
+8. On `BLOCKED`, read its `need` field
+   1. It names user input, credentials, access, or a missing or non-unique
+      anchor: relay the blocker and stop
+   2. Otherwise, below the top tier: dispatch a fresh implementer one tier up
+      with the same `brief_path`, `review_paths_file`, and `task_base_ref`, plus
+      `prior_report` and `escalated_from`. Never re-run `task-start`
+   3. At the top tier: relay the blocker and stop
 
 After all tasks, dispatch one fresh finalizer. Relay its result without
-rerunning review or verification. Delete the workspace only after final `PASS`.
+rerunning review or verification. After its `PASS`, relay every
+`**Manual check (user):**` item to the user and wait for each result. Delete the
+workspace only after final `PASS` and every manual check passed.
 
 The implementer owns implementation, verification, review fixes, path-list
 updates, task recording, and executor-owned checkpoint commits. The orchestrator
@@ -45,6 +54,10 @@ Map each task's `Difficulty` to the current harness:
 Use a reviewer one tier above the implementer, capped at the most capable model.
 Name every dispatched model. Treat missing or invalid difficulty as `high` and
 report it.
+
+Escalate one tier per `BLOCKED`, up to the most capable model. The reviewer
+stays one tier above the current implementer, capped. Name every escalated
+model.
 
 ## Orchestrator state
 
@@ -81,6 +94,8 @@ plan_base_ref      = <SHA captured by executing-plans>
 task_base_ref      = <SHA printed by task-start>
 commit_policy      = <Checkpoint commits | No commits>
 git_owner          = <coordinator | executor>
+prior_report       = <absolute report path of the BLOCKED attempt | none>
+escalated_from     = <model of the BLOCKED attempt | none>
 context            = <non-normative orientation only>
 ```
 

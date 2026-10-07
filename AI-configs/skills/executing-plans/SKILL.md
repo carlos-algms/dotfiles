@@ -41,7 +41,8 @@ one `Plan file policy` to all of them.
 The active reviewer dispatcher writes one plain file containing exact
 repo-relative paths, one per line.
 
-- Seed task scope from its `Files` section
+- Seed task scope from the paths in its `**Edit <label>:**` and `**Changes:**`
+  lines, each once
 - Add a discovered path before editing it and record one ledger `Ruling:`
 - Treat each listed path as wholly task-owned, including all its hunks
 - Include listed untracked files
