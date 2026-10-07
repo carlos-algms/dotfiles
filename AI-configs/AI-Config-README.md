@@ -72,6 +72,29 @@ ln -s $(pwd)/AI-configs/agents    ~/.claude/agents
 ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.claude/CLAUDE.md
 ```
 
+### Claude personal account (macOS)
+
+`~/.claude/` is the work account. `~/.claude-personal/` is the personal account.
+The `claude()` function in `shell/common/aliases_ai.sh` sets
+`CLAUDE_CONFIG_DIR=~/.claude-personal` outside `~/work/`. Each config dir has
+its own Keychain login, plugins, MCP servers, and history.
+
+```bash
+mkdir -p ~/.claude-personal
+ln -s $(pwd)/AI-configs/claude/claude-personal-settings.json ~/.claude-personal/settings.json
+ln -s $(pwd)/AI-configs/claude/claude-statusline.sh          ~/.claude-personal/statusline.sh
+ln -s $(pwd)/AI-configs/claude/hooks                         ~/.claude-personal/hooks
+ln -s $(pwd)/AI-configs/claude/output-styles                 ~/.claude-personal/output-styles
+
+ln -s $(pwd)/AI-configs/skills    ~/.claude-personal/skills
+ln -s $(pwd)/AI-configs/agents    ~/.claude-personal/agents
+
+ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.claude-personal/CLAUDE.md
+```
+
+Then run `claude` outside `~/work/`, `/login` with the personal account, and
+install the plugins again.
+
 ## agy (Antigravity CLI)
 
 Google's Antigravity CLI (`agy`) replaced Gemini CLI. It keeps `~/.gemini/` as

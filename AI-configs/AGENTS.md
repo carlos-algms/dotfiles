@@ -5,7 +5,7 @@ at the top, CLI-specific overrides in per-tool subdirs.
 
 - `base-ai-instructions.md` - shared instructions, symlinked globally as the
   main instructions file for each agent:
-  - `~/.claude/CLAUDE.md`
+  - `~/.claude/CLAUDE.md` and `~/.claude-personal/CLAUDE.md`
   - `~/.gemini/GEMINI.md` (read by agy, Google's Antigravity CLI)
   - `~/.cursor/rules/agents-md.mdc` (Cursor Agent CLI)
   - `~/.config/opencode/AGENTS.md`
@@ -18,6 +18,14 @@ at the top, CLI-specific overrides in per-tool subdirs.
   so each CLI symlinks it directly.
 - `claude/` holds Claude-specific bits (`claude-settings.json`,
   `claude-statusline.sh`, `hooks/`).
+- Two Claude accounts on macOS, one config dir each:
+  - `~/.claude/` - work account, settings from `claude/claude-settings.json`
+  - `~/.claude-personal/` - personal account, settings from
+    `claude/claude-personal-settings.json`
+  - The `claude()` function in `shell/common/aliases_ai.sh` sets
+    `CLAUDE_CONFIG_DIR=~/.claude-personal` outside `~/work/`
+  - Both dirs have the same symlinks into this repo. Logins, plugins, MCP
+    servers, and history stay separate per dir
 - Third-party components (skills, agents, hooks) are vendored into these
   top-level directories via a single sync script. See ./COMPONENTS-sync.md for
   the manifest format, run instructions, and how to add a new source.
@@ -27,7 +35,8 @@ at the top, CLI-specific overrides in per-tool subdirs.
   symlinks into this repo. A file inside one of them is already tracked here.
   Never symlink an individual file inside an already-linked directory, and never
   "fix divergence" between the two paths: they are one file. Check the parent
-  with `ls -la ~/.claude/` before touching any link.
+  with `ls -la ~/.claude/` before touching any link. Same rules for
+  `~/.claude-personal/`.
 
 ## Codex (`codex/`)
 

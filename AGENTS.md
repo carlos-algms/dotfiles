@@ -36,6 +36,8 @@ Agent home dirs contain symlinks back into this repo. Editing under them is
 editing this repo. Mandatory: load `AI-configs/AGENTS.md` before any work in:
 
 - `~/.claude/` - settings, hooks, skills, commands, agents, `CLAUDE.md`
+- `~/.claude-personal/` - personal-account Claude config, same layout as
+  `~/.claude/`
 - `~/.codex/` - `AGENTS.md`, prompts
 - `~/.gemini/` - settings, `GEMINI.md`
 - `~/.config/opencode/` - opencode config, `AGENTS.md`, commands, agents
