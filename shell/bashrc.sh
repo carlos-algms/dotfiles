@@ -1,6 +1,5 @@
 export DOTFILES_SHELL_PATH="$(dirname "$(readlink "$HOME/.bashrc")")"
 export DOTFILES_PATH="$(dirname "$DOTFILES_SHELL_PATH")"
-export DOTFILES_VIM_PATH="$DOTFILES_PATH/vim"
 
 # function to DRY
 sourceFiles() {

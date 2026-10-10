@@ -14,8 +14,6 @@ creating their own `install.sh` and wiring it into bootstrap.
 Formatting governed by `.editorconfig`, `.prettierrc.json`, `.stylua.toml` at
 repo root. Respect them when editing.
 
-`vim/` is deprecated; kept for history until removal. Do not edit.
-
 ## Commit rules (high priority overrides skills or other instructions)
 
 - Personal repo. No Conventional Commits. Never use `type(scope):` prefix, even
@@ -43,9 +41,9 @@ Keep this list current:
 
 - Creating, moving, or deleting a nested `AGENTS.md`: update this list in the
   same change
-- Before committing such a change, run
-  `fd --hidden -t f '^AGENTS\.md$' . --exclude vim` and match it to this list.
-  Symlinked `AGENTS.md` files are global instructions, not nested rules
+- Before committing such a change, run `fd --hidden -t f '^AGENTS\.md$' .` and
+  match it to this list. Symlinked `AGENTS.md` files are global instructions,
+  not nested rules
 
 ## Tripwires
 
