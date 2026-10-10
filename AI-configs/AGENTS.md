@@ -60,7 +60,8 @@ Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
 - `pi/agent/mcp.json` - MCP servers wired into pi.
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
   that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
-  build step). Current extensions: `web_fetch`, `web_search`, `vim-mode`.
+  build step). Current extensions: `web_fetch`, `web_search`, `vim-mode`,
+  `rate-limit-status`.
 - `pi/extensions-disabled/` - extensions kept around but not loaded.
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
   `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to
