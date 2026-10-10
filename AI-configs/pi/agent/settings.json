@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.4",
+  "lastChangelogVersion": "1.1.0",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",
   "defaultThinkingLevel": "off",
@@ -11,11 +11,13 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": ["-skills/council-mode/SKILL.md"],
+      "skills": [
+        "-skills/council-mode/SKILL.md"
+      ],
       "prompts": []
     },
-    "npm:@vanillagreen/pi-task-panel",
-    "npm:@gotgenes/pi-anthropic-auth"
+    "npm:@gotgenes/pi-anthropic-auth",
+    "npm:@juicesharp/rpiv-todo"
   ],
   "hideThinkingBlock": false,
   "showHardwareCursor": true,
@@ -27,14 +29,5 @@
   "theme": "dark",
   "warnings": {
     "anthropicExtraUsage": true
-  },
-  "kendex": {
-    "extensionManager": {
-      "config": {
-        "@vanillagreen/pi-task-panel": {
-          "showWorkflowReminder": false
-        }
-      }
-    }
   }
 }
