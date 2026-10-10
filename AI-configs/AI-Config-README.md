@@ -148,6 +148,7 @@ ln -s ~/.claude/output-styles/terse.md ~/.pi/agent/APPEND_SYSTEM.md
 ln -s $(pwd)/AI-configs/pi/agent/settings.json  ~/.pi/agent/settings.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp.json       ~/.pi/agent/mcp.json
 ln -s $(pwd)/AI-configs/pi/agent/models.json    ~/.pi/agent/models.json
+ln -s $(pwd)/AI-configs/pi/agent/keybindings.json ~/.pi/agent/keybindings.json
 
 ln -s $(pwd)/AI-configs/pi/extensions           ~/.pi/agent/extensions
 ```

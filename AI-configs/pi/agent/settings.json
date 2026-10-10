@@ -29,5 +29,10 @@
   "theme": "dark",
   "warnings": {
     "anthropicExtraUsage": true
-  }
+  },
+  "enabledModels": [
+    "anthropic/claude-sonnet-5-5",
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-haiku-5-5"
+  ]
 }

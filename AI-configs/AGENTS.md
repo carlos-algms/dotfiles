@@ -86,6 +86,12 @@ Pi (`@earendil-works/pi-coding-agent`) layout:
   purpose. Slack MCP needs Slack's pre-registered Claude client and
   `--oauth-callback-port 3118`
 - `pi/agent/models.json` - provider and model overrides (OpenRouter routing)
+- `pi/agent/keybindings.json` - key overrides. `ctrl+p` / `ctrl+n` move list
+  selection (autocomplete, selectors) via `tui.select.up` / `tui.select.down`.
+  `app.model.cycleForward` moved to `alt+p`: in the editor, app actions run
+  before `tui.select.*`, so a shared `ctrl+p` would cycle models. Session and
+  scoped-models selectors keep their own `ctrl+p` / `ctrl+n` actions, which win
+  there. Run `/reload` after editing
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
   that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
   build step). The whole dir is linked, so every extension in it auto-loads
