@@ -6,9 +6,13 @@ motions, and one-shot commands.
 
 ## What it does
 
-- Two modes: `insert` (default) and `normal`. `Esc` toggles to normal; `i` /
-  `a` return to insert.
+- Two modes: `insert` (default) and `normal`. `Esc` toggles to normal; `i` / `a`
+  return to insert.
 - Mode indicator rendered on the editor's bottom border.
+- Cursor shape per mode: bar in insert, block in normal. Uses the hardware
+  cursor (`showHardwareCursor: true` required) and hides pi's fake reverse-video
+  cursor. Unfocused shape comes from the terminal (kitty
+  `cursor_shape_unfocused`, default `hollow`).
 - Translates `vim` keys to pi's existing editor primitives (cursor moves,
   delete-word, delete-to-line-end, etc). Does not call pi's keybinding manager
   directly.
@@ -17,10 +21,10 @@ motions, and one-shot commands.
 
 - Motions: `h` `j` `k` `l` `0` `$` `w` `W` `b` `B` `e` `E`
 - Edits: `x` `D` `C` `S` `s` `~`
-- Operators: `d{motion}` / `c{motion}` over `w` `b` `e` `h` `l` `0` `$`;
-  `dd` / `cc` for whole-line
-- Char search: `dt<char>` / `df<char>` / `ct<char>` / `cf<char>`
-  (forward, single-line)
+- Operators: `d{motion}` / `c{motion}` over `w` `b` `e` `h` `l` `0` `$`; `dd` /
+  `cc` for whole-line
+- Char search: `dt<char>` / `df<char>` / `ct<char>` / `cf<char>` (forward,
+  single-line)
 - Case ops: `gu{motion}` / `gU{motion}`
 - Open lines: `o` `O`
 - Append: `A` `I`
@@ -28,8 +32,8 @@ motions, and one-shot commands.
 
 ## Installation
 
-Symlinked via the whole-dir extension link set up in
-`AI-Config-README.md`. Reload pi or restart.
+Symlinked via the whole-dir extension link set up in `AI-Config-README.md`.
+Reload pi or restart.
 
 ## Caveats
 
@@ -52,8 +56,8 @@ Symlinked via the whole-dir extension link set up in
 This file is a fork of upstream's example. To keep upstream merges clean:
 
 - Upstream code blocks must stay byte-identical. Modifying them breaks merge.
-- All local logic lives between
-  `// === LOCAL ADDITIONS ===` / `// === END LOCAL ADDITIONS ===` markers.
+- All local logic lives between `// === LOCAL ADDITIONS ===` /
+  `// === END LOCAL ADDITIONS ===` markers.
 - New behavior hooks into `handleInput` via the single `handleLocal()` guard at
   the top of the override; do not interleave.
 
@@ -77,21 +81,21 @@ and `c` operators waiting for a motion. One state slot rather than a parser.
 
 ### `~` uses direct buffer mutation
 
-No editor primitive for "toggle case at cursor", so `~` reads via `getLines()`
-/ `getCursor()`, deletes the char, and inserts the toggled char. Direct buffer
-mutation is the cheapest path; the alternative (sequence-only) would need a
-new pi primitive.
+No editor primitive for "toggle case at cursor", so `~` reads via `getLines()` /
+`getCursor()`, deletes the char, and inserts the toggled char. Direct buffer
+mutation is the cheapest path; the alternative (sequence-only) would need a new
+pi primitive.
 
 ### `dt`/`df` use `setText` + direct cursor state poke
 
 pi's `handleForwardDelete` pushes one undo snapshot per char, so the natural
 implementation (loop N forward-deletes) creates N undo steps. To get one undo
 step, `dt`/`df` build the modified buffer text and call `setText` (single
-snapshot), then restore the cursor via direct mutation of `state.cursorLine`
-/ `state.cursorCol`. Safe because pi's `UndoStack.push` deep-clones via
-`structuredClone`, so post-`setText` mutation doesn't corrupt the snapshot.
-This is the only place we touch private editor state; lifted instead of
-walking visual lines with key sequences (which break under word wrap).
+snapshot), then restore the cursor via direct mutation of `state.cursorLine` /
+`state.cursorCol`. Safe because pi's `UndoStack.push` deep-clones via
+`structuredClone`, so post-`setText` mutation doesn't corrupt the snapshot. This
+is the only place we touch private editor state; lifted instead of walking
+visual lines with key sequences (which break under word wrap).
 
 ### No tests
 
@@ -106,7 +110,8 @@ grows.
 - No `i` / `a` text objects (`diw`, `da"`, etc).
 - No counts (e.g. `3w`, `5dd`).
 - `g` prefix only resolves to `gu` / `gU`. `gg` / `G` not implemented.
-- `d{motion}` / `c{motion}` only over `w` `b` `e` `h` `l` `0` `$` (plus `dd`/`cc`).
+- `d{motion}` / `c{motion}` only over `w` `b` `e` `h` `l` `0` `$` (plus
+  `dd`/`cc`).
 - `de` / `dE` are aliased to `dw` / `dW` (pi has no "to end of word" primitive).
   They eat trailing whitespace, unlike real vim `de`.
 - `dt`/`df`/`ct`/`cf` are forward + single-line only. `dT`/`dF` (backward) not

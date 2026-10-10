@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 
 import { CustomEditor, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { matchesKey } from "@earendil-works/pi-tui";
+import { CURSOR_MARKER, matchesKey } from "@earendil-works/pi-tui";
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
 const NORMAL_KEYS: Record<string, string | null> = {
@@ -81,12 +81,24 @@ const SIMPLE_KEYS: Record<string, { seqs: string[]; insert?: boolean }> = {
 	O: { seqs: ["\x01", "\n", "\x1b[A"], insert: true }, // open line above
 	u: { seqs: ["\x1f"] }, // undo (pi binds ctrl+-; terminal-dependent)
 };
+// Hardware cursor shape per mode (DECSCUSR). Unfocused shape is the terminal's
+// job (kitty: cursor_shape_unfocused hollow). Needs showHardwareCursor: true.
+const CURSOR_SHAPE = {
+	normal: "\x1b[2 q", // steady block
+	insert: "\x1b[6 q", // steady bar
+} satisfies Record<"normal" | "insert", string>;
+
+// pi's editor draws a fake reverse-video cursor right after the marker. Strip
+// it so only the hardware cursor (with its shape) is visible.
+const FAKE_CURSOR = new RegExp(`${CURSOR_MARKER}\\x1b\\[7m(.*?)\\x1b\\[0m`);
 // === END LOCAL ADDITIONS ==================================================
 
 class ModalEditor extends CustomEditor {
 	private mode: "normal" | "insert" = "insert";
 	// LOCAL: pending operator state. `g` is a two-key prefix (resolves to gu/gU).
 	private pendingOp: "d" | "c" | "g" | "gu" | "gU" | "dt" | "df" | "ct" | "cf" | null = null;
+	// LOCAL: last cursor shape sent to the terminal, to write only on change.
+	private cursorShape: string | null = null;
 
 	handleInput(data: string): void {
 		// LOCAL hook: handles operator-pending, extended motions, A/I, and
@@ -270,8 +282,15 @@ class ModalEditor extends CustomEditor {
 	// === END LOCAL ADDITIONS ==============================================
 
 	render(width: number): string[] {
-		const lines = super.render(width);
+		const lines = super.render(width).map((line) => line.replace(FAKE_CURSOR, `${CURSOR_MARKER}$1`));
 		if (lines.length === 0) return lines;
+
+		// LOCAL: sync hardware cursor shape with mode.
+		const shape = CURSOR_SHAPE[this.mode];
+		if (shape !== this.cursorShape) {
+			this.cursorShape = shape;
+			this.tui.terminal.write(shape);
+		}
 
 		// LOCAL: render mode label as a separate line below editor + autocomplete
 		// list. super.render() emits autocomplete after the bottom border (see
