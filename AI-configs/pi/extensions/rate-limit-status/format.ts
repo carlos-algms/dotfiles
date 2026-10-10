@@ -2,24 +2,35 @@ import type { ExtensionContext } from '@earendil-works/pi-coding-agent';
 
 const MINUTES_PER_HOUR = 60;
 const MINUTES_PER_DAY = 1440;
-const BAR_WIDTH = 16;
-
-const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
+const BAR_WIDTH = 10;
 
 type WindowLabel = '5h' | '7d';
 
-function formatReset(epochSeconds: number): string {
+function formatReset(epochSeconds: number, label: WindowLabel): string {
   const minutes = Math.max(
     0,
     Math.round((epochSeconds * 1000 - Date.now()) / 60_000),
   );
-  if (minutes < MINUTES_PER_HOUR) {
-    return relativeTime.format(minutes, 'minute');
+  const resetDate = new Date(epochSeconds * 1000);
+  const time = resetDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  if (label === '5h') {
+    return `${minutes}m @ ${time}`;
   }
-  if (minutes < MINUTES_PER_DAY) {
-    return relativeTime.format(Math.round(minutes / MINUTES_PER_HOUR), 'hour');
-  }
-  return relativeTime.format(Math.round(minutes / MINUTES_PER_DAY), 'day');
+  const days = Math.floor(minutes / MINUTES_PER_DAY);
+  const hours = Math.floor((minutes % MINUTES_PER_DAY) / MINUTES_PER_HOUR);
+  const mins = minutes % MINUTES_PER_HOUR;
+  const duration = [
+    days > 0 ? `${days}d` : '',
+    hours > 0 ? `${hours}h` : '',
+    mins > 0 ? `${mins}m` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const weekday = resetDate.toLocaleDateString('en-GB', { weekday: 'short' });
+  return `${duration || '0m'} @ ${weekday} ${time}`;
 }
 
 function makeBar(percent: number): string {
@@ -53,7 +64,7 @@ function formatWindow(
   const percent = Math.round(utilization * 100);
   return ctx.ui.theme.fg(
     pickColor(percent),
-    `${label} ${makeBar(percent)} ${percent}% (${formatReset(reset)})`,
+    `${label} ${makeBar(percent)} ${percent}% (${formatReset(reset, label)})`,
   );
 }
 
