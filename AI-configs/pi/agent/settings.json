@@ -5,15 +5,14 @@
   "defaultThinkingLevel": "off",
   "modelThinkingLevels": {
     "lmstduio/ornith-1.5-35b-a3b-reap192-mlx": "off",
+    "anthropic/claude-haiku-5-5": "high",
     "anthropic/claude-sonnet-5-5": "high",
     "anthropic/claude-opus-5-5": "medium"
   },
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": [
-        "-skills/council-mode/SKILL.md"
-      ],
+      "skills": ["-skills/council-mode/SKILL.md"],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
