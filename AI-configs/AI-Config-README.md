@@ -170,12 +170,42 @@ pnpm install -g defuddle
 ```
 
 Auth lives outside dotfiles (OAuth tokens written by `/login`, not git-safe).
-Symlink from the private OneDrive vault:
+The real file is usually kept in private cloud storage. Link it, or skip the
+link on a machine without access and run `/login` in Pi to create it:
 
 ```bash
-ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-auth.json \
-  ~/.pi/agent/auth.json
+ln -s <path-to-stored-auth.json> ~/.pi/agent/auth.json
 ```
+
+`web_search` API keys also live outside dotfiles, at
+`${XDG_CONFIG_HOME:-~/.config}/pi-web-search-extension/auth.json`. The real file
+is usually kept in private cloud storage. Link it:
+
+```bash
+mkdir -p ~/.config/pi-web-search-extension
+ln -s <path-to-stored-web-search-auth.json> \
+  ~/.config/pi-web-search-extension/auth.json
+```
+
+On a machine without access to that storage, create the file with your own keys.
+Use an empty `apiKey` for backends you do not use; `marginalia` accepts
+`public`:
+
+```bash
+mkdir -p ~/.config/pi-web-search-extension
+cat > ~/.config/pi-web-search-extension/auth.json <<'EOF'
+{
+  "langsearch": { "apiKey": "" },
+  "tavily": { "apiKey": "" },
+  "exa": { "apiKey": "" },
+  "brave": { "apiKey": "" },
+  "marginalia": { "apiKey": "public" }
+}
+EOF
+chmod 600 ~/.config/pi-web-search-extension/auth.json
+```
+
+Set `WEB_SEARCH_AUTH_PATH` to use another location.
 
 Claude Pro/Max OAuth needs `@gotgenes/pi-anthropic-auth`. Log in with
 `/login anthropic`. API-key requests pass through unchanged.

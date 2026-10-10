@@ -5,12 +5,9 @@ import { asObject, asString } from './http.ts';
 import type { BackendName } from './types.ts';
 
 const DEFAULT_AUTH_PATH = join(
-  homedir(),
-  'OneDrive',
-  'work',
-  'mac-pro',
-  'dotfiles',
-  'web-search-auth.json',
+  process.env.XDG_CONFIG_HOME || join(homedir(), '.config'),
+  'pi-web-search-extension',
+  'auth.json',
 );
 
 const ENV_OVERRIDE = 'WEB_SEARCH_AUTH_PATH';

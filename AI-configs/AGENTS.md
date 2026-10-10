@@ -110,10 +110,11 @@ Per-extension docs (read on demand, don't pre-emptively load):
 Auth and runtime files live OUTSIDE the repo. Never commit or print them:
 
 - `~/.pi/agent/auth.json` - API keys and OAuth credentials (from `/login`);
-  linked from the private vault, see `AI-Config-README.md`
+  usually linked from private cloud storage, see `AI-Config-README.md`
 - `~/.pi/agent/mcp-auth.json` - MCP OAuth tokens
-- `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API keys
-  for `web_search` extension (override path via `WEB_SEARCH_AUTH_PATH`).
+- `${XDG_CONFIG_HOME:-~/.config}/pi-web-search-extension/auth.json` -
+  per-backend API keys for `web_search` extension, usually linked from private
+  cloud storage (override path via `WEB_SEARCH_AUTH_PATH`).
 - `~/.pi/web-search-usage.json` - per-backend daily/monthly counters managed by
   the `web_search` extension.
 

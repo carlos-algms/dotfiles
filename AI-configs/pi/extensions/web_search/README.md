@@ -4,9 +4,9 @@ Pi extension. Fans out to 2 backends in parallel, dedupes by URL, returns
 markdown (provider summaries/snippets) + provenance footer.
 
 Also exposes a standalone CLI at `run.ts` (symlinked to
-`~/.local/bin/web-search-ai-summary`) so non-pi agents can shell out to the
-same logic via the `multi-provider-web-search` skill. Pi loads `index.ts`
-in-process; CLI imports the same modules and prints to stdout.
+`~/.local/bin/web-search-ai-summary`) so non-pi agents can shell out to the same
+logic via the `multi-provider-web-search` skill. Pi loads `index.ts` in-process;
+CLI imports the same modules and prints to stdout.
 
 ## Behaviour
 
@@ -40,8 +40,8 @@ in-process; CLI imports the same modules and prints to stdout.
 
 Ordering rationale:
 
-- exa: semantic, query-aware summary + highlights in one call.
-  Best on technical/niche.
+- exa: semantic, query-aware summary + highlights in one call. Best on
+  technical/niche.
 - tavily: general/current events, freshness. Loses to exa on niche.
 - brave: independent ~30B-page index (not Google/Bing). Mainstream English. Free
   cap pauses at $5/mo (~1000 req). Above langsearch since not Bing-derived;
@@ -61,8 +61,9 @@ Ordering rationale:
 
 ## File layout
 
-- Auth: `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json`. Override via
-  `WEB_SEARCH_AUTH_PATH`. Shape:
+- Auth: `${XDG_CONFIG_HOME:-~/.config}/pi-web-search-extension/auth.json`.
+  Usually a symlink to a copy in private cloud storage; setup in
+  `../../../AI-Config-README.md`. Override via `WEB_SEARCH_AUTH_PATH`. Shape:
   `{langsearch:{apiKey},tavily:{apiKey},exa:{apiKey},brave:{apiKey},marginalia:{apiKey}}`.
   Marginalia defaults to `public`.
 - Usage counter: `~/.pi/web-search-usage.json`. Shape per backend:
@@ -76,8 +77,8 @@ Ordering rationale:
 Raw provider content goes to the agent with no compression, so context size is
 the constraint. 3 per backend = ~6 results per call. Max 5 (~10 per call) is a
 hard guard: if results miss, rephrase the query; more results of the same query
-do not improve relevance. Constants live in `registry.ts`, shared by
-`index.ts` and `run.ts`.
+do not improve relevance. Constants live in `registry.ts`, shared by `index.ts`
+and `run.ts`.
 
 ### Tavily `search_depth: advanced` + `chunks_per_source: 2`
 
@@ -88,23 +89,24 @@ density; `usage.ts` reflects halved cap. See
 
 ### Exa content: summary + highlights, no text
 
-`contents: { summary:true, highlights:{maxCharacters:800} }`.
-Highlights capped at 800 chars (Exa ignores numSentences: ~3-4k chars/result uncapped). Full `text` dropped (was 2000 chars/result) since nothing compresses output
-anymore; agent uses `web_fetch` for depth.
+`contents: { summary:true, highlights:{maxCharacters:800} }`. Highlights capped
+at 800 chars (Exa ignores numSentences: ~3-4k chars/result uncapped). Full
+`text` dropped (was 2000 chars/result) since nothing compresses output anymore;
+agent uses `web_fetch` for depth.
 
 ### LangSearch: `snippet` only
 
 Tested 2026-10: `summary: true` returns the same text as `snippet` (20/20
 results identical, same total chars), so the flag is a no-op and is not sent.
-LangSearch returns ~1.3k chars/result and sometimes off-topic results (no
-filter anymore). It is 4th in priority, spillover only.
+LangSearch returns ~1.3k chars/result and sometimes off-topic results (no filter
+anymore). It is 4th in priority, spillover only.
 
 ### Haiku summary pass removed
 
 Previously a nested `pi --print` (Haiku 4.5) filtered, ranked and rewrote
 results. Removed to cut latency (~16-30s), cost and the nested-pi dependency.
-Consequences: raw provider text reaches the main agent (no injection buffer),
-no relevance filter, duplicate-URL snippets are concatenated unmerged.
+Consequences: raw provider text reaches the main agent (no injection buffer), no
+relevance filter, duplicate-URL snippets are concatenated unmerged.
 
 ### URL normalisation scope
 
@@ -115,14 +117,15 @@ normalisation: too aggressive vs cost.
 
 Same URL from N backends -> one row, `sources: [exa, tavily, ...]`, snippets
 joined with `\n\n---\n\n` (skip if substring of existing). No length/priority
-heuristic to pick "best" snippet. Each backend often complements the others
-(exa semantic summary, tavily chunk picks, brave description); merging
-preserves all angles.
+heuristic to pick "best" snippet. Each backend often complements the others (exa
+semantic summary, tavily chunk picks, brave description); merging preserves all
+angles.
 
-### Auth in OneDrive JSON
+### Auth in XDG config JSON
 
-Outside git repo. Syncs across machines without committing. JSON enables future
-per-backend options.
+Outside git repo, in the XDG config dir. The file is usually a symlink to a copy
+in private cloud storage, so it syncs across machines without committing. JSON
+enables future per-backend options.
 
 ### Single counter file + per-minute in-memory
 
@@ -158,9 +161,9 @@ Different separators avoid collision when bodies contain markdown `---` rules or
 
 ### Provenance footer every call
 
-Mirrors `web_fetch`. Reports query, dedupe count, total ms,
-per-backend status (ok/skipped-quota/skipped-rate/error + count + ms). `details`
-object mirrors structurally for pi UI.
+Mirrors `web_fetch`. Reports query, dedupe count, total ms, per-backend status
+(ok/skipped-quota/skipped-rate/error + count + ms). `details` object mirrors
+structurally for pi UI.
 
 ## Limitations
 
