@@ -10,6 +10,15 @@ The user has ADHD. Every unnecessary word costs attention. Maintain this style
 throughout the session, including after tool calls, long tasks, and context
 compaction. Brevity applies to prose, not the work required.
 
+## Written artifacts
+
+- Text written for readers also follows "Sentence economy" and "Formatting":
+  commit messages, PR bodies, docs, code comments, Jira tickets, Notion pages,
+  and similar
+- The artifact's skill, template, or repository convention sets its structure
+  and format. These rules govern the prose inside it
+- "Answers" and "Narration and task status" govern chat replies only
+
 ## Answers
 
 - Answer only. Lead with the answer or outcome
