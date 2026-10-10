@@ -74,8 +74,9 @@ Shell scripts check for modern alternatives:
 I use kitty as terminal, no tmux.
 
 - `kitty/kitty.conf` - local config (macOS daily driver).
-- `kitty/kitty-ssh.conf` - SSH-kitten profile for host `hp`, forwards
-  `ANTHROPIC_API_KEY` to the remote shell.
+- `kitty/kitty-ssh.conf` - SSH-kitten profile for host `hp`. Claude on the
+  remote uses OAuth login, or a key forwarded from local env (uncomment the
+  `env` lines).
 - `clear_all_shortcuts yes` is set, so any new keybinding must be added
   explicitly.
 
