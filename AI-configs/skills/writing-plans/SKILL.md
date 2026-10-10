@@ -317,7 +317,7 @@ inherits blind.
 - Declare a language on every fence
 - After saving, run the target repo's Markdown formatter on the plan file. No
   repo formatter config: run
-  `prettier --prose-wrap always --embedded-language-formatting off --write <plan>`
+  `prettier --log-level error --prose-wrap always --embedded-language-formatting off --write <plan>`
 - Always pass `--embedded-language-formatting off` to prettier. Otherwise it
   reformats code inside fences and breaks verbatim anchors
 
@@ -418,10 +418,10 @@ inherits blind.
 
      **Cases:**
 
-     | Test               | Input     | Expect                                  |
-     | ------------------ | --------- | --------------------------------------- |
-     | `test_parse_empty` | `""`      | `Result(value="")`                      |
-     | `test_parse_none`  | `None`    | raises `ValueError("text is required")` |
+     | Test               | Input  | Expect                                  |
+     | ------------------ | ------ | --------------------------------------- |
+     | `test_parse_empty` | `""`   | `Result(value="")`                      |
+     | `test_parse_none`  | `None` | raises `ValueError("text is required")` |
 
   2. **Implement `parse()`**
 
