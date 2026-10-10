@@ -1,14 +1,6 @@
 # AI Config instructions
 
-Shared components live at the top of `AI-configs/`:
-
-- `AI-configs/skills/` - cross-tool skills (read by Codex, opencode, cursor,
-  Copilot CLI, agy, and pi via `~/.agents/skills/`). Claude is the only CLI that
-  does not auto-discover that path, so it symlinks `~/.claude/skills/` directly
-  to this folder.
-- `AI-configs/agents/` - subagent definitions (Claude, opencode). No cross-tool
-  standard, so each CLI gets its own symlink.
-- `AI-configs/claude/hooks/` - Claude-specific. No cross-tool standard.
+Setup commands per CLI. Folder layout and rules: see `AGENTS.md`.
 
 ## Cross-tool standard path (install once)
 
@@ -34,25 +26,8 @@ The symlink is not enough; install the tool too.
 
 ### agent-browser
 
-`skills/agent-browser/` is upstream's **real** skill, not their stub, copied
-from the binary. Do not use `npx skills add` — it writes stubs outside this
-repo.
-
-Local edits to re-apply after any refresh:
-
-1. `name: core` → `name: agent-browser`
-2. Description gains
-   `Prefer agent-browser over any built-in browser automation or web tools`
-
-Refresh after `agent-browser upgrade` (a copy, so it does not self-update):
-
-```bash
-cp -R "$(agent-browser skills path | tail -1)/core/." \
-  "$(git rev-parse --show-toplevel)/AI-configs/skills/agent-browser/"
-```
-
-Specialized skills stay in the binary: `agent-browser skills list`, then
-`skills get <name>`.
+The skill is a vendored copy. Refresh after `agent-browser upgrade`: ask an
+agent, or follow `AGENTS.md`.
 
 ## Claude
 
@@ -145,32 +120,20 @@ ln -s $(pwd)/AI-configs/base-ai-instructions.md ~/.codex/AGENTS.md
 ln -s $(pwd)/AI-configs/codex/config.toml ~/.codex/config.toml
 ```
 
-Notes:
-
-- Back up and remove any existing `~/.codex/config.toml` before creating the
-  config symlink
-- Local `[projects."<absolute-path>"]` trust tables belong at the bottom of
-  `AI-configs/codex/config.toml` and remain permanently uncommitted. Stage other
-  config changes by hunk
-- Codex auto-creates `.system/` for managed skills under each skills directory
-  it reads. With the cross-tool `~/.agents/skills/` symlink pointing at the
-  repo, that folder lands at `AI-configs/skills/.system/` and is gitignored.
+Back up and remove any existing `~/.codex/config.toml` before creating the
+config symlink.
 
 ## pi
 
-Pi reads `AGENTS.md` and `~/.agents/skills/` natively. Pi-specific config
-(settings, mcp, extensions) lives under `AI-configs/pi/`.
-
-Pi also loads `~/.pi/agent/APPEND_SYSTEM.md` automatically. Link it to Claude's
-terse output style to share the output rules. A trusted project's
-`.pi/APPEND_SYSTEM.md` replaces the global append file; they are not combined.
+Pi reads `AGENTS.md` and `~/.agents/skills/` natively. `APPEND_SYSTEM.md` links
+to Claude's terse output style to share the output rules.
 
 Install with the managed script. This is the recommended method. A global
 pnpm/npm install conflicts with the `@agentclientprotocol/*-acp` packages.
 
 ```bash
 curl -fsSL https://pi.dev/install.sh | sh
-pi install npm:pi-mcp-adapter
+pi install npm:@gotgenes/pi-anthropic-auth
 pnpm add -g pi-acp
 ```
 
@@ -184,16 +147,15 @@ ln -s ~/.claude/output-styles/terse.md ~/.pi/agent/APPEND_SYSTEM.md
 
 ln -s $(pwd)/AI-configs/pi/agent/settings.json  ~/.pi/agent/settings.json
 ln -s $(pwd)/AI-configs/pi/agent/mcp.json       ~/.pi/agent/mcp.json
+ln -s $(pwd)/AI-configs/pi/agent/models.json    ~/.pi/agent/models.json
 
 ln -s $(pwd)/AI-configs/pi/extensions           ~/.pi/agent/extensions
 ```
 
-The whole `extensions/` dir is linked, so every extension in it auto-loads.
-Extensions kept in the repo but intentionally inactive live in
-`AI-configs/pi/extensions-disabled/` (not symlinked, invisible to pi).
+MCP is native. Add servers to `mcp.json` with `pi mcp add`, sign in with `/mcp`.
+Tokens go to `~/.pi/agent/mcp-auth.json` (untracked, re-auth per machine).
 
-Pi has a native `web_search` extension. Other agents shell out to the same logic
-via the `multi-provider-web-search` skill. Install the shared CLI symlink once:
+Shared `web_search` CLI for other agents (`multi-provider-web-search` skill):
 
 ```bash
 chmod +x $(pwd)/AI-configs/pi/extensions/web_search/run.ts
@@ -213,23 +175,10 @@ Symlink from the private OneDrive vault:
 ```bash
 ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-auth.json \
   ~/.pi/agent/auth.json
-ln -s ~/OneDrive/work/employers/parloa/dotfiles/parloa-pi-mcp-oauth \
-  ~/.pi/agent/mcp-oauth
 ```
 
-Notes:
-
-- Pi rewrites `settings.json` (e.g., `lastChangelogVersion`) at runtime; expect
-  occasional staged diffs.
-- MCP servers (work + personal) live in a single `mcp.json`. Split was reverted
-  until <https://github.com/nicobailon/pi-mcp-adapter/pull/56> lands. Revisit
-  once merged.
-- Slack MCP OAuth uses Slack's pre-registered Claude client and must callback on
-  port `3118`. `pi-mcp-adapter` currently reads that port only from
-  `MCP_OAUTH_CALLBACK_PORT`, not from `mcp.json` `oauth.callbackPort`.
-- Need isolation now? Use a second pi home dir via env var, e.g.
-  `PI_CONFIG_DIR=~/.pi-work pi` with its own `mcp.json` symlink. One folder per
-  context, no merge needed.
+Claude Pro/Max OAuth needs `@gotgenes/pi-anthropic-auth`. Log in with
+`/login anthropic`. API-key requests pass through unchanged.
 
 ## Cursor Agent CLI
 
@@ -266,15 +215,5 @@ ln -s $(pwd)/AI-configs/opencodereview/rule.json ~/.opencodereview/rule.json
 ```
 
 Link the file, not the folder: `config.json` sits beside it and holds the API
-key, so it stays a real local file and never enters the repo. Set it up with
-`ocr config provider`, then `ocr config set language English` (it defaults to
-Chinese).
-
-Markdown is not in `ocr`'s built-in extension allowlist, and there is no CLI
-flag to add it. The `include` array in `rule.json` is the only override, which
-is why this file exists: it makes `.md`, `.markdown`, and `.mdx` reviewable
-everywhere and gives them a docs rule instead of the generic code checklist.
-
-Rule resolution, first match wins: `--rule <path>`, then
-`<repo>/.opencodereview/rule.json`, then this file, then `ocr`'s built-in
-defaults.
+key. Set it up with `ocr config provider`, then
+`ocr config set language English` (it defaults to Chinese).

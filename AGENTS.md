@@ -8,9 +8,8 @@ configuration.
 Supports Linux, macOS, and Windows environments with automated installation
 scripts.
 
-`bootstrap.sh` / `bootstrap.bat` orchestrate per-tool installers
-(`<tool>/install.sh`, e.g. `shell/`, `neovim/`, `kitty/`, `nodejs/`). Add new
-tools by creating their own `install.sh` and wiring it into bootstrap.
+Install architecture: see `README.md` "Installation System". Add new tools by
+creating their own `install.sh` and wiring it into bootstrap.
 
 Formatting governed by `.editorconfig`, `.prettierrc.json`, `.stylua.toml` at
 repo root. Respect them when editing.
@@ -27,25 +26,43 @@ repo root. Respect them when editing.
 
 ## Nested AGENTS.md
 
-Load these when working in their folders:
+Some agents do not auto-load nested files. Mandatory: read the matching file
+before proposing, editing, staging, or committing any path it covers:
 
-- `neovim/AGENTS.md` - Neovim v0.11+ config, doc-lookup strategy, plugins
-- `AI-configs/AGENTS.md` - AI assistant configs + symlink layout
+- `neovim/AGENTS.md` - Neovim v0.11+ config, doc-lookup strategy, plugins.
+  Covers `neovim/` and `~/.config/nvim/`
+- `AI-configs/AGENTS.md` - AI assistant configs, symlink layout, per-CLI rules.
+  Covers `AI-configs/` and these home paths, which are or contain links into
+  this repo:
+  - `~/.claude/`, `~/.claude-personal/`
+  - `~/.codex/`, `~/.gemini/`, `~/.cursor/rules/`, `~/.pi/agent/`
+  - `~/.config/opencode/`, `~/.agents/skills/` (whole-dir links)
+  - `~/.config/crush/crush.json`, `~/.opencodereview/rule.json`
 
-Agent home dirs contain symlinks back into this repo. Editing under them is
-editing this repo. Mandatory: load `AI-configs/AGENTS.md` before any work in:
+Keep this list current:
 
-- `~/.claude/` - settings, hooks, skills, commands, agents, `CLAUDE.md`
-- `~/.claude-personal/` - personal-account Claude config, same layout as
-  `~/.claude/`
-- `~/.codex/` - `AGENTS.md`, prompts
-- `~/.gemini/` - settings, `GEMINI.md`
-- `~/.config/opencode/` - opencode config, `AGENTS.md`, commands, agents
-- `~/.pi/agent/` - `AGENTS.md`, prompts, settings, mcp, extensions
-- `~/.agents/skills/` - cross-tool skills dir
-- `~/.opencodereview/rule.json` - `ocr` global review rules
+- Creating, moving, or deleting a nested `AGENTS.md`: update this list in the
+  same change
+- Before committing such a change, run
+  `fd --hidden -t f '^AGENTS\.md$' . --exclude vim` and match it to this list.
+  Symlinked `AGENTS.md` files are global instructions, not nested rules
 
-See `AI-configs/AI-Config-README.md` for exact symlink commands.
+## Tripwires
+
+High-risk rules from nested files. Full rules live in the linked file.
+
+- Never stage or commit the `[projects.*]` trust tables in
+  `AI-configs/codex/config.toml`. See `AI-configs/AGENTS.md`
+- Agent home paths are or contain links into this repo, some whole dirs (e.g.
+  `~/.config/opencode/`, `~/.claude/skills/`, `~/.pi/agent/extensions/`). Never
+  symlink a single file inside a linked dir. See `AI-configs/AGENTS.md`
+- Pi rewrites `~/.pi/agent/settings.json` at runtime and can replace the link
+  with a regular file. See `AI-configs/AGENTS.md`
+- `AI-configs/skills/agent-browser/` is a vendored copy with local edits. Never
+  refresh it without the procedure in `AI-configs/AGENTS.md`
+
+Found a gotcha, broken link, outdated rule, or nested rule you missed? State it
+once in the closing message and ask `Promote X to root Tripwires? (y/n)`.
 
 ## Shell Configuration
 
@@ -83,11 +100,7 @@ I use kitty as terminal, no tmux.
 ## Herdr
 
 Terminal workspace manager for AI agents. Config lives in this repo, symlinked
-out. Not wired into `bootstrap.sh` - link manually:
-
-```bash
-ln -s $(pwd)/herdr/config.toml ~/.config/herdr/config.toml
-```
+out. Not wired into `bootstrap.sh`; link command in `README.md`.
 
 - `herdr/config.toml` - overrides only; everything else stays on defaults. Full
   schema: `herdr --default-config`.

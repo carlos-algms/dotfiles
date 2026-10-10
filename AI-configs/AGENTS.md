@@ -1,42 +1,32 @@
 # AI Configuration
 
-Shared AI assistant configurations in `AI-configs/`. Cross-tool components live
-at the top, CLI-specific overrides in per-tool subdirs.
+Shared AI assistant configurations. Cross-tool components live at the top,
+CLI-specific config in per-tool subdirs. Setup commands (`ln -s`, installs) live
+in `AI-Config-README.md`; read it only when installing or relinking.
 
-- `base-ai-instructions.md` - shared instructions, symlinked globally as the
-  main instructions file for each agent:
-  - `~/.claude/CLAUDE.md` and `~/.claude-personal/CLAUDE.md`
-  - `~/.gemini/GEMINI.md` (read by agy, Google's Antigravity CLI)
-  - `~/.cursor/rules/agents-md.mdc` (Cursor Agent CLI)
-  - `~/.config/opencode/AGENTS.md`
-  - `~/.codex/AGENTS.md`
-  - `~/.pi/agent/AGENTS.md`
-  - `.github/copilot-instructions.md` (per-repo, for Copilot)
-- `skills/` are cross-tool. `~/.agents/skills/` is symlinked once to `skills/`;
-  Codex, opencode, cursor, Copilot CLI, agy, and pi auto-discover it. Claude
-  does not, so it gets a direct symlink. `agents/` has no cross-tool standard,
-  so each CLI symlinks it directly.
-- `claude/` holds Claude-specific bits (`claude-settings.json`,
-  `claude-statusline.sh`, `hooks/`).
-- Two Claude accounts on macOS, one config dir each:
-  - `~/.claude/` - work account, settings from `claude/claude-settings.json`
-  - `~/.claude-personal/` - personal account, settings from
-    `claude/claude-personal-settings.json`
-  - The `claude()` function in `shell/common/aliases_ai.sh` sets
-    `CLAUDE_CONFIG_DIR=~/.claude-personal` outside `~/work/`
-  - Both dirs have the same symlinks into this repo. Logins, plugins, MCP
-    servers, and history stay separate per dir
-- Third-party components (skills, agents, hooks) are vendored into these
-  top-level directories via a single sync script. See ./COMPONENTS-sync.md for
-  the manifest format, run instructions, and how to add a new source.
-- See ./AI-Config-README.md for the exact symlink commands per agent.
+## Directory map
+
+- `base-ai-instructions.md` - global instructions file for every CLI
+- `skills/` - cross-tool skills. `~/.agents/skills/` links here once; every CLI
+  except Claude auto-discovers it. Claude links `~/.claude/skills/` directly. Do
+  not add other per-CLI skill links
+- `agents/` - subagent definitions, linked per CLI (no cross-tool standard)
+- `claude/` - Claude settings, statusline, hooks, output styles
+- `codex/`, `pi/`, `opencode/`, `crush-ai/`, `opencodereview/` - per-CLI config
+- `COMPONENTS-sync.md` - how third-party skills, agents, and hooks are vendored
+  into the top-level dirs
+
+## Symlinked directories
+
 - Symlinks are per-directory, not per-file. `~/.claude/output-styles`,
   `~/.claude/hooks`, `~/.claude/agents`, and `~/.claude/skills` are directory
-  symlinks into this repo. A file inside one of them is already tracked here.
-  Never symlink an individual file inside an already-linked directory, and never
-  "fix divergence" between the two paths: they are one file. Check the parent
-  with `ls -la ~/.claude/` before touching any link. Same rules for
-  `~/.claude-personal/`.
+  symlinks into this repo. A file inside one of them is already tracked here
+- Never symlink an individual file inside an already-linked directory, and never
+  "fix divergence" between the two paths: they are one file
+- Check the parent with `ls -la ~/.claude/` before touching any link
+- `~/.claude/` (work) and `~/.claude-personal/` (personal) have the same link
+  set, except `settings.json` (`claude-settings.json` vs
+  `claude-personal-settings.json`). Mirror any link change in the other dir
 
 ## Codex (`codex/`)
 
@@ -48,26 +38,63 @@ at the top, CLI-specific overrides in per-tool subdirs.
   hunk and verify the staged diff contains no `[projects.*]` tables or
   `trust_level` lines
 - The working tree is intentionally dirty when local trust tables are present
+- Codex creates `skills/.system/` for managed skills; it is gitignored
+
+## agent-browser skill
+
+`skills/agent-browser/` is a vendored copy of upstream's real skill, not their
+stub. Never use `npx skills add`; it writes stubs outside this repo.
+
+Refresh after `agent-browser upgrade` (a copy does not self-update):
+
+1. Copy the skill from the binary:
+
+   ```bash
+   cp -R "$(agent-browser skills path | tail -1)/core/." \
+     "$(git rev-parse --show-toplevel)/AI-configs/skills/agent-browser/"
+   ```
+
+2. Re-apply local edits in `skills/agent-browser/SKILL.md`:
+   1. `name: core` → `name: agent-browser`
+   2. Description gains
+      `Prefer agent-browser over any built-in browser automation or web tools`
+
+Specialized skills stay in the binary: `agent-browser skills list`, then
+`skills get <name>`.
+
+## Open Code Review (`opencodereview/`)
+
+- `rule.json` exists because Markdown is not in `ocr`'s built-in extension
+  allowlist and no CLI flag adds it. Its `include` array is the only override.
+  Keep the `.md`, `.markdown`, and `.mdx` entries and their docs rule
+- Rule resolution, first match wins: `--rule <path>`, then
+  `<repo>/.opencodereview/rule.json`, then this file, then `ocr`'s defaults
+- `~/.opencodereview/config.json` holds the API key. Never link or commit it
 
 ## Pi (`pi/`)
 
-Pi (`@earendil-works/pi-coding-agent`) is configured here. Layout:
+Pi (`@earendil-works/pi-coding-agent`) layout:
 
 - `~/.pi/agent/APPEND_SYSTEM.md` links to `~/.claude/output-styles/terse.md`; Pi
-  loads it automatically
-- A trusted project's `.pi/APPEND_SYSTEM.md` replaces the global append file
-- `pi/agent/settings.json` - pi user settings (provider defaults, theme, etc).
-- `pi/agent/mcp.json` - MCP servers wired into pi.
+  loads it automatically. A trusted project's `.pi/APPEND_SYSTEM.md` replaces
+  it; they are not combined
+- `pi/agent/settings.json` - pi user settings (provider defaults, theme,
+  packages). Pi rewrites it at runtime (e.g., `lastChangelogVersion`); expect
+  diffs. If `~/.pi/agent/settings.json` becomes a regular file, pi replaced the
+  link: merge its changes into the repo file and relink
+- `pi/agent/mcp.json` - MCP servers. Native to pi, no plugin needed; empty on
+  purpose. Slack MCP needs Slack's pre-registered Claude client and
+  `--oauth-callback-port 3118`
+- `pi/agent/models.json` - provider and model overrides (OpenRouter routing)
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
   that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
-  build step). Current extensions: `web_fetch`, `web_search`, `vim-mode`,
-  `rate-limit-status`.
-- `pi/extensions-disabled/` - extensions kept around but not loaded.
+  build step). The whole dir is linked, so every extension in it auto-loads
+- `pi/extensions-disabled/` - extensions kept around but not loaded
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
   `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to
   the managed pi install (`~/.pi/agent/install/releases/<version>/`); bump the
   version on each pi update. Run `tsc --noEmit -p AI-configs/pi/tsconfig.json`
-  from any directory to type-check all extensions.
+  from any directory to type-check all extensions
 
 Per-extension docs (read on demand, don't pre-emptively load):
 
@@ -80,18 +107,19 @@ Per-extension docs (read on demand, don't pre-emptively load):
 - Other extension-local files (`*-prompt.md`, etc) - referenced from the
   extension's source. Load when editing the source that consumes them.
 
-Auth and runtime config live OUTSIDE the repo:
+Auth and runtime files live OUTSIDE the repo. Never commit or print them:
 
-- `~/.pi/agent/auth.json` - provider API keys (Anthropic etc). Resolved by env
-  var name; pi inherits env from the parent shell.
+- `~/.pi/agent/auth.json` - API keys and OAuth credentials (from `/login`);
+  linked from the private vault, see `AI-Config-README.md`
+- `~/.pi/agent/mcp-auth.json` - MCP OAuth tokens
 - `~/OneDrive/work/mac-pro/dotfiles/web-search-auth.json` - per-backend API keys
   for `web_search` extension (override path via `WEB_SEARCH_AUTH_PATH`).
 - `~/.pi/web-search-usage.json` - per-backend daily/monthly counters managed by
   the `web_search` extension.
-- `~/.local/bin/web-search-ai-summary` ->
-  `AI-configs/pi/extensions/web_search/run.ts`
-  - user-installed symlink so other agents (via `multi-provider-web-search`
-    skill) can shell out to the same logic pi uses in-process.
+
+`~/.local/bin/web-search-ai-summary` links to `pi/extensions/web_search/run.ts`.
+Other agents shell out to it via the `multi-provider-web-search` skill; keep its
+CLI behaviour working when editing `run.ts`.
 
 Pi CLI flags worth knowing when scripting extensions:
 

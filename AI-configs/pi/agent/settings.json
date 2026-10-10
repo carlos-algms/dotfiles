@@ -27,5 +27,14 @@
   "theme": "dark",
   "warnings": {
     "anthropicExtraUsage": true
+  },
+  "kendex": {
+    "extensionManager": {
+      "config": {
+        "@vanillagreen/pi-task-panel": {
+          "showWorkflowReminder": false
+        }
+      }
+    }
   }
 }

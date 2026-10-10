@@ -50,10 +50,8 @@ bootstrap.bat
 - **Entry point**: `./bootstrap.sh` - Orchestrates all installation scripts
 - **Architecture**: Iterates through subdirectories running individual
   `install.sh` scripts
-- **Logging**: All scripts source `shell/common/01_logging.sh` for consistent
-  output (e_header, e_success, e_error, e_arrow)
-- **OS Detection**: Scripts source `shell/common/00_os.sh` which exports
-  `IS_WIN`, `IS_MAC`, `IS_LINUX` environment variables
+- **Script conventions**: logging and OS detection, see `AGENTS.md` "File
+  Operations Protocol"
 
 ### Module Structure
 
@@ -85,6 +83,9 @@ Each major component has its own `install.sh`:
 # Sync neovim config via SSH
 # Like a shared host like HostGator, GoDaddy, etc..
 ./neovim/sync-via-ssh.sh
+
+# Herdr (not wired into bootstrap)
+ln -s $(pwd)/herdr/config.toml ~/.config/herdr/config.toml
 ```
 
 ---
