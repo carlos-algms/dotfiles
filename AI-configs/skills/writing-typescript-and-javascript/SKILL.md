@@ -1,34 +1,19 @@
 ---
-name: typescript-and-javascript
+name: writing-typescript-and-javascript
 description: >
-  Enforces strict TypeScript and JavaScript style policies for ALL
-  .ts/.tsx/.js/.jsx file operations. Use when creating, writing, or editing ANY
-  TS/JS code. Triggers include: components, hooks, services, utilities, classes,
-  interfaces, types, schemas, tests, scripts, configuration files, or any
-  agent-authored TS/JS content.
+  Applies the user's TypeScript and JavaScript conventions. Use before writing,
+  editing, or suggesting TS/JS code, in files or in chat.
 ---
 
 # TypeScript/JavaScript Protocol
 
-General typescript and javascript rules, lower priority over project's local
-rules.
-
-If possible merge rules and follow all of them, if conflicting, prefer project's
-local rules.
+Project rules override these. Apply these where the project is silent.
 
 ## Type Checking
 
-When iterating solutions (not reviewing), run type check:
-
-```bash
-pnpm tsc --noEmit
-# monorepo: cd apps/demo-app && pnpm tsc --noEmit
-```
-
-## Code Block Types
-
-- Pure TypeScript: `ts`
-- TypeScript with JSX: `tsx`
+After changing code in a file, run the type check with the project's package
+manager from the closest workspace (e.g. `tsc --noEmit`). Fix errors, then run
+it again until it passes.
 
 ## Style Rules
 

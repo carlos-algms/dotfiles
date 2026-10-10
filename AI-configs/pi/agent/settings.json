@@ -21,7 +21,7 @@
   "hideThinkingBlock": false,
   "showHardwareCursor": true,
   "skills": [
-    "-skills/css/SKILL.md",
+    "-skills/writing-css/SKILL.md",
     "-skills/jira-atlassian-cli/SKILL.md",
     "-skills/multi-provider-web-search/SKILL.md"
   ],

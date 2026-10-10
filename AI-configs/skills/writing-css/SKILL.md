@@ -1,21 +1,13 @@
 ---
-name: css
+name: writing-css
 description: >
-  Enforces strict CSS and CSS Modules policies for ALL CSS authoring, including
-  stylesheet files (.css/.scss/.module.css) and CSS-in-JS (styled-components,
-  Emotion, vanilla-extract, styled-jsx, Stitches, template literal styles
-  embedded in TS/JS files). Use when creating, writing, or editing ANY CSS,
-  styled component, or inline style block. Triggers include: component styles,
-  global stylesheets, theme files, design tokens, animations, keyframes, utility
-  classes, styled.X or styled() definitions, or any agent-authored CSS content.
+  Applies the user's CSS and CSS Modules conventions. Use before writing,
+  editing, or suggesting CSS, in files or in chat.
 ---
 
 # CSS Protocol
 
-General CSS preferences, lower priority over project's local instructions.
-
-If possible merge instructions, if conflicting, prefer project's local
-instructions.
+Project rules override these. Apply these where the project is silent.
 
 ## Modern Features
 

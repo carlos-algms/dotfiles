@@ -1,11 +1,13 @@
 ---
-name: react
+name: writing-react
 description:
-  Writes React components and hooks using TypeScript. Use when creating or
-  modifying React components, hooks, or JSX.
+  Applies the user's React conventions for components and hooks. Use before
+  writing, editing, or suggesting React code, in files or in chat.
 ---
 
 # React Protocol
+
+Project rules override these. Apply these where the project is silent.
 
 ## Component Structure
 
