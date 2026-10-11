@@ -48,14 +48,10 @@ fi
 
 export VISUAL="$EDITOR"
 
-# disable shared history between ZSH instances
-HISTORY_IGNORE="(l|ls|pwd|exit|clear|ll|lsa|cd ..|cd -) *"
+HISTORY_IGNORE="(l|ls|pwd|exit|clear|ll|lsa|cd ..|cd -)( *|)"
 HISTSIZE=10000
 HISTFILE="$XDG_STATE_HOME/zsh_history"
 SAVEHIST=$HISTSIZE
-HISTDUP=erase
-# unsetopt inc_append_history
-# unsetopt share_history
 setopt hist_ignore_space
 setopt hist_ignore_all_dups
 setopt hist_save_no_dups
@@ -67,6 +63,8 @@ setopt hist_find_no_dups
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
+# Redundant with the oh-my-zsh vi-mode plugin and with EDITOR=nvim|vim (zsh picks the vi keymap when EDITOR is set).
+# Kept so vi keys also work on machines where neither applies
 set -o vi
 
 if [[ -n "$HERDR_ENV" && -n "$KITTY_INSTALLATION_DIR" ]]; then
