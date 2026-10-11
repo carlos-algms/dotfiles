@@ -74,6 +74,9 @@ once in the closing message and ask `Promote X to root Tripwires? (y/n)`.
   functions.
 - OS-specific overrides in `shell/{linux,macos,windows}/`, mirroring `common/`.
   Each has its own `install-*.sh`.
+- Linux CLI tools (fzf, rg, yazi, fnm, zoxide) install and update through
+  `shell/linux/install-or-update-shell-tools.sh`. Run it to update them. Linux
+  only; macOS uses brew.
 - User scripts in `shell/bin/` (added to PATH).
 
 ### Tool Detection Pattern

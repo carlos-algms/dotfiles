@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "${BASH_SOURCE[0]%"${BASH_SOURCE[0]##*/}"}." && pwd)"
+
+# gpg --dearmor asks before overwriting, so only create the key once
 sudo mkdir -p /etc/apt/keyrings
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+if [[ ! -f /etc/apt/keyrings/gierens.gpg ]]; then
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+fi
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 
@@ -18,69 +24,20 @@ sudo apt install -y \
     htop \
     jq \
     luajit \
+    rsync \
     tree \
+    unzip \
     watch \
     wget \
-    xz-utils
+    xz-utils \
+    zsh
 
-curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
-curl -s https://ohmyposh.dev/install.sh | bash -s
-curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+mkdir -p "$HOME/.local/bin"
 
-mkdir -p $HOME/.local/bin
-
-ARCH=$(uname -m)
-
-# FZF most recent
-if [[ "$ARCH" == "x86_64" ]]; then
-    FZF_URL=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep browser_download_url | grep linux_amd64 | cut -d '"' -f 4)
-elif [[ "$ARCH" == "aarch64" ]]; then
-    FZF_URL=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep browser_download_url | grep linux_arm64 | cut -d '"' -f 4)
-else
-    echo "FZF Install: Unsupported architecture: $ARCH"
+# Debian/Ubuntu install fd as "fdfind". Other tools (fzf, nvim) need the name "fd"
+if command -v fdfind >/dev/null 2>&1; then
+    ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
 fi
 
-if [[ -n "$FZF_URL" ]]; then
-    TMPDIR=$(mktemp -d)
-    curl -L "$FZF_URL" -o "$TMPDIR/fzf.tar.gz"
-    tar -xzf "$TMPDIR/fzf.tar.gz" -C "$TMPDIR"
-    mv "$TMPDIR/fzf" "$HOME/.local/bin/fzf"
-    chmod +x "$HOME/.local/bin/fzf"
-    rm -rf "$TMPDIR"
-fi
-
-# ripgrep most recent
-if [[ "$ARCH" == "x86_64" ]]; then
-    RG_URL=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep browser_download_url | grep 'x86_64-unknown-linux-musl.tar.gz"' | cut -d '"' -f 4)
-elif [[ "$ARCH" == "aarch64" ]]; then
-    RG_URL=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep browser_download_url | grep 'aarch64-unknown-linux-musl.tar.gz"' | cut -d '"' -f 4)
-else
-    echo "ripgrep Install: Unsupported architecture: $ARCH"
-fi
-
-if [[ -n "$RG_URL" ]]; then
-    TMPDIR=$(mktemp -d)
-    curl -L "$RG_URL" -o "$TMPDIR/rg.tar.gz"
-    tar -xzf "$TMPDIR/rg.tar.gz" -C "$TMPDIR" --strip-components=1 --wildcards '*/rg'
-    mv "$TMPDIR/rg" "$HOME/.local/bin/rg"
-    chmod +x "$HOME/.local/bin/rg"
-    rm -rf "$TMPDIR"
-fi
-
-# Install Yazi (latest release)
-if [[ "$ARCH" == "x86_64" ]]; then
-    YAZI_URL=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep browser_download_url | grep yazi-x86_64-unknown-linux-gnu.zip | cut -d '"' -f 4)
-elif [[ "$ARCH" == "aarch64" ]]; then
-    YAZI_URL=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep browser_download_url | grep yazi-aarch64-unknown-linux-gnu.zip | cut -d '"' -f 4)
-else
-    echo "Yazi Install: Unsupported architecture: $ARCH"
-fi
-
-if [[ -n "$YAZI_URL" ]]; then
-    TMPDIR=$(mktemp -d)
-    curl -L "$YAZI_URL" -o "$TMPDIR/yazi.zip"
-    unzip -j "$TMPDIR/yazi.zip" '*/yazi' -d "$TMPDIR"
-    mv "$TMPDIR/yazi" "$HOME/.local/bin/yazi"
-    chmod +x "$HOME/.local/bin/yazi"
-    rm -rf "$TMPDIR"
-fi
+# fzf, ripgrep, yazi, fnm, zoxide. Rerun that script alone to update them
+"${SCRIPT_DIR}/install-or-update-shell-tools.sh"

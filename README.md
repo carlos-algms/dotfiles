@@ -94,6 +94,11 @@ Each major component has its own `install.sh`:
 # bootstrap.sh runs every component and lists the failed installers at the end.
 # Installers are idempotent: rerun the failed ones.
 
+# Linux only: install or update fzf, ripgrep, yazi, fnm, zoxide (+ Node LTS).
+# Reinstalls a tool only when a newer release exists; rerun it to update them.
+# Set GITHUB_TOKEN to avoid GitHub API rate limits.
+./shell/linux/install-or-update-shell-tools.sh
+
 # Sync neovim config via SSH
 # Like a shared host like HostGator, GoDaddy, etc..
 ./neovim/sync-via-ssh.sh
