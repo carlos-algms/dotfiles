@@ -26,6 +26,12 @@ fi
 
 target="${HOME}/.config/nvim"
 
+# Already linked: do not move the working link aside on every rerun
+if [ -L "$target" ] && [ "$(readlink "$target")" = "${SCRIPT_DIR}/nvim" ]; then
+  e_success "nvim config is already linked"
+  exit 0
+fi
+
 if [ -d "$target" ] || [ -L "$target" ]; then
   TODAY="$(date)"
   mv "$target" "$target-${TODAY}"

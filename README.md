@@ -68,6 +68,17 @@ Each major component has its own `install.sh`:
 - Scripts create symlinks to this repository rather than copying files
 - Existing files are backed up with timestamp suffix before linking
 - Platform-specific installers in `shell/[linux|macos|windows]/install-*.sh`
+- `shell/zsh/install-zsh.sh` installs oh-my-zsh only when `~/.oh-my-zsh` is
+  missing. The oh-my-zsh installer replaces an existing `~/.zshrc` with its own
+  template and saves the old file as `~/.zshrc.pre-oh-my-zsh`, so a fresh
+  machine gets a working file. Symlink your own `~/.zshrc` afterwards if you
+  want
+- `shell/zsh/installers/pnpm-shell-completion.sh` installs the
+  `pnpm-shell-completion` oh-my-zsh plugin. It is a native binary, so it is
+  faster than `pnpm completion zsh`, which starts Node on shell start (~0.55s)
+  and on every Tab (~0.3s). Rerun the script to update it: it compares the
+  installed release tag with the latest GitHub release and reinstalls when they
+  differ
 
 ## Key Commands
 
@@ -79,6 +90,9 @@ Each major component has its own `install.sh`:
 ./shell/install.sh
 ./neovim/install.sh
 ./kitty/install.sh
+
+# bootstrap.sh runs every component and lists the failed installers at the end.
+# Installers are idempotent: rerun the failed ones.
 
 # Sync neovim config via SSH
 # Like a shared host like HostGator, GoDaddy, etc..
