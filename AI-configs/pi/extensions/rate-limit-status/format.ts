@@ -16,9 +16,6 @@ function formatReset(epochSeconds: number, label: WindowLabel): string {
     hour: '2-digit',
     minute: '2-digit',
   });
-  if (label === '5h') {
-    return `${minutes}m @ ${time}`;
-  }
   const days = Math.floor(minutes / MINUTES_PER_DAY);
   const hours = Math.floor((minutes % MINUTES_PER_DAY) / MINUTES_PER_HOUR);
   const mins = minutes % MINUTES_PER_HOUR;
@@ -29,8 +26,11 @@ function formatReset(epochSeconds: number, label: WindowLabel): string {
   ]
     .filter(Boolean)
     .join(' ');
-  const weekday = resetDate.toLocaleDateString('en-GB', { weekday: 'short' });
-  return `${duration || '0m'} @ ${weekday} ${time}`;
+  const when =
+    label === '5h'
+      ? time
+      : `${resetDate.toLocaleDateString('en-GB', { weekday: 'short' })} ${time}`;
+  return `${duration || '0m'} @ ${when}`;
 }
 
 function makeBar(percent: number): string {
