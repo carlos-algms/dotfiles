@@ -116,7 +116,12 @@ height = "50%"
 # open_plugin_popup_pane sets that label, from a plugin manifest `title`.
 # OSC 2 does nothing: the title is UI state, not the terminal title.
 # fzf's --border-label carries the text instead.
+#
+# PATH: popups run via `/bin/sh -c` with the herdr server's frozen env.
+# On a remote box the server starts from a non-interactive SSH session (`herdr --remote`),
+# which skips ~/.zshrc, so ~/.local/bin (fd, fzf, herdr) is missing.
 command = '''
+export PATH="$HOME/.local/bin:$PATH"
 rel=$(fd -t d -d 1 --base-directory ~ . work projects 2>/dev/null |
   fzf --no-preview --border --border-label=" pick the new workspace folder " \
     --prompt="workspace> ")
@@ -132,7 +137,9 @@ type = "popup"
 description = "new worktree from default branch"
 width = "60%"
 height = "30%"
+# PATH: see the picker above; popups miss ~/.local/bin (herdr) on remote boxes.
 command = '''
+export PATH="$HOME/.local/bin:$PATH"
 fail() {
   printf '\n%s\n\nPress Enter to close.' "$1"
   IFS= read -r _
@@ -188,8 +195,9 @@ output=$(herdr worktree create --cwd "$primary" --branch "$name" \
 # `--` separator. send-text just types, which is all this needs. The trailing
 # newline inside the quotes is the Enter press.
 #
-# Multi-line '''…''' and $() work because herdr runs `command` through $SHELL
-# (falling back to /bin/sh); the cmd.exe path in the docs is Windows-only.
+# Multi-line '''…''' and $() work because herdr runs `command` through
+# `/bin/sh -lc` for type = "shell" and `/bin/sh -c` for popups; the cmd.exe path
+# is Windows-only. See <https://herdr.dev/docs/configuration>
 # jq resolves as /usr/bin/jq, so this survives the launchd PATH that made
 # kitty.conf spell out /opt/homebrew/bin/herdr.
 [[keys.command]]
