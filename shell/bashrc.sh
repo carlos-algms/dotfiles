@@ -1,4 +1,4 @@
-export DOTFILES_SHELL_PATH="$(dirname "$(readlink "$HOME/.bashrc")")"
+export DOTFILES_SHELL_PATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 export DOTFILES_PATH="$(dirname "$DOTFILES_SHELL_PATH")"
 
 # function to DRY

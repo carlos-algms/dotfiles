@@ -17,7 +17,7 @@ if [ "$IS_AI_TERMINAL" != "1" ]; then
     # requires coreutils to be installed
     alias ls="gls -F --color=auto --group-directories-first"
   else
-    alias ls='`which -p ls` -F --color=auto --group-directories-first'
+    alias ls='command ls -F --color=auto --group-directories-first'
   fi
 
   alias l='ls -1a'

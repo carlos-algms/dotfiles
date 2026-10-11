@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd -- "${BASH_SOURCE[0]%"${BASH_SOURCE[0]##*/}"}." && pwd)"
 
 source "${SCRIPT_DIR}/../shell/common/00_os.sh"
 source "${SCRIPT_DIR}/../shell/common/01_logging.sh"

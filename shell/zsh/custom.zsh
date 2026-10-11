@@ -16,11 +16,19 @@ export FFMPEG_DATADIR="$XDG_CONFIG_HOME/ffmpeg"
 export LESSHISTFILE="$XDG_CACHE_HOME/less_history"
 export PYTHON_HISTORY="$XDG_DATA_HOME/python/history"
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+# Keep PATH free of duplicates. Each shell start prepends the same dirs again
+# (~/.local/bin here and in ~/.zshrc, dotfiles bin dirs), and a nested shell
+# inherits its parent's PATH, so entries pile up. -U keeps the first
+# occurrence, so order is preserved. It must be set on PATH, not `path`:
+# these scripts assign the scalar, and `typeset -U path` alone does not
+# dedupe that.
+typeset -U PATH
+
 # Set local bin early so all commands are available
 export PATH="$HOME/.local/bin:$PATH"
 
-## Hide the default user name from the prompt
-DEFAULT_USER=$(whoami)
+## Hide the default user name from the prompt on themes that read it, like `agnoster`
+DEFAULT_USER="$USERNAME"
 
 # it was setting as user@machine-name making it ugly and long
 DISABLE_AUTO_TITLE="true"
@@ -68,8 +76,10 @@ if [[ -n "$HERDR_ENV" && -n "$KITTY_INSTALLATION_DIR" ]]; then
     unfunction kitty-integration
 fi
 
-export DOTFILES_SHELL_PATH="$(dirname $(dirname $(readlink -f ${0:a})))"
-export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
+# Resolve this file's real path (it is symlinked into ~/.oh-my-zsh/custom): zsh
+# parameter expansion avoids forking dirname/readlink on every shell start
+export DOTFILES_SHELL_PATH="${${(%):-%x}:A:h:h}"
+export DOTFILES_PATH="${DOTFILES_SHELL_PATH:h}"
 
 source $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
 
@@ -81,12 +91,8 @@ esac
 
 if command -v fnm &>/dev/null; then
   eval "$(fnm env --use-on-cd --corepack-enabled --shell zsh)"
-  source <(fnm completions --shell zsh)
-
-  if [[ -z "$(fnm current)" ]]; then
-    fnm install --lts
-  fi
-
+  # Disabled: rarely used. brew already ships _fnm on macOS; ~14ms per shell start
+  # source <(fnm completions --shell zsh)
 fi
 
 bindkey "^P" up-line-or-beginning-search

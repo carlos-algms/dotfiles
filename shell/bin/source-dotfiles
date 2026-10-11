@@ -6,8 +6,11 @@ sourceFiles() {
         return 1
     fi
 
-    for f in $(find "$1" -type f -name "*.sh" | sort); do
-        source "$f"
+    # A glob is sorted by the current locale, like `sort`, no need for extra processing
+    for f in "$1"/*.sh; do
+        if [ -f "$f" ]; then
+            source "$f"
+        fi
     done
 }
 
@@ -29,7 +32,7 @@ elif [[ ! -z "$IS_LINUX" ]]; then
     sourceFiles "${DOTFILES_SHELL_PATH}/linux/bash"
 else
     e_error "No OS identified to source files"
-    exit 1
+    return 1
 fi
 
 unset sourceFiles

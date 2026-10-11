@@ -7,7 +7,7 @@
 # --modify-window=1: treat mtimes within 1s as equal (FAT/SMB coarse timestamps)
 # --info=progress2,name: aggregate total progress bar (ETA) + name of each file as it transfers
 # --human-readable: sizes as K/M/G instead of raw bytes
-alias Rsync="$(which -p rsync) \
+alias Rsync="command rsync \
     --no-inc-recursive \
     --archive \
     --hard-links \
@@ -38,10 +38,10 @@ if command -v fd >/dev/null 2>&1; then
 
   alias fdir="fd -t d -H $(printf -- '--exclude %s ' "${excludes[@]}")"
 else
-  # Using which because it might change in Windows
-  alias ff="$(which -p find)  . $(printf -- '! -path \"**/%s/**\" ' "${excludes[@]}") -type f -name "
+  # `command` skips aliases and functions, and works in bash and zsh
+  alias ff="command find . $(printf -- '! -path \"**/%s/**\" ' "${excludes[@]}") -type f -name "
 
-  alias fdir="$(which -p find) . \( $(printf -- '-path \"**/%s\" -o ' "${excludes[@]}") \) -prune -o -type d -print"
+  alias fdir="command find . \( $(printf -- '-path \"**/%s\" -o ' "${excludes[@]}") \) -prune -o -type d -print"
 fi
 
 alias cdf='P="$(fdir | fzf)"; test -d "$P" && cd "$P" || echo "No directory selected."'
