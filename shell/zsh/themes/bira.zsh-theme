@@ -3,8 +3,10 @@ source $ZSH/themes/bira.zsh-theme
 # blank line between prompts
 PROMPT=$'\n'"$PROMPT"
 
-# bira hardcodes %n@%m; replace with a fixed label
-PROMPT=${PROMPT/'%n@%m'/carlos@parloa-mac}
+# bira hardcodes %n@%m; use a fixed label on mac
+if [[ $OSTYPE == darwin* ]]; then
+  PROMPT=${PROMPT/'%n@%m'/carlos@mac}
+fi
 
 # lambda instead of $
 PROMPT=${PROMPT/'%(!.#.$)'/'%(!.#.λ)'}
