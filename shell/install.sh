@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd -- "${BASH_SOURCE[0]%"${BASH_SOURCE[0]##*/}"}." && pwd)"
 
 source "${SCRIPT_DIR}/common/00_os.sh"
 source "${SCRIPT_DIR}/common/01_logging.sh"
 
-if [[ ! -z "$IS_WIN" ]]; then
+if [[ -n "$IS_WIN" ]]; then
     "${SCRIPT_DIR}/windows/install-windows.sh"
-    # Link mintTTY config file only for windows
-    ln -snf $SCRIPT_DIR/minttyrc $HOME/.minttyrc
-elif [[ ! -z "$IS_MAC" ]]; then
+elif [[ -n "$IS_MAC" ]]; then
     "${SCRIPT_DIR}/macos/install-mac.sh"
     "${SCRIPT_DIR}/zsh/install-zsh.sh"
-elif [[ ! -z "$IS_LINUX" ]]; then
+elif [[ -n "$IS_LINUX" ]]; then
     "${SCRIPT_DIR}/linux/install-linux.sh"
     "${SCRIPT_DIR}/zsh/install-zsh.sh"
 else
@@ -20,41 +19,9 @@ else
     exit 1
 fi
 
-### TODO: instead of backing up the files, it should be possible to inject code at the end of the file, if it is not already there
-# e_header "Backup bash files"
-#
-# TODAY="`date`"
-#
-# if [ -f $HOME/.bash_profile ]; then
-#     mv $HOME/.bash_profile "$HOME/.bash_profile-${TODAY}"
-# fi
-#
-# if [ -f $HOME/.bashrc ]; then
-#     mv $HOME/.bashrc "$HOME/.bashrc-${TODAY}"
-# fi
-#
-# e_header "Linking bash config files"
-#
-# ln -snf $SCRIPT_DIR/bashrc.sh              $HOME/.bash_profile
-# ln -snf $SCRIPT_DIR/bashrc.sh              $HOME/.bashrc
-#
-
 e_arrow Setup EZA theme
-mkdir -p $HOME/.config/eza
-ln -snf $SCRIPT_DIR/eza-theme.yml $HOME/.config/eza/theme.yml
+mkdir -p "$HOME/.config/eza"
+ln -snf "$SCRIPT_DIR/eza-theme.yml" "$HOME/.config/eza/theme.yml"
 e_success "EZA theme setup done"
-
-# Unix needs to add execution rights
-for f in $(find $SCRIPT_DIR/bin -type f ! -name ".*"); do
-    chmod u+x "$f"
-done
-
-for f in $(find $SCRIPT_DIR/linux/bin -type f ! -name ".*"); do
-    chmod u+x "$f"
-done
-
-for f in $(find $SCRIPT_DIR/macos/bin -type f ! -name ".*"); do
-    chmod u+x "$f"
-done
 
 e_success "Done installing shell configs"

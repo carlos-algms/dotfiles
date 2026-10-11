@@ -2,7 +2,7 @@ IS_WIN=""
 IS_MAC=""
 IS_LINUX=""
 
-if [ ! -z "$WINDIR" ]; then
+if [ -n "${WINDIR:-}" ]; then
     IS_WIN=true
 elif [[ "$OSTYPE" =~ ^darwin ]]; then
     IS_MAC=true
