@@ -23,7 +23,6 @@ export PATH="$HOME/.local/bin:$PATH"
 DEFAULT_USER=$(whoami)
 
 # it was setting as user@machine-name making it ugly and long
-# And most likely conflicting with oh-my-posh, as it fixed after any command
 DISABLE_AUTO_TITLE="true"
 ZSH_THEME_TERM_TITLE_IDLE="%~"
 
@@ -74,18 +73,6 @@ export DOTFILES_PATH="$(dirname $DOTFILES_SHELL_PATH)"
 
 source $DOTFILES_SHELL_PATH/bin/source-dotfiles $DOTFILES_SHELL_PATH
 
-# ZSH has a basic vi mode
-# if [ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]; then
-#     git clone https://github.com/jeffreytse/zsh-vi-mode \
-#         $ZSH_CUSTOM/plugins/zsh-vi-mode
-# fi
-# # https://github.com/jeffreytse/zsh-vi-mode
-# function vim_mode_lazy_keybindings() {
-# FZF needs to be loaded after zsh-vi-mode to avoid conflicts
-# move it here if re-enabling zsh-vi-mode
-#}
-#zvm_after_init_commands+=(vim_mode_lazy_keybindings)
-
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 case ":$PATH:" in
 *":$PNPM_HOME:"*) ;;
@@ -102,11 +89,6 @@ if command -v fnm &>/dev/null; then
 
 fi
 
-# disabled in favor of g-plane/pnpm-shell-completion
-# if command -v pnpm &>/dev/null; then
-#     source <(pnpm completion zsh)
-# fi
-
 bindkey "^P" up-line-or-beginning-search
 bindkey "^N" down-line-or-beginning-search
 
@@ -120,9 +102,3 @@ export FZF_CTRL_R_OPTS="--info inline --no-sort --no-preview"
 if command -v fzf &>/dev/null; then
   source <(fzf --zsh)
 fi
-
-# oh-my-posh is nice, but slower than native bira (omz theme),
-# and I no longer need all its features
-# if command -v oh-my-posh >/dev/null 2>&1; then
-#   eval "$(oh-my-posh init zsh --config $DOTFILES_SHELL_PATH/oh-my-posh.yaml)"
-# fi

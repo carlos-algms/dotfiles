@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -ex
-
-cd ${DOTFILES_PATH}
-
-echo "DOTFILES folder: '$(pwd)'"
-
-git pull
