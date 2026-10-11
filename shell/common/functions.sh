@@ -1,28 +1,36 @@
 # Easy extract
 extract() {
-  if [ -f $1 ]; then
-    filename=$(basename -- "$1")
-    filename="${filename%.*}"
-    target="${2-"./$filename"}"
+  local file="$1" name="${1##*/}" target
 
-    case $1 in
-    *.tar.bz2) tar xvjf $1 -C "$target" ;;
-    *.tar.gz) tar xvzf $1 -C "$target" ;;
-    *.tar.xz) tar xJf $1 -C "$target" ;;
-    *.bz2) bunzip2 $1 ;;
-    *.rar) rar x $1 "$target" ;;
-    *.gz) gunzip $1 ;;
-    *.tar) tar xvf $1 -C "$target" ;;
-    *.tbz2) tar xvjf $1 -C "$target" ;;
-    *.tgz) tar xvzf $1 -C "$target" ;;
-    *.zip) unzip $1 -d "$target" ;;
-    *.Z) uncompress $1 ;;
-    *.7z) 7z x $1 -o"$target" ;;
-    *) echo "don't know how to extract '$1'..." ;;
-    esac
-  else
-    echo "'$1' is not a valid file!"
+  if [ ! -f "$file" ]; then
+    echo "'$file' is not a valid file!"
+    return 1
   fi
+
+  # a.tar.gz -> a, b.zip -> b
+  name="${name%.tar.*}"
+  if [[ "$name" == "${file##*/}" ]]; then
+    name="${name%.*}"
+  fi
+  target="${2:-./$name}"
+
+  case "$file" in
+  # tar detects gz, bz2 and xz by itself. unzip and 7z create the target
+  *.tar.* | *.tgz | *.tbz2 | *.tar)
+    mkdir -p "$target"
+    tar xvf "$file" -C "$target"
+    ;;
+  *.bz2) bunzip2 "$file" ;;
+  *.rar)
+    mkdir -p "$target"
+    rar x "$file" "$target/"
+    ;;
+  *.gz) gunzip "$file" ;;
+  *.zip) unzip "$file" -d "$target" ;;
+  *.Z) uncompress "$file" ;;
+  *.7z) 7z x "$file" -o"$target" ;;
+  *) echo "don't know how to extract '$file'..." ;;
+  esac
 }
 
 if command -v yazi >/dev/null 2>&1; then
