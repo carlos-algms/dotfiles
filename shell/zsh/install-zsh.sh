@@ -20,9 +20,12 @@ e_header "Linking custom zsh config file"
 
 ln -sf "$(realpath "$scriptDir/custom.zsh")" ~/.oh-my-zsh/custom/custom.zsh
 
-e_header "Linking custom zsh agnoster with λ theme"
+e_header "Linking custom zsh themes"
 
-ln -sf "$(realpath "$scriptDir/themes/agnoster.zsh-theme")" ~/.oh-my-zsh/custom/themes/agnoster.zsh-theme
+# Per file, not a dir link: custom/themes holds omz-tracked example.zsh-theme, and omz update would see it deleted
+for theme in "$scriptDir"/themes/*.zsh-theme; do
+    ln -sf "$(realpath "$theme")" ~/.oh-my-zsh/custom/themes/"${theme:t}"
+done
 
 e_success "Done installing ZSH and oh-my-zsh"
 echo ""
