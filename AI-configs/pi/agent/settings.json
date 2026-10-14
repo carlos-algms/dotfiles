@@ -1,5 +1,6 @@
 {
-  "lastChangelogVersion": "1.1.0",
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "lastChangelogVersion": "1.2.0",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",
   "defaultThinkingLevel": "off",
@@ -12,7 +13,9 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": ["-skills/council-mode/SKILL.md"],
+      "skills": [
+        "-skills/council-mode/SKILL.md"
+      ],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
