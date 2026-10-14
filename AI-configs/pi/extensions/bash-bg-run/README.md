@@ -22,19 +22,35 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
    `echo $$;`. The first output line is the shell pid, which `jobs.ts` strips
    from the log and returns as the job id.
 3. Pi spawns with `detached: true`, so the pid is also the process group id.
-   `kill -- -<pid>` stops the whole tree.
+   `kill -- -<pid>` stops the whole tree. A process that calls `setsid` (for
+   example the `crit _serve` daemon) leaves that group and survives it, see
+   step 7.
 4. Output goes to `/tmp/pi-bash-bg-logs/<iso-date>_<pid>.log`. The date has `:`
    replaced by `-`. The file opens with `wx`, so a name collision fails instead
    of overwriting. Directory mode is `0700`, file mode is `0600`.
-5. `bash_bg_kill` aborts the job's `AbortController`. Pi's `exec()` kills the
-   process tree. An unknown pid returns an error that names the manual fallback
-   `kill -- -<pid>`.
+5. `bash_bg_kill` first runs `sweep(pid, { walkTree: true })`, then aborts the
+   job's `AbortController`. Pi's `exec()` kills the process group. An unknown
+   pid returns an error that names the manual fallback `kill -- -<pid>`.
 6. On exit, `notify.ts` reads the last 8 KB of the log (positional read, so
    memory stays flat for any log size), drops the partial first line, keeps the
    last 50 lines, and sends them with
    `pi.sendMessage(..., { triggerTurn: true, deliverAs: 'followUp' })`. A throw
    from `sendMessage` (stale `pi` after `/reload`) is swallowed.
-7. On `session_shutdown` (exit, `/reload`, `/new`, fork, switch), `index.ts`
+7. `sweep.ts` stops what the process group kill misses. The command is prefixed
+   with `export PI_BG_JOB=$$;`, so the job id is also an environment tag that
+   children inherit through `setsid` and double forks. `sweep` reads `ps axeww`
+   (which appends each process's environment) and sends `SIGTERM` to:
+   - every process that carries `PI_BG_JOB=<pid>` (exact match)
+   - with `walkTree`, every descendant of the job shell, found through `ppid`.
+     It runs before the abort, because after the group dies a daemon that stayed
+     attached loses its parent link. It is only valid while the shell is alive,
+     because a dead pid can be reused
+
+   It runs in `kill()` and `killAll()` (tree and tag), and when a job ends for
+   any reason (exit, timeout, abort, log error) in `finish()` (tag only). So a
+   job that ends on its own also stops its leftover daemons.
+
+8. On `session_shutdown` (exit, `/reload`, `/new`, fork, switch), `index.ts`
    calls `jobs.killAll()`.
 
 ## Files
@@ -43,6 +59,8 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
   only file that imports Pi at runtime
 - `jobs.ts` - `createJobs()` with `start()`, `kill()` and `killAll()`. Takes
   `BashOperations` and a log directory as arguments, so tests can inject a fake
+- `sweep.ts` - `sweep()` and the pure `findTargets()`. `createJobs` takes
+  `sweep` as an option, so tests can inject a fake
 - `notify.ts` - `readTail()` and `createNotifier()`. Takes `sendMessage` and
   `truncateTail` as arguments
 - `tools.ts` - `createToolHandlers()`: the `execute` logic of both tools
@@ -87,6 +105,13 @@ Decisions:
   a process group id there
 - Job ids live in memory. After a pi restart `bash_bg_kill` no longer knows old
   pids, but the log files stay on disk
+- `sweep` is best effort, not a lock. A process that clears its environment
+  escapes the tag. A macOS system binary (SIP-protected, such as `/bin/sleep`)
+  hides its environment from `ps`, so it escapes the tag too. A process forked
+  after the scan escapes both. Tested only on macOS; Linux uses the same `ps`
+  syntax but is untested
+- A command that daemonizes itself and exits right away (`foo --daemon`) has its
+  daemon stopped when the job ends. Use `bash` for it
 - Jobs stop on `session_shutdown`. Pi also kills its tracked children on exit
 - The log has no size cap. A noisy job can fill `/tmp`
 - No periodic polling. The agent checks the log only during its own turns, or

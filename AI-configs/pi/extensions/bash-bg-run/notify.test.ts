@@ -42,20 +42,34 @@ test('readTail does not return a character split by the window boundary', async 
 });
 
 test('readTail returns the window of a larger log that has no newline', async () => {
-  const tail = await readTail(writeLog('x'.repeat(TAIL_LIMITS.maxBytes * 3)), identity);
+  const tail = await readTail(
+    writeLog('x'.repeat(TAIL_LIMITS.maxBytes * 3)),
+    identity,
+  );
   assert.equal(tail, 'x'.repeat(TAIL_LIMITS.maxBytes));
 });
 
 test('readTail passes the window through the injected truncate', async () => {
-  assert.equal(await readTail(writeLog('abc'), (content) => content.toUpperCase()), 'ABC');
+  assert.equal(
+    await readTail(writeLog('abc'), (content) => content.toUpperCase()),
+    'ABC',
+  );
 });
 
-const result = { pid: 42, command: 'make', logPath: '', exitCode: 0 } satisfies JobResult;
+const result = {
+  pid: 42,
+  command: 'make',
+  logPath: '',
+  exitCode: 0,
+} satisfies JobResult;
 
 test('notify sends the completion message as a follow-up that triggers a turn', async () => {
   const sent: unknown[][] = [];
   const logPath = writeLog('done\n');
-  const notify = createNotifier({ send: (...args) => void sent.push(args), truncate: identity });
+  const notify = createNotifier({
+    send: (...args) => void sent.push(args),
+    truncate: identity,
+  });
 
   await notify({ ...result, logPath });
 
@@ -73,7 +87,10 @@ test('notify sends the completion message as a follow-up that triggers a turn', 
 
 test('notify still sends the message, without a tail, when the log is missing', async () => {
   const sent: unknown[][] = [];
-  const notify = createNotifier({ send: (...args) => void sent.push(args), truncate: identity });
+  const notify = createNotifier({
+    send: (...args) => void sent.push(args),
+    truncate: identity,
+  });
 
   await notify({ ...result, logPath: '/nonexistent/job.log' });
 

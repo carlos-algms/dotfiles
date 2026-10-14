@@ -27,8 +27,13 @@ async function readLastBytes(logPath: string, size: number) {
 }
 
 /** Reads only the last `maxBytes` of the log, so memory stays flat for any log size. */
-export async function readTail(logPath: string, truncate: NotifierOptions['truncate']): Promise<string> {
-  const window = await readLastBytes(logPath, TAIL_LIMITS.maxBytes).catch(() => undefined);
+export async function readTail(
+  logPath: string,
+  truncate: NotifierOptions['truncate'],
+): Promise<string> {
+  const window = await readLastBytes(logPath, TAIL_LIMITS.maxBytes).catch(
+    () => undefined,
+  );
   if (!window) {
     return '';
   }
@@ -46,8 +51,14 @@ export async function readTail(logPath: string, truncate: NotifierOptions['trunc
 export function createNotifier({ send, truncate }: NotifierOptions) {
   return async function notify(result: JobResult): Promise<void> {
     try {
-      const content = formatCompletion(result, await readTail(result.logPath, truncate));
-      send({ customType: 'bg-run', content, display: true }, { triggerTurn: true, deliverAs: 'followUp' });
+      const content = formatCompletion(
+        result,
+        await readTail(result.logPath, truncate),
+      );
+      send(
+        { customType: 'bg-run', content, display: true },
+        { triggerTurn: true, deliverAs: 'followUp' },
+      );
     } catch {
       // After /reload or /new the captured `pi` is stale and `send` throws. Nobody is left to notify.
     }
