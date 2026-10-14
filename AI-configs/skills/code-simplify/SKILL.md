@@ -29,20 +29,43 @@ State detected mode in the first line of the subagent prompt.
 
 ## Output shape
 
-The subagent must group findings under these exact headers in this order:
+Priority: correct, safe, tested, lean. Group findings under these exact headers
+in this order. Skip empty groups:
 
-1. **Bugs** - will break on some input
-2. **Misguidance** - docs, comments, or instructions that disagree with code
-3. **Missing validations** - boundaries where failure is silently swallowed
-4. **Real simplifications** - reduces surface area without churn
-5. **Low-priority** - nitpicks, style preferences, or theoretical issues
+1. **Must fix** - bugs, security holes, data loss
+2. **Should fix** - misguidance (docs, comments, or instructions that disagree
+   with code), missing validations (failure silently swallowed), risky logic
+   without a test, lean findings
+3. **Nice to have** - shorter forms. Only when the user asks for nitpicks
+
+Lean findings:
+
+- delete: dead code, unused options, flags, config, speculative features
+- reuse: the repo already has this helper; name the path
+- stdlib/native: the standard library or platform already does it
+- yagni: interface with one implementation, pass-through wrapper, config nobody
+  sets
+- merge: near-copies that must change together
+- split: one function doing unrelated jobs. Split by job, never by line count
 
 Rules:
 
-- One bullet per finding
-- Include `file:line` citation
-- Sort by severity
-- Skip `Low-priority` if user excluded nitpicks or style
+- Number findings across all groups, so the user can say "fix 2 and 5"
+- Each finding: bold title, `file:line`, then What, Problem, Fix, If skipped;
+  one sentence each
+- Every finding needs a concrete case: this input leads to this wrong result. No
+  case, no finding
+- Before calling code unused, grep the whole tree, including tests, fixtures,
+  config, and string or dynamic references
+- Propose the smallest fix. Prefer fixes that delete code. Never add layers,
+  config, or frameworks
+- A `shortcut: <limit>, <upgrade>` comment is a decision, not a finding
+- No style taste, no "consider", no vague worries
+
+End with:
+
+- `Verdict:` one line: ship, or what to fix first
+- `Lean: -<N> lines possible.` when lean findings exist
 
 ## Exclusion handling
 
@@ -61,7 +84,7 @@ Do not smuggle excluded items into findings.
 Pass these constraints to the subagent:
 
 - Mode: `apply` or `report`
-- Output shape: five-header template above
+- Output shape: three-group template above
 - Exclusions: user exclusions verbatim
 - Scope: recently modified sections unless user directs otherwise
 - Project context: read `CLAUDE.md`, `AGENTS.md`, or equivalent local rules
