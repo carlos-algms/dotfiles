@@ -19,6 +19,7 @@
 
 import { CustomEditor, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { matchesKey } from "@earendil-works/pi-tui";
+import { expandFenceSnippet } from "./vim-snippets.ts";
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
 const NORMAL_KEYS: Record<string, string | null> = {
@@ -179,6 +180,14 @@ class ModalEditor extends CustomEditor {
 		// Insert mode keeps upstream passthrough, except Esc: like vim, it moves the
 		// cursor onto the last typed char.
 		if (this.mode === "insert") {
+			if (data === "\t") {
+				const { line, col } = this.getCursor();
+				const edit = expandFenceSnippet(this.getLines(), line, col);
+				if (edit) {
+					this.replaceBuffer(edit.lines, edit.line, edit.col);
+					return true;
+				}
+			}
 			if (!matchesKey(data, "escape")) return false;
 			this.mode = "normal";
 			if (this.getCursor().col > 0) super.handleInput("\x1b[D");
