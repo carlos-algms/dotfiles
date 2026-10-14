@@ -11,3 +11,6 @@ AI-configs/opencode/agents
 AI-configs/opencode/commands
 AI-configs/opencode/skills
 AI-configs/skills/.trash
+
+## python bytecode
+__pycache__/

@@ -1,10 +1,10 @@
 ---
 name: jira-atlassian-cli
 description: |
-  Load before any Jira interaction or mcp__atlassian__* call. Holds required
+  Load before any Jira interaction or Atlassian MCP call. Holds required
   field values (team ID, sprint IDs, custom field mappings) unavailable
   elsewhere; skipping causes missing fields on created tickets. Triggers: Jira
-  URLs, ticket keys (e.g. ABC-123), MCP tools mcp__atlassian__*, acli, or
+  URLs, ticket keys (e.g. ABC-123), Atlassian/Jira MCP tools, acli, or
   keywords create/read/edit/search/transition, ticket, Jira, issue, sprint,
   backlog, refinement, work item.
 ---
@@ -20,331 +20,142 @@ Private team values live in `~/OneDrive/work/contexts/jira-data.yaml`.
 - Resolve team: user-named team, else top-level `my_team` field.
 - Substitute placeholders from resolved team: `{cloud_id}`, `{project_key}`,
   `{team_field}`, `{team_id}`, `{sprint_field}`, `{refinement_sprint_id}`,
-  `{active_sprint_board_id}`.
+  `{active_sprint_board_id}`, and workflow statuses `{status_ready_for_dev}`,
+  `{status_blocked}`, `{status_in_progress}`, `{status_in_review}`,
+  `{status_done}`, `{status_wont_do}` (from the team's `statuses` map).
+  Top-level `my_email` is the user's own email.
 - File missing: ask user. Do not guess. End turn.
 
 ### Active (current) sprint is NOT constant
 
 - `{refinement_sprint_id}` is stable; the active sprint id rotates every sprint.
-- Never hardcode the active sprint id. Resolve it at runtime.
-- `{active_sprint_board_id}` is the constant agile board; sprints are its
-  children. Resolve the active sprint from the board in one call (verified):
+- Never hardcode the active sprint id. Resolve it at runtime from the constant
+  board `{active_sprint_board_id}` (flag is `--id`, the board id):
 
   ```bash
   acli jira board list-sprints --id {active_sprint_board_id} --state active --json
   ```
 
-  Read `id` from the single active sprint. Flag is `--id` (the board id), not
-  `--board`. The command is `board list-sprints`; there is no
-  `acli jira sprint list`.
-
-- Do NOT use the old search+view path (`customfield_10020` is rejected in a
-  search `--fields` list and stripped from search results). The board endpoint
-  replaces it.
+  Read `id` from the single active sprint. Pass it as `--sprint <id>` to the
+  script. Do NOT use search with `customfield_10020`; it is rejected.
 
 ## Tool Priority
 
-Prefer MCP (`mcp__atlassian__*`) for everything. Supports markdown
-(`contentFormat: "markdown"`) and full ADF (`contentFormat: "adf"`). Pass
-`cloudId: "{cloud_id}"` on all MCP calls.
+`acli` first, for reads, search, create, edit, assign, comment, and transition.
+Make each write one `acli` call. Do not create and then edit to add fields.
 
-Use `acli` only when MCP cannot do the job, or not available (bulk ops, advanced
-JQL export, edge cases).
+## acli gaps (MCP fallback)
 
-## MCP Create/Edit Notes
+Use Atlassian/Jira MCP only for what `acli` cannot do. Recipes and payloads are
+in `references/mcp.md`:
 
-- `contentFormat: "adf"` required when description contains acceptance criteria
-  or any checklist. Jira markdown renders `- [ ]` as literal text in bullets,
-  not checkboxes. Only `taskList`/`taskItem` ADF nodes produce real checkboxes.
-- `contentFormat: "markdown"` for simple descriptions (headings, bold, lists,
-  links, no checklists).
-- `contentFormat: "adf"` for full control (checkboxes, panels, complex layouts).
-  Pass ADF JSON as the `description` string.
-- Always set team and sprint via `additional_fields`:
+- Remove or change the parent of an existing ticket (`edit` has no parent)
+- Team or sprint on an existing ticket (`edit` JSON rejects custom fields)
+- Transition to `{status_wont_do}` (needs a comment inside the transition)
 
-  ```json
-  "additional_fields": {
-    "{team_field}": "{team_id}",
-    "{sprint_field}": {refinement_sprint_id}
-  }
-  ```
+A new gap: say so to the user, use MCP once, then record the recipe in
+`references/mcp.md`. No MCP tools in the session: abort and explain.
 
-- Epic link: `"parent": "{project_key}-NNN"`.
-- API response body is unreliable for verifying rendering. Create/edit/get
-  responses echo `description` as markdown even when sent or requested as ADF
-  (including `responseContentFormat: "adf"`); ADF features (checkboxes, expand,
-  panels) appear flat in the echo but render correctly in Jira. Verify by
-  opening the issue URL.
-- `expand` IS valid in issue ADF. `editJiraIssue` `INVALID_INPUT` almost always
-  means a structural error in a sibling node, not `expand`. Most common:
-  paragraph-wrapped `taskItem.content` (see ADF Reference).
+## Write tickets with `scripts/md2adf.py`
+
+Paths are relative to this skill's directory. The script turns Markdown into ADF
+(Jira rich text) and wraps it as an `acli` payload. It is pure: no network, same
+input gives identical output, so it is safe to rerun. Do not read the ADF.
+
+How to run it:
+
+- Write the Markdown body in a heredoc and pipe the script into `acli`
+  (`/dev/stdin`)
+- Lines between `<<'EOF'` and the closing `EOF` are literal text fed to the
+  script's stdin. They are not shell commands
+- The command is the line with `<<'EOF'`; the trailing `\` continues it onto the
+  `| acli ...` line, then the body starts
+- Run it as one bash call. Do not save it to a script file
+- If the script fails it writes nothing, `acli` rejects the empty input
+  (`json: invalid format`), and no ticket is created
+
+- Checkboxes: `- [ ]` open, `- [x]` done, nesting allowed
+- Smart link: `<https://{cloud_id}/browse/{project_key}-NNN>`
+- Also supported: tables, fenced code, nested lists, blockquote, rule, bold,
+  italic, strike, inline code, links, and `:::panel` / `:::expand` containers
+- Not supported: images, raw HTML blocks, bullets or code under a checklist
+  item, tables or headings inside list items. The script exits 2 with
+  `line N: ...` on stderr and writes nothing
+
+Create (one call; defaults to team `my_team`, sprint `refinement`, type `Task`):
+
+```bash
+scripts/md2adf.py --format acli-create --summary "Title" \
+  --parent {project_key}-NNN --label ai-assisted --assignee me <<'EOF' \
+  | acli jira workitem create --from-json /dev/stdin --json | jq -r .key
+## Context
+
+- [ ] Acceptance criterion
+EOF
+```
+
+Body from an existing Markdown file (for example a refined, approved ticket):
+pass the path as the last argument and drop the heredoc. Do not read the file;
+the script reads it, so its content never enters the context. The same works for
+edit and comment.
+
+```bash
+scripts/md2adf.py --format acli-create --summary "Title" \
+  --parent {project_key}-NNN --label ai-assisted --assignee me ticket.md \
+  | acli jira workitem create --from-json /dev/stdin --json | jq -r .key
+```
+
+Flags:
+
+- `--assignee me`: your `my_email`
+- `--assignee <email>`: another person
+- Never `--assignee @me`: in JSON it assigns another person
+- `--sprint <id>`: the active sprint
+- `--team <key>`: another team
+- `--type <type>`: issue type
+- `--label <name>`: repeatable
+
+`acli create` is not idempotent. Before retrying a failed create, search by
+summary under the parent.
+
+Edit (one call; body, summary, assignee, labels together):
+
+```bash
+scripts/md2adf.py --format acli-edit --issues {project_key}-N \
+  --summary "New title" --assignee me --label-add x --label-remove y <<'EOF' \
+  | acli jira workitem edit --from-json /dev/stdin --yes
+New body
+EOF
+```
+
+Edit cannot change parent, team, or sprint; see "acli gaps".
+
+Comment, or an MCP description (default format is bare ADF):
+
+```bash
+scripts/md2adf.py <<'EOF' \
+  | acli jira workitem comment create --key {project_key}-N --body-file /dev/stdin
+Comment text
+EOF
+```
+
+For MCP, run the script alone and pass the output as `description` with
+`contentFormat: "adf"`. Use `-o <file>` to write a file instead of stdout.
+
+Script fails or a node is missing: read `references/adf.md` and
+`references/md2adf.md`. Do not hand-write ADF unless the script cannot emit the
+node.
 
 ## AI Disclosure (label only)
 
 Apply this section ONLY when a global, enterprise, or company rule requires AI
 disclosure. Otherwise add no label and no disclaimer.
 
-- Disclose with the `ai-assisted` label only, and only on issues you create
-- MCP create: add `"labels": ["ai-assisted"]` to `additional_fields`
-- acli create: `--label ai-assisted`, or top-level `"labels": ["ai-assisted"]` in `--from-json`
+- Disclose with the `ai-assisted` label only, and only on issues you create:
+  `--label ai-assisted` on the script
 - Editing or commenting on an existing issue: add no label and no disclaimer
-- Never add an AI disclaimer, banner, or footer to a summary, description, or comment
-
-## ADF Reference (for `contentFormat: "adf"`)
-
-Pass ADF JSON as the `description` value.
-
-Canonical docs:
-https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/.
-Per-node spec at `.../document/nodes/<nodeName>/`.
-
-### Debugging a node
-
-1. Fetch the node spec for allowed `content`, `attrs`, `marks`:
-
-   ```bash
-   defuddle parse \
-     "https://developer.atlassian.com/cloud/jira/platform/apis/document/nodes/<nodeName>/" \
-     --md
-   ```
-
-2. Still rejected: isolate by replacing the suspect subtree with a minimal valid
-   node (e.g. `taskList` -> `bulletList`). Success means the suspect is the
-   cause. MCP errors usually name the offending node.
-
-3. MCP-stricter-than-spec traps:
-   - `taskItem.content`: bare inline nodes, NOT `paragraph`-wrapped. Same rule
-     inside `expand`. See
-     [atlassian/atlassian-mcp-server#25](https://github.com/atlassian/atlassian-mcp-server/issues/25)
-     (also confirms markdown `- [ ]` does NOT auto-convert to `taskList`; send
-     ADF).
-   - `tableCell` / `tableHeader` / `panel` / `expand`: block-node children only;
-     wrap raw text in `paragraph`.
-
-### ADF Node Types
-
-Use inside `description.content`:
-
-- **Paragraph:**
-  `{ "type": "paragraph", "content": [{ "type": "text", "text": "..." }] }`
-- **Heading:**
-  `{ "type": "heading", "attrs": { "level": 2 }, "content": [{ "type": "text", "text": "..." }] }`
-- **Code block:**
-  `{ "type": "codeBlock", "attrs": { "language": "tsx" }, "content": [{ "type": "text", "text": "..." }] }`
-- **Bullet list:**
-  `{ "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [...] }] }] }`
-- **Ordered list:**
-  `{ "type": "orderedList", "content": [/* same as bulletList */] }`
-- **Bold text:**
-  `{ "type": "text", "text": "...", "marks": [{ "type": "strong" }] }`
-- **Inline code:**
-  `{ "type": "text", "text": "...", "marks": [{ "type": "code" }] }`
-- **Task list (checkboxes):**
-  `{ "type": "taskList", "attrs": { "localId": "ac-1" }, "content": [{ "type": "taskItem", "attrs": { "localId": "ac-1-1", "state": "TODO" }, "content": [{ "type": "text", "text": "..." }] }] }`
-
-  Acceptance criteria MUST use `taskList`/`taskItem`, not `bulletList`.
-  `taskItem.content` MUST be bare `text` nodes; paragraph-wrapping is rejected
-  with `INVALID_INPUT` (see Debugging trap above).
-
-- **Expand (collapsible section):**
-  `{ "type": "expand", "attrs": { "title": "..." }, "content": [<block nodes>] }`
-  Children: block nodes (`paragraph`, `bulletList`, `heading`, etc.). Use to
-  hide long context (findings, traces) below the fold.
-
-- **Inline smart link** (renders as Jira card / Notion preview / any URL):
-  `{ "type": "inlineCard", "attrs": { "url": "https://{cloud_id}/browse/{project_key}-NNN" } }`
-  Use inside a `paragraph` content array. Works for any URL.
-
-- **Panel** (info/warning/error/success callout):
-
-  ```json
-  {
-    "type": "panel",
-    "attrs": { "panelType": "info" },
-    "content": [
-      {
-        "type": "paragraph",
-        "content": [{ "type": "text", "text": "Note text here" }]
-      }
-    ]
-  }
-  ```
-
-  `panelType`: `info`, `note`, `warning`, `error`, `success`.
-
-- **Table:**
-
-  ```json
-  {
-    "type": "table",
-    "attrs": { "isNumberColumnEnabled": false, "layout": "default" },
-    "content": [
-      {
-        "type": "tableRow",
-        "content": [
-          {
-            "type": "tableHeader",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [{ "type": "text", "text": "Header" }]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "type": "tableRow",
-        "content": [
-          {
-            "type": "tableCell",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [{ "type": "text", "text": "Cell" }]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-  ```
-
-  Header row: `tableHeader`. Data rows: `tableCell`. Cell content: block nodes
-  (wrap text in `paragraph`).
-
-- **Horizontal rule:** `{ "type": "rule" }`
-- **Link mark:**
-  `{ "type": "text", "text": "click here", "marks": [{ "type": "link", "attrs": { "href": "https://..." } }] }`
-
-## Issue Linking (Blocks, Relates, etc.)
-
-Use MCP `mcp__atlassian__createIssueLink`. Available link types:
-
-| Name          | Inward (passive) | Outward (active) |
-| ------------- | ---------------- | ---------------- |
-| **Blocks**    | is blocked by    | blocks           |
-| **Relates**   | relates to       | relates to       |
-| **Duplicate** | is duplicated by | duplicates       |
-| **Fixes**     | is fixed by      | fixes            |
-| **Improves**  | is improved by   | improves         |
-
-Directionality for "Blocks": `inwardIssue` = blocker, `outwardIssue` = blocked.
-A blocks B:
-
-```
-inwardIssue: "{project_key}-A", outwardIssue: "{project_key}-B", type: "Blocks"
-```
-
-## Subtasks
-
-MCP create with `issueTypeName: "Sub-task"` and `parent: "{project_key}-NNN"`.
-Same `parent` field as epic linking; issue type determines subtask vs. epic
-child.
-
-### Sprint Field
-
-`{sprint_field}` takes a plain integer, not an object:
-
-```json
-"{sprint_field}": {refinement_sprint_id}
-```
-
-NOT `{ "id": ... }` (errors with "Number value expected as the Sprint id").
-
-#### Active (current) sprint vs refinement
-
-`jira-data.yaml` holds `refinement_sprint_id` and `active_sprint_board_id`. The
-current/active sprint id is NOT in the yaml and changes every sprint. To target
-the active sprint (user says "current sprint", "this sprint", "not refinement"),
-resolve it live from the board in one call:
-
-`acli jira board list-sprints --id {active_sprint_board_id} --state active --json`
-then read `id` from the single active sprint. Use that integer as
-`{sprint_field}` in the create JSON.
-
-### Parent / Epic Linking
-
-MCP create: `"parent": "{project_key}-NNN"`. MCP edit
-(`mcp__atlassian__editJiraIssue`):
-`fields: {"parent": {"key": "{project_key}-NNN"}}`.
-
-## acli Fallback Reference
-
-Use `acli jira workitem` subcommands only when MCP cannot do the job.
-
-### Quick Reference
-
-Substitute `{project_key}` before running.
-
-| Operation  | Command                                                                         |
-| ---------- | ------------------------------------------------------------------------------- |
-| View       | `acli jira workitem view {project_key}-N`                                       |
-| View (all) | `acli jira workitem view {project_key}-N --fields '*all' --json`                |
-| Search     | `acli jira workitem search --jql "project = {project_key} AND ..." --limit 20`  |
-| Create     | `acli jira workitem create --project {project_key} --type Task --summary "..."` |
-| Create ADF | `acli jira workitem create --from-json file.json`                               |
-| Edit       | `acli jira workitem edit --key {project_key}-N --summary "New title"`           |
-| Transition | `acli jira workitem transition --key {project_key}-N --status "In Progress"`    |
-| Comment    | `acli jira workitem comment create --key {project_key}-N --body "..."`          |
-
-### acli pitfalls (verified)
-
-- `acli jira workitem edit` prompts y/N; pass `--yes` for non-interactive runs.
-- No `acli jira me`. Get your accountId via JQL:
-  `acli jira workitem search --jql "assignee = currentUser()" --limit 1 --json`,
-  read `fields.assignee.accountId`.
-- Assignee on create: nest inside `additionalAttributes` as
-  `"assignee": { "accountId": "..." }`.
-- Active sprint id: resolve at runtime (see "Active (current) sprint" above);
-  never reuse `{refinement_sprint_id}` for it.
-
-### acli JSON Template (for `--from-json`)
-
-Assignee on create: add `assignee.accountId` inside `additionalAttributes`.
-There is NO `acli jira me`. Get your own accountId via:
-`acli jira workitem search --jql "assignee = currentUser()" --limit 1 --json`
-then read `fields.assignee.accountId`.
-
-```json
-{
-  "additionalAttributes": {
-    "{team_field}": "{team_id}",
-    "{sprint_field}": {refinement_sprint_id},
-    "assignee": { "accountId": "712020:..." }
-  },
-  "parentIssueId": "{project_key}-NNN",
-  "projectKey": "{project_key}",
-  "summary": "Ticket title",
-  "type": "Task",
-  "description": {
-    "type": "doc",
-    "version": 1,
-    "content": [
-      {
-        "type": "paragraph",
-        "content": [{ "type": "text", "text": "Description here." }]
-      }
-    ]
-  }
-}
-```
-
-### acli Edit JSON Format
-
-Uses `"issues"` (array of keys) instead of `"projectKey"`:
-
-```json
-{
-  "issues": ["{project_key}-N"],
-  "description": {
-    "type": "doc",
-    "version": 1,
-    "content": [...]
-  }
-}
-```
+- Never add an AI disclaimer, banner, or footer to a summary, description, or
+  comment
 
 ## Ticket framing (summary = deliverable, not motivation)
 
@@ -366,15 +177,52 @@ PR/ticket/incident as its subject, rewrite it to name the change instead.
 
 ### Read a ticket from a URL
 
-Extract key from URL (e.g. `{project_key}-NNN` from
-`https://{cloud_id}/browse/{project_key}-NNN`), then MCP
-`mcp__atlassian__getJiraIssue` with `issueIdOrKey: "{project_key}-NNN"`.
+Extract the key from `https://{cloud_id}/browse/{project_key}-NNN`, then
+`acli jira workitem view {project_key}-NNN`. Add `--fields '*all' --json` for
+all fields.
 
 ### Search team tickets
-
-MCP `mcp__atlassian__searchJiraIssuesUsingJql`, or fallback:
 
 ```bash
 acli jira workitem search --jql "project = {project_key} AND status = 'New'" --limit 20
 acli jira workitem search --jql "project = {project_key} AND sprint = {refinement_sprint_id}" --limit 50
 ```
+
+### Assign, transition
+
+```bash
+acli jira workitem assign --key {project_key}-N --assignee @me --yes
+acli jira workitem transition --key {project_key}-N --status "{status_in_progress}"
+```
+
+- `@me` is valid on `assign` and on `edit` flags only
+- Transition `--status` takes the exact name from the `statuses` map
+- Never guess a status name
+- A name missing from the map: ask the user
+- `acli` cannot list allowed transitions
+- A wrong name fails with `No allowed transitions found`
+- `{status_wont_do}` needs a comment inside the transition, which `acli` cannot
+  send (see "acli gaps")
+
+### Link tickets
+
+```bash
+acli jira workitem link create --out {project_key}-A --in {project_key}-B --type Blocks
+```
+
+- With `--type Blocks`, `--in` is the blocker and `--out` is the blocked ticket
+- `--out A --in B` makes A "is blocked by" B
+- The success message prints the reverse (`A Blocks B`); ignore it
+- List link types: `acli jira workitem link type`
+- List links of a ticket: `acli jira workitem link list --key K --json`
+- Remove a link: `acli jira workitem link delete --id <id> --yes`
+
+## References
+
+Do not load these in normal operation. Load one only to identify and debug a
+failure.
+
+- `references/acli.md` - verified `acli` behavior, pitfalls, JSON templates
+- `references/adf.md` - ADF node shapes, debugging rejected nodes
+- `references/md2adf.md` - exact Markdown grammar the script accepts
+- `references/mcp.md` - MCP recipes for the acli gaps, subtasks, link types
