@@ -36,6 +36,9 @@ motions, and one-shot commands.
   (forward, single-line)
 - Case ops: `gu{motion}` / `gU{motion}`
 - Open lines: `o` `O`
+- Join: `J` inserts one space (none after trailing whitespace; empty or
+  `)`-starting next line adds none), strips the next line's leading whitespace,
+  one undo step
 - Append: `A` `I`
 - Undo: `u` (terminal-dependent, see caveats)
 
@@ -70,8 +73,9 @@ Reload pi or restart.
 
 This file is a fork of upstream's example. To keep upstream merges clean:
 
-- Upstream code blocks stay byte-identical, except the intentional divergences
-  below.
+- Upstream code blocks stay semantically identical, except the intentional
+  divergences below. Style-only drift (repo prettier, braces on single-statement
+  `if`) is reapplied on each merge, not hand-merged.
 - Local logic lives between `// === LOCAL ADDITIONS ===` /
   `// === END LOCAL ADDITIONS ===` markers.
 - New behavior hooks into `handleInput` via the `handleLocal()` guard at the top
