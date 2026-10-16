@@ -51,7 +51,8 @@ in `references/mcp.md`:
 
 - Remove or change the parent of an existing ticket (`edit` has no parent)
 - Team or sprint on an existing ticket (`edit` JSON rejects custom fields)
-- Transition to `{status_wont_do}` (needs a comment inside the transition)
+- Transition to `{status_wont_do}` (needs a comment inside the transition;
+  generate the comment ADF with `scripts/md2adf.py`, never by hand)
 
 A new gap: say so to the user, use MCP once, then record the recipe in
 `references/mcp.md`. No MCP tools in the session: abort and explain.
@@ -60,7 +61,7 @@ A new gap: say so to the user, use MCP once, then record the recipe in
 
 Paths are relative to this skill's directory. The script turns Markdown into ADF
 (Jira rich text) and wraps it as an `acli` payload. It is pure: no network, same
-input gives identical output, so it is safe to rerun. Do not read the ADF.
+input gives identical output, so it is safe to rerun. Do not read its output.
 
 How to run it:
 
@@ -86,7 +87,7 @@ Create (one call; defaults to team `my_team`, sprint `refinement`, type `Task`):
 
 ```bash
 scripts/md2adf.py --format acli-create --summary "Title" \
-  --parent {project_key}-NNN --label ai-assisted --assignee me <<'EOF' \
+  --parent {project_key}-NNN --label ai-assisted <<'EOF' \
   | acli jira workitem create --from-json /dev/stdin --json | jq -r .key
 ## Context
 
@@ -101,7 +102,7 @@ edit and comment.
 
 ```bash
 scripts/md2adf.py --format acli-create --summary "Title" \
-  --parent {project_key}-NNN --label ai-assisted --assignee me ticket.md \
+  --parent {project_key}-NNN --label ai-assisted ticket.md \
   | acli jira workitem create --from-json /dev/stdin --json | jq -r .key
 ```
 
@@ -112,7 +113,8 @@ Flags:
 - Never `--assignee @me`: in JSON it assigns another person
 - `--sprint <id>`: the active sprint
 - `--team <key>`: another team
-- `--type <type>`: issue type
+- `--type <type>`: issue type. Keep the default `Task` unless the user names
+  another type
 - `--label <name>`: repeatable
 
 `acli create` is not idempotent. Before retrying a failed create, search by
@@ -130,6 +132,44 @@ EOF
 
 Edit cannot change parent, team, or sprint; see "acli gaps".
 
+The edit payload replaces the whole description. To change part of an existing
+description, see "Change part of an existing description".
+
+Change the type of one or more tickets (no script):
+
+```bash
+acli jira workitem edit --key {project_key}-A,{project_key}-B --type Task --yes
+```
+
+### Change part of an existing description
+
+Never rebuild an existing description from `acli jira workitem view` output: it
+is plain text and drops links, code marks, checkboxes and panels. Patch the
+stored ADF instead; this is the only safe path that keeps formatting.
+
+1. Save the stored ADF to a scratch file. Do not print it:
+   `acli jira workitem view {project_key}-N --fields description --json | jq .fields.description > desc.json`
+2. Find the target node by its top-level index:
+   `jq -c '.content | map(.type)' desc.json`
+3. Generate the new nodes with the script (bare ADF), never by hand:
+   `scripts/md2adf.py -o new.json <<'EOF'` with the Markdown fragment, for
+   example one bullet or one checkbox
+4. Splice and send in one pipe. Example, append the new bullets to the list at
+   index `I`:
+
+   ```bash
+   jq --slurpfile new new.json \
+     '.content[I].content += $new[0].content[0].content' desc.json \
+     | jq '{issues: ["{project_key}-N"], description: .}' \
+     | acli jira workitem edit --from-json /dev/stdin --yes
+   ```
+
+   A new section (heading plus list) goes in as whole top-level nodes:
+   `.content |= .[:I] + $new[0].content + .[I:]`
+
+5. Verify with `acli jira workitem view {project_key}-N --fields description`
+   and search the output for the new text
+
 Comment, or an MCP description (default format is bare ADF):
 
 ```bash
@@ -144,7 +184,8 @@ For MCP, run the script alone and pass the output as `description` with
 
 Script fails or a node is missing: read `references/adf.md` and
 `references/md2adf.md`. Do not hand-write ADF unless the script cannot emit the
-node.
+node. Splicing script output into stored ADF with `jq` is not hand-writing (see
+"Change part of an existing description").
 
 ## AI Disclosure (label only)
 
@@ -192,6 +233,7 @@ acli jira workitem search --jql "project = {project_key} AND sprint = {refinemen
 
 ```bash
 acli jira workitem assign --key {project_key}-N --assignee @me --yes
+acli jira workitem assign --key {project_key}-A,{project_key}-B --remove-assignee --yes
 acli jira workitem transition --key {project_key}-N --status "{status_in_progress}"
 ```
 

@@ -15,31 +15,10 @@ response omits many fields).
   `Won't Do`.
 - **Transition to `Won't Do`** (needs a comment inside the transition; `acli`
   has no comment flag): `getTransitionsForJiraIssue`, then `transitionJiraIssue`
-  with `transition: {id: "71"}` and the comment as ADF:
-
-  ```json
-  {
-    "transition": { "id": "71" },
-    "update": {
-      "comment": [
-        {
-          "add": {
-            "body": {
-              "type": "doc",
-              "version": 1,
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [{ "type": "text", "text": "Reason" }]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  }
-  ```
+  with `transition: {id: "71"}` and `update: {comment: [{add: {body: <ADF>}}]}`.
+  Generate `<ADF>` with `scripts/md2adf.py` (default format) and pass it
+  unchanged. Never hand-write it: plain text nodes drop smart links, links and
+  code marks.
 
   Id `71` is the `Won't Do` transition (status id `10239`) from `New`. Other
   statuses and source states may use other ids; read them from the available
