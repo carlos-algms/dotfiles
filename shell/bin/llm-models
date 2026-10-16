@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# ==============================================================================
+# llm-models — List model IDs from public model APIs (no auth needed)
+#
+# Usage: llm-models [-h|--help] [-f REGEX] [provider ...]
+#   providers: zen go openrouter nous (default: all)
+#   -f REGEX   keep only IDs matching REGEX, case-insensitive
+#              (default: stealth|alpha|free|pickle; use -f . for all)
+#   -h, --help show this help
+#
+# Output: "<provider> <id>" with aligned columns, sorted.
+# ==============================================================================
+
+readonly URL_ZEN="https://opencode.ai/zen/v1/models"
+readonly URL_GO="https://opencode.ai/zen/go/v1/models"
+readonly URL_OPENROUTER="https://openrouter.ai/api/v1/models"
+readonly URL_NOUS="https://inference-api.nousresearch.com/v1/models"
+
+usage() {
+    sed -n '/^# Usage/,/^# Output/p' "$0" | sed 's/^# \{0,1\}//' >&2
+    exit "${1:-1}"
+}
+
+list_models() {
+    local provider="$1" url="$2"
+    curl -fsS -m 30 "$url" | jq -r --arg p "$provider" '.data[].id | "\($p)\t\(.)"'
+}
+
+filter="stealth|alpha|free|pickle"
+[ "${1:-}" = "--help" ] && usage 0
+while getopts "f:h" opt; do
+    case "$opt" in
+        f) filter="$OPTARG" ;;
+        h) usage 0 ;;
+        *) usage ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+providers=("$@")
+[ ${#providers[@]} -eq 0 ] && providers=(zen go openrouter nous)
+
+for p in "${providers[@]}"; do
+    case "$p" in
+        zen) url="$URL_ZEN" ;;
+        go) url="$URL_GO" ;;
+        openrouter) url="$URL_OPENROUTER" ;;
+        nous) url="$URL_NOUS" ;;
+        *)
+            echo "unknown provider: $p" >&2
+            usage
+            ;;
+    esac
+    list_models "$p" "$url"
+done | sort -u | column -t -s "$(printf '\t')" | { rg -i -- "$filter" || true; }
