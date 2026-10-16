@@ -1,6 +1,6 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "lastChangelogVersion": "1.2.0",
+  "lastChangelogVersion": "1.3.0",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",
   "defaultThinkingLevel": "off",
@@ -19,7 +19,8 @@
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
-    "npm:@juicesharp/rpiv-todo"
+    "npm:@juicesharp/rpiv-todo",
+    "../../projects/pi-ocz"
   ],
   "hideThinkingBlock": false,
   "showHardwareCursor": true,
