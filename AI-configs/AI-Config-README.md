@@ -7,10 +7,13 @@ Setup commands per CLI. Folder layout and rules: see `AGENTS.md`.
 ```bash
 mkdir -p ~/.agents
 ln -s $(pwd)/AI-configs/skills ~/.agents/skills
+ln -s $(pwd)/AI-configs/agents ~/.agents/agents
 ```
 
-That single symlink covers Codex, opencode, cursor, Copilot CLI, agy, and pi.
-The per-CLI install steps below only set up what each CLI does **not**
+The `skills` symlink covers Codex, opencode, cursor, Copilot CLI, agy, and pi.
+The `agents` symlink is the cross-tool path, and `pi-subagents` reads it
+natively; Claude and opencode use their own per-CLI agent links below. The
+per-CLI install steps below only set up what each CLI does **not**
 auto-discover.
 
 ## Skills needing a binary on PATH

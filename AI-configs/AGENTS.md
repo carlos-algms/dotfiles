@@ -10,7 +10,11 @@ in `AI-Config-README.md`; read it only when installing or relinking.
 - `skills/` - cross-tool skills. `~/.agents/skills/` links here once; every CLI
   except Claude auto-discovers it. Claude links `~/.claude/skills/` directly. Do
   not add other per-CLI skill links
-- `agents/` - subagent definitions, linked per CLI (no cross-tool standard)
+- `agents/` - subagent definitions. Linked as `~/.claude/agents`,
+  `~/.claude-personal/agents`, `~/.config/opencode/agents`, and
+  `~/.agents/agents` (cross-tool user-scope path). Claude Code frontmatter is
+  read as-is by pi-subagents, but its capitalized `tools` names and model
+  aliases (`sonnet`, `opus`, `haiku`) fail a Pi launch; `inherit` works
 - `claude/` - Claude settings, statusline, hooks, output styles
 - `codex/`, `pi/`, `opencode/`, `crush-ai/`, `opencodereview/` - per-CLI config
 - `COMPONENTS-sync.md` - how third-party skills, agents, and hooks are vendored
@@ -27,6 +31,8 @@ in `AI-Config-README.md`; read it only when installing or relinking.
 - `~/.claude/` (work) and `~/.claude-personal/` (personal) have the same link
   set, except `settings.json` (`claude-settings.json` vs
   `claude-personal-settings.json`). Mirror any link change in the other dir
+- `~/.agents/agents` is the cross-tool user-scope agent root. Pi scans it
+  natively; other CLIs read it per their own docs
 
 ## Codex (`codex/`)
 

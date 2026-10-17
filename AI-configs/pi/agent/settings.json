@@ -13,9 +13,7 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": [
-        "-skills/council-mode/SKILL.md"
-      ],
+      "skills": ["-skills/council-mode/SKILL.md"],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
@@ -37,5 +35,63 @@
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-opus-5-5",
     "anthropic/claude-haiku-5-5"
-  ]
+  ],
+  "subagents": {
+    "agentOverrides": {
+      "worker": {
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor",
+          "web_fetch",
+          "web_search",
+          "subagent"
+        ]
+      },
+      "delegate": {
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor",
+          "web_fetch",
+          "web_search",
+          "subagent"
+        ]
+      },
+      "scout": {
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor",
+          "web_fetch",
+          "web_search",
+          "subagent"
+        ]
+      },
+      "researcher": {
+        "disabled": true
+      },
+      "evidence-auditor": {
+        "disabled": true
+      },
+      "oracle": {
+        "disabled": true
+      }
+    }
+  }
 }
