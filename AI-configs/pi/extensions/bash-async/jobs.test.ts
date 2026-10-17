@@ -27,6 +27,7 @@ function setup(script: Script) {
   const logDir = join(mkdtempSync(join(tmpdir(), 'bash-async-test-')), 'logs');
   const execCalls: { command: string; cwd: string; timeout?: number }[] = [];
   const events: string[] = [];
+  const changes: number[] = [];
   let resolve!: (result: JobResult) => void;
   const exited = new Promise<JobResult>((r) => {
     resolve = r;
@@ -43,10 +44,11 @@ function setup(script: Script) {
     ops: { exec },
     logDir,
     onExit: resolve,
+    onChange: () => changes.push(jobs.list().length),
     now: () => NOW,
     sweep,
   });
-  return { jobs, exited, logDir, execCalls, events };
+  return { jobs, exited, logDir, execCalls, events, changes };
 }
 
 function waitForAbort(signal: AbortSignal | undefined): Promise<never> {
@@ -248,6 +250,75 @@ test('a job that ends on its own sweeps the tag without walking the tree', async
   await exited;
 
   assert.deepEqual(events, ['sweep:99:false']);
+});
+
+test('list returns the running job and drops it when it ends', async () => {
+  const { jobs, exited } = setup(async (_command, { onData, signal }) => {
+    onData(Buffer.from('99\n'));
+    return waitForAbort(signal);
+  });
+
+  const { pid, logPath } = await jobs.start('sleep 100', '/work');
+
+  assert.deepEqual(jobs.list(), [
+    { pid, logPath, command: 'sleep 100', startedAt: NOW.getTime() },
+  ]);
+  jobs.kill(pid);
+  await exited;
+  assert.deepEqual(jobs.list(), []);
+});
+
+test('onChange fires after a job starts and after it ends, with the list already updated', async () => {
+  const { jobs, exited, changes } = setup(async (_command, { onData }) => {
+    onData(Buffer.from('99\n'));
+    return { exitCode: 0 };
+  });
+
+  await jobs.start('true', '/work');
+  await exited;
+
+  assert.deepEqual(changes, [1, 0]);
+});
+
+test('onChange fires once per job end when the job is killed', async () => {
+  const { jobs, exited, changes } = setup(
+    async (_command, { onData, signal }) => {
+      onData(Buffer.from('99\n'));
+      return waitForAbort(signal);
+    },
+  );
+
+  const { pid } = await jobs.start('sleep 100', '/work');
+  jobs.kill(pid);
+  await exited;
+
+  assert.deepEqual(changes, [1, 0]);
+});
+
+test('a throwing onChange does not lose the exit report', async () => {
+  const logDir = join(mkdtempSync(join(tmpdir(), 'bash-async-test-')), 'logs');
+  let report!: (result: JobResult) => void;
+  const exited = new Promise<JobResult>((r) => {
+    report = r;
+  });
+  const jobs = createJobs({
+    ops: {
+      exec: async (_command, _cwd, { onData }) => {
+        onData(Buffer.from('99\n'));
+        return { exitCode: 0 };
+      },
+    },
+    logDir,
+    onExit: report,
+    onChange: () => {
+      throw new Error('stale ctx');
+    },
+    sweep: () => {},
+  });
+
+  await jobs.start('true', '/work');
+
+  assert.equal((await exited).exitCode, 0);
 });
 
 test('kill returns false for an unknown pid', () => {

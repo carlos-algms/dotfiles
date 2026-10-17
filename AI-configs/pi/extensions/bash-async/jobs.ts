@@ -11,6 +11,11 @@ export interface StartedJob {
   logPath: string;
 }
 
+export interface RunningJob extends StartedJob {
+  command: string;
+  startedAt: number;
+}
+
 export interface JobResult extends StartedJob {
   command: string;
   exitCode: number | null;
@@ -21,6 +26,8 @@ interface JobsOptions {
   ops: BashOperations;
   logDir: string;
   onExit: (result: JobResult) => void;
+  /** Called after a job starts and after it ends, for any reason. */
+  onChange?: () => void;
   now?: () => Date;
   sweep?: (pid: number, options: SweepOptions) => void;
 }
@@ -41,10 +48,22 @@ export function createJobs(options: JobsOptions) {
     ops,
     logDir,
     onExit,
+    onChange,
     now = () => new Date(),
     sweep = defaultSweep,
   } = options;
-  const running = new Map<number, AbortController>();
+  const running = new Map<
+    number,
+    { job: RunningJob; controller: AbortController }
+  >();
+
+  function changed() {
+    try {
+      onChange?.();
+    } catch {
+      // A throwing UI hook (stale ctx after /new) must not lose the job's exit report.
+    }
+  }
 
   async function start(
     command: string,
@@ -88,7 +107,11 @@ export function createJobs(options: JobsOptions) {
           controller.abort();
         });
         job = { pid, logPath, log };
-        running.set(pid, controller);
+        running.set(pid, {
+          job: { pid, logPath, command, startedAt: now().getTime() },
+          controller,
+        });
+        changed();
         log.write(head.subarray(end + 1));
         resolve({ pid, logPath });
       }
@@ -100,6 +123,7 @@ export function createJobs(options: JobsOptions) {
         }
         const { pid, logPath, log } = job;
         running.delete(pid);
+        changed();
         sweep(pid, { walkTree: false });
         const report = () =>
           onExit({ pid, logPath, command, exitCode, error: logError ?? error });
@@ -128,22 +152,26 @@ export function createJobs(options: JobsOptions) {
   }
 
   function kill(pid: number): boolean {
-    const controller = running.get(pid);
-    if (!controller) {
+    const entry = running.get(pid);
+    if (!entry) {
       return false;
     }
     // Sweep first: once the group is dead, detached children lose the parent link the tree walk needs.
     sweep(pid, { walkTree: true });
-    controller.abort();
+    entry.controller.abort();
     return true;
   }
 
+  function list(): RunningJob[] {
+    return [...running.values()].map((entry) => entry.job);
+  }
+
   function killAll() {
-    for (const [pid, controller] of running) {
+    for (const [pid, { controller }] of running) {
       sweep(pid, { walkTree: true });
       controller.abort();
     }
   }
 
-  return { start, kill, killAll };
+  return { start, kill, killAll, list };
 }

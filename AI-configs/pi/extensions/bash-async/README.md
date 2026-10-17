@@ -51,14 +51,44 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
    job that ends on its own also stops its leftover daemons.
 
 8. On `session_shutdown` (exit, `/reload`, `/new`, fork, switch), `index.ts`
-   calls `jobs.killAll()`.
+   calls `jobs.killAll()`, then `ui.stop()`, which closes the panel and removes
+   the count line.
+
+## Interactive UI
+
+Only with a UI (`ctx.hasUI`); print and RPC modes skip it.
+
+- Count line: `N async running · → to inspect`, left-aligned in a `belowEditor`
+  widget, so it renders just above the footer, like the pi-subagents roster. It
+  re-renders on every job start and end (`jobs` `onChange`) and is empty at 0
+  jobs. `setStatus` cannot reach the first footer line, so it is not used.
+- `→` on an empty prompt opens an overlay panel: running jobs on the left, the
+  log tail of the selected job on the right. `ui.ts` consumes the key only when
+  the editor text is empty, the prompt editor has focus, no panel is open and at
+  least one job runs. Otherwise it passes through.
+- Panel keys: `j`/`k`/`↑`/`↓` select, `X` (shift+x) kills the selected job at
+  once with no confirmation, `J`/`K` scroll the log, `Esc`/`q`/`ctrl+c` close.
+  The log follows the tail until scrolled.
+- The panel polls the log every 500 ms with `readTail()` from `notify.ts`, so it
+  shows the last 8 KB (50 lines) of the log. The full log stays on disk.
+- A job that ends leaves the list at once. The panel closes when the last job
+  ends.
+- `ui.ts` gets the `TUI` from the same widget factory, because pi-tui exposes
+  the focused component only there. The focus check duck-types the editor, like
+  pi-subagents does.
 
 ## Files
 
-- `index.ts` - coordinator. Registers the two tools and wires the modules. The
-  only file that imports Pi at runtime
-- `jobs.ts` - `createJobs()` with `start()`, `kill()` and `killAll()`. Takes
-  `BashOperations` and a log directory as arguments, so tests can inject a fake
+- `index.ts` - coordinator. Registers the two tools and wires the modules. With
+  `ui.ts` and `panel.ts`, the only files that import Pi at runtime
+- `jobs.ts` - `createJobs()` with `start()`, `kill()`, `killAll()` and `list()`,
+  and an `onChange` hook. Takes `BashOperations` and a log directory as
+  arguments, so tests can inject a fake
+- `ui.ts` - count widget, `→` key handler and panel lifecycle
+- `panel.ts` - panel rendering, key mapping and log polling. Not unit tested
+- `panel-state.ts` - pure selection and scroll logic, `cleanLog()`
+- `input.ts` - pure rules for when `→` opens the panel
+- `footer.ts` - `formatFooter()`, `footerLines()`
 - `sweep.ts` - `sweep()` and the pure `findTargets()`. `createJobs` takes
   `sweep` as an option, so tests can inject a fake
 - `notify.ts` - `readTail()` and `createNotifier()`. Takes `sendMessage` and
@@ -128,6 +158,8 @@ Decisions:
 - The log has no size cap. A noisy job can fill `/tmp`
 - No periodic polling. The agent checks the log only during its own turns, or
   when a job end wakes it
+- The panel layout, the focus check and the count widget have no automated test.
+  Check them by hand in pi after `/reload`
 
 ## References
 

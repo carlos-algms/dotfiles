@@ -2,7 +2,9 @@
  * Bash Async - `bash_async_run` starts a bash command in the background without
  * blocking the agent, `bash_async_kill` stops it. Output goes to a log file the
  * agent reads with its own tools. When the command ends, a follow-up message wakes
- * the agent. Nothing waits for or polls the job in between.
+ * the agent. Nothing waits for or polls the job in between. In the interactive UI,
+ * the footer counts running jobs and `→` on an empty prompt opens a panel with
+ * their output, where `X` kills the selected job.
  */
 
 import {
@@ -12,8 +14,9 @@ import {
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
 import { createJobs } from './jobs.ts';
-import { TAIL_LIMITS, createNotifier } from './notify.ts';
+import { TAIL_LIMITS, createNotifier, readTail } from './notify.ts';
 import { createToolHandlers } from './tools.ts';
+import { createUi } from './ui.ts';
 
 const LOG_DIR = '/tmp/pi-bash-async-logs';
 
@@ -34,25 +37,37 @@ const KILL_PARAMS = Type.Object({
 });
 
 export default function (pi: ExtensionAPI) {
+  const truncate = (content: string) =>
+    truncateTail(content, TAIL_LIMITS).content;
   const notify = createNotifier({
     send: (message, options) => pi.sendMessage(message, options),
-    truncate: (content) => truncateTail(content, TAIL_LIMITS).content,
+    truncate,
   });
 
   const jobs = createJobs({
     ops: createLocalBashOperations(),
     logDir: LOG_DIR,
     onExit: (result) => void notify(result),
+    onChange: () => ui.refresh(),
+  });
+  const ui = createUi({
+    jobs,
+    readTail: (logPath) => readTail(logPath, truncate),
   });
   const handlers = createToolHandlers(jobs);
 
-  pi.on('session_shutdown', () => jobs.killAll());
+  pi.on('session_start', (_event, ctx) => ui.start(ctx));
+  pi.on('session_shutdown', () => {
+    jobs.killAll();
+    ui.stop();
+  });
 
   pi.registerTool({
     name: 'bash_async_run',
     label: 'Bash async run',
     description:
       'Start a bash command in the background. Returns at once with a job id (the shell pid) and a log file path. ' +
+      'All output stays in that log file. Do not redirect it in the command (`>`, `>>`, `2>`, `&>`): a redirected stream leaves the log and never reaches the completion message. ' +
       'When the command ends, its exit code and the end of its output arrive as a separate follow-up message. That message is the only result channel: no tool waits for this job. ' +
       'Never sleep, poll, or run a second command to collect the result. bg_wait is a pi-subagents tool for subagent runs and cannot wait for this job. ' +
       'If nothing else is left to do, end the turn and report the job id; the result wakes you. ' +
