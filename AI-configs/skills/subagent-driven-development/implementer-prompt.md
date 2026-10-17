@@ -1,7 +1,8 @@
 Apply dispatcher values: `brief_path`, `preamble_path`, `task_id`,
 `working_dir`, `workspace_dir`, `ledger_path`, `review_paths_file`,
-`plan_base_ref`, `task_base_ref`, `commit_policy`, `git_owner`, `prior_report`,
-`escalated_from`, and optional `context`.
+`plan_base_ref`, `task_base_ref`, `commit_policy`, `git_owner`,
+`workspace_mode`, `reviewer_model`, `prior_report`, `escalated_from`, and
+optional `context`.
 
 Own the complete task cycle. Operate in `working_dir`.
 
@@ -16,26 +17,25 @@ orientation only.
 - Treat every listed path as wholly task-owned
 - Include listed untracked files
 - Ignore unlisted worktree changes
-- Add a required path before editing it
-- Append one ledger `Ruling:` explaining every added path
+- Never add a path yourself. A needed path outside the list: return `BLOCKED`
+  with `need path claim <path>`
+- A listed path the task neither creates nor changes: remove it from the list
+  and append one ledger `Ruling:`
 - Never infer scope from `git status`
-
-Stop when a required edit belongs to another active task or cannot be claimed
-safely.
 
 ## Escalation
 
 - `prior_report` not `none`: read it, then continue from the current working
   tree. Never restart the task
-- `escalated_from` not `none`: the plan's stop rule for a check failing for a
-  reason the step does not name does not apply. Find the cause, fix it inside
-  owned paths, and append one ledger `Ruling:`
-- A missing or non-unique anchor still stops
+- A missing file or symbol named in the brief, or a plan-owned decision, still
+  stops
 
 ## Workflow
 
 1. Implement every brief step
-2. Run the task gate once as the last implementation verification
+2. Run the task gate once as the last implementation verification, after
+   applying `## Verification selection` in `../executing-plans/SKILL.md`,
+   resolved relative to this prompt
 3. Write `<workspace_dir>/task-<task_id>-report.md`
 4. Build the scoped package with:
 
@@ -48,7 +48,9 @@ safely.
    canonical formatter-only output
 7. Rebuild the package after fixes and update evidence to its final digest
 8. Under `Checkpoint commits`, commit only owned paths when `git_owner` is
-   `executor`; otherwise leave Git state to the coordinator
+   `executor`, following `## Commit ownership` in `../executing-plans/SKILL.md`,
+   resolved relative to this prompt. Otherwise leave Git state to the
+   coordinator
 9. Record completion with:
 
    ```text
@@ -59,6 +61,9 @@ safely.
 
 ## Report
 
+Keep each `VERIFY` line on one line; `scripts/task-done` matches it whole.
+
+<!-- prettier-ignore -->
 ```markdown
 # Task <task_id> report
 
@@ -68,16 +73,15 @@ safely.
 
 ## Verification
 
-VERIFY | state=<sha256:digest> |
-{"command":"<command>","exit_code":0,"result":"<token>"}
+VERIFY | state=<sha256:digest> | {"command":"<command>","exit_code":0,"result":"<token>"}
 
 ## Deviations
 
 - <brief said X; implementation uses Y because Z>
 ```
 
-Omit `Deviations` when none exist. Record plan drift as ledger `Ruling:` lines
-before returning.
+Omit `Deviations` when none exist. Choices under `**Implementer decides:**` are
+not deviations. Record plan drift as ledger `Ruling:` lines before returning.
 
 ## Review
 
@@ -88,8 +92,8 @@ Resolve these paths relative to this prompt:
 - Checklist: `../requesting-code-review/code-reviewer.md`
 
 The dispatcher is this implementer. Pass the task brief as `requirements_path`,
-`spec_path=none`, the report, package, owned path list, final digest, task
-scope, task ID, and checklist to the reviewer.
+`spec_path=none`, `preamble_path`, the report, package, owned path list, final
+digest, task scope, task ID, `reviewer_model`, and checklist to the reviewer.
 
 Skip review only when every owned change is execution-state bookkeeping,
 checkbox-only, or canonical formatter-only output. Treat configuration,

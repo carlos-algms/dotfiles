@@ -10,8 +10,9 @@ description: >
 # Writing plans
 
 Write a plan each task's implementer can execute after reading only that task
-plus the shared header. Assume the cheapest capable model with zero repo
-context. Every choice the plan leaves open is a guess.
+plus the shared header. Assume a capable mid-tier model that reads the repo. The
+plan settles interfaces, behavior, cases, scope, and files. The implementer
+discovers the code.
 
 ## Terms
 
@@ -29,10 +30,8 @@ context. Every choice the plan leaves open is a guess.
   consumes the earlier result
 - **Footprint:** files, frameworks, runtimes, imports, and tooling a step
   touches
-- **Edit:** one labeled change to one file, nested under the step that applies
-  it
-- **Anchor:** existing lines copied verbatim from the pre-task file, unique in
-  that file, cited as `path:line`
+- **Touch point:** one change named by `path`, the symbol or region, and a
+  one-clause intent
 
 ## Plan file, and the optional spec
 
@@ -104,14 +103,15 @@ acceptance criteria in `Source requirements`.
 
 ## Assumption gate
 
-Verify every asserted fact about what exists before drafting tasks. Ask only
-about intent or facts that discovery cannot resolve.
+Verify facts that change the task split, an interface, or scope before drafting
+tasks. Leave the rest to the implementer's discovery. Ask only about intent or
+facts that discovery cannot resolve.
 
 Run this before writing any task.
 
-1. List every fact the plan asserts about what exists: a file's contents, a
-   symbol's signature, a template's output, a tool's default, a dependency's
-   version, a config's effect
+1. List the facts the plan depends on: a file or symbol to touch, a cross-task
+   signature, a dependency's installed major version, a tool or config that
+   decides a task gate
 2. Mark each `verified` or `open`
 3. Resolve every `open` fact discovery can reach. Never ask what you can read
 4. Ask the user every `open` fact discovery cannot reach
@@ -121,9 +121,8 @@ The writer reads; the implementer runs. Read files, docs, type definitions, and
 library source, and run read-only commands. Never run code, tests, builds, or
 checks: the implementer's red and green runs do that once, at a lower cost.
 
-Read library internals only when public types and docs leave a design choice
-open. A runtime detail that changes only a test, a constraint, or a fallback is
-a prediction: write it and move on.
+Never read library internals. A runtime detail that changes only code inside a
+task is the implementer's to discover.
 
 Facts about runtime behavior and the plan's new code are predictions, not
 verified facts. Write the prediction. When reading cannot settle it, add a
@@ -140,8 +139,6 @@ report findings, not intentions.
 - Read the governing `AGENTS.md`, `CLAUDE.md`, and contributing guide
 - Read existing ADRs and project docs
 - Run `--help`, `--version`, and read-only subcommands
-- Only when the plan anchors into generated files: scaffold the generator into a
-  temp directory, without installing, and read its output
 - Fetch the current official docs when external behavior matters
 - Search upstream issues and PRs when repo research is inconclusive and upstream
   behavior changes the plan
@@ -176,7 +173,9 @@ Ask before drafting tasks.
 1. Show the full numbered list of open questions first, so the user sees the
    scope
 2. Ask them one at a time, in list order
-3. Use the harness question tool when one exists; otherwise ask in chat
+3. Use the harness question tool when one exists; otherwise ask in chat. A
+   subagent writer sends its questions and spec proposals to its dispatcher
+   instead and waits for the answers
 4. Give each question a recommended answer, so the user confirms rather than
    composes
 5. Wait for the answer before the next question
@@ -202,21 +201,6 @@ implementer checks it in one step, and what to do when it proves false.
 
 Never write an unresolved fact as plain instruction text. A constraint is the
 exception, not a substitute for asking.
-
-### Verify before asserting
-
-These facts are wrong often enough to check every time, by reading:
-
-- A scaffolding command's behavior in a non-empty directory
-- Whether a named config file actually affects the check you attach to it,
-  judged from the config and the tool's docs
-- A type check, lint, or test command that silently passes over zero files,
-  judged from the config that selects its files
-- The installed major version of a dependency you pin or call
-- A template's or generator's real output, not its documented output
-- A symbol's current signature in this repo
-- Whether a test can fail for the reason the task claims, judged from the code
-  under test
 
 ### Forbidden assertion shapes
 
@@ -294,12 +278,14 @@ inherits blind.
 - One idea per paragraph, placed under what it qualifies
 - Label a paragraph `**Edge case:**`, `**Constraint:**`, or `**Why:**` when the
   relationship is not obvious
-- Place each edit after the substeps of the step that applies it
-- Write no file list. Executors derive a task's owned paths from its edit labels
-  and `**Changes:**` lines
+- Write one `**Files:**` list per task: every repo-relative path the task
+  creates or edits by hand. Executors seed owned paths from it and
+  `**Changes:**` lines
 - Add `**Changes:**` under a step whose command creates, changes, or deletes
-  files no edit names. List each file path, never a directory. Example:
-  `pnpm add zod` changes `package.json` and `pnpm-lock.yaml`
+  files. List each path in only one of `**Files:**` and `**Changes:**`. List
+  each file path, never a directory. Example: `pnpm add zod` changes
+  `package.json` and `pnpm-lock.yaml`
+- Add `**Implementer decides:**` to name local choices left open on purpose
 
 ## Markdown format
 
@@ -319,7 +305,7 @@ inherits blind.
   repo formatter config: run
   `prettier --log-level error --prose-wrap always --embedded-language-formatting off --write <plan>`
 - Always pass `--embedded-language-formatting off` to prettier. Otherwise it
-  reformats code inside fences and breaks verbatim anchors
+  reformats code inside fences and breaks exact code
 
 ## Plan skeleton
 
@@ -332,8 +318,9 @@ inherits blind.
 
 ## Shared preamble
 
-- Anchor missing or not unique, or a check fails for a reason the step does not
-  name: stop and report. Never pick a location or a fix
+- A named file or symbol is missing, a fix needs a plan-owned decision, or a
+  needed path is outside your owned paths: stop and report, naming a path as
+  `need path claim <path>`. Never decide it yourself
 - [Repo rule every task follows]
 
 ## Tasks
@@ -349,6 +336,8 @@ inherits blind.
 
 - Use exactly these two H2 headings, in this order
 - Keep the stop rule as the first preamble item, verbatim
+- A milestone plan's coordinator completion action is the last step of the
+  final-verification checkpoint
 - Put every task, commit checkpoint, and the final-verification checkpoint under
   `## Tasks`
 
@@ -361,10 +350,17 @@ inherits blind.
 
   **Difficulty:** low | medium | high
 
+  **Files:**
+
+  - `src/parser.py`
+  - `tests/test_parser.py`
+
   **Interfaces:**
 
   - Consumes: `normalize(text: str) -> str` from Task M
   - Produces: `parse(text: str | None) -> Result`
+
+  **Implementer decides:** helper names, test names, and test layout
 
   **Steps:**
 
@@ -372,106 +368,51 @@ inherits blind.
 
      **Skills (load if not already loaded):** `<language-skill>`
 
-     1. Apply edits N.1a and N.1b
-     2. Add one test per `**Cases:**` row, following `test_parse_valid`
+     1. Add `Result` and a `parse()` stub raising `NotImplementedError` to
+        `src/parser.py`
+     2. Add one test per `**Cases:**` item to `tests/test_parser.py`, following
+        `tests/test_text.py`
      3. Run `pytest tests/test_parser.py`
-        - Expected: `test_parse_valid`, `test_parse_empty`, and
-          `test_parse_none` fail on `NotImplementedError`
-        - Expected: no import or collection errors
-
-     **Edit N.1a:** `src/parser.py:1`, stub `Result` and `parse()`
-
-     After:
-
-     ```python
-     from dataclasses import dataclass
-
-     from src.text import normalize
-     ```
-
-     Insert:
+        - Expected: the new tests fail on `NotImplementedError`, with no
+          collection errors
 
      ```python
      @dataclass(frozen=True)
      class Result:
          value: str
-
-
-     def parse(text: str | None) -> Result:
-         raise NotImplementedError
-     ```
-
-     **Edit N.1b:** `tests/test_parser.py:2`, add the pattern test
-
-     After:
-
-     ```python
-     from src.parser import Result, parse
-     ```
-
-     Insert:
-
-     ```python
-     def test_parse_valid():
-         assert parse("valid") == Result(value="valid")
      ```
 
      **Cases:**
 
-     | Test               | Input  | Expect                                  |
-     | ------------------ | ------ | --------------------------------------- |
-     | `test_parse_empty` | `""`   | `Result(value="")`                      |
-     | `test_parse_none`  | `None` | raises `ValueError("text is required")` |
+     - Valid text returns `Result` holding the normalized text
+     - `""` returns `Result(value="")`
+     - `None` raises `ValueError("text is required")`
 
   2. **Implement `parse()`**
 
-     1. Apply edit N.2a
+     1. Replace the `parse()` stub body in `src/parser.py`
 
-     **Edit N.2a:** `src/parser.py`, body of `parse()` from edit N.1a
-
-     **Uses:**
-
-     - `normalize(text: str) -> str` at `src/text.py:8`
-
-     Replace:
-
-     ```python
-         raise NotImplementedError
-     ```
-
-     With:
-
-     ```python
-         if text is None:
-             raise ValueError("text is required")
-         return Result(value=normalize(text))
-     ```
+     **Constraint:** normalize through `normalize()` at `src/text.py:8`.
 
   3. **Run the task gate once**
 
      1. `[one formatter command listing every applicable task file]`
-        - Omit when no changed file is covered by that tool
-        - Expected: exit 0
      2. `[one linter command listing every applicable task file]`
-        - Expected: exit 0
      3. `[affected test command]`
-        - Omit when an unchanged valid result already covers the final diff
-        - Expected: exit 0, `[N] passed` per test file
 
-     Green: every applicable non-dominated check exits 0.
+     Green: every command exits 0.
 ````
 
 ## Difficulty
 
 Set `**Difficulty:**` on every task. The dispatcher maps it to a model.
 
-Write every task so the cheapest model can finish it. A bigger model is the
-fallback for a stuck implementer, not the default.
+Write every task so the default coding model can finish it. A bigger model is
+the fallback for a stuck implementer, not the default.
 
-- `low`: every change is an exact edit, or a body of 15 lines or fewer, with its
-  cases
-- `medium`: one module, with at least one `**Algorithm:**` body the implementer
-  writes
+- `low`: mechanical change with no new logic: a rename, a config value, a copy
+  of an existing pattern
+- `medium`: the default. New logic in one module or a few closely related files
 - `high`: cross-module contract, an ambiguity the plan could not close, or a
   case the writer flagged as risky
 
@@ -488,82 +429,43 @@ contract. An implementer sees only its own task.
 
 ## Code detail
 
-The plan settles every decision. The implementer applies edits and runs checks.
+The plan settles decisions that cross a task boundary or are costly to reverse.
+The implementer discovers the rest by reading the repo.
 
-### Edits
+### Touch points
 
-Give every change to a source, test, config, or doc file as one edit.
-
-- Label: `**Edit <task>.<step><letter>:**`, then `path:line`, then a one-clause
-  purpose. Example: `**Edit 3.2a:**`
-- `path:line` is the anchor's first line in the file before the task starts
-- Anchor code a prior edit in the same task created by citing that edit's label
-  instead of a line
-- The anchor text is authoritative. Line numbers drift after earlier edits
-- An anchor is 1-5 lines copied from the file, unique in that file. Copy it from
-  a read; never retype it from memory
-- Change code: a `Replace:` anchor block, then a `With:` block
-- Add code: an `After:` or `Before:` anchor block, then an `Insert:` block
-- Remove code: a `Delete:` block holding the exact lines
-- New file: a `Create:` block holding imports, types, signatures, and bodies per
-  `### Bodies`
-- Fence every block with the file's language. Never use `diff` fences or `@@`
-  hunk headers
-- Block content keeps the file's exact indentation and tab or space style,
-  relative to the fence
-- Add `**Uses:**` under an edit whose new code calls a symbol the edit does not
-  show. List each symbol's exact signature at `path:line`, or from its producing
-  task
-- A substep applies an edit by its label. Never restate an edit in prose
-
-### Bodies
-
-- Write the full body when it is 15 lines or fewer, or when prose describing it
-  would be longer
-- Over 15 lines: write the signature, then `**Algorithm:**` as numbered steps,
-  then the case table
-- One algorithm step per branch. Each step names its locals, the helper it calls
-  from `**Uses:**`, its exact return value or error, and the case rows it covers
+- Name each change as a touch point in the step that makes it
+- Cite an existing symbol as `path:line` only when the implementer would
+  otherwise search for it
+- Never write anchors, `Replace`/`With` blocks, or function bodies
 - Never copy a whole existing file into the plan
 
 ### Write as code
 
-- Function and method signatures
-- Type, model, dataclass, and schema definitions with their exact field names,
-  types, aliases, and defaults
-- Named constants with their values
-- Regexes
-- Exact error messages and their format strings
-- Wiring: parameters threaded through callers, imports, type annotations,
-  registrations
-- Shell commands
-- Config fragments
-- Test cases, as a table of test name, input, and expectation
+Only these:
 
-A prose sentence describing a signature, field list, or regex is a defect.
-Replace it with the code.
+- Signatures and types listed in `**Interfaces:**`
+- Constants, user-visible strings, and error messages that tests or users
+  observe
+- Config fragments whose exact values matter
+- Shell commands
+
+Everything else is prose or a pointer to a repo pattern.
 
 ### Tests
 
-- Give exact test names as the repo's runner prints them
-- Give setup and teardown code for every shared state a test changes
-- Name the helper, stub, or fixture to reuse, with `path:line`
-- Write one complete test per test file as the pattern
-- Give the remaining cases as a table; each row names its test. Leave the
-  pattern test out of the table
-- Add the cases as their own substep, before the red run
-- A red run lists every test expected to fail and its failure kind, such as
-  "assertion on `getByRole`" or "`NotImplementedError`". Give an exact message
-  only when known without running the plan's code
+- Point at one existing test file as the pattern
+- List cases as bullets under `**Cases:**`: input and expected behavior
+- Name the fixture or helper to reuse when one exists
+- Stub every produced signature before the red run, so collection succeeds
+- A red run states what must fail and that collection must succeed
 - Behavior of new code that docs and source cannot settle: write a
   `**Constraint:**` with a one-step check and a fallback
-- A green run gives the expected pass count per test file
 
 ### Docs
 
-- User-facing text of 15 lines or fewer: give the exact text in an `Insert:`
-  block
-- Longer: give the section anchor and a list of every fact the text states
+- User-facing text of 15 lines or fewer: give the exact text
+- Longer: give the section and a list of every fact the text states
 
 ### Write as prose
 
@@ -589,9 +491,9 @@ Never write:
 - References to types, functions, or methods no task defines and the repo cannot
   import
 - Comments, abstractions, defensive branches, or tests for speculative needs
-- An edit without a verbatim anchor
-- A choice left to the implementer: "or", "e.g.", "something like", an unnamed
-  helper, an unstated value
+- Code outside `### Write as code`
+- A plan-owned choice left open: an interface, a case, a file, a scope boundary,
+  or a user-visible value. Local choices may use "or" and "e.g."
 
 ### Length
 
@@ -601,14 +503,13 @@ agent acts on:
 - Design rationale for a settled decision belongs in the spec, not the plan
 - Repo rules, tool invocations, and conventions appear once in the shared
   preamble
-- Never restate what a `path:line` citation shows, except an edit anchor
+- Never restate what a `path:line` citation shows
 - Never justify absent work. A check you did not add needs no explanation
 
-**Floor.** An implementer reaches `Green:` without asking a question or
-re-deriving a decision. Never cut:
+**Floor.** An implementer reaches `Green:` without asking about a plan-owned
+decision. Never cut:
 
 - Signatures, types, exact constants, named files
-- Every edit's anchor and exact new code
 - Every constraint that changes behavior, and every case
 - Anything a `## Detail calibration` ban would otherwise catch
 
@@ -621,45 +522,16 @@ them per task.
 
 ## Verification
 
-- Classify each changed file before selecting commands: documentation, source,
-  test, build or tool config, generated artifact, other
 - Map each command to the changed path or behavior justifying it
 - Omit a command when no changed path or repo rule makes it applicable
-- Documentation-only changes do not justify unit tests, type checks, or builds
-- A test-only change justifies the affected tests, not an unrelated full suite
-- Build or tool-config changes justify only the checks they can alter
-- A comment-only source change justifies nothing when comments have no
-  executable role
-- Treat directives, suppressions, pragmas, doctests, generated-documentation
-  inputs, shebangs, encoding declarations, and format-sensitive metadata as
-  executable, not comment-only
-- Never write a test, type check, build, or full gate as the check following a
-  formatter step. A formatter reports its own success and a reflow does not
-  change behavior. Its `Green:` is exit 0 or a clean `--check`
-- A formatter step touching only `.md`, `.mdx`, or docs paths gets no code check
-- One exception: the step changed formatter configuration. Then give it a real
-  check
 - Batch every file a tool accepts into one invocation. Never one per file
-- Remove a command a later command covers plus more, unless an intervening
-  action consumes its result
-- Treat a result as consumed only when a later action depends on its output,
-  pass state, fail state, or artifact
-- Compare semantic scope, not command text
-- Focused tests immediately followed by a containing suite: keep the suite
-- One-file formatting followed by containing multi-file formatting: keep the
-  containing one
-- A post-write existence or read-back check is dominated when the write reports
-  its own failure and a later formatter, parser, test, diff, or review consumes
-  the file
-- Keep a focused TDD red run when implementation depends on its failure
-- Keep a focused green run mid-implementation only when the next action consumes
-  it
 - Run the task gate only as each task's last verification
 - A task gate holds only commands. Put every manual check in the
   final-verification checkpoint
 - Never write an aggregate command (`make test`, `pnpm run test`, a pathless
   `pytest`) as a step's `Green:`. Aggregates belong to the task gate
-- Run a relevant full gate at most once per implementation state
+- Executors drop inapplicable and dominated commands per `executing-plans`
+  `## Verification selection`
 
 ## Commit policy
 
@@ -671,7 +543,7 @@ plan file plus every `Additional plan state files` path.
 Encode the policy with checkpoints:
 
 - `Checkpoint commits`: one checkpoint per task and one final-state checkpoint
-  after final verification when plan state is included
+  after final verification
 - `No commits`: no checkpoints
 
 Write each checkpoint as a bare line. The executing skill owns the mechanics:
@@ -709,7 +581,7 @@ Every plan ends with one final-verification checkpoint after all tasks.
 - Never copy task-gate commands into final verification as fallbacks
 - Never point a final command at another plan section
 - Add each manual check as an exact procedure with one expected observation,
-  under a `**Manual check (user):**` label. Agents skip it; the coordinator
+  under a `**Manual check (user):**` label. Agents skip it; the executing skill
   relays it to the user after final verification
 - Remove every unused placeholder
 
@@ -718,10 +590,8 @@ Every plan ends with one final-verification checkpoint after all tasks.
 
   1. **Close final review coverage**
 
-     **Skills (load if not already loaded):** `requesting-code-review`
-
-     Omit the skills line and the dispatch step when task-review evidence covers
-     the complete current implementation.
+     Omit the dispatch step when task-review evidence covers the complete
+     current implementation. The executing skill owns review mechanics.
 
      1. Reuse a task-review result covering the complete implementation
      2. Dispatch a fresh reviewer only for missing coverage
@@ -768,7 +638,6 @@ Record deviations as ledger `Ruling:` lines, never in the plan.
 - Signals: file extensions, frameworks, runtimes, test runners, specific
   imports, build and package managers, domain tooling
 - Add `**Skills (load if not already loaded):**` only on a matching step
-- Add `requesting-code-review` only to a final-review step that can dispatch
 - Any step reading or replying to a bot review gets
   `replying-to-pr-review-threads`
 
@@ -863,60 +732,22 @@ behavior. What a user or caller observes when the plan is done.]
 
 After writing, check and fix inline:
 
-1. **Coverage:** every captured source requirement is in the header; every
-   header requirement maps to a task; every task maps to verification
-2. **Spec split:** with a spec file, the plan carries no acceptance criteria,
-   research findings, or settled rationale the spec owns. Without one, no spec
-   file was created unasked, and `**Spec:**` reads `none`
-3. **Assumptions:** no `## Assumption gate` forbidden shape remains; every fact
-   about what exists that reading could reach was resolved, every one it could
-   not was asked, and each still open is a `**Constraint:**` naming what was not
-   verified; every runtime prediction reading could not settle has a
-   `**Constraint:**` with a fallback
-4. **Ambiguity:** no `## Detail calibration` red flag remains
-5. **Code detail:** every change is a labeled edit with a verbatim, unique
-   anchor; every signature, model, constant, regex, and error message is code;
-   every case list is a table; no body over 15 lines; no whole-file copy; every
-   called symbol an edit does not show is in its `**Uses:**`; every red run
-   names its failing tests; every green run names its pass counts; every file a
-   command changes and no edit names is in a `**Changes:**` line
-6. **Interfaces:** every cross-task contract has matching `Produces` and
-   `Consumes` signatures
-7. **Difficulty:** every task carries one of the three literals
-8. **Type consistency:** signatures and names match across tasks
-9. **Reuse:** nothing created that already exists in the repo
-10. **Safety:** destructive operations match source requirements and repo rules;
-    every named error mapping has a step handling it
-11. **Scope:** no unrequested comment, abstraction, dependency, configuration,
-    fallback, defensive branch, or test
-12. **Reachability:** every case is reachable through a supported flow or a real
-    trust boundary
-13. **Task overlap:** list each task's file set; merge overlapping sets
-14. **No deliverable-free tasks:** no task whose only output is a commit, a
-    format run, or a checkbox tick
-15. **Repetition:** repeated repo rules live in the shared preamble
-16. **Verification:**
-    1. Remove repeated `Green:` checks and standalone red phases
-    2. Each task's last step is its smallest non-dominated gate
-    3. One final-verification checkpoint after all tasks, holding final review
-    4. Reuse a task review covering the unchanged complete implementation
-    5. Every final command is exact; no final command repeats covered evidence
-    6. No full gate before final verification unless a task gate covers the
-       complete implementation and final verification reuses it
-    7. One invocation per tool, all applicable paths
-    8. No post-write existence check already proved downstream
-    9. No narrow green check immediately followed by a containing suite
-17. **Commit policy:** checkpoint count and placement match the header policy;
-    no checkpoint holds a command, message, or path list
-18. **Readability:** every task is a checkbox; every step a nested numbered
-    item; every action its own item; every paragraph indented and necessary;
-    `## Shared preamble` then `## Tasks`; blank lines per `## Markdown format`;
-    the formatter ran
-19. **Header:** `Goal` states current behavior, gap, target, and observable
-    result; `Out of scope` exists; `Call chain` exists for a cross-file change
-20. **Cold read:** read each task as a no-context implementer. Every question it
-    would ask and every choice it would make is a defect. Fix it with an edit, a
-    case, or a constraint
+1. **Coverage:** every captured source requirement is in the header, maps to a
+   task, and each task maps to a gate. A spec, when present, owns criteria and
+   rationale; otherwise `**Spec:**` reads `none`
+2. **Plan-owned decisions:** every interface, case, file, scope boundary, and
+   user-visible value is settled; `Produces` and `Consumes` match verbatim;
+   every task has a `**Difficulty:**` literal and a `**Files:**` list
+3. **Assumptions:** no forbidden assertion shape remains; every open fact was
+   asked or is a `**Constraint:**` with a fallback
+4. **Scope and reuse:** nothing unrequested or already in the repo; every case
+   reachable through a supported flow or a real trust boundary; destructive
+   operations match source requirements
+5. **Tasks:** no overlapping `**Files:**` and `**Changes:**` sets; no
+   deliverable-free task; no code outside `### Write as code`; each task ends
+   with one gate; one final-verification checkpoint after all tasks
+6. **Format:** header fields and checkpoints match the recorded policies; repo
+   rules live in the shared preamble; the formatter ran
 
 ## Plan reviewer
 
@@ -953,6 +784,9 @@ Write the resolved mode into the header, save the plan and its spec when one
 exists, then report the plan path, the spec path or `none`, the recorded mode,
 and every fact still open with the task it affects. Do not ask during handoff;
 the assumption gate already asked.
+
+A dispatched writer returns this report to its dispatcher and never executes the
+plan.
 
 - Both modes -> **REQUIRED SUB-SKILL:** `executing-plans`
 - `executing-plans` loads `subagent-driven-development` only for

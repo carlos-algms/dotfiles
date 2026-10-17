@@ -1,6 +1,6 @@
 Apply dispatcher values: `requirements_path`, `requirements_kind`, `spec_path`,
 `report_path`, `package_path`, `review_paths_file`, `state_digest`, `task_id`,
-`scope_mode`, and `checklist_path`.
+`preamble_path`, `scope_mode`, and `checklist_path`.
 
 Act as a read-only reviewer. Never edit, stage, or commit.
 
@@ -15,6 +15,10 @@ Read:
 4. `review_paths_file`
 5. `checklist_path`
 
+When `preamble_path` is not `none`, read only its `Out of scope`, repo rules,
+and constraints. Source requirements absent from the brief are not `MISSING` in
+task scope.
+
 When `requirements_kind=plan`, require `spec_path` to match the plan's `Spec`
 field and read it when it is not `none`.
 
@@ -24,15 +28,20 @@ an input is missing, unreadable, or contradictory.
 
 The package is the implementation scope. Requirements inputs are outside that
 scope. Inspect a listed changed file separately only when the package cuts off
-code needed to judge a named risk. Never inspect an unlisted implementation path
-or broaden scope from `git status`.
+code needed to judge a named risk. Read an unlisted path only to trace a changed
+contract to its call sites or sibling branches; never review it as scope or
+broaden scope from `git status`.
 
 ## Review
 
 Treat the report as unverified claims.
 
-Apply the complete checklist at `checklist_path`, then check requirements
-conformance against the same package.
+Apply only these parts of `checklist_path`: the analysis bullets of
+`## Review scope` from "Read each whole modified function" through "Ignore
+unrelated pre-existing issues", then `## Validation boundary`,
+`## What to check`, and `## Calibration`. This prompt owns inputs, scope, and
+output; ignore the checklist's versions. Then check requirements conformance
+against the same package.
 
 Classify conformance defects:
 
@@ -41,9 +50,13 @@ Classify conformance defects:
 - `MISUNDERSTOOD`: wrong interpretation
 - `WRONG SPEC`: requirements conflict with governing repository rules
 
+Choices the brief lists under `**Implementer decides:**` are not `EXTRA` or
+`MISUNDERSTOOD`.
+
 For task scope, compare against the task brief. For complete scope, compare
 against the plan and its cited source requirements. Earlier completed task
-behavior is not extra in cumulative or complete scope.
+behavior is not extra in cumulative or complete scope. Requirements the plan
+assigns to the root coordinator are not `MISSING`.
 
 Do not rerun a suite, formatter, linter, type check, or build. Run one focused
 check only when a specific code risk cannot be resolved by reading.

@@ -42,6 +42,10 @@ for the same repository.
 - Never commit without an explicit user request
 - Permission applies to one commit action; autonomous mode does not waive the
   gate
+- Exception: a plan executed through `executing-plans` with
+  `Commit policy: Checkpoint commits` approves its mechanical checkpoint commits
+  and coordinator squashes into the feature branch. Skip the approval in step 7;
+  every message rule still applies
 - Never rewrite history: no `git rebase`, `commit --amend`, `push --force`, or
   `--force-with-lease`
 - Never use `git checkout`, `git revert`, or `git reset` to undo existing work

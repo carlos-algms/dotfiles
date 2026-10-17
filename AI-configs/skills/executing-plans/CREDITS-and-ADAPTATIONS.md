@@ -13,17 +13,17 @@ Original source:
   Upstream splits these into two skills; this one owns the shared start gates
   and hands off
 - Added immediate checkbox ticking after verified steps
-- Added plan-owned commit cadence with inline or delegated checkpoint
-  ownership
+- Added plan-owned commit cadence with inline or delegated checkpoint ownership
 - Added final whole-plan review with a reuse-first evidence gate
 - Added a single-runner rule for final verification, owned per execution mode
-- Added a shared baseline-snapshot lifecycle with per-mode cleanup ownership.
-  Upstream has no equivalent: it never classifies pre-existing uncommitted
-  work, so a plan executed over a dirty tree can commit work the user never
-  intended
+- Added owned path lists seeded from each task's `**Files:**` and `**Changes:**`
+  lines, never from `git status`. Upstream has no equivalent, so a plan executed
+  over a dirty tree can commit work the user never intended
 - Added mechanical invalidation: a passing command is stale only when an edit
   landed after it, and a formatter run is never an invalidating edit
-- Added milestone finalization turns
+- Added milestone execution ownership values: `workspace_mode`, `git_owner`,
+  `milestone_owner`, and `pr_owner`
+- Added `## Verification selection`, applied by every executor before a gate
 
 ## Ported back from upstream (2026-09-23)
 
@@ -38,10 +38,10 @@ Original source:
   remember is a summary, the brief has the exact values
 - The pre-flight interface scan before Task 1, cross-checking each task's
   `Produces` against its consumers' `Consumes`
-- Reading the plan's spec at start, with the spec as the binding authority
-  when the plan conflicts with it
-- Workspace deletion after a clean final review, with `git clean -fdx` named
-  as the loss case recovered from `git log`
+- Reading the plan's spec at start, with the spec as the binding authority when
+  the plan conflicts with it
+- Workspace deletion after a clean final review, with `git clean -fdx` named as
+  the loss case recovered from `git log`
 
 ## Corrections
 

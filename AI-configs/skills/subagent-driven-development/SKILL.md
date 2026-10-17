@@ -16,27 +16,46 @@ For each incomplete task:
 
 1. Run `scripts/task-start PLAN_FILE N`
 2. Seed `<workspace>/task-<N>-paths.txt` from the paths in the task's
-   `**Edit <label>:**` and `**Changes:**` lines, each once
-3. Dispatch one implementer with the payload below
+   `**Files:**` and `**Changes:**` lines, each once. Never re-seed an existing
+   file; it holds granted path claims
+3. Dispatch one implementer with the payload below. Set `prior_report` to an
+   existing `task-<N>-report.md`, else `none`
 4. On `PASS`, retain its exact `PACKAGE`, `REVIEW`, `VERIFY`, `LEARNED`, and
    `DISMISSED` lines
-5. Under `Checkpoint commits` with `git_owner=coordinator`, stage only the
-   task's owned path list, create its mechanical commit, and verify the commit
-   contains no other path
+5. Under `Checkpoint commits` with `git_owner=coordinator`, leave the checkpoint
+   unticked. The root coordinator commits it after the finalizer's `PASS`
 6. Tick the task; tick its checkpoint only after its Git owner committed
 7. Dispatch the next task
 8. On `BLOCKED`, read its `need` field
-   1. It names user input, credentials, access, or a missing or non-unique
-      anchor: relay the blocker and stop
-   2. Otherwise, below the top tier: dispatch a fresh implementer one tier up
+   1. It names `path claim <path>`: resolve it per `executing-plans`
+      `## Path claims`, then dispatch a fresh implementer at the same tier with
+      the same `brief_path`, `review_paths_file`, and `task_base_ref`, plus
+      `prior_report`. On a stop, relay the blocker and stop
+   2. It names user input, credentials, access, a plan-owned decision, or a
+      missing file or symbol named in the brief: relay the blocker and stop
+   3. Otherwise, below the top tier: dispatch a fresh implementer one tier up
       with the same `brief_path`, `review_paths_file`, and `task_base_ref`, plus
       `prior_report` and `escalated_from`. Never re-run `task-start`
-   3. At the top tier: relay the blocker and stop
+   4. At the top tier: relay the blocker and stop
 
 After all tasks, dispatch one fresh finalizer. Relay its result without
-rerunning review or verification. After its `PASS`, relay every
-`**Manual check (user):**` item to the user and wait for each result. Delete the
-workspace only after final `PASS` and every manual check passed.
+rerunning review or verification. With a root coordinator, it owns manual checks
+and workspace deletion.
+
+Without a root coordinator, when the plan has `**Manual check (user):**` items:
+
+1. Dispatch the finalizer with `defer_state=true`
+2. After its `PASS`, relay every manual check to the user and wait for each
+   result
+3. A failed check: stop, keep the workspace, and report
+4. All passed: run finalizer steps 10-12 yourself, per `finalizer-prompt.md`
+5. Delete the workspace
+
+Without manual checks, use `defer_state=false` and delete the workspace after
+the finalizer's `PASS`.
+
+`coordinator` in `git_owner`, `milestone_owner`, and `pr_owner` means the root
+milestone coordinator from `plan-a-milestone`, never this orchestrator.
 
 The implementer owns implementation, verification, review fixes, path-list
 updates, task recording, and executor-owned checkpoint commits. The orchestrator
@@ -51,9 +70,10 @@ Map each task's `Difficulty` to the current harness:
 - `medium`: default coding model
 - `high`: most capable available model
 
-Use a reviewer one tier above the implementer, capped at the most capable model.
-Name every dispatched model. Treat missing or invalid difficulty as `high` and
-report it.
+Use a reviewer one tier above the implementer, capped at the most capable model,
+passed as `reviewer_model`. The finalizer's reviewer uses the most capable
+model. Name every dispatched model. Treat missing or invalid difficulty as
+`high` and report it.
 
 Escalate one tier per `BLOCKED`, up to the most capable model. The reviewer
 stays one tier above the current implementer, capped. Name every escalated
@@ -94,6 +114,8 @@ plan_base_ref      = <SHA captured by executing-plans>
 task_base_ref      = <SHA printed by task-start>
 commit_policy      = <Checkpoint commits | No commits>
 git_owner          = <coordinator | executor>
+workspace_mode     = <shared | isolated | sequential>
+reviewer_model     = <one tier above this implementer, capped>
 prior_report       = <absolute report path of the BLOCKED attempt | none>
 escalated_from     = <model of the BLOCKED attempt | none>
 context            = <non-normative orientation only>
@@ -113,14 +135,14 @@ working_dir           = <absolute repo or worktree path>
 workspace_dir         = <absolute plan workspace path>
 ledger_path           = <workspace>/progress.md
 plan_base_ref         = <SHA captured by executing-plans>
-review_evidence       = <exact retained REVIEW lines | none>
-verification_evidence = <exact retained VERIFY lines | none>
 review_packages       = <task ids with absolute PACKAGE paths | none>
 commit_policy         = <Checkpoint commits | No commits>
 git_owner             = <coordinator | executor>
 milestone_owner       = <coordinator | executor>
 pr_owner              = <coordinator | executor>
 plan_id               = <stable milestone plan ID | none>
+reviewer_model        = <most capable available model>
+defer_state           = <true | false>
 ```
 
 The finalizer is the only subagent receiving `plan_path`.
@@ -141,8 +163,8 @@ Resolve relative to this file:
 - Relay every `LEARNED`, `DISMISSED`, `STATE`, and `MILESTONE` line unchanged
 - Do not report absent optional blocks
 - Never synthesize evidence or grant Git or milestone ownership
-- Create a requested PR only when `pr_owner=executor`; otherwise relay
-  `PR | coordinator`
+- On `PR | pending`, ask the user, then create the PR only after approval;
+  otherwise relay `PR | coordinator`
 
 ## Integration
 

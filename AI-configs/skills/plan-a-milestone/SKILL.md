@@ -1,10 +1,11 @@
 ---
 name: plan-a-milestone
 description: >
-  Create or update a terse milestone file composed of delegated implementation
-  plans. Use only when the user directly invokes plan-a-milestone or explicitly
-  asks to create or update a milestone plan. Do not infer use from large
-  features, multiple plans, parallel work, sequential work, or PR decomposition.
+  Create, update, or execute a terse milestone file composed of delegated
+  implementation plans. Use only when the user directly invokes plan-a-milestone
+  or explicitly asks to create, update, or execute a milestone plan. Do not
+  infer use from large features, multiple plans, parallel work, sequential work,
+  or PR decomposition.
 ---
 
 # Plan a milestone
@@ -80,15 +81,18 @@ main agent never edits plan content.
 - Dispatch one writer at a time in topological order
 - Give one subagent ownership of one plan file only
 - Require each subagent to load and follow `writing-plans`
-- Give each subagent the repository root, plan path, milestone path, expected
-  milestone link target, plan-specific source requirements, dependencies,
-  execution mode, commit policy, and document policy
+- Writers send open questions and spec proposals to the main agent instead of
+  the user. The main agent asks the user per `writing-plans` `#### How to ask`
+  and passes each answer back
+- Give each subagent the plan ID, repository root, plan path, milestone path,
+  expected milestone link target, plan-specific source requirements,
+  dependencies, execution mode, commit policy, and document policy
 - Pass `review_source_requirements` captured before drafting: original user
   requirements, the plan-specific outcome, and every mandatory milestone rule
 - Require each subagent to format its plan file with the repository formatter
 - Require each subagent to return the plan path, final plan-review result,
   milestone path, matched plan-link target, resolved document policy, and exact
-  implementation file set
+  implementation file set from its `**Files:**` and `**Changes:**` lines
 - Do not paste one writer's full plan into another writer's prompt
 - Let a dependent writer read completed prerequisite plan files from disk
 - Do not let plan writers edit the milestone file
@@ -111,10 +115,11 @@ Classify each parallel-ready plan pair before dispatch:
 
 - `shared`: owned paths and command outputs are disjoint; workers never stage or
   commit concurrently
-- `isolated`: overlap or independent Git state makes shared execution unsafe;
-  create one branch and worktree per plan from committed dependency state
-- `sequential`: required state is uncommitted, isolation is unavailable, or
-  safety is unclear
+- `isolated`: owned paths are disjoint, but command outputs or tool state
+  collide in one tree; create one branch and worktree per plan from committed
+  dependency state
+- `sequential`: owned paths overlap, required state is uncommitted, isolation is
+  unavailable, or safety is unclear
 
 For shared execution, serialize all coordinator-owned Git operations.
 
@@ -127,6 +132,53 @@ milestone update on mismatch. `No commits` plans never use isolated execution.
 Require each isolated worker to return its final owned path-list path, package
 path, and reviewed digest.
 
+Under `Plan file policy: Exclude`, copy the plan file, its spec, and the
+milestone file into each isolated worktree at the same repo-relative paths
+before dispatch. After integration, copy the worker's plan file back to the main
+checkout. The main checkout's milestone stays the only one the coordinator
+updates.
+
+## Milestone execution
+
+Each plan lands as one squash commit on the active feature branch. No plan
+creates its own PR. Before the first dispatch, create or confirm a non-default
+feature branch as the active branch.
+
+Dispatch one fresh executor subagent per plan. It loads `executing-plans` with
+the plan path, `plan_id`, and these values:
+
+| `workspace_mode` | `git_owner`   | `milestone_owner` | `pr_owner`    |
+| ---------------- | ------------- | ----------------- | ------------- |
+| `shared`         | `coordinator` | `coordinator`     | `coordinator` |
+| `isolated`       | `executor`    | `coordinator`     | `coordinator` |
+| `sequential`     | `coordinator` | `coordinator`     | `coordinator` |
+
+The root coordinator owns these steps:
+
+1. Path claim: grant `path claim <path>` only when no other active plan's owned
+   path lists, `**Files:**`, or `**Changes:**` contain the path. On grant,
+   append the path to the claiming task's `task-<N>-paths.txt` and one `Ruling:`
+   to its ledger, then reply to the waiting executor or re-dispatch it on the
+   same plan. On a conflict, deny it and run the claiming plan after the
+   conflicting plan finishes
+2. Manual checks: after the plan's final `PASS`, relay every
+   `**Manual check (user):**` item in its final-verification checkpoint to the
+   user and wait for each result. A failed check: stop that plan, keep its
+   workspace, skip its commit, integration, and milestone update, and report
+3. Commit under `Checkpoint commits` with `git_owner=coordinator`: create one
+   commit from the plan's `final-paths.txt`, plus its plan state under
+   `Plan file policy: Include`, following `executing-plans`
+   `## Commit ownership`. Tick every commit checkpoint in the plan first
+4. Integration under `isolated`: squash and verify the digest as above
+5. Milestone update
+6. Delete the plan workspace
+
+`Checkpoint commits` approves every coordinator commit and squash into the
+feature branch; never ask per commit. After the last plan, ask the user before
+creating one requested PR from the feature branch, and only when the repository
+has a remote that accepts PRs. Otherwise report `PR | none`. Squashing the
+feature branch into the default branch is the user's step.
+
 After a plan passes and its result is integrated, validate its milestone link,
 check only that plan's box, format the milestone, and verify the link again.
 Workers never edit the milestone file. Under `Plan file policy: Include`, the
@@ -135,7 +187,7 @@ coordinator commits the milestone update after integration.
 ## Plan boundaries
 
 - Give each plan one independently testable, reviewable outcome
-- Keep each plan suitable for one isolated PR
+- Keep each plan suitable for one squash commit on the feature branch
 - Keep implementation file ownership disjoint between parallel plans
 - Move shared foundations or contracts into an earlier prerequisite plan
 - Add a dependency when a plan needs code, contracts, migrations, or generated
@@ -172,8 +224,9 @@ pass them into `writing-plans`. Do not replace or relax that workflow.
 3. List the milestone path under `Additional plan state files`
 4. Exclude both files from every commit and PR when `Plan file policy` is
    `Exclude`
-5. Reject `No commits` when the source requirements request a PR
-6. Add a final action after implementation review and validation:
+5. Reject `No commits` when the source requirements request a PR, or when the
+   plan has a dependency or a dependent in the milestone
+6. Add a final action as the last step of the final-verification checkpoint:
    1. Return `PASS | <plan ID>` to the active coordinator
    2. The coordinator re-reads the milestone after integration
    3. Resolve every checkbox link target relative to the milestone file

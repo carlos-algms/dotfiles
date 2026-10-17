@@ -13,6 +13,8 @@ Use this contract for inline, task, and final review.
 - `state_digest`: digest printed by `review-package`
 - `scope_mode`: `task`, `cumulative`, or `complete`
 - `task_id`: one task, several tasks, or `all`
+- `preamble_path`: shared plan preamble for task scope, or `none`
+- `reviewer_model`: model for the dispatched reviewer
 
 Treat every listed path as wholly owned by the dispatched scope. Never add a
 path inferred from `git status`. Include listed untracked files. Ignore every
@@ -20,13 +22,17 @@ unlisted path.
 
 ## Dispatch
 
-Dispatch one fresh reviewer with `reviewer-prompt.md` and the inputs above plus
-`checklist_path`. A plan reviewer reads `spec_path` as requirements input, not
-implementation scope.
+Dispatch one fresh reviewer on `reviewer_model` with `reviewer-prompt.md` and
+the inputs above plus `checklist_path`. A plan reviewer reads `spec_path` as
+requirements input, not implementation scope.
 
 Accept only `PASS` or Critical and Important findings carrying `static` or
 `behavioural`. Treat empty, errored, narrated, malformed, or untagged output as
 a failed dispatch. Allow three dispatch attempts, then stop.
+
+When the harness gives this agent no way to dispatch a reviewer, run the review
+pass yourself as a separate step, strictly from `reviewer-prompt.md`, and append
+`| inline` to its `REVIEW` line.
 
 ## Findings
 
@@ -55,8 +61,9 @@ REVIEW | <scope_mode> | <PASS|DISCHARGED> | state=<state_digest>
 VERIFY | state=<state_digest> | {"command":"<command>","exit_code":0,"result":"<token>"}
 ```
 
-Evidence is reusable only while the digest for the same owned paths remains
-unchanged.
+Evidence is reusable only while every owned path it covers keeps the same line
+in the package's `## State` section. Compare per path; a task digest never
+equals a larger package's digest.
 
 Record each dismissal and each plan correction as one ledger `Ruling:` line.
 Return no reviewer transcript.

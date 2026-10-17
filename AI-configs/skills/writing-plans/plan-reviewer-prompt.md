@@ -14,8 +14,8 @@ repeat a check it reports.
 2. Read `plan_path`
 3. Read `spec_path` when it is not `none`
 4. Read governing repository instructions
-5. Read a repository file only to check one specific plan assertion: an anchor,
-   a symbol, a path. Skip assertions `discovery_context` covers
+5. Read a repository file only to check one specific plan assertion: a symbol, a
+   path. Skip assertions `discovery_context` covers
 
 Return one Critical `<review-input>` finding and stop when a required input is
 missing, unreadable, or conflicting.
@@ -27,25 +27,26 @@ Apply every relevant rule in `skill_path` without restating it.
 Check these reviewer-only boundaries:
 
 - Trace each independent `source_requirements` item through the plan header, a
-  delivery task, and applicable verification
+  delivery task, and applicable verification. Milestone and plan-state
+  requirements trace to the coordinator completion action in the
+  final-verification checkpoint instead of a task
 - Report a missing, contradicted, or invented requirement
 - With a spec, require stable requirement IDs or `path:line` citations instead
   of copied acceptance prose
 - Verify claimed paths, symbols, signatures, commands, dependencies, and config
-  against files that exist and docs. Anchors into files a command generates are
-  checked by the implementer's first run
+  against files that exist and docs. Paths a command generates are checked by
+  the implementer's first run
 - Check cross-task ordering, file ownership, interfaces, and task independence
 - Check destructive operations and shared writers
 - Check exact header literals and checkpoint placement
 - Check that every command applies to changed behavior or a governing rule
-- Reject dominated verification and duplicated review work
-- Reject an edit whose anchor is missing, not verbatim, or not unique in the
-  repository file
-- Reject a decision left to the implementer: alternatives, "e.g.", unnamed
-  helpers, unstated values
-- Reject a body over 15 lines or a whole-file copy
-- Reject a called symbol an edit does not show and its `Uses` does not list
-- Reject a file a command changes that no edit or `Changes` line names
+- Reject duplicated review work. Executors drop dominated verification
+- Reject a plan-owned decision left open: an interface, a case, a file, a scope
+  boundary, or a user-visible value. Local choices may stay open
+- Report as `Important` any code outside the skill's `### Write as code` list,
+  or a whole-file copy
+- Reject a file a task edits by hand that its `**Files:**` list omits, a file a
+  command changes that no `**Changes:**` line names, or a path listed in both
 - Reject a manual check inside a task gate
 - Reject placeholders, hidden assumptions, and unavailable dependencies
 - Check every requested skill name against the step that uses it and the skill

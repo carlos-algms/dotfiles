@@ -30,7 +30,13 @@ head -n 1 "$ledger" | grep -q '^# Plan ledger - plan: ' || { echo "invalid ledge
 [ -f "$evidence" ] || { echo "missing evidence file: $evidence" >&2; exit 2; }
 grep -F "VERIFY | state=$state | " "$evidence" | grep -q '"exit_code":0' || { echo "no passing VERIFY evidence for $state: $evidence" >&2; exit 3; }
 
-line="Task $n: complete (commits $(git rev-parse --short=7 "$base")..$(git rev-parse --short=7 "$head"), state: $state, evidence: $evidence)"
+# BASE equals HEAD when the task is still uncommitted, e.g. a coordinator commits later.
+if [ "$(git rev-parse "$base")" = "$(git rev-parse "$head")" ]; then
+  commits="none"
+else
+  commits="$(git rev-parse --short=7 "$base")..$(git rev-parse --short=7 "$head")"
+fi
+line="Task $n: complete (commits $commits, state: $state, evidence: $evidence)"
 existing=$(grep "^Task $n: complete " "$ledger" || true)
 if [ -n "$existing" ]; then
   [ "$existing" = "$line" ] || { echo "conflicting completion for Task $n" >&2; exit 3; }

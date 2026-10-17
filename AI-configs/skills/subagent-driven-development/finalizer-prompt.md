@@ -1,13 +1,14 @@
 Apply dispatcher values: `plan_path`, `working_dir`, `workspace_dir`,
-`ledger_path`, `plan_base_ref`, `review_evidence`, `verification_evidence`,
-`review_packages`, `commit_policy`, `git_owner`, `milestone_owner`, `pr_owner`,
-and `plan_id`.
+`ledger_path`, `plan_base_ref`, `review_packages`, `commit_policy`, `git_owner`,
+`milestone_owner`, `pr_owner`, `plan_id`, `reviewer_model`, and `defer_state`.
 
-Own complete-plan review, final verification, final executor-owned state, and a
-requested PR when `pr_owner=executor`. Operate in `working_dir`.
+Own complete-plan review, final verification, and final executor-owned state.
+Operate in `working_dir`.
 
-Read the plan, its spec when present, repository instructions, the ledger, and
-`review-loop.md`.
+Read the plan, its spec when present, repository instructions, the ledger,
+`review-loop.md`, and `## Verification selection` in
+`../executing-plans/SKILL.md`, resolved relative to this prompt. Apply it before
+every final check.
 
 ## Complete scope
 
@@ -39,14 +40,16 @@ Use the printed digest as the final state identity.
 6. Run only written final checks whose semantic scope remains uncovered
 7. Rebuild the package after every fix and update evidence to its digest
 8. Append final rulings to the ledger
-9. Tick final verification
+9. Tick final verification. When `defer_state=true`, skip steps 10-12, add
+   `DEFERRED | 10-12` to the output, and return
 10. Under `Checkpoint commits`, execute the final state checkpoint when
-    `git_owner=executor`
+    `git_owner=executor`, following `## Commit ownership` in
+    `../executing-plans/SKILL.md`
 11. When `milestone_owner=executor`, validate the one matching milestone link,
     check its box, preserve every other entry, format the file, and verify the
     link
-12. Create a requested PR only when the reviewed work is committed and
-    `pr_owner=executor`
+12. A requested PR with `pr_owner=executor`: never create it. Return
+    `PR | pending` for the main agent's user gate
 13. Return only the output contract
 
 When `git_owner=coordinator`, leave owned implementation state for coordinator
@@ -68,6 +71,8 @@ review_paths_file  = <workspace_dir>/final-paths.txt
 state_digest       = <final package digest>
 scope_mode         = complete
 task_id            = all
+preamble_path      = none
+reviewer_model     = <reviewer_model>
 checklist_path      = <requesting-code-review/code-reviewer.md>
 ```
 
@@ -87,13 +92,14 @@ Success:
 
 ```text
 PASS | final
+DEFERRED | 10-12
 PLAN | <plan_id | none>
 PATHS | <absolute final paths file>
 PACKAGE | <absolute final package path>
 REVIEW | complete | <PASS|DISCHARGED|SKIPPED> | state=<sha256:digest>
 VERIFY | state=<sha256:digest> | {"command":"<command>","exit_code":0,"result":"<token>"}
 COMMITS | <sha[,sha...] | none | coordinator>
-PR | <url | none | coordinator>
+PR | <pending | none | coordinator>
 STATE | <comma-separated excluded modified plan-state paths>
 FIXED
 - <path:line> | <problem> | <fix>
@@ -103,7 +109,8 @@ LEARNED
 - final: Ruling: <decision> - <why> - <cost if wrong>
 ```
 
-Omit empty `STATE`, `FIXED`, `DISMISSED`, and `LEARNED` blocks.
+Omit `DEFERRED` unless `defer_state=true`. Omit empty `STATE`, `FIXED`,
+`DISMISSED`, and `LEARNED` blocks.
 
 Blocked:
 
