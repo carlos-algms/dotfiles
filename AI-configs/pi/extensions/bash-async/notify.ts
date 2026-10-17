@@ -56,7 +56,7 @@ export function createNotifier({ send, truncate }: NotifierOptions) {
         await readTail(result.logPath, truncate),
       );
       send(
-        { customType: 'bg-run', content, display: true },
+        { customType: 'bash-async', content, display: true },
         { triggerTurn: true, deliverAs: 'followUp' },
       );
     } catch {

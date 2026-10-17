@@ -33,7 +33,7 @@ export type Jobs = ReturnType<typeof createJobs>;
  * Runs commands through Pi's own bash operations. The command is prefixed with
  * `echo $$;` because `exec()` does not expose the child pid. Pi spawns detached,
  * so that pid is also the process group id (`kill -- -<pid>` stops the tree).
- * It also exports the pid as `PI_BG_JOB`, so `sweep` can find processes that
+ * It also exports the pid as `PI_ASYNC_JOB`, so `sweep` can find processes that
  * left the group with `setsid`.
  */
 export function createJobs(options: JobsOptions) {

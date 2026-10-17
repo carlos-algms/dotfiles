@@ -9,7 +9,10 @@ import { TAIL_LIMITS, createNotifier, readTail } from './notify.ts';
 const identity = (content: string) => content;
 
 function writeLog(content: string): string {
-  const logPath = join(mkdtempSync(join(tmpdir(), 'bg-run-test-')), 'job.log');
+  const logPath = join(
+    mkdtempSync(join(tmpdir(), 'bash-async-test-')),
+    'job.log',
+  );
   writeFileSync(logPath, content);
   return logPath;
 }
@@ -76,7 +79,7 @@ test('notify sends the completion message as a follow-up that triggers a turn', 
   assert.deepEqual(sent, [
     [
       {
-        customType: 'bg-run',
+        customType: 'bash-async',
         content: `Job 42 ended (exit 0): make\nLog: ${logPath}\nLast output:\ndone`,
         display: true,
       },

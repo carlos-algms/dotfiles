@@ -24,7 +24,7 @@ const NOW = new Date('2026-01-02T03:04:05.678Z');
 const LOG_NAME_PREFIX = '2026-01-02T03-04-05.678Z';
 
 function setup(script: Script) {
-  const logDir = join(mkdtempSync(join(tmpdir(), 'bg-run-test-')), 'logs');
+  const logDir = join(mkdtempSync(join(tmpdir(), 'bash-async-test-')), 'logs');
   const execCalls: { command: string; cwd: string; timeout?: number }[] = [];
   const events: string[] = [];
   let resolve!: (result: JobResult) => void;
@@ -104,7 +104,7 @@ test('start runs the tag and pid-echo prefixed command with the given cwd and ti
 
   assert.deepEqual(execCalls, [
     {
-      command: 'export PI_BG_JOB=$$; echo $$; sleep 1',
+      command: 'export PI_ASYNC_JOB=$$; echo $$; sleep 1',
       cwd: '/work',
       timeout: 30,
     },
@@ -258,7 +258,7 @@ test('kill returns false for an unknown pid', () => {
 test('killAll aborts every running job', async () => {
   const results: JobResult[] = [];
   let pids = ['11\n', '22\n'];
-  const logDir = join(mkdtempSync(join(tmpdir(), 'bg-run-test-')), 'logs');
+  const logDir = join(mkdtempSync(join(tmpdir(), 'bash-async-test-')), 'logs');
   const jobs = createJobs({
     ops: {
       exec: async (_command, _cwd, { onData, signal }) => {
@@ -350,7 +350,7 @@ async function setupReal() {
   const exited = new Promise<JobResult>((r) => {
     resolve = r;
   });
-  const logDir = join(mkdtempSync(join(tmpdir(), 'bg-run-test-')), 'logs');
+  const logDir = join(mkdtempSync(join(tmpdir(), 'bash-async-test-')), 'logs');
   return { jobs: createJobs({ ops, logDir, onExit: resolve }), exited };
 }
 
@@ -472,7 +472,10 @@ async function withDaemon(
     t.skip('installed Pi or python3 not found');
     return;
   }
-  const pidFile = join(mkdtempSync(join(tmpdir(), 'bg-run-daemon-')), 'pid');
+  const pidFile = join(
+    mkdtempSync(join(tmpdir(), 'bash-async-daemon-')),
+    'pid',
+  );
   const daemonPid = () => readPid(pidFile) ?? 0;
   try {
     await run({
@@ -518,7 +521,7 @@ test('a job that ends on its own also stops the setsid daemon it left behind', a
     async ({ jobs, exited, command, daemonPid }) => {
       const waitForDaemon = `while [ ! -s "$PIDFILE" ]; do sleep 0.1; done`;
       const pidFile =
-        command.match(/'([^']*bg-run-daemon-[^']*pid)'/)?.[1] ?? '';
+        command.match(/'([^']*bash-async-daemon-[^']*pid)'/)?.[1] ?? '';
       await jobs.start(
         `PIDFILE=${shellQuote(pidFile)}; ${command} & ${waitForDaemon}`,
         process.cwd(),

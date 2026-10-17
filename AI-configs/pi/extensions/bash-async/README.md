@@ -1,13 +1,13 @@
-# bash-bg-run
+# bash-async
 
 Pi extension. Runs a bash command in the background so the agent stays
 responsive. Pi's built-in `bash` tool is synchronous and has no background mode.
 
 ## Tools
 
-- `bash_bg_run(command, timeout?)` - starts the command and returns at once with
-  a job id (the pid) and a log file path
-- `bash_bg_kill(pid)` - stops a job started by `bash_bg_run`
+- `bash_async_run(command, timeout?)` - starts the command and returns at once
+  with a job id (the pid) and a log file path
+- `bash_async_kill(pid)` - stops a job started by `bash_async_run`
 
 The agent does not wait or poll. When the command ends, a message with the exit
 code, the log path, and the last lines of output wakes the agent. While the
@@ -15,7 +15,7 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
 
 ## How it works
 
-1. `bash_bg_run` calls `createLocalBashOperations().exec()` from pi, without
+1. `bash_async_run` calls `createLocalBashOperations().exec()` from pi, without
    `await`. Pi handles shell config, the detached spawn, timeout, process-tree
    kill on abort, and cleanup of children on pi shutdown.
 2. `exec()` does not expose the child pid. The command is prefixed with
@@ -25,22 +25,22 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
    `kill -- -<pid>` stops the whole tree. A process that calls `setsid` (for
    example the `crit _serve` daemon) leaves that group and survives it, see
    step 7.
-4. Output goes to `/tmp/pi-bash-bg-logs/<iso-date>_<pid>.log`. The date has `:`
-   replaced by `-`. The file opens with `wx`, so a name collision fails instead
-   of overwriting. Directory mode is `0700`, file mode is `0600`.
-5. `bash_bg_kill` first runs `sweep(pid, { walkTree: true })`, then aborts the
-   job's `AbortController`. Pi's `exec()` kills the process group. An unknown
-   pid returns an error that names the manual fallback `kill -- -<pid>`.
+4. Output goes to `/tmp/pi-bash-async-logs/<iso-date>_<pid>.log`. The date has
+   `:` replaced by `-`. The file opens with `wx`, so a name collision fails
+   instead of overwriting. Directory mode is `0700`, file mode is `0600`.
+5. `bash_async_kill` first runs `sweep(pid, { walkTree: true })`, then aborts
+   the job's `AbortController`. Pi's `exec()` kills the process group. An
+   unknown pid returns an error that names the manual fallback `kill -- -<pid>`.
 6. On exit, `notify.ts` reads the last 8 KB of the log (positional read, so
    memory stays flat for any log size), drops the partial first line, keeps the
    last 50 lines, and sends them with
    `pi.sendMessage(..., { triggerTurn: true, deliverAs: 'followUp' })`. A throw
    from `sendMessage` (stale `pi` after `/reload`) is swallowed.
 7. `sweep.ts` stops what the process group kill misses. The command is prefixed
-   with `export PI_BG_JOB=$$;`, so the job id is also an environment tag that
+   with `export PI_ASYNC_JOB=$$;`, so the job id is also an environment tag that
    children inherit through `setsid` and double forks. `sweep` reads `ps axeww`
    (which appends each process's environment) and sends `SIGTERM` to:
-   - every process that carries `PI_BG_JOB=<pid>` (exact match)
+   - every process that carries `PI_ASYNC_JOB=<pid>` (exact match)
    - with `walkTree`, every descendant of the job shell, found through `ppid`.
      It runs before the abort, because after the group dies a daemon that stayed
      attached loses its parent link. It is only valid while the shell is alive,
@@ -70,32 +70,44 @@ command runs, the agent reads the log with `tail`, `head`, `rg`, or `read`.
 ## Tests
 
 ```bash
-node --test 'AI-configs/pi/extensions/bash-bg-run/*.test.ts'
+node --test 'AI-configs/pi/extensions/bash-async/*.test.ts'
 tsc --noEmit -p AI-configs/pi/tsconfig.json
 ```
 
 `node:test` runs the `.ts` files with Node type stripping (Node 22.19 or newer).
 No dependencies. One test runs `sleep 3` through the installed pi's real
-`createLocalBashOperations()` and asserts `bash_bg_kill` stops it. It reads the
-pi version from `~/.pi/agent/install/current-version` and skips if the install
-is missing.
+`createLocalBashOperations()` and asserts `bash_async_kill` stops it. It reads
+the pi version from `~/.pi/agent/install/current-version` and skips if the
+install is missing.
 
 ## Why not `bg_wait`
 
 `bg_wait` belongs to the `pi-subagents` extension, not to this one. It waits for
 `pi-subagents` runs and for jobs from providers registered through
 `registerBackgroundWorkProvider`. This extension does not register one, so
-`bg_wait` cannot see `bash_bg_run` jobs.
+`bg_wait` cannot see the jobs started here.
 
-An agent confused `bg_wait` with the old `bg_run` and `bg_kill` names: same
-`bg_` prefix, and `bg_wait` describes itself as waiting for background work.
+Two agent failures drove the current names:
+
+1. An agent passed the job id to `bg_wait`. Same `bg_` prefix as the old
+   `bg_run` and `bg_kill`, and `bg_wait` describes itself as waiting for
+   background work
+2. After starting a job, an agent ran a second command to wait, sleep or poll
+   for it, because the result arrives as a follow-up message rather than as the
+   tool result
 
 Decisions:
 
-- Renamed the tools to `bash_bg_run` and `bash_bg_kill`, to drop the shared
-  `bg_` prefix
-- The tool descriptions say the agent must not wait for a job, and do not name
-  `bg_wait`
+- Named the extension `bash-async` and the tools `bash_async_run` and
+  `bash_async_kill`. No shared prefix with `bg_wait`, and the names read as
+  fire-and-forget
+- Both descriptions and the prompt guidelines state that nothing waits for the
+  job: no sleeping, no polling, no second command, and `bg_wait` cannot see it.
+  When nothing else is left to do, the agent ends the turn and reports the job
+  id
+- The descriptions name `bg_wait` and say it belongs to `pi-subagents`. An
+  earlier version deliberately avoided naming it, and agents kept mixing the two
+  up
 - Did not register a `bg_wait` provider. It would make this extension depend on
   `pi-subagents`
 
@@ -103,8 +115,8 @@ Decisions:
 
 - macOS and Linux only. Pi does not set `detached` on Windows, so the pid is not
   a process group id there
-- Job ids live in memory. After a pi restart `bash_bg_kill` no longer knows old
-  pids, but the log files stay on disk
+- Job ids live in memory. After a pi restart `bash_async_kill` no longer knows
+  old pids, but the log files stay on disk
 - `sweep` is best effort, not a lock. A process that clears its environment
   escapes the tag. A macOS system binary (SIP-protected, such as `/bin/sleep`)
   hides its environment from `ps`, so it escapes the tag too. A process forked
@@ -136,7 +148,7 @@ Decisions:
   - `~/.pi/agent/install/releases/<version>/` - managed pi install. Pinned in
     `AI-configs/pi/tsconfig.json`
   - `~/.pi/agent/npm/node_modules/pi-subagents/` - `pi-subagents` package
-  - `/tmp/pi-bash-bg-logs/` - job logs
+  - `/tmp/pi-bash-async-logs/` - job logs
 
 [pi-ext]:
   https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md

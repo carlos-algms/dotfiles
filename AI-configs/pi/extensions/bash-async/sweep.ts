@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 
 /** Env var set to the job id in every job shell. Children inherit it, even across `setsid` and double forks. */
-export const JOB_TAG = 'PI_BG_JOB';
+export const JOB_TAG = 'PI_ASYNC_JOB';
 
 export interface Proc {
   pid: number;
