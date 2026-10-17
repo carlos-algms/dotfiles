@@ -37,6 +37,9 @@
     "anthropic/claude-haiku-5-5"
   ],
   "subagents": {
+    "defaultSubagentOnlyExtensions": [
+      "~/.pi/agent/extensions/rate-limit-status/index.ts"
+    ],
     "agentOverrides": {
       "worker": {
         "tools": [
