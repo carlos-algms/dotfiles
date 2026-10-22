@@ -41,6 +41,8 @@ export async function runDefuddle(
       );
     });
 
+    // EPIPE: child exited or was aborted mid-write; 'close'/'error' report the cause
+    child.stdin.on('error', () => {});
     child.stdin.end(html, 'utf8');
   });
 }
