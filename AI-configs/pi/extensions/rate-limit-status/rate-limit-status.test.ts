@@ -19,6 +19,7 @@ import { readSnapshot, writeSnapshot } from './internal/snapshot-store.ts';
 import type { HeaderMap, Snapshot } from './internal/types.ts';
 import { anthropic } from './providers/anthropic.ts';
 import { nous } from './providers/nous.ts';
+import { openaiCodex } from './providers/openai-codex.ts';
 
 /** fg wraps text in tags so nested colouring is detectable. */
 function fakeCtx(provider = 'nous') {
@@ -82,6 +83,7 @@ const NOUS_HEADERS = {
 test('registry resolves a known provider and rejects unknown ones', () => {
   assert.equal(getRateLimitProvider('anthropic')?.provider, 'anthropic');
   assert.equal(getRateLimitProvider('nous')?.provider, 'nous');
+  assert.equal(getRateLimitProvider('openai-codex')?.provider, 'openai-codex');
   assert.equal(getRateLimitProvider('openai'), undefined);
   assert.equal(getRateLimitProvider('constructor'), undefined);
   assert.equal(getRateLimitProvider(undefined), undefined);
@@ -201,6 +203,76 @@ test('nous format is undefined without any usable window', () => {
   );
 });
 
+/** Shape captured from a real `openai-codex` WebSocket stream. */
+function codexEvent(secondaryMinutes = 10080, reset = Number(futureReset())) {
+  return {
+    type: 'codex.rate_limits',
+    plan_type: 'plus',
+    rate_limits: {
+      allowed: true,
+      limit_reached: false,
+      primary: {
+        used_percent: 7,
+        window_minutes: 300,
+        reset_after_seconds: 3600,
+        reset_at: reset,
+      },
+      secondary: {
+        used_percent: 95,
+        window_minutes: secondaryMinutes,
+        reset_after_seconds: 3600,
+        reset_at: reset,
+      },
+    },
+  };
+}
+
+test('openai-codex pickEvent flattens rate-limit windows by label', () => {
+  const reset = Number(futureReset());
+  assert.deepEqual(openaiCodex.pickEvent(codexEvent(10080, reset)), {
+    '5h-used': '7',
+    '5h-reset': String(reset),
+    '7d-used': '95',
+    '7d-reset': String(reset),
+  });
+});
+
+test('openai-codex pickEvent skips zero-length windows', () => {
+  assert.deepEqual(Object.keys(openaiCodex.pickEvent(codexEvent(0)) ?? {}), [
+    '5h-used',
+    '5h-reset',
+  ]);
+});
+
+test('openai-codex pickEvent ignores other or malformed events', () => {
+  for (const data of [
+    undefined,
+    null,
+    'x',
+    { type: 'response.created' },
+    { type: 'codex.rate_limits' },
+    { type: 'codex.rate_limits', rate_limits: { primary: { used: 1 } } },
+  ]) {
+    assert.equal(openaiCodex.pickEvent(data), undefined, JSON.stringify(data));
+  }
+});
+
+test('openai-codex format renders both windows, each coloured once', () => {
+  const text = openaiCodex.format(
+    ctx,
+    snap(openaiCodex.pickEvent(codexEvent()) ?? {}),
+  );
+  assert.match(text ?? '', /^<dim>5h .*7% \(.*\)<\/dim>/);
+  assert.match(text ?? '', /<error>7d .*95% \(.*\)<\/error>$/);
+  assert.doesNotMatch(text ?? '', /<\w+>[^<]*<\w+>/);
+});
+
+test('openai-codex format is undefined when every reset has passed', () => {
+  const expired = openaiCodex.pickEvent(codexEvent(10080, Number(pastReset())));
+  assert.equal(openaiCodex.format(ctx, snap(expired ?? {})), undefined);
+  assert.equal(openaiCodex.format(ctx, snap({})), undefined);
+});
+
 test('snapshot store keys each provider independently', () => {
   withHome(() => {
     const first = writeSnapshot('anthropic', { a: '1' });
@@ -272,6 +344,19 @@ test('poll tick re-renders so expired buckets leave the footer', () => {
       handlers.get('session_shutdown')?.({}, uiCtx);
       mock.timers.reset();
     }
+  });
+});
+
+test('stream hook writes the codex snapshot and sets the footer', () => {
+  withHome(() => {
+    const { ctx: uiCtx, statuses } = fakeCtx('openai-codex');
+    const handler = installExtension().get('provider_stream_event');
+    handler?.({ provider: 'openai-codex', data: { type: 'x' } }, uiCtx);
+    assert.deepEqual(statuses, []);
+    handler?.({ provider: 'openai-codex', data: codexEvent() }, uiCtx);
+    assert.equal(statuses.length, 1);
+    assert.match(statuses[0] ?? '', /5h .*7d/);
+    assert.ok(readSnapshot('openai-codex'));
   });
 });
 

@@ -1,7 +1,6 @@
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { getRateLimitProvider } from './internal/registry.ts';
-import { render, show } from './internal/render.ts';
-import { writeSnapshot } from './internal/snapshot-store.ts';
+import { record, render } from './internal/render.ts';
 
 const POLL_MS = 2000;
 
@@ -37,14 +36,14 @@ export default function rateLimitStatus(pi: ExtensionAPI): void {
     if (!provider) {
       return;
     }
-    const headers = provider.pick(event.headers);
-    // Responses without rate-limit headers keep the last good footer line.
-    if (Object.keys(headers).length === 0) {
+    record(ctx, provider, provider.pick?.(event.headers));
+  });
+
+  pi.on('provider_stream_event', (event, ctx) => {
+    const provider = getRateLimitProvider(event.provider);
+    if (!provider) {
       return;
     }
-    const snapshot = writeSnapshot(provider.provider, headers);
-    if (ctx.hasUI) {
-      show(ctx, provider, snapshot);
-    }
+    record(ctx, provider, provider.pickEvent?.(event.data));
   });
 }
