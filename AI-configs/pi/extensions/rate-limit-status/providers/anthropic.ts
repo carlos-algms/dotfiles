@@ -1,10 +1,18 @@
 import type { ExtensionContext } from '@earendil-works/pi-coding-agent';
+import { bar, joinParts, pickColor } from '../internal/format-shared.ts';
+import { pickByPrefix } from '../internal/pick-by-prefix.ts';
+import type { HeaderMap, RateLimitProvider } from '../internal/types.ts';
+
+const PREFIX = 'anthropic-ratelimit-unified-';
+const WINDOWS = ['5h', '7d'] as const;
+type WindowLabel = (typeof WINDOWS)[number];
 
 const MINUTES_PER_HOUR = 60;
 const MINUTES_PER_DAY = 1440;
-const BAR_WIDTH = 10;
 
-type WindowLabel = '5h' | '7d';
+function resetOf(headers: HeaderMap, label: WindowLabel): number {
+  return Number(headers[`${PREFIX}${label}-reset`]);
+}
 
 function formatReset(epochSeconds: number, label: WindowLabel): string {
   const minutes = Math.max(
@@ -33,57 +41,36 @@ function formatReset(epochSeconds: number, label: WindowLabel): string {
   return `${duration || '0m'} @ ${when}`;
 }
 
-function makeBar(percent: number): string {
-  const filled = Math.floor((Math.min(percent, 100) * BAR_WIDTH) / 100);
-  return '█'.repeat(filled) + '░'.repeat(BAR_WIDTH - filled);
-}
-
-function pickColor(percent: number): 'error' | 'warning' | 'dim' {
-  if (percent >= 90) {
-    return 'error';
-  }
-  if (percent >= 70) {
-    return 'warning';
-  }
-  return 'dim';
-}
-
 function formatWindow(
   ctx: ExtensionContext,
   label: WindowLabel,
-  headers: Record<string, string>,
+  headers: HeaderMap,
 ): string | undefined {
-  const utilization = Number(
-    headers[`anthropic-ratelimit-unified-${label}-utilization`],
-  );
-  const reset = Number(headers[`anthropic-ratelimit-unified-${label}-reset`]);
+  const utilization = Number(headers[`${PREFIX}${label}-utilization`]);
+  const reset = resetOf(headers, label);
   if (!Number.isFinite(utilization) || !Number.isFinite(reset)) {
     return undefined;
   }
-
   const percent = Math.round(utilization * 100);
   return ctx.ui.theme.fg(
     pickColor(percent),
-    `${label} ${makeBar(percent)} ${percent}% (${formatReset(reset, label)})`,
+    `${label} ${bar(percent)} ${percent}% (${formatReset(reset, label)})`,
   );
 }
 
-export function formatRateLimits(
-  ctx: ExtensionContext,
-  rawHeaders: Record<string, string>,
-): string | undefined {
-  const headers = Object.fromEntries(
-    Object.entries(rawHeaders).map(([key, value]) => [
-      key.toLowerCase(),
-      value,
-    ]),
-  );
-  const parts = [
-    formatWindow(ctx, '5h', headers),
-    formatWindow(ctx, '7d', headers),
-  ].filter((part) => part !== undefined);
-  if (parts.length === 0) {
-    return undefined;
-  }
-  return parts.join(ctx.ui.theme.fg('dim', ' | '));
-}
+export const anthropic = {
+  provider: 'anthropic',
+  pick: (raw) => pickByPrefix(raw, PREFIX),
+  format(ctx, { headers }) {
+    const live = WINDOWS.some(
+      (label) => resetOf(headers, label) * 1000 > Date.now(),
+    );
+    if (!live) {
+      return undefined;
+    }
+    return joinParts(
+      ctx,
+      WINDOWS.map((label) => formatWindow(ctx, label, headers)),
+    );
+  },
+} satisfies RateLimitProvider;

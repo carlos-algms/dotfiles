@@ -1,27 +1,11 @@
-/**
- * Rate Limit Status - shows Anthropic subscription 5h and 7d usage as a third
- * footer line. Reads `anthropic-ratelimit-unified-*` response headers.
- *
- * Every session that loads this file (other pi instances, subagent children)
- * writes the headers to a shared snapshot. Only UI sessions render it.
- */
+import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
+import { getRateLimitProvider } from './internal/registry.ts';
+import { render, show } from './internal/render.ts';
+import { writeSnapshot } from './internal/snapshot-store.ts';
 
-import type {
-  ExtensionAPI,
-  ExtensionContext,
-} from '@earendil-works/pi-coding-agent';
-import { formatRateLimits } from './format';
-import {
-  getSnapshotMtimeMs,
-  readSnapshot,
-  writeSnapshot,
-} from './snapshot-store';
-
-const STATUS_KEY = 'rate-limits';
-const PROVIDER = 'anthropic';
 const POLL_MS = 2000;
 
-export default function (pi: ExtensionAPI) {
+export default function rateLimitStatus(pi: ExtensionAPI): void {
   let timer: ReturnType<typeof setInterval> | undefined;
 
   function stopPolling() {
@@ -29,33 +13,14 @@ export default function (pi: ExtensionAPI) {
     timer = undefined;
   }
 
-  function render(ctx: ExtensionContext, provider: string | undefined) {
-    if (provider !== PROVIDER) {
-      ctx.ui.setStatus(STATUS_KEY, undefined);
-      return;
-    }
-    const headers = readSnapshot();
-    ctx.ui.setStatus(
-      STATUS_KEY,
-      headers ? formatRateLimits(ctx, headers) : undefined,
-    );
-  }
-
   pi.on('session_start', (_event, ctx) => {
     stopPolling();
     if (!ctx.hasUI) {
       return;
     }
-    let lastMtime = getSnapshotMtimeMs();
     render(ctx, ctx.model?.provider);
-    timer = setInterval(() => {
-      const mtime = getSnapshotMtimeMs();
-      if (mtime === lastMtime) {
-        return;
-      }
-      lastMtime = mtime;
-      render(ctx, ctx.model?.provider);
-    }, POLL_MS);
+    // Re-render every tick, not on mtime change: countdowns and expiry move.
+    timer = setInterval(() => render(ctx, ctx.model?.provider), POLL_MS);
     timer.unref();
   });
 
@@ -68,14 +33,18 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on('after_provider_response', (event, ctx) => {
-    writeSnapshot(event.headers);
-    if (!ctx.hasUI) {
+    const provider = getRateLimitProvider(ctx.model?.provider);
+    if (!provider) {
       return;
     }
-    const text = formatRateLimits(ctx, event.headers);
-    if (text === undefined) {
+    const headers = provider.pick(event.headers);
+    // Responses without rate-limit headers keep the last good footer line.
+    if (Object.keys(headers).length === 0) {
       return;
     }
-    ctx.ui.setStatus(STATUS_KEY, text);
+    const snapshot = writeSnapshot(provider.provider, headers);
+    if (ctx.hasUI) {
+      show(ctx, provider, snapshot);
+    }
   });
 }
