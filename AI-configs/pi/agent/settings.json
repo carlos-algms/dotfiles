@@ -4,6 +4,7 @@
   "defaultProvider": "anthropic",
   "defaultModel": "claude-sonnet-5-5",
   "defaultThinkingLevel": "off",
+  "defaultTools": ["+codemode"],
   "modelThinkingLevels": {
     "lmstduio/ornith-1.5-35b-a3b-reap192-mlx": "off",
     "anthropic/claude-haiku-5-5": "high",
@@ -38,7 +39,9 @@
   ],
   "subagents": {
     "defaultSubagentOnlyExtensions": [
-      "~/.pi/agent/extensions/rate-limit-status/index.ts"
+      "~/.pi/agent/extensions/rate-limit-status/index.ts",
+      "~/.pi/agent/extensions/web_fetch/index.ts",
+      "~/.pi/agent/extensions/web_search/index.ts"
     ],
     "agentOverrides": {
       "worker": {
