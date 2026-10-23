@@ -37,7 +37,7 @@ screen_reader_detection_done = true
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 3
-"gpt-6.1-sol" = 1
+"gpt-6.1-sol" = 2
 
 [plugins."crit@local"]
 enabled = true
@@ -60,6 +60,9 @@ additionalContextLimit = 0
 
 [hooks.state."crit@local:hooks/hooks.json:stop:0:0"]
 trusted_hash = "sha256:bf6ad428ae7902810fa2d68d8db42228377af118aa18508ad0eccf73a95ed1f8"
+
+[hooks.state."/Users/carlos.gomes/.codex/config.toml:session_start:0:0"]
+trusted_hash = "sha256:b337aebe1de1ae2b9ed60dd57064de91ef8e3dc97ee0f5c9d8a724b1f65c1591"
 
 [permissions.workspace-net]
 extends = ":workspace"
