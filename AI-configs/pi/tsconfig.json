@@ -27,6 +27,12 @@
       "@earendil-works/pi-coding-agent/*": [
         "../../../../.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-coding-agent/*"
       ],
+      "@earendil-works/pi-ai": [
+        "../../../../.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-ai/dist/index.d.ts"
+      ],
+      "@earendil-works/pi-ai/compat": [
+        "../../../../.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-ai/dist/compat.d.ts"
+      ],
       "@earendil-works/pi-tui": [
         "../../../../.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-tui"
       ],
