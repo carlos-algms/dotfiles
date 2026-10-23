@@ -34,3 +34,6 @@ For all tests, use the `test` script in the closest `package.json`.
 
 Write the test, run it, and read the failure. Fix the code or the test, then run
 it again until it passes.
+
+A mock of the boundary under test must assert the arguments it receives. A mock
+that ignores its arguments proves nothing about the call.

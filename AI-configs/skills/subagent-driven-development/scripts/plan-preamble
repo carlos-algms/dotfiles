@@ -23,7 +23,12 @@ else
   out="$dir/preamble.md"
 fi
 
-awk '
+# A plan embedded in a larger document starts at its `# ... Implementation Plan`
+# heading; text above it never reaches implementers.
+start=$(grep -n -m1 -E '^# .*Implementation Plan[[:space:]]*$' "$plan" | cut -d: -f1 || true)
+
+awk -v start="${start:-1}" '
+  NR < start { next }
   {
     line = $0
     probe = line

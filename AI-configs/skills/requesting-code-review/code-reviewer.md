@@ -151,6 +151,13 @@ presumes infrastructure the app lacks is not a finding.
 - Read up to three available representative sibling files when applicable
 - Match naming, file placement, imports, errors, tests, fixtures, and assertions
 - Reuse existing helpers before adding abstractions
+- List every suppression the change adds for a linter, type checker, formatter,
+  or test runner, in whatever form the language and tools use. Examples: `noqa`,
+  `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `type: ignore`,
+  `-- luacheck: ignore`, `---@diagnostic disable`, `-- stylua: ignore`,
+  `#[allow(...)]`, `//nolint`, `@SuppressWarnings`, `pragma: no cover`, skipped
+  tests, and config ignore-list entries. Adapt to the repo's languages and
+  tools. Flag each one the repo rules do not permit
 - Report file-responsibility problems only when they cause concrete harm or
   violate project rules
 
@@ -170,6 +177,10 @@ comments that are inaccurate, stale, or contradict behavior.
 For every changed behavior, branch, error/nil/fallback path, and inspected
 sibling, cite the covering assertion or mark `UNCOVERED`. Tests must exercise
 behavior rather than only mocks.
+
+For each new test, name the production change that would make it fail. Flag a
+test with none, a mock that discards the arguments of the boundary under test,
+and a stub that returns the default the code under test should produce.
 
 ## Calibration
 
