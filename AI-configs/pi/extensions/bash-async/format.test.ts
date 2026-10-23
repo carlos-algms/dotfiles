@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { formatCompletion } from './format.ts';
+import { collapseCompletion, formatCompletion } from './format.ts';
 import type { JobResult } from './jobs.ts';
 
 const base = {
@@ -48,4 +48,19 @@ test('keeps leading whitespace of the tail', () => {
     formatCompletion(base, '  indented\n'),
     /Last output:\n {2}indented$/,
   );
+});
+
+test('collapse keeps the header and the last lines of the tail', () => {
+  const text = formatCompletion(base, 'a\nb\nc\nd\n');
+  assert.deepEqual(collapseCompletion(text, 2), {
+    text: 'Job 42 ended (exit 0): make test\nLog: /tmp/pi-bg-jobs/x_42.log\nLast output:\nc\nd',
+    hidden: 2,
+  });
+});
+
+test('collapse leaves a short tail and a tail-less message unchanged', () => {
+  const short = formatCompletion(base, 'a\nb\n');
+  assert.deepEqual(collapseCompletion(short, 5), { text: short, hidden: 0 });
+  const none = formatCompletion(base, '');
+  assert.deepEqual(collapseCompletion(none, 5), { text: none, hidden: 0 });
 });

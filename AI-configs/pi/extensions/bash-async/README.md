@@ -80,7 +80,7 @@ Only with a UI (`ctx.hasUI`); print and RPC modes skip it.
 ## Files
 
 - `index.ts` - coordinator. Registers the two tools and wires the modules. With
-  `ui.ts` and `panel.ts`, the only files that import Pi at runtime
+  `ui.ts`, `panel.ts` and `render.ts`, the only files that import Pi at runtime
 - `jobs.ts` - `createJobs()` with `start()`, `kill()`, `killAll()` and `list()`,
   and an `onChange` hook. Takes `BashOperations` and a log directory as
   arguments, so tests can inject a fake
@@ -94,7 +94,11 @@ Only with a UI (`ctx.hasUI`); print and RPC modes skip it.
 - `notify.ts` - `readTail()` and `createNotifier()`. Takes `sendMessage` and
   `truncateTail` as arguments
 - `tools.ts` - `createToolHandlers()`: the `execute` logic of both tools
-- `format.ts` - builds the completion message
+- `format.ts` - builds the completion message, and `collapseCompletion()` cuts
+  it to the header and the last 5 output lines
+- `render.ts` - message renderer for the completion message. Collapsed view
+  shows the last 5 output lines until the expand key (`app.tools.expand`). Only
+  the display changes; the model still gets the full tail
 - `*.test.ts` - tests
 
 ## Tests

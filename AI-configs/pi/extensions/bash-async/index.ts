@@ -15,6 +15,7 @@ import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
 import { createJobs } from './jobs.ts';
 import { TAIL_LIMITS, createNotifier, readTail } from './notify.ts';
+import { renderCompletion } from './render.ts';
 import { createToolHandlers } from './tools.ts';
 import { createUi } from './ui.ts';
 
@@ -56,6 +57,7 @@ export default function (pi: ExtensionAPI) {
   });
   const handlers = createToolHandlers(jobs);
 
+  pi.registerMessageRenderer('bash-async', renderCompletion);
   pi.on('session_start', (_event, ctx) => ui.start(ctx));
   pi.on('session_shutdown', () => {
     jobs.killAll();
