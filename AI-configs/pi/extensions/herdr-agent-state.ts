@@ -184,6 +184,10 @@ export default function (pi) {
   let agentActive = false;
   let blockedCount = 0;
   let blockedMessage: string | undefined;
+  // LOCAL PATCH (dotfiles, not herdr): consume pi-subagents' herdr:busy so the
+  // dot stays working during async subagents. herdr overwrites this file on
+  // `herdr integration install pi` or update; re-apply every LOCAL PATCH hunk.
+  let subagentsBusy = false;
   let lastState: AgentState | undefined;
   let lastMessage: string | undefined;
   let rootSession = false;
@@ -192,7 +196,8 @@ export default function (pi) {
     if (blockedCount > 0) {
       return { state: "blocked" as const, message: blockedMessage };
     }
-    if (agentActive) {
+    // LOCAL PATCH: `|| subagentsBusy`
+    if (agentActive || subagentsBusy) {
       return { state: "working" as const, message: undefined };
     }
     return { state: "idle" as const, message: undefined };
@@ -223,6 +228,15 @@ export default function (pi) {
 
     blockedCount += 1;
     blockedMessage = data.label;
+    publishState();
+  });
+
+  // LOCAL PATCH: herdr:busy handler
+  pi.events.on("herdr:busy", (data) => {
+    if (!rootSession) {
+      return;
+    }
+    subagentsBusy = !!data?.active;
     publishState();
   });
 

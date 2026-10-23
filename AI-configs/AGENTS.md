@@ -101,6 +101,12 @@ Pi (`@earendil-works/pi-coding-agent`) layout:
 - `pi/extensions/<name>/` - custom tool extensions. Each is a TypeScript module
   that registers tools via `pi.registerTool(...)`. Pi loads `.ts` directly (no
   build step). The whole dir is linked, so every extension in it auto-loads
+- `pi/extensions/herdr-agent-state.ts` - herdr-managed file with a LOCAL PATCH
+  (grep `LOCAL PATCH`): it consumes pi-subagents' `herdr:busy` so the herdr dot
+  stays `working` during async subagents. herdr's Pi integration ignores that
+  event. `herdr integration install pi` and herdr updates overwrite the file.
+  Before running them, `git diff` the file; afterwards re-apply every
+  `LOCAL PATCH` hunk
 - `pi/extensions-disabled/` - extensions kept around but not loaded
 - `pi/tsconfig.json` - shared tsconfig for all extensions. Maps
   `@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`, and `typebox` to

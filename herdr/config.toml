@@ -249,6 +249,7 @@ row_gap = 0
 rows = [
   ["state_icon", "workspace"],
   ["tab"],
+  ["$summary"],
 ]
 
 [experimental]
