@@ -19,7 +19,9 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": ["-skills/council-mode/SKILL.md"],
+      "skills": [
+        "-skills/council-mode/SKILL.md"
+      ],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
@@ -31,7 +33,8 @@
   "skills": [
     "-skills/writing-css/SKILL.md",
     "-skills/jira-atlassian-cli/SKILL.md",
-    "-skills/multi-provider-web-search/SKILL.md"
+    "-skills/multi-provider-web-search/SKILL.md",
+    "-skills/defuddle/SKILL.md"
   ],
   "theme": "dark",
   "warnings": {
@@ -107,5 +110,6 @@
         "disabled": true
       }
     }
-  }
+  },
+  "deviceId": "5b3a5244-e6a7-473d-a284-1c958f72ff75"
 }
