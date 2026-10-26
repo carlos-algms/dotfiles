@@ -5,7 +5,7 @@ export async function runDefuddle(
   signal: AbortSignal,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn('defuddle', ['parse', '/dev/stdin', '--md'], {
+    const child = spawn('defuddle', ['parse', '-', '--md'], {
       stdio: ['pipe', 'pipe', 'pipe'],
       signal,
     });
