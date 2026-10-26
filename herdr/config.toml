@@ -240,6 +240,14 @@ herdr pane send-text "$pane" 'exec pi
 '
 '''
 
+[[keys.command]]
+key = "cmd+shift+y"
+type = "popup"
+description = "Yazi in current directory"
+width = "95%"
+height = "80%"
+command = 'PATH="$HOME/.local/bin:$PATH" exec yazi "${HERDR_ACTIVE_PANE_CWD:-$PWD}"'
+
 [ui]
 agent_panel_sort = "spaces"
 show_agent_labels_on_pane_borders = true
