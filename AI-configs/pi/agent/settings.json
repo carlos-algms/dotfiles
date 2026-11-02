@@ -6,6 +6,7 @@
   "defaultThinkingLevel": "off",
   "defaultTools": ["+codemode"],
   "modelThinkingLevels": {
+    "deepseek/deepseek-flash": "high",
     "openai-codex/gpt-6.1-sol": "medium",
     "openai-codex/gpt-6-luna": "xhigh",
     "openai-codex/gpt-5.6-terra": "medium",
