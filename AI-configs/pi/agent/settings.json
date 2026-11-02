@@ -25,6 +25,8 @@
     "../../projects/pi-ocz"
   ],
   "hideThinkingBlock": false,
+  "cacheWarming": "idle",
+  "showCacheMissNotices": true,
   "showHardwareCursor": true,
   "skills": [
     "-skills/multi-provider-web-search/SKILL.md",
