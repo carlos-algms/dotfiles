@@ -1,12 +1,10 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "lastChangelogVersion": "1.3.0",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6.1-sol",
+  "lastChangelogVersion": "1.4.0",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
   "defaultThinkingLevel": "off",
-  "defaultTools": [
-    "+codemode"
-  ],
+  "defaultTools": ["+codemode"],
   "modelThinkingLevels": {
     "openai-codex/gpt-6.1-sol": "medium",
     "openai-codex/gpt-6-luna": "xhigh",
@@ -19,9 +17,7 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": [
-        "-skills/council-mode/SKILL.md"
-      ],
+      "skills": ["-skills/council-mode/SKILL.md"],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
@@ -31,7 +27,6 @@
   "hideThinkingBlock": false,
   "showHardwareCursor": true,
   "skills": [
-    "-skills/writing-css/SKILL.md",
     "-skills/multi-provider-web-search/SKILL.md",
     "-skills/defuddle/SKILL.md"
   ],
@@ -40,6 +35,7 @@
     "anthropicExtraUsage": true
   },
   "enabledModels": [
+    "deepseek/deepseek-flash",
     "openai-codex/gpt-6.1-sol",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-luna",
