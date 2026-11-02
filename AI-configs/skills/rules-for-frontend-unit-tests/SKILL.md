@@ -1,5 +1,5 @@
 ---
-name: writing-frontend-unit-tests
+name: rules-for-frontend-unit-tests
 description:
   Detects Jest or Vitest and applies the user's frontend test conventions. Use
   before writing, running, or suggesting unit tests, in files or in chat.

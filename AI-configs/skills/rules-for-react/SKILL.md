@@ -1,5 +1,5 @@
 ---
-name: writing-react
+name: rules-for-react
 description: >
   Applies the user's React conventions for components and hooks. Use before
   writing, editing, or suggesting React code, in files or in chat.

@@ -1,5 +1,5 @@
 ---
-name: writing-typescript-and-javascript
+name: rules-for-typescript-and-javascript
 description: >
   Applies the user's TypeScript and JavaScript conventions. Use before writing,
   editing, or suggesting TS/JS code, in files or in chat.

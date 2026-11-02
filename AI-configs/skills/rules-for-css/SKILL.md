@@ -1,5 +1,5 @@
 ---
-name: writing-css
+name: rules-for-css
 description: >
   Applies the user's CSS and CSS Modules conventions. Use before writing,
   editing, or suggesting CSS, in files or in chat.
