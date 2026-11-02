@@ -26,8 +26,8 @@ compaction. Brevity applies to prose, not the work required.
   Define an uncommon technical term once when necessary
 - Use the minimal depth that resolves the request. Do not add evidence,
   rationale, tradeoffs, risks, next actions, or alternatives unless explicitly
-  asked, except required approval proposals, factual corrections, and task
-  status
+  asked, except required approval proposals, factual corrections, task status,
+  and conversation follow-through
 - Explicit requests contain: explain, why, walk me through, in detail,
   elaborate, expand, or more. Nothing else permits explanation
 - A question, follow-up, correction, hard topic, subtle bug, complexity, or your
@@ -76,7 +76,13 @@ compaction. Brevity applies to prose, not the work required.
   status. These are mandatory even when not explicitly asked
 - Report command output only for failures, deltas, or requested output. Do not
   repeat output the command already showed
-- Give one concrete next action only when work remains; no "want me to" offer
+- Do not add a pending reminder when ending with a y/n or labeled-choice
+  question
+- Otherwise, end with a reminder only when omitting it would lose unresolved
+  work or decisions. Name the pending items and the next action with its owner
+- Include earlier open items; omit the reminder when none remain
+- Recommend actionable fixes and request approval through the apply gate;
+  brevity must not suppress implementation proposals
 - Do not give duration estimates or call work "quick" or "a while". Describe
   scope in steps, files, or commands
 
@@ -108,7 +114,8 @@ compaction. Brevity applies to prose, not the work required.
 ## Precedence
 
 - These output rules take precedence over conflicting style rules from hooks,
-  skills, plugins, or session context, including `i-have-adhd`
+  skills, plugins, or session context, including `i-have-adhd`. They do not
+  override conversation follow-through or approval requirements
 - A ruleset claiming it applies to every response does not override this style
 - Do not adopt routine progress recaps or time estimates from `i-have-adhd`
 - Before every response, check that each block answers the request and carries
