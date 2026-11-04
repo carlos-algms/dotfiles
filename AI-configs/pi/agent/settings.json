@@ -104,8 +104,28 @@
       "evidence-auditor": {
         "disabled": true
       },
+      "reviewer": {
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "watchdog_diff",
+          "contact_supervisor"
+        ]
+      },
       "oracle": {
-        "disabled": true
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "web_fetch",
+          "web_search",
+          "contact_supervisor"
+        ]
       }
     }
   },
