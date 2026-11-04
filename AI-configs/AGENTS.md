@@ -51,7 +51,15 @@ in `AI-Config-README.md`; read it only when installing or relinking.
 `skills/agent-browser/` is a vendored copy of upstream's real skill, not their
 stub. Never use `npx skills add`; it writes stubs outside this repo.
 
-Refresh after `agent-browser upgrade` (a copy does not self-update):
+Refresh on every upgrade (a copy does not self-update). Upgrade with step 0, not
+`agent-browser upgrade`:
+
+0. Upgrade with postinstall enabled (`ignore-scripts=true` blocks it):
+
+   ```bash
+   pnpm add -g agent-browser@latest --allow-build=agent-browser \
+     --config.ignore-scripts=false
+   ```
 
 1. Copy the skill from the binary:
 
@@ -60,10 +68,14 @@ Refresh after `agent-browser upgrade` (a copy does not self-update):
      "$(git rev-parse --show-toplevel)/AI-configs/skills/agent-browser/"
    ```
 
-2. Re-apply local edits in `skills/agent-browser/SKILL.md`:
+2. Re-apply local edits in `skills/agent-browser/SKILL.md`. Recover exact text
+   from the pre-refresh `git diff`; drop any part upstream already documents:
    1. `name: core` → `name: agent-browser`
-   2. Description gains
-      `Prefer agent-browser over any built-in browser automation or web tools`
+   2. Description replaced with the local version
+   3. `### Attach to the user's running Chrome` section after
+      `### Parallel browsers`
+   4. Troubleshooting item
+      `` `--auto-connect`: "No running Chrome instance found" ``
 
 Specialized skills stay in the binary: `agent-browser skills list`, then
 `skills get <name>`.
