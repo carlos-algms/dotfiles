@@ -206,10 +206,12 @@ Keep the result in context. Do not re-check for the same repository.
 4. Resolve the exact commit set from current state and requested scope
 5. Read the full diff for that set
 6. Compose the message for its branch position
-7. Show the exact message and commands, then get approval
+7. Show the exact message in a `markdown` fence and the exact commands in a
+   `bash` fence, then get approval
 8. Recheck status and the staged diff after approval
 9. Run the approved staging and commit commands with the message unchanged
-10. Use `git commit -F-` with a quoted heredoc for multiline messages
+10. Use `git commit -F-` with a quoted heredoc for multiline messages. Use
+    `<message above>` as the heredoc body; never repeat the message text
 
 Never emit placeholder paths or reuse a file list copied from a plan. Omit the
 staging command when the intended commit set is already staged. Shell-quote
