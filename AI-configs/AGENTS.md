@@ -15,7 +15,12 @@ in `AI-Config-README.md`; read it only when installing or relinking.
   `~/.agents/agents` (cross-tool user-scope path). Claude Code frontmatter is
   read as-is by pi-subagents, but its capitalized `tools` names and model
   aliases (`sonnet`, `opus`, `haiku`) fail a Pi launch; `inherit` works
-- `claude/` - Claude settings, statusline, hooks, output styles
+- `claude/` - Claude settings, statusline, hooks, output styles, mods
+- `claude/mods/<name>/` - Claude Code mods (plugins with a hooks module), one
+  folder each. Each folder must be listed in `CLAUDE_CODE_PLUGIN_DIRS`
+  (colon-separated) in the `env` of both `claude-settings.json` and
+  `claude-personal-settings.json`. Check with `claude plugin validate <folder>`
+  and `claude plugin test <folder>`
 - `codex/`, `pi/`, `opencode/`, `crush-ai/`, `opencodereview/` - per-CLI config
 - `COMPONENTS-sync.md` - how third-party skills, agents, and hooks are vendored
   into the top-level dirs
@@ -23,8 +28,9 @@ in `AI-Config-README.md`; read it only when installing or relinking.
 ## Symlinked directories
 
 - Symlinks are per-directory, not per-file. `~/.claude/output-styles`,
-  `~/.claude/hooks`, `~/.claude/agents`, and `~/.claude/skills` are directory
-  symlinks into this repo. A file inside one of them is already tracked here
+  `~/.claude/hooks`, `~/.claude/mods`, `~/.claude/agents`, and
+  `~/.claude/skills` are directory symlinks into this repo. A file inside one of
+  them is already tracked here
 - Never symlink an individual file inside an already-linked directory, and never
   "fix divergence" between the two paths: they are one file
 - Check the parent with `ls -la ~/.claude/` before touching any link

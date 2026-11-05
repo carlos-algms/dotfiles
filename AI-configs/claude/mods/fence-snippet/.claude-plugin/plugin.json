@@ -1,0 +1,5 @@
+{
+  "name": "fence-snippet",
+  "version": "0.1.0",
+  "description": "Tab after a lone backtick or language word expands a code fence"
+}
