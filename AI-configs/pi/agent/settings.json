@@ -1,19 +1,31 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-flash",
   "defaultThinkingLevel": "off",
   "defaultTools": ["+codemode"],
+  "enabledModels": [
+    "deepseek/deepseek-flash",
+    "deepseek/deepseek-v4-pro",
+    "openai-codex/gpt-6.1-sol",
+    "openai-codex/gpt-5.6-terra",
+    "openai-codex/gpt-6-luna",
+    "openrouter/z-ai/glm-5.3",
+    "openrouter/xiaomi/mimo-v2.6-pro"
+  ],
   "modelThinkingLevels": {
     "deepseek/deepseek-flash": "high",
+    "deepseek/deepseek-v4-pro": "max",
     "openai-codex/gpt-6.1-sol": "medium",
     "openai-codex/gpt-6-luna": "xhigh",
     "openai-codex/gpt-5.6-terra": "medium",
     "lmstduio/ornith-1.5-35b-a3b-reap192-mlx": "off",
     "anthropic/claude-haiku-5-5": "high",
     "anthropic/claude-sonnet-5-5": "high",
-    "anthropic/claude-opus-5-5": "medium"
+    "anthropic/claude-opus-5-5": "medium",
+    "openrouter/xiaomi/mimo-v2.6-pro": "xhigh",
+    "openrouter/z-ai/glm-5.3": "high"
   },
   "packages": [
     {
@@ -37,15 +49,6 @@
   "warnings": {
     "anthropicExtraUsage": true
   },
-  "enabledModels": [
-    "deepseek/deepseek-flash",
-    "openai-codex/gpt-6.1-sol",
-    "openai-codex/gpt-5.6-terra",
-    "openai-codex/gpt-6-luna",
-    "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-opus-5-5",
-    "anthropic/claude-haiku-5-5"
-  ],
   "subagents": {
     "defaultSubagentOnlyExtensions": [
       "~/.pi/agent/extensions/rate-limit-status/index.ts",
@@ -129,5 +132,9 @@
       }
     }
   },
-  "deviceId": "5b3a5244-e6a7-473d-a284-1c958f72ff75"
+  "deviceId": "5b3a5244-e6a7-473d-a284-1c958f72ff75",
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.84.0",
+    "{\"source\":\"npm:@gotgenes/pi-anthropic-auth\",\"scope\":\"user\"}": "3.4.4"
+  }
 }

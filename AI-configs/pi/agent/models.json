@@ -10,15 +10,39 @@
             }
           }
         },
+        "z-ai/glm-5.3": {
+          "compat": {
+            "openRouterRouting": {
+              "order": [
+                "baidu",
+                "tenstorrent/fp8",
+                "novita/fp8",
+                "wafer/us",
+                "wafer",
+                "decart",
+                "z-ai"
+              ],
+              "allow_fallbacks": false
+            }
+          }
+        },
+        "xiaomi/mimo-v2.6-pro": {
+          "maxTokens": 131072,
+          "compat": {
+            "openRouterRouting": {
+              "order": ["gmicloud", "deepinfra", "xiaomi"],
+              "allow_fallbacks": false
+            }
+          }
+        },
         "deepseek/deepseek-v4.1-flash": {
           "compat": {
             "openRouterRouting": {
               "order": [
-                "together",
-                "makora",
-                "krea",
-                "atlas-cloud",
-                "coreweave"
+                "wafer/us",
+                "coreweave/fp8",
+                "deepinfra/fp8",
+                "morph/fp8"
               ],
               "allow_fallbacks": false
             }
@@ -45,17 +69,6 @@
         {
           "id": "mistral-medium-3-5",
           "name": "Mistral Medium 3.5"
-        }
-      ]
-    },
-    "opencode-zen": {
-      "baseUrl": "https://opencode.ai/zen/v1",
-      "api": "openai-completions",
-      "apiKey": "$OPENCODE_ZEN_API_KEY",
-      "models": [
-        {
-          "id": "deepseek-v4-flash-free",
-          "name": "DeepSeek V4 Flash Free"
         }
       ]
     },

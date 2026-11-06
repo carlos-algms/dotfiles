@@ -36,6 +36,9 @@ before proposing, editing, staging, or committing any path it covers:
   - `~/.codex/`, `~/.gemini/`, `~/.cursor/rules/`, `~/.pi/agent/`
   - `~/.config/opencode/`, `~/.agents/skills/` (whole-dir links)
   - `~/.config/crush/crush.json`, `~/.opencodereview/rule.json`
+- `AI-configs/pi/AGENTS.md` - Pi config quirks, model search and pricing lookup
+  via `shell/bin/llm-models`, promotional routing to revisit. Covers
+  `AI-configs/pi/`
 
 Keep this list current:
 
