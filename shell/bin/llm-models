@@ -5,17 +5,17 @@ set -euo pipefail
 # ==============================================================================
 # llm-models — List model IDs from public model APIs (no auth needed)
 #
-# Usage: llm-models [-h|--help] [-f REGEX] [provider ...]
-#   providers: zen go openrouter nous (default: all)
-#   -f REGEX   keep only IDs matching REGEX, case-insensitive
-#              (default: stealth|alpha|free|pickle; use -f . for all)
+# Usage: llm-models [-h|--help] [-a] [-f REGEX] [provider ...]
+#   providers: zen openrouter nous (default: all)
+#   default    keep only models priced at zero on both input and output
+#   -a         keep every model, priced or not
+#   -f REGEX   also keep only IDs matching REGEX, case-insensitive
 #   -h, --help show this help
 #
 # Output: "<provider> <id>" with aligned columns, sorted.
 # ==============================================================================
 
 readonly URL_ZEN="https://opencode.ai/zen/v1/models"
-readonly URL_GO="https://opencode.ai/zen/go/v1/models"
 readonly URL_OPENROUTER="https://openrouter.ai/api/v1/models"
 readonly URL_NOUS="https://inference-api.nousresearch.com/v1/models"
 
@@ -26,13 +26,24 @@ usage() {
 
 list_models() {
     local provider="$1" url="$2"
-    curl -fsS -m 30 "$url" | jq -r --arg p "$provider" '.data[].id | "\($p)\t\(.)"'
+    # Zen prices live in cost.text, the OpenRouter-compatible APIs in pricing.
+    # A missing price maps to -1 so it never counts as free.
+    curl -fsS -m 30 "$url" |
+        jq -r --arg p "$provider" --argjson all "$all" '
+            .data[]
+            | {id, i: (.cost.text.input.price // .pricing.prompt),
+                 o: (.cost.text.output.price // .pricing.completion)}
+            | select($all or ((.i | tonumber? // -1) == 0 and
+                              (.o | tonumber? // -1) == 0))
+            | "\($p)\t\(.id)"'
 }
 
-filter="stealth|alpha|free|pickle"
+all=false
+filter=
 [ "${1:-}" = "--help" ] && usage 0
-while getopts "f:h" opt; do
+while getopts "af:h" opt; do
     case "$opt" in
+        a) all=true ;;
         f) filter="$OPTARG" ;;
         h) usage 0 ;;
         *) usage ;;
@@ -41,12 +52,11 @@ done
 shift $((OPTIND - 1))
 
 providers=("$@")
-[ ${#providers[@]} -eq 0 ] && providers=(zen go openrouter nous)
+[ ${#providers[@]} -eq 0 ] && providers=(zen openrouter nous)
 
 for p in "${providers[@]}"; do
     case "$p" in
         zen) url="$URL_ZEN" ;;
-        go) url="$URL_GO" ;;
         openrouter) url="$URL_OPENROUTER" ;;
         nous) url="$URL_NOUS" ;;
         *)

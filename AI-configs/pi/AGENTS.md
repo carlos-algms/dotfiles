@@ -68,15 +68,16 @@ Pi (`@earendil-works/pi-coding-agent`) configuration. Cross-CLI rules live in
 
 ## Finding models
 
-`shell/bin/llm-models` lists public ids without auth:
+`shell/bin/llm-models` lists public ids without auth. By default it keeps only
+models priced at zero on both input and output:
 
 ```bash
-llm-models                       # stealth|alpha|free|pickle across all providers
-llm-models -f . openrouter       # every OpenRouter id
-llm-models -f 'glm-5' nous       # Nous only
+llm-models                  # free models across all providers
+llm-models -a openrouter    # every OpenRouter id, priced or not
+llm-models -f 'glm-5' nous  # free GLM ids on Nous only
 ```
 
-Providers: `zen`, `go`, `openrouter`, `nous`. Output is `<provider> <id>`.
+Providers: `zen`, `openrouter`, `nous`. Output is `<provider> <id>`.
 
 ## Finding pricing
 
