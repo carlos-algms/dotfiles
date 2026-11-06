@@ -16,7 +16,7 @@
   ],
   "modelThinkingLevels": {
     "deepseek/deepseek-flash": "high",
-    "deepseek/deepseek-v4-pro": "max",
+    "deepseek/deepseek-v4-pro": "high",
     "openai-codex/gpt-6.1-sol": "medium",
     "openai-codex/gpt-6-luna": "xhigh",
     "openai-codex/gpt-5.6-terra": "medium",

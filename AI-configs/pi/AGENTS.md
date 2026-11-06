@@ -23,6 +23,11 @@ Pi (`@earendil-works/pi-coding-agent`) configuration. Cross-CLI rules live in
   regular file, pi replaced the link: merge its content back here and relink
 - A `modelOverrides` entry is inert unless the model id is in `enabledModels`
 - `enabledModels` order is the model cycle order
+- OpenRouter filters providers by requested output length before applying
+  `openRouterRouting.order`. Set `maxTokens` to the lowest output limit among
+  the chosen providers; otherwise Pi's inherited catalog limit can exclude
+  preferred providers. This budget includes thinking and answer tokens and
+  resets after each tool result starts a new model request
 - `openRouterRouting.order` takes OpenRouter provider slugs from
   `https://openrouter.ai/api/v1/providers`, not endpoint tags: `baidu`, not
   `baidu/fp8`

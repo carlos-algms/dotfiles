@@ -11,6 +11,7 @@
           }
         },
         "z-ai/glm-5.3": {
+          "maxTokens": 131072,
           "compat": {
             "openRouterRouting": {
               "order": [
@@ -36,6 +37,7 @@
           }
         },
         "deepseek/deepseek-v4.1-flash": {
+          "maxTokens": 393216,
           "compat": {
             "openRouterRouting": {
               "order": [
