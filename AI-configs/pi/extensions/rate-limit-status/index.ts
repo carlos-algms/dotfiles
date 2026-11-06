@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
+import type { ExtensionAPI, ExtensionContext } from '@earendil-works/pi-coding-agent';
 import { getRateLimitProvider } from './internal/registry.ts';
 import { record, render } from './internal/render.ts';
 
@@ -6,10 +6,19 @@ const POLL_MS = 2000;
 
 export default function rateLimitStatus(pi: ExtensionAPI): void {
   let timer: ReturnType<typeof setInterval> | undefined;
+  let currentProvider: string | undefined;
 
   function stopPolling() {
     clearInterval(timer);
     timer = undefined;
+  }
+
+  function startPolling(ctx: ExtensionContext) {
+    if (timer) {
+      return;
+    }
+    timer = setInterval(() => render(ctx, currentProvider), POLL_MS);
+    timer.unref();
   }
 
   pi.on('session_start', (_event, ctx) => {
@@ -17,17 +26,27 @@ export default function rateLimitStatus(pi: ExtensionAPI): void {
     if (!ctx.hasUI) {
       return;
     }
-    render(ctx, ctx.model?.provider);
-    // Re-render every tick, not on mtime change: countdowns and expiry move.
-    timer = setInterval(() => render(ctx, ctx.model?.provider), POLL_MS);
-    timer.unref();
+    currentProvider = ctx.model?.provider;
+    render(ctx, currentProvider);
+    if (getRateLimitProvider(currentProvider)) {
+      startPolling(ctx);
+    }
   });
 
-  pi.on('session_shutdown', stopPolling);
+  pi.on('session_shutdown', () => {
+    stopPolling();
+  });
 
   pi.on('model_select', (event, ctx) => {
-    if (ctx.hasUI) {
-      render(ctx, event.model.provider);
+    if (!ctx.hasUI) {
+      return;
+    }
+    currentProvider = event.model.provider;
+    render(ctx, currentProvider);
+    if (getRateLimitProvider(currentProvider)) {
+      startPolling(ctx);
+    } else {
+      stopPolling();
     }
   });
 

@@ -22,21 +22,27 @@ import { nous } from './providers/nous.ts';
 import { openaiCodex } from './providers/openai-codex.ts';
 
 /** fg wraps text in tags so nested colouring is detectable. */
-function fakeCtx(provider = 'nous') {
+function fakeCtx(provider = 'nous', hasUI = true) {
   const statuses: (string | undefined)[] = [];
   const ctx = {
-    hasUI: true,
-    model: { provider },
+    hasUI,
+    get model() {
+      return { provider };
+    },
     ui: {
       theme: {
         fg: (color: string, text: string) => `<${color}>${text}</${color}>`,
       },
-      setStatus(_key: string, text: string | undefined) {
+      setStatus(key: string, text: string | undefined) {
+        assert.equal(key, 'rate-limits');
         statuses.push(text);
       },
     },
   } as unknown as ExtensionContext;
-  return { ctx, statuses };
+  function selectProvider(nextProvider: string): void {
+    provider = nextProvider;
+  }
+  return { ctx, statuses, selectProvider };
 }
 
 const { ctx } = fakeCtx();
@@ -175,13 +181,20 @@ test('nous format renders the four windows with used/limit', () => {
   assert.doesNotMatch(text ?? '', /<\w+>[^<]*<\w+>/);
 });
 
-test('nous format drops buckets whose relative reset has elapsed', () => {
+test('nous format shows expired buckets as 0/limit', () => {
   const twoMinutesAgo = Date.now() - 120_000;
   const text = nous.format(ctx, snap(NOUS_HEADERS, twoMinutesAgo));
-  assert.doesNotMatch(text ?? '', /RPM|TPM/);
+  assert.match(text ?? '', /RPM .*0\/800/);
+  assert.match(text ?? '', /TPM .*0\/8,000,000/);
   assert.match(text ?? '', /RPH/);
+
   const yesterday = Date.now() - 86_400_000;
-  assert.equal(nous.format(ctx, snap(NOUS_HEADERS, yesterday)), undefined);
+  const expired = nous.format(ctx, snap(NOUS_HEADERS, yesterday));
+  assert.match(expired ?? '', /RPM 0\/800<\/dim>/);
+  assert.match(expired ?? '', /RPH 0\/33,600<\/dim>/);
+  assert.match(expired ?? '', /TPM 0\/8,000,000<\/dim>/);
+  assert.match(expired ?? '', /TPH 0\/336,000,000<\/dim>/);
+  assert.doesNotMatch(expired ?? '', /[()]/);
 });
 
 test('nous format is undefined without any usable window', () => {
@@ -328,7 +341,7 @@ test('response hook writes the snapshot and sets the footer', () => {
   });
 });
 
-test('poll tick re-renders so expired buckets leave the footer', () => {
+test('poll tick re-renders expired Nous buckets as 0/limit', () => {
   withHome(() => {
     mock.timers.enable({ apis: ['setInterval', 'Date'], now: Date.now() });
     const { ctx: uiCtx, statuses } = fakeCtx('nous');
@@ -338,12 +351,153 @@ test('poll tick re-renders so expired buckets leave the footer', () => {
       handlers.get('session_start')?.({}, uiCtx);
       assert.match(statuses.at(-1) ?? '', /RPM/);
       mock.timers.tick(120_000);
-      assert.doesNotMatch(statuses.at(-1) ?? '', /RPM/);
+      assert.match(statuses.at(-1) ?? '', /RPM .*0\/800/);
       assert.match(statuses.at(-1) ?? '', /RPH/);
     } finally {
       handlers.get('session_shutdown')?.({}, uiCtx);
       mock.timers.reset();
     }
+  });
+});
+
+for (const provider of ['nous', 'deepseek']) {
+  test(`session start polls only registered providers: ${provider}`, (t) => {
+    t.mock.timers.enable({ apis: ['setInterval'] });
+    withHome(() => {
+      const { ctx: uiCtx, statuses } = fakeCtx(provider);
+      const handlers = installExtension();
+      handlers.get('session_start')?.({}, uiCtx);
+      assert.equal(statuses.length, 1);
+      t.mock.timers.tick(1999);
+      assert.equal(statuses.length, 1);
+      t.mock.timers.tick(1);
+      const expected = provider === 'deepseek' ? 1 : 2;
+      assert.equal(statuses.length, expected);
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      t.mock.timers.tick(6000);
+      assert.equal(statuses.length, expected);
+    });
+  });
+}
+
+test('model switches start, reuse, stop, and restart polling for the active provider', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  withHome(() => {
+    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx('deepseek');
+    const handlers = installExtension();
+    writeSnapshot('nous', NOUS_HEADERS);
+    writeSnapshot('anthropic', {
+      'anthropic-ratelimit-unified-5h-utilization': '0.12',
+      'anthropic-ratelimit-unified-5h-reset': futureReset(),
+    });
+    writeSnapshot('openai-codex', openaiCodex.pickEvent(codexEvent()) ?? {});
+    handlers.get('session_start')?.({}, uiCtx);
+    for (const provider of [
+      'nous',
+      'nous',
+      'anthropic',
+      'openai-codex',
+      'deepseek',
+      'nous',
+    ]) {
+      selectProvider(provider);
+      const before = statuses.length;
+      handlers.get('model_select')?.({ model: { provider } }, uiCtx);
+      const formatter = getRateLimitProvider(provider);
+      const snapshot = readSnapshot(provider);
+      if (formatter) {
+        assert.ok(snapshot);
+      }
+      const expected =
+        formatter && snapshot ? formatter.format(uiCtx, snapshot) : undefined;
+      assert.equal(statuses.length, before + 1);
+      assert.equal(statuses.at(-1), expected);
+      t.mock.timers.tick(6000);
+      assert.equal(statuses.length, before + (provider === 'deepseek' ? 1 : 4));
+      assert.equal(statuses.at(-1), expected);
+    }
+    handlers.get('session_shutdown')?.({}, uiCtx);
+  });
+});
+
+test('repeated session start replaces polling and non-limited sessions stop it', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  withHome(() => {
+    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx();
+    const handlers = installExtension();
+    handlers.get('session_start')?.({}, uiCtx);
+    handlers.get('session_start')?.({}, uiCtx);
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.length, 5);
+    selectProvider('deepseek');
+    handlers.get('session_start')?.({}, uiCtx);
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.length, 6);
+  });
+});
+
+test('headless session start and model selection do not render or poll', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  withHome(() => {
+    const { ctx: headlessCtx, statuses } = fakeCtx('nous', false);
+    const handlers = installExtension();
+    handlers.get('session_start')?.({}, headlessCtx);
+    handlers.get('model_select')?.(
+      { model: { provider: 'nous' } },
+      headlessCtx,
+    );
+    t.mock.timers.tick(6000);
+    assert.deepEqual(statuses, []);
+  });
+});
+
+for (const provider of ['deepseek', 'nous']) {
+  test(`late Codex stream events preserve the active ${provider} footer`, (t) => {
+    t.mock.timers.enable({ apis: ['setInterval'] });
+    withHome(() => {
+      const { ctx: uiCtx, statuses, selectProvider } = fakeCtx('openai-codex');
+      const handlers = installExtension();
+      writeSnapshot('nous', NOUS_HEADERS);
+      handlers.get('session_start')?.({}, uiCtx);
+      selectProvider(provider);
+      handlers.get('model_select')?.({ model: { provider } }, uiCtx);
+      const before = [...statuses];
+      const data = codexEvent();
+      handlers.get('provider_stream_event')?.(
+        { provider: 'openai-codex', data },
+        uiCtx,
+      );
+      assert.deepEqual(statuses, before);
+      assert.deepEqual(
+        readSnapshot('openai-codex')?.headers,
+        openaiCodex.pickEvent(data),
+      );
+      t.mock.timers.tick(6000);
+      assert.equal(statuses.at(-1), before.at(-1));
+      selectProvider('openai-codex');
+      handlers.get('model_select')?.(
+        { model: { provider: 'openai-codex' } },
+        uiCtx,
+      );
+      assert.match(statuses.at(-1) ?? '', /5h .*7d/);
+      handlers.get('session_shutdown')?.({}, uiCtx);
+    });
+  });
+}
+
+test('headless stream events store snapshots without rendering', () => {
+  withHome(() => {
+    const { ctx: headlessCtx, statuses } = fakeCtx('openai-codex', false);
+    const data = codexEvent();
+    installExtension().get('provider_stream_event')?.(
+      { provider: 'openai-codex', data },
+      headlessCtx,
+    );
+    assert.deepEqual(statuses, []);
+    assert.deepEqual(
+      readSnapshot('openai-codex')?.headers,
+      openaiCodex.pickEvent(data),
+    );
   });
 });
 
@@ -360,16 +514,31 @@ test('stream hook writes the codex snapshot and sets the footer', () => {
   });
 });
 
-test('response hook keeps the footer when headers are absent or provider unknown', () => {
-  withHome(() => {
+test('response hook preserves existing state for irrelevant headers and unknown providers', () => {
+  withHome((home) => {
     const nousCtx = fakeCtx('nous');
+    const unknownCtx = fakeCtx('openai');
     const handler = installExtension().get('after_provider_response');
+    handler?.({ status: 200, headers: NOUS_HEADERS }, nousCtx.ctx);
+    assert.match(nousCtx.statuses.at(-1) ?? '', /RPM/);
+    const statuses = [...nousCtx.statuses];
+    const snapshot = readSnapshot('nous');
+    assert.ok(snapshot);
+
     handler?.(
       { status: 502, headers: { 'content-type': 'text/html' } },
       nousCtx.ctx,
     );
-    handler?.({ status: 200, headers: NOUS_HEADERS }, fakeCtx('openai').ctx);
-    assert.deepEqual(nousCtx.statuses, []);
-    assert.equal(readSnapshot('nous'), undefined);
+    assert.deepEqual(nousCtx.statuses, statuses);
+    assert.deepEqual(readSnapshot('nous'), snapshot);
+
+    unknownCtx.ctx.ui.setStatus('rate-limits', 'existing footer');
+    const file = join(home, '.pi', 'rate-limits.json');
+    const stored = readFileSync(file, 'utf8');
+    handler?.({ status: 200, headers: NOUS_HEADERS }, unknownCtx.ctx);
+    assert.deepEqual(unknownCtx.statuses, ['existing footer']);
+    assert.deepEqual(nousCtx.statuses, statuses);
+    assert.equal(readFileSync(file, 'utf8'), stored);
+    assert.equal(readSnapshot('openai'), undefined);
   });
 });

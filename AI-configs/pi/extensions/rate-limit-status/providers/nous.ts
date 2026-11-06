@@ -1,5 +1,5 @@
 import type { ExtensionContext } from '@earendil-works/pi-coding-agent';
-import { bar, count, joinParts, pickColor } from '../internal/format-shared.ts';
+import { count, joinParts, pickColor } from '../internal/format-shared.ts';
 import { pickByPrefix } from '../internal/pick-by-prefix.ts';
 import type { RateLimitProvider, Snapshot } from '../internal/types.ts';
 
@@ -25,7 +25,7 @@ function formatSeconds(seconds: number): string {
   return `${Math.floor(minutes / 60)}h${mins > 0 ? ` ${mins}m` : ''}`;
 }
 
-/** Resets are relative seconds from capture time; expired buckets are dropped. */
+/** Resets are relative seconds from capture time; expired buckets show 0/limit. */
 function formatBucket(
   ctx: ExtensionContext,
   { label, suffix }: (typeof BUCKETS)[number],
@@ -37,18 +37,21 @@ function formatBucket(
   if (
     !Number.isFinite(limit) ||
     !Number.isFinite(remaining) ||
-    limit <= 0 ||
-    !(resetAt > Date.now())
+    !Number.isFinite(resetAt) ||
+    limit <= 0
   ) {
     return undefined;
   }
-  const used = Math.max(0, limit - remaining);
-  const percent = (used / limit) * 100;
-  const resets = formatSeconds((resetAt - Date.now()) / 1000);
-  return ctx.ui.theme.fg(
-    pickColor(percent),
-    `${label} ${bar(percent)} ${count(used)}/${count(limit)} (${resets})`,
-  );
+  const expired = resetAt <= Date.now();
+  const used = expired ? 0 : Math.max(0, limit - remaining);
+  const percent = expired ? 0 : (used / limit) * 100;
+  const resets = expired
+    ? undefined
+    : formatSeconds((resetAt - Date.now()) / 1000);
+  const body = resets
+    ? `${label} ${count(used)}/${count(limit)} (${resets})`
+    : `${label} ${count(used)}/${count(limit)}`;
+  return ctx.ui.theme.fg(pickColor(percent), body);
 }
 
 export const nous = {

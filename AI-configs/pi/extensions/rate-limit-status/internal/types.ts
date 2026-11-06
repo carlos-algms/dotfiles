@@ -16,6 +16,6 @@ export interface RateLimitProvider {
   pick?(rawHeaders: HeaderMap): HeaderMap;
   /** Raw provider stream event -> flat map to store, or undefined to ignore. */
   pickEvent?(data: unknown): HeaderMap | undefined;
-  /** Footer line, or undefined when no window is live. */
+  /** Footer line, or undefined when no window is usable. */
   format(ctx: ExtensionContext, snapshot: Snapshot): string | undefined;
 }

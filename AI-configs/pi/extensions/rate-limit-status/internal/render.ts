@@ -16,7 +16,7 @@ function show(
   );
 }
 
-/** Store and show a captured map. Empty or missing maps keep the last footer. */
+/** Store captured maps; show only the active provider. Empty maps keep the footer. */
 export function record(
   ctx: ExtensionContext,
   provider: RateLimitProvider,
@@ -26,7 +26,7 @@ export function record(
     return;
   }
   const snapshot = writeSnapshot(provider.provider, captured);
-  if (ctx.hasUI) {
+  if (ctx.hasUI && ctx.model?.provider === provider.provider) {
     show(ctx, provider, snapshot);
   }
 }
