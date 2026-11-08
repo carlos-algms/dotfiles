@@ -2,27 +2,11 @@
   "providers": {
     "openrouter": {
       "modelOverrides": {
-        "z-ai/glm-5.3-flash": {
-          "compat": {
-            "openRouterRouting": {
-              "order": ["baseten", "together", "crusoe", "coreweave"],
-              "allow_fallbacks": false
-            }
-          }
-        },
         "z-ai/glm-5.3": {
           "maxTokens": 131072,
           "compat": {
             "openRouterRouting": {
-              "order": [
-                "baidu",
-                "tenstorrent/fp8",
-                "novita/fp8",
-                "wafer/us",
-                "wafer",
-                "decart",
-                "z-ai"
-              ],
+              "order": ["wafer/us", "decart/fp4", "wafer/fp4"],
               "allow_fallbacks": false
             }
           }
@@ -31,20 +15,21 @@
           "maxTokens": 131072,
           "compat": {
             "openRouterRouting": {
-              "order": ["gmicloud", "deepinfra", "xiaomi"],
+              "order": ["deepinfra", "gmicloud", "xiaomi"],
               "allow_fallbacks": false
             }
           }
         },
-        "deepseek/deepseek-v4.1-flash": {
-          "maxTokens": 393216,
+        "deepseek/deepseek-v4.1-flash-1017": {
+          "maxTokens": 262144,
           "compat": {
             "openRouterRouting": {
               "order": [
-                "wafer/us",
-                "coreweave/fp8",
+                "sail-research/fp4/us",
+                "deepinfra/fp8/flex",
                 "deepinfra/fp8",
-                "morph/fp8"
+                "morph/fp8",
+                "relace/fp4"
               ],
               "allow_fallbacks": false
             }

@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Compare OpenRouter providers for one model: applied prices, p90 latency,
+p90 throughput and simulated long-session cost.
+
+Usage: openrouter-providers-comparison [-n COUNT] [-o RATIO] [-c HIT] MODEL
+
+  MODEL        OpenRouter model id, e.g. z-ai/glm-5.3
+  -n COUNT     providers to show, ranked cheapest first (default: 5)
+  -o RATIO     output tokens as a fraction of input tokens (default: 0.1)
+  -c HIT       cache hit rate on input tokens (default: 0.95)
+
+Prices are the applied rates: the page `pricing` block already has
+`pricing.discount` subtracted. `pricing_json` is the undiscounted list price.
+
+Session cost = freshness miss + cache read + output:
+  input*(1-HIT)*$/M_in + input*HIT*$/M_cache + input*RATIO*$/M_out
+Session sizes are total prompt tokens. Ranking key is the largest session.
+"""
+
+import argparse
+import json
+import re
+import urllib.error
+import urllib.request
+
+SESSIONS = (100_000, 150_000, 250_000)
+UA = {"User-Agent": "Mozilla/5.0"}
+EP = re.compile(r'\{"id":"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"')
+
+
+def fetch(url):
+    try:
+        return urllib.request.urlopen(
+            urllib.request.Request(url, headers=UA), timeout=30
+        ).read().decode()
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"{url}: HTTP {e.code}") from None
+
+
+def endpoints(model):
+    """Per-provider pricing and stats. The page embeds each endpoint as JSON,
+    the public endpoints API has no latency or throughput."""
+    html = fetch("https://openrouter.ai/" + model).replace('\\"', '"')
+    dec, out = json.JSONDecoder(), {}
+    for m in EP.finditer(html):
+        try:
+            o, _ = dec.raw_decode(html, m.start())
+        except ValueError:
+            continue
+        stats = o.get("stats")
+        if isinstance(stats, dict) and "p90_latency" in stats:
+            out[o["provider_slug"]] = o
+    return out
+
+
+def per_m(value):
+    return float(value) * 1e6
+
+
+def session_cost(price, prompt, hit, ratio):
+    missing = price.get("prompt")
+    if missing is None:
+        return None
+    cached = price.get("input_cache_read") or missing
+    return (
+        prompt * (1 - hit) * float(missing)
+        + prompt * hit * float(cached)
+        + prompt * ratio * float(price["completion"])
+    )
+
+
+def row(slug, ep, hit, ratio):
+    price = ep.get("pricing") or {}
+    if not price.get("prompt"):
+        return None
+    stats = ep["stats"]
+    return {
+        "slug": slug,
+        "quant": ep.get("quantization") or "-",
+        "in": per_m(price["prompt"]),
+        "cache": per_m(price.get("input_cache_read") or price["prompt"]),
+        "out": per_m(price["completion"]),
+        "lat": stats.get("p90_latency"),
+        "tps": stats.get("p90_throughput"),
+        "cost": [session_cost(price, s, hit, ratio) for s in SESSIONS],
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        usage="%(prog)s [-n COUNT] [-o RATIO] [-c HIT] MODEL",
+        description="Per-provider cost, p90 latency and p90 throughput for one "
+        "OpenRouter model, ranked for long sessions.",
+    )
+    ap.add_argument("model")
+    ap.add_argument("-n", type=int, default=5, help="providers to show")
+    ap.add_argument("-o", type=float, default=0.1, help="output/input ratio")
+    ap.add_argument("-c", type=float, default=0.95, help="cache hit rate")
+    a = ap.parse_args()
+    if not 0 <= a.c <= 1 or not 0 <= a.o < float("inf"):
+        ap.error("-c must be within 0..1, -o must be finite and >= 0")
+    if not 1 <= a.n <= 5:
+        ap.error("-n must be within 1..5")
+
+    eps = endpoints(a.model)
+    if not eps:
+        raise SystemExit(f"no endpoints found for {a.model}")
+
+    rows = [r for r in (row(s, e, a.c, a.o) for s, e in eps.items()) if r]
+    rows.sort(
+        key=lambda r: (
+            r["cost"][-1] if r["cost"][-1] is not None else float("inf"),
+            -(r["tps"] or 0),
+            r["lat"] or float("inf"),
+        )
+    )
+    rows = rows[: a.n]
+
+    f = lambda v, fmt: fmt.format(v) if v is not None else "-"
+    head = (
+        f"{'provider':<28}{'quant':<9}{'$/M in':>8}{'$/M cache':>11}"
+        f"{'$/M out':>9}{'p90 ms':>8}{'p90 t/s':>9}"
+        + "".join(f"{s // 1000}k".rjust(9) for s in SESSIONS)
+    )
+    print(f"{a.model}  cache={a.c:.0%}  out={a.o:.0%} of input")
+    print(head)
+    print("-" * len(head))
+    for r in rows:
+        print(
+            f"{r['slug']:<28}{r['quant']:<9}{r['in']:>8.3f}{r['cache']:>11.3f}"
+            f"{r['out']:>9.3f}{f(r['lat'], '{:.0f}'):>8}{f(r['tps'], '{:.0f}'):>9}"
+            + "".join(f(c, "${:.3f}").rjust(9) for c in r["cost"])
+        )
+
+
+if __name__ == "__main__":
+    main()

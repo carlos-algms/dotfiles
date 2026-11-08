@@ -81,6 +81,11 @@ Providers: `zen`, `openrouter`, `nous`. Output is `<provider> <id>`.
 
 ## Finding pricing
 
+`shell/bin/openrouter-providers-comparison -n 5 <model>` prints the applied
+price, p90 latency, p90 throughput and simulated 100k/150k/250k session costs
+per provider, ranked by longest-session cost. It reads the model page, so the
+prices already have `pricing.discount` applied.
+
 OpenRouter prices per provider for one model:
 
 ```bash
@@ -96,8 +101,8 @@ Rules
 - `pricing.prompt` and `pricing.completion` already include `pricing.discount`.
   `pricing_json` holds the undiscounted list price
 - `latency_last_30m` and `throughput_last_30m` are always `null` in the API.
-  Real p50 latency and throughput only exist in the stats blocks of the model
-  page, keyed by endpoint id:
+  Real p50 and p90 latency and throughput only exist in the stats blocks of the
+  model page, keyed by endpoint id:
 
 ```bash
 curl -fsSL "https://openrouter.ai/z-ai/glm-5.3" -o /tmp/page.html
@@ -126,10 +131,11 @@ EOF
 Discounts end silently. Before trusting a cheap provider, check its
 `pricing.discount` and its list price in `pricing_json`.
 
-| Model          | Route order                                                                     | Why promo                                                       | When to remove                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `z-ai/glm-5.3` | `baidu`, `tenstorrent/fp8`, `novita/fp8`, `wafer/us`, `wafer`, `decart`, `z-ai` | Baidu is 80% off at $0.28 in / $0.88 out; list is $1.40 / $4.40 | No published end date. Discount is time-of-day tiered (80% weekday 08:00-21:00, 90% weekend, 95% weekday nights, SGT): check before quoting a price, and confirm `discount` is still 0.8 |
+| Model          | Route order                     | Why routed                                                                                                  | When to remove                                                                                                                                                                                                          |
+| -------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `z-ai/glm-5.3` | `wafer/us`, `reka`, `wafer/fp4` | `wafer/us` (fp4) prices input at $0.0699 and cache read at $0.0689, with `discount` 0; output stays at list | Recheck `wafer/us` input, which sits far below the $1.40 / $4.40 list while output does not. Baidu's 80% promo is over: `baidu/fp8` reports `discount` 0.001 at $1.3986 in / $4.3956 out, and Baidu is out of the order |
+
+Baidu is no longer in the order; `reka` is second.
 
 To retire a promo: drop the provider from `order` and keep the rest. The
-`z-ai/glm-5.3` fallback without Baidu is `tenstorrent/fp8`, `novita/fp8`,
-`wafer/us`, `wafer`, `decart`, `z-ai`.
+`z-ai/glm-5.3` fallback without `wafer/us` is `reka`, `wafer/fp4`.
