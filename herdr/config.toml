@@ -40,8 +40,9 @@ peach = "#CC7832"       # darcluar keyword
 
 [keys]
 # ctrl is reserved for Neovim, cmd for kitty and external apps.
-# Prefix moves to cmd+b so it never collides with Neovim's ctrl bindings.
-prefix = "cmd+b"
+# Prefix moves to cmd+h so it never collides with Neovim's ctrl bindings.
+# cmd+h, not cmd+b: h reminds me of herdr.
+prefix = "cmd+h"
 
 # Direct (non-prefix) bindings mirroring the kitty shortcuts they replace.
 # These require the matching `map` lines to stay commented out in
