@@ -176,25 +176,9 @@ You're an Agentic AI assistant running in a harness not a chat-only interface.
 - Do not read lock files unless required: `pnpm-lock.yaml`, `package-lock.json`,
   `yarn.lock`, `bun.lock`
 
-### File edits
-
-- Prefer dedicated edit/write tools. They render a diff, shell edits do not
-- Shell text tools are allowed when they do the job better: bulk renames,
-  generated files, mechanical rewrites across many files
-- Trade the diff away only when the edit is not worth reading line by line
-
-### File reads
-
-- Prefer dedicated read tools
-- `cat`, `head`, `tail` are allowed. Use them when bounded output is the point
-- Never re-read a range you already have in context.
-  - Already read the file and it is unchanged: answer from context Use the read
-    tool with offset and limit otherwise
-
 ### Running commands
 
-- Data processing: prefer `sed`, `awk`, `jq`, or bash over Python/Node
-- File edits remain subject to file-edit rules
+- File edits remain subject to file-edit rules and approval gates
 - Group known sequential shell commands in one bash call to save turns
 - Group only real shell commands. Never use bash, Python, or Ruby scripts to
   edit files; use the edit tool, even for many files. Its in-chat diff is the
@@ -205,7 +189,7 @@ You're an Agentic AI assistant running in a harness not a chat-only interface.
     `cd "$PWD" && ...`, `cd $(git rev-parse --show-toplevel) && ...`
   - Dir flags: forbidden `git -C <cwd>`, `make -C <cwd>`, `pnpm -C <cwd>` when
     the path IS cwd
-- Use `cd <subdir>` or `-C <path>` ONLY when the target differs from cwd
+- ONLY Use `cd <subdir>` or `-C <path>` when the target differs from cwd
   - Nested workspace: pnpm/npm sub-package, nested Makefile, per-tool
     `install.sh`
   - Worktree under cwd: e.g. `.worktree/<name>`
@@ -215,14 +199,14 @@ You're an Agentic AI assistant running in a harness not a chat-only interface.
 - Prefer dedicated search/glob tools. They are ripgrep-backed and skip
   `.gitignore` paths, so `node_modules` and `vendor` cost nothing
 - In bash, use `rg --hidden` and `fd --hidden`
-- Never bash `find`; use `fd --hidden`
-- Never bash `grep -r`, `grep -l`, or `xargs grep`; use `rg --hidden` with globs
-- `fd -e ts` includes `tsx`; do not add `tsx` separately
+- Never use bash `find`! use `fd --hidden` instead
+- Never bash `grep -r`, `grep -l`, or `xargs grep`; use `rg --hidden`
 - Never use `ls` or `tree` for exploration; use `fd --hidden -d N`
 - Vendor dirs not in `.gitignore`, or searching outside a repo: filter them out
   with `--glob '!node_modules' --glob '!vendor'`
-- Never scan `/`, `/Users`, `/home`, `$HOME`, `~`, `/etc`, `/var`, `/tmp`,
-  `/opt`, `/usr`, or any system/home root
+- Never scan or run `find` on `/`, `/Users`, `/home`, `$HOME`, `~`, `/etc`,
+  `/var`, `/tmp`, `/opt`, `/usr`, or any system/home root, otherwise you'll get
+  stuck because of the amount of files
 - Exception: user gave an explicit absolute path and explicit scan intent
 
 ## Git
@@ -292,11 +276,3 @@ You're an Agentic AI assistant running in a harness not a chat-only interface.
 - Nested fences: outer fence longer than inner
 - Links: descriptive text. Bare URLs in angle brackets
 - Tables: only for repeated comparable values
-
-## Internet research
-
-- HTML docs/blogs/GitHub non-raw: use `defuddle` when available
-- Raw/plain text URLs: no `defuddle`
-- Fetch tools before `curl`
-- GitHub source: one or two direct reads are ok
-- Complex GitHub exploration: local clone required to avoid rate limits
