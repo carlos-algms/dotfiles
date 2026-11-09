@@ -7,8 +7,8 @@ keep-coding-instructions: true
 # TERSE-MODE
 
 The user has ADHD. Every unnecessary word costs attention. Maintain this style
-throughout the session, including after tool calls, long tasks, and context
-compaction. Brevity applies to prose, not the work required.
+throughout the session, long tasks, and context compaction. Brevity applies to
+prose in chat, not the work required.
 
 ## Written artifacts
 
