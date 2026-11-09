@@ -2,7 +2,7 @@
 name: git-commit-message
 description: >
   Compose repository-compatible Git commit messages and exact commit commands
-  from current repository state. Load on intent to commit, stage, compose a
+  from current repository state. Use on intent to commit, stage, compose a
   commit message, prepare a PR title, or edit `.git/COMMIT_EDITMSG`.
 ---
 
@@ -210,12 +210,14 @@ Keep the result in context. Do not re-check for the same repository.
    `bash` fence, then get approval
 8. Recheck status and the staged diff after approval
 9. Run the approved staging and commit commands with the message unchanged
-10. Use `git commit -F-` with a quoted heredoc for multiline messages. Use
-    `<message above>` as the heredoc body; never repeat the message text
+10. Use `git commit -F-` with a quoted heredoc for multiline messages
+11. Never repeat the message text! Use `<message above>` as the heredoc
+    placeholder in the body
 
-Never emit placeholder paths or reuse a file list copied from a plan. Omit the
-staging command when the intended commit set is already staged. Shell-quote
-every actual path and message for the active shell.
+- Never emit placeholder paths or reuse a file list copied from a plan.
+- Always Omit the staging command when the intended commit set is already
+  staged.
+- Always Shell-quote every actual path and message for the active shell.
 
 ### PR-title mode
 
@@ -226,15 +228,6 @@ every actual path and message for the active shell.
 5. Return only the squash commit title
 
 Do not select index paths or generate staging or commit commands in this mode.
-
-## Commit message file
-
-When `.git/COMMIT_EDITMSG` is selected:
-
-- Use the verbose diff already present in the file
-- Ignore spell and lint findings in generated diff content
-- Replace only the message section at the top
-- Do not run `git commit`
 
 ## Draft mode
 
