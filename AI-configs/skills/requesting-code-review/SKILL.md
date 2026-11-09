@@ -36,6 +36,10 @@ git status --porcelain
 
 3. Dispatch a fresh generic subagent:
 
+You, the dispatcher, do NOT read the code-reviewer.md file, only the subagent.
+Exception is if you're going to run the review inline because the user asked or
+there're no subagents in this session.
+
 ```text
 MUST read instructions at <skill_dir>/code-reviewer.md FIRST.
 Do not act until you have read it. Then apply:
