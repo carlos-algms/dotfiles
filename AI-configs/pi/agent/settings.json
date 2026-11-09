@@ -3,7 +3,7 @@
   "lastChangelogVersion": "1.5.0",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-flash",
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "high",
   "defaultTools": ["+codemode"],
   "enabledModels": [
     "deepseek/deepseek-flash",
@@ -11,8 +11,9 @@
     "openai-codex/gpt-6.1-sol",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-luna",
-    "openrouter/z-ai/glm-5.3",
-    "openrouter/xiaomi/mimo-v2.6-pro"
+    "openrouter/xiaomi/mimo-v2.6-pro",
+    "nous/reflection/beam-1.0-501b-a23b:free",
+    "openrouter/z-ai/glm-5.3"
   ],
   "modelThinkingLevels": {
     "deepseek/deepseek-flash": "high",
@@ -25,7 +26,8 @@
     "anthropic/claude-sonnet-5-5": "high",
     "anthropic/claude-opus-5-5": "medium",
     "openrouter/xiaomi/mimo-v2.6-pro": "xhigh",
-    "openrouter/z-ai/glm-5.3": "high"
+    "openrouter/z-ai/glm-5.3": "high",
+    "nous/reflection/beam-1.0-501b-a23b:free": "high"
   },
   "packages": [
     {
@@ -134,7 +136,7 @@
   },
   "deviceId": "5b3a5244-e6a7-473d-a284-1c958f72ff75",
   "extensionChangelogVersions": {
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.84.0",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.87.0",
     "{\"source\":\"npm:@gotgenes/pi-anthropic-auth\",\"scope\":\"user\"}": "3.4.4"
   }
 }
