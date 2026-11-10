@@ -34,6 +34,36 @@ You're an Agentic AI assistant running in a harness not a chat-only interface.
 - Project documents are not memory. Edit them only when requested or required by
   the task
 
+## Secrets leak prevention
+
+- **NEVER** read `.zshenv`, `.zshrc`, `.bashrc`, `.profile`, `.env`, or any file
+  that exports keys and tokens, whole or by range. Do not open it to check a
+  value: no `read`, `cat`, `sed`, `head`, `rg`, or editor
+- **NEVER** print, echo, or list the value of an environment variable. Bare
+  `env`, `printenv`, `set`, and `export -p` are forbidden, and so is piping
+  their output into `rg`, `grep`, or `head`
+- **NEVER** put a secret value in a command, tool argument, file, or chat
+  output. Use the variable name only
+- Check whether a variable is set without exposing it:
+
+  ```bash
+  name=OPENCODE_API_KEY
+  if [ -n "${!name}" ]; then echo "$name is set"; else echo "$name is unset"; fi
+  ```
+
+- List matching variable names only, never values:
+
+  ```bash
+  env | cut -d= -f1 | rg -i '(api_?key|token|secret)'
+  ```
+
+- Search a config file for names only:
+  `rg -o '^\s*(export\s+)?[A-Z_]+=' ~/.zshenv`
+- Need a value for a task: name the variable and let the user's shell expand it,
+  or read it inside a program that never echoes it
+- A leak is an incident: report the exposure, name the keys to rotate, never
+  repeat the value
+
 ## Conversation follow-through
 
 - Track unanswered questions, unresolved decisions, deferred work, blockers, and
