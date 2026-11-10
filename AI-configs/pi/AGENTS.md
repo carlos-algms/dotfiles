@@ -52,11 +52,13 @@ Pi (`@earendil-works/pi-coding-agent`) configuration. Cross-CLI rules live in
   `high`. `medium` is not a GLM-5.3 level; the API takes `low`, `high`, `max`
   only. 45-95 tok/s measured on the routed hosts; Novita and Z.AI are the 45
   tok/s floor
-- `deepseek/deepseek-v4-pro` - candidate to replace GLM-5.3 for planning and
-  review when Baidu's discount ends or GLM becomes materially more expensive.
-  Compare actual costs, including cache reuse and reasoning tokens. Small
-  benchmark gains alone do not justify the price spike. Validate review quality
-  before relaxing the different-family reviewer rule
+- `deepseek/deepseek-v4-pro` - the official API still serves V4-Pro-0813, which
+  predates V4.1-Flash-1017; no V4.1 Pro exists. V4.1-Flash-1017 beats it on
+  every shared benchmark (DeepSWE v1.1 77.0 vs 62.7, NL2Repo 68.2 vs 61.5,
+  AutomationBench 60.5 vs 31.8, ALE 35.4 vs 25.7, HLE ties) at 3-4x lower price,
+  so it is not a reviewer upgrade. Against GLM-5.3 it is a wash on agentic
+  coding and worse on cost. Not in `enabledModels`; re-add only for same-family
+  diversity checks
 - `xiaomi/mimo-v2.6-pro` - long context and maths, not general planning. Loses
   to GLM on reasoning (50.2 vs 54.9) and knowledge (42.9 vs 53.9), wins on long
   context (68.1 vs 64.7), maths (65.9 vs 60.2) and cost. Only non-quantized host

@@ -7,7 +7,6 @@
   "defaultTools": ["+codemode"],
   "enabledModels": [
     "deepseek/deepseek-flash",
-    "deepseek/deepseek-v4-pro",
     "openai-codex/gpt-6.1-sol",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-luna",
