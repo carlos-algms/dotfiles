@@ -12,7 +12,10 @@ function show(
 ): void {
   ctx.ui.setStatus(
     STATUS_KEY,
-    provider && snapshot ? provider.format(ctx, snapshot) : undefined,
+    provider
+      ? provider.formatTime?.(ctx) ??
+          (snapshot ? provider.format(ctx, snapshot) : undefined)
+      : undefined,
   );
 }
 
@@ -35,7 +38,8 @@ export function record(
 export function render(
   ctx: ExtensionContext,
   providerId: string | undefined,
+  modelId?: string,
 ): void {
-  const provider = getRateLimitProvider(providerId);
+  const provider = getRateLimitProvider(providerId, modelId);
   show(ctx, provider, provider && readSnapshot(provider.provider));
 }

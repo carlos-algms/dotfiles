@@ -18,17 +18,35 @@ import { getRateLimitProvider } from './internal/registry.ts';
 import { readSnapshot, writeSnapshot } from './internal/snapshot-store.ts';
 import type { HeaderMap, Snapshot } from './internal/types.ts';
 import { anthropic } from './providers/anthropic.ts';
+import {
+  deepseek,
+  isPeak,
+  OFF_PEAK_RATES,
+  PEAK_RATES,
+  syncDeepSeekCost,
+} from './providers/deepseek.ts';
 import { nous } from './providers/nous.ts';
 import { openaiCodex } from './providers/openai-codex.ts';
 
+/** Unregistered provider used as the "no rate-limit data" fixture. */
+const UNREGISTERED = 'kimi-coding';
+
+/** Friday, off-peak UTC. */
+const OFF_PEAK_AT = '2025-01-03T22:49:00Z';
+
+const FLASH_MODEL = {
+  provider: 'deepseek',
+  id: 'deepseek-flash',
+  cost: { input: 0.3, output: 1.2, cacheRead: 0.006 },
+};
+
 /** fg wraps text in tags so nested colouring is detectable. */
-function fakeCtx(provider = 'nous', hasUI = true) {
+function fakeCtx(provider = 'nous', hasUI = true, modelId?: string) {
   const statuses: (string | undefined)[] = [];
+  const model = { provider, id: modelId, cost: { ...FLASH_MODEL.cost } };
   const ctx = {
     hasUI,
-    get model() {
-      return { provider };
-    },
+    model,
     ui: {
       theme: {
         fg: (color: string, text: string) => `<${color}>${text}</${color}>`,
@@ -40,9 +58,9 @@ function fakeCtx(provider = 'nous', hasUI = true) {
     },
   } as unknown as ExtensionContext;
   function selectProvider(nextProvider: string): void {
-    provider = nextProvider;
+    model.provider = nextProvider;
   }
-  return { ctx, statuses, selectProvider };
+  return { ctx, statuses, model, selectProvider };
 }
 
 const { ctx } = fakeCtx();
@@ -86,13 +104,25 @@ const NOUS_HEADERS = {
   'x-ratelimit-reset-tokens-1h': '3500',
 };
 
-test('registry resolves a known provider and rejects unknown ones', () => {
+test('registry resolves providers by id and restricts deepseek to deepseek-flash', () => {
   assert.equal(getRateLimitProvider('anthropic')?.provider, 'anthropic');
   assert.equal(getRateLimitProvider('nous')?.provider, 'nous');
   assert.equal(getRateLimitProvider('openai-codex')?.provider, 'openai-codex');
+  assert.equal(getRateLimitProvider(UNREGISTERED), undefined);
   assert.equal(getRateLimitProvider('openai'), undefined);
   assert.equal(getRateLimitProvider('constructor'), undefined);
   assert.equal(getRateLimitProvider(undefined), undefined);
+  assert.equal(
+    getRateLimitProvider('deepseek', 'deepseek-flash')?.provider,
+    'deepseek',
+  );
+  assert.equal(getRateLimitProvider('deepseek', 'deepseek-v4-pro'), undefined);
+  assert.equal(getRateLimitProvider('deepseek'), undefined);
+  // Providers without a model list match regardless of id.
+  assert.equal(
+    getRateLimitProvider('anthropic', 'claude')?.provider,
+    'anthropic',
+  );
 });
 
 test('anthropic pick lowercases and keeps only unified headers', () => {
@@ -110,7 +140,7 @@ test('anthropic pick lowercases and keeps only unified headers', () => {
   );
 });
 
-test('anthropic format renders both windows with a percentage', () => {
+test('anthropic format renders each live window once, coloured', () => {
   const text = anthropic.format(
     ctx,
     snap({
@@ -120,19 +150,8 @@ test('anthropic format renders both windows with a percentage', () => {
       'anthropic-ratelimit-unified-7d-reset': futureReset(),
     }),
   );
-  assert.match(text ?? '', /5h .*12%/);
-  assert.match(text ?? '', /7d .*85%/);
-});
-
-test('anthropic format colours each window once, without nesting', () => {
-  const text = anthropic.format(
-    ctx,
-    snap({
-      'anthropic-ratelimit-unified-5h-utilization': '0.95',
-      'anthropic-ratelimit-unified-5h-reset': futureReset(),
-    }),
-  );
-  assert.match(text ?? '', /^<error>5h .*95%.*<\/error>$/);
+  assert.match(text ?? '', /^<dim>5h .*12%.*<\/dim>/);
+  assert.match(text ?? '', /<warning>7d .*85%.*<\/warning>$/);
   assert.doesNotMatch(text ?? '', /<\w+>[^<]*<\w+>/);
 });
 
@@ -179,6 +198,12 @@ test('nous format renders the four windows with used/limit', () => {
   assert.match(text ?? '', /TPM .*7,999,951\/8,000,000/);
   assert.match(text ?? '', /TPH/);
   assert.doesNotMatch(text ?? '', /<\w+>[^<]*<\w+>/);
+
+  const longReset = nous.format(
+    ctx,
+    snap({ ...NOUS_HEADERS, 'x-ratelimit-reset-requests': '5400' }),
+  );
+  assert.match(longReset ?? '', /RPM .*\(1h 30m\)/);
 });
 
 test('nous format shows expired buckets as 0/limit', () => {
@@ -240,7 +265,7 @@ function codexEvent(secondaryMinutes = 10080, reset = Number(futureReset())) {
   };
 }
 
-test('openai-codex pickEvent flattens rate-limit windows by label', () => {
+test('openai-codex pickEvent flattens usable windows and drops zero-length ones', () => {
   const reset = Number(futureReset());
   assert.deepEqual(openaiCodex.pickEvent(codexEvent(10080, reset)), {
     '5h-used': '7',
@@ -248,9 +273,6 @@ test('openai-codex pickEvent flattens rate-limit windows by label', () => {
     '7d-used': '95',
     '7d-reset': String(reset),
   });
-});
-
-test('openai-codex pickEvent skips zero-length windows', () => {
   assert.deepEqual(Object.keys(openaiCodex.pickEvent(codexEvent(0)) ?? {}), [
     '5h-used',
     '5h-reset',
@@ -322,22 +344,38 @@ function installExtension() {
   return handlers;
 }
 
-test('response hook writes the snapshot and sets the footer', () => {
-  withHome(() => {
-    const { ctx: uiCtx, statuses } = fakeCtx('nous');
+test('response hook writes the snapshot, then ignores irrelevant headers and unknown providers', () => {
+  withHome((home) => {
+    const { ctx: nousCtx, statuses } = fakeCtx('nous');
+    const handler = installExtension().get('after_provider_response');
     const upperCased = Object.fromEntries(
       Object.entries(NOUS_HEADERS).map(([key, value]) => [
         key.toUpperCase(),
         value,
       ]),
     );
-    installExtension().get('after_provider_response')?.(
-      { status: 200, headers: upperCased },
-      uiCtx,
+    handler?.({ status: 200, headers: upperCased }, nousCtx);
+    assert.match(statuses.at(-1) ?? '', /RPM/);
+    const snapshot = readSnapshot('nous');
+    assert.ok(snapshot);
+
+    const before = [...statuses];
+    handler?.(
+      { status: 502, headers: { 'content-type': 'text/html' } },
+      nousCtx,
     );
-    assert.equal(statuses.length, 1);
-    assert.match(statuses[0] ?? '', /RPM/);
-    assert.ok(readSnapshot('nous'));
+    assert.deepEqual(statuses, before);
+    assert.deepEqual(readSnapshot('nous'), snapshot);
+
+    const { ctx: unknownCtx, statuses: unknownStatuses } = fakeCtx('openai');
+    unknownCtx.ui.setStatus('rate-limits', 'existing footer');
+    const file = join(home, '.pi', 'rate-limits.json');
+    const stored = readFileSync(file, 'utf8');
+    handler?.({ status: 200, headers: NOUS_HEADERS }, unknownCtx);
+    assert.deepEqual(unknownStatuses, ['existing footer']);
+    assert.deepEqual(statuses, before);
+    assert.equal(readFileSync(file, 'utf8'), stored);
+    assert.equal(readSnapshot('openai'), undefined);
   });
 });
 
@@ -360,30 +398,10 @@ test('poll tick re-renders expired Nous buckets as 0/limit', () => {
   });
 });
 
-for (const provider of ['nous', 'deepseek']) {
-  test(`session start polls only registered providers: ${provider}`, (t) => {
-    t.mock.timers.enable({ apis: ['setInterval'] });
-    withHome(() => {
-      const { ctx: uiCtx, statuses } = fakeCtx(provider);
-      const handlers = installExtension();
-      handlers.get('session_start')?.({}, uiCtx);
-      assert.equal(statuses.length, 1);
-      t.mock.timers.tick(1999);
-      assert.equal(statuses.length, 1);
-      t.mock.timers.tick(1);
-      const expected = provider === 'deepseek' ? 1 : 2;
-      assert.equal(statuses.length, expected);
-      handlers.get('session_shutdown')?.({}, uiCtx);
-      t.mock.timers.tick(6000);
-      assert.equal(statuses.length, expected);
-    });
-  });
-}
-
 test('model switches start, reuse, stop, and restart polling for the active provider', (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] });
   withHome(() => {
-    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx('deepseek');
+    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx(UNREGISTERED);
     const handlers = installExtension();
     writeSnapshot('nous', NOUS_HEADERS);
     writeSnapshot('anthropic', {
@@ -397,7 +415,7 @@ test('model switches start, reuse, stop, and restart polling for the active prov
       'nous',
       'anthropic',
       'openai-codex',
-      'deepseek',
+      UNREGISTERED,
       'nous',
     ]) {
       selectProvider(provider);
@@ -413,26 +431,37 @@ test('model switches start, reuse, stop, and restart polling for the active prov
       assert.equal(statuses.length, before + 1);
       assert.equal(statuses.at(-1), expected);
       t.mock.timers.tick(6000);
-      assert.equal(statuses.length, before + (provider === 'deepseek' ? 1 : 4));
+      assert.equal(
+        statuses.length,
+        before + (provider === UNREGISTERED ? 1 : 4),
+      );
       assert.equal(statuses.at(-1), expected);
     }
     handlers.get('session_shutdown')?.({}, uiCtx);
   });
 });
 
-test('repeated session start replaces polling and non-limited sessions stop it', (t) => {
+test('repeated session start replaces polling, and shutdown or an unregistered provider stops it', (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] });
   withHome(() => {
-    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx();
+    const first = fakeCtx();
+    const second = fakeCtx();
     const handlers = installExtension();
-    handlers.get('session_start')?.({}, uiCtx);
-    handlers.get('session_start')?.({}, uiCtx);
+    handlers.get('session_start')?.({}, first.ctx);
+    handlers.get('session_start')?.({}, second.ctx);
     t.mock.timers.tick(6000);
-    assert.equal(statuses.length, 5);
-    selectProvider('deepseek');
-    handlers.get('session_start')?.({}, uiCtx);
+    assert.equal(first.statuses.length, 1);
+    assert.equal(second.statuses.length, 4);
+
+    handlers.get('session_shutdown')?.({}, second.ctx);
     t.mock.timers.tick(6000);
-    assert.equal(statuses.length, 6);
+    assert.equal(second.statuses.length, 4);
+
+    second.selectProvider(UNREGISTERED);
+    handlers.get('session_start')?.({}, second.ctx);
+    t.mock.timers.tick(6000);
+    assert.equal(second.statuses.length, 5);
+    assert.equal(first.statuses.length, 1);
   });
 });
 
@@ -451,39 +480,37 @@ test('headless session start and model selection do not render or poll', (t) => 
   });
 });
 
-for (const provider of ['deepseek', 'nous']) {
-  test(`late Codex stream events preserve the active ${provider} footer`, (t) => {
-    t.mock.timers.enable({ apis: ['setInterval'] });
-    withHome(() => {
-      const { ctx: uiCtx, statuses, selectProvider } = fakeCtx('openai-codex');
-      const handlers = installExtension();
-      writeSnapshot('nous', NOUS_HEADERS);
-      handlers.get('session_start')?.({}, uiCtx);
-      selectProvider(provider);
-      handlers.get('model_select')?.({ model: { provider } }, uiCtx);
-      const before = [...statuses];
-      const data = codexEvent();
-      handlers.get('provider_stream_event')?.(
-        { provider: 'openai-codex', data },
-        uiCtx,
-      );
-      assert.deepEqual(statuses, before);
-      assert.deepEqual(
-        readSnapshot('openai-codex')?.headers,
-        openaiCodex.pickEvent(data),
-      );
-      t.mock.timers.tick(6000);
-      assert.equal(statuses.at(-1), before.at(-1));
-      selectProvider('openai-codex');
-      handlers.get('model_select')?.(
-        { model: { provider: 'openai-codex' } },
-        uiCtx,
-      );
-      assert.match(statuses.at(-1) ?? '', /5h .*7d/);
-      handlers.get('session_shutdown')?.({}, uiCtx);
-    });
+test('late Codex stream events preserve the active nous footer', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  withHome(() => {
+    const { ctx: uiCtx, statuses, selectProvider } = fakeCtx('openai-codex');
+    const handlers = installExtension();
+    writeSnapshot('nous', NOUS_HEADERS);
+    handlers.get('session_start')?.({}, uiCtx);
+    selectProvider('nous');
+    handlers.get('model_select')?.({ model: { provider: 'nous' } }, uiCtx);
+    const before = [...statuses];
+    const data = codexEvent();
+    handlers.get('provider_stream_event')?.(
+      { provider: 'openai-codex', data },
+      uiCtx,
+    );
+    assert.deepEqual(statuses, before);
+    assert.deepEqual(
+      readSnapshot('openai-codex')?.headers,
+      openaiCodex.pickEvent(data),
+    );
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.at(-1), before.at(-1));
+    selectProvider('openai-codex');
+    handlers.get('model_select')?.(
+      { model: { provider: 'openai-codex' } },
+      uiCtx,
+    );
+    assert.match(statuses.at(-1) ?? '', /5h .*7d/);
+    handlers.get('session_shutdown')?.({}, uiCtx);
   });
-}
+});
 
 test('headless stream events store snapshots without rendering', () => {
   withHome(() => {
@@ -506,7 +533,9 @@ test('stream hook writes the codex snapshot and sets the footer', () => {
     const { ctx: uiCtx, statuses } = fakeCtx('openai-codex');
     const handler = installExtension().get('provider_stream_event');
     handler?.({ provider: 'openai-codex', data: { type: 'x' } }, uiCtx);
+    handler?.({ provider: UNREGISTERED, data: codexEvent() }, uiCtx);
     assert.deepEqual(statuses, []);
+    assert.equal(readSnapshot(UNREGISTERED), undefined);
     handler?.({ provider: 'openai-codex', data: codexEvent() }, uiCtx);
     assert.equal(statuses.length, 1);
     assert.match(statuses[0] ?? '', /5h .*7d/);
@@ -514,31 +543,106 @@ test('stream hook writes the codex snapshot and sets the footer', () => {
   });
 });
 
-test('response hook preserves existing state for irrelevant headers and unknown providers', () => {
-  withHome((home) => {
-    const nousCtx = fakeCtx('nous');
-    const unknownCtx = fakeCtx('openai');
-    const handler = installExtension().get('after_provider_response');
-    handler?.({ status: 200, headers: NOUS_HEADERS }, nousCtx.ctx);
-    assert.match(nousCtx.statuses.at(-1) ?? '', /RPM/);
-    const statuses = [...nousCtx.statuses];
-    const snapshot = readSnapshot('nous');
-    assert.ok(snapshot);
+test('isPeak marks Mon-Fri 01:00-04:00 and 06:00-10:00 UTC', () => {
+  const peak = (iso: string) => assert.equal(isPeak(new Date(iso)), true, iso);
+  const off = (iso: string) => assert.equal(isPeak(new Date(iso)), false, iso);
+  peak('2025-01-03T01:00:00Z'); // Friday, window start
+  peak('2025-01-03T03:59:00Z');
+  off('2025-01-03T04:00:00Z'); // end exclusive
+  peak('2025-01-03T06:00:00Z');
+  peak('2025-01-03T09:59:00Z');
+  off('2025-01-03T10:00:00Z');
+  off(OFF_PEAK_AT); // evening off-peak
+  off('2025-01-04T02:00:00Z'); // Saturday
+  off('2025-01-05T02:00:00Z'); // Sunday
+});
 
-    handler?.(
-      { status: 502, headers: { 'content-type': 'text/html' } },
-      nousCtx.ctx,
-    );
-    assert.deepEqual(nousCtx.statuses, statuses);
-    assert.deepEqual(readSnapshot('nous'), snapshot);
+test('syncDeepSeekCost applies the current rate only to deepseek-flash', () => {
+  const offPeak = { ...FLASH_MODEL, cost: { ...PEAK_RATES } };
+  syncDeepSeekCost(offPeak, new Date(OFF_PEAK_AT));
+  assert.deepEqual(offPeak.cost, OFF_PEAK_RATES);
 
-    unknownCtx.ctx.ui.setStatus('rate-limits', 'existing footer');
-    const file = join(home, '.pi', 'rate-limits.json');
-    const stored = readFileSync(file, 'utf8');
-    handler?.({ status: 200, headers: NOUS_HEADERS }, unknownCtx.ctx);
-    assert.deepEqual(unknownCtx.statuses, ['existing footer']);
-    assert.deepEqual(nousCtx.statuses, statuses);
-    assert.equal(readFileSync(file, 'utf8'), stored);
-    assert.equal(readSnapshot('openai'), undefined);
+  const peak = { ...FLASH_MODEL, cost: { ...OFF_PEAK_RATES } };
+  syncDeepSeekCost(peak, new Date('2025-01-03T02:00:00Z'));
+  assert.deepEqual(peak.cost, PEAK_RATES);
+
+  const untouched = [
+    { ...FLASH_MODEL, id: 'deepseek-v4-pro', cost: { ...FLASH_MODEL.cost } },
+    {
+      ...FLASH_MODEL,
+      provider: 'openrouter',
+      id: 'deepseek/deepseek-v4.1-flash-1017',
+      cost: { ...FLASH_MODEL.cost },
+    },
+    { ...FLASH_MODEL, provider: 'openrouter', cost: { ...FLASH_MODEL.cost } },
+  ];
+  for (const model of untouched) {
+    syncDeepSeekCost(model);
+    assert.deepEqual(model.cost, FLASH_MODEL.cost, model.id);
+  }
+
+  syncDeepSeekCost(undefined);
+});
+
+test('deepseek renders a time line and no header line', (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse(OFF_PEAK_AT) });
+  assert.equal(deepseek.formatTime?.(ctx), '<dim>deepseek off-peak −50%</dim>');
+  t.mock.timers.setTime(Date.parse('2025-01-03T06:00:00Z'));
+  assert.equal(deepseek.formatTime?.(ctx), '<warning>deepseek peak</warning>');
+  assert.equal(deepseek.format(ctx, snap(NOUS_HEADERS)), undefined);
+});
+
+test('deepseek-flash polls and shows the time-based line', (t) => {
+  t.mock.timers.enable({
+    apis: ['setInterval', 'Date'],
+    now: Date.parse(OFF_PEAK_AT),
   });
+  withHome(() => {
+    const { ctx: uiCtx, statuses } = fakeCtx(
+      'deepseek',
+      true,
+      'deepseek-flash',
+    );
+    const handlers = installExtension();
+    handlers.get('session_start')?.({}, uiCtx);
+    assert.match(statuses.at(-1) ?? '', /deepseek off-peak/);
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.length, 4);
+
+    handlers.get('model_select')?.(
+      { model: { provider: 'deepseek', id: 'deepseek-v4-pro' } },
+      uiCtx,
+    );
+    assert.equal(statuses.at(-1), undefined);
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.length, 5); // polling stopped for the unmatched model
+
+    handlers.get('session_shutdown')?.({}, uiCtx);
+    t.mock.timers.tick(6000);
+    assert.equal(statuses.length, 5);
+  });
+});
+
+test('model_select syncs deepseek-flash cost', (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse(OFF_PEAK_AT) });
+  withHome(() => {
+    const { ctx: uiCtx, model } = fakeCtx('deepseek', true, 'deepseek-flash');
+    installExtension().get('model_select')?.({ model }, uiCtx);
+    assert.deepEqual(model.cost, OFF_PEAK_RATES);
+  });
+});
+
+test('headless hooks still sync deepseek-flash cost', (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse(OFF_PEAK_AT) });
+  const handlers = installExtension();
+  for (const hook of ['session_start', 'before_provider_request']) {
+    const {
+      ctx: headlessCtx,
+      model,
+      statuses,
+    } = fakeCtx('deepseek', false, 'deepseek-flash');
+    handlers.get(hook)?.({}, headlessCtx);
+    assert.deepEqual(model.cost, OFF_PEAK_RATES, hook);
+    assert.deepEqual(statuses, [], hook);
+  }
 });
