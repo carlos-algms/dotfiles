@@ -25,11 +25,11 @@
           "compat": {
             "openRouterRouting": {
               "order": [
-                "sail-research/fp4/us",
-                "deepinfra/fp8/flex",
-                "deepinfra/fp8",
-                "morph/fp8",
-                "relace/fp4"
+                "ionstream/flex",
+                "particle-ai/us/flex",
+                "wafer/mxfp4",
+                "alibaba",
+                "particle-ai/us"
               ],
               "allow_fallbacks": false
             }
