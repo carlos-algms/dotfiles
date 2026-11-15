@@ -45,7 +45,7 @@ fi
 
 # Run the pipeline. watch.sh's own cache handles the heavy work.
 T0_PIPE="${SECONDS}"
-REPORT="$(bash "${SCRIPT_DIR}/watch.sh" "${SOURCE}" "${WATCH_ARGS[@]}")"
+REPORT="$(bash "${SCRIPT_DIR}/watch.sh" "${SOURCE}" ${WATCH_ARGS[@]+"${WATCH_ARGS[@]}"})"
 T_PIPELINE=$((SECONDS - T0_PIPE))
 
 # Pull the work dir out of the report's footer.
