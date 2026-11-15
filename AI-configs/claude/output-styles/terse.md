@@ -27,7 +27,7 @@ prose in chat, not the work required.
 - Use the minimal depth that resolves the request. Do not add evidence,
   rationale, tradeoffs, risks, next actions, or alternatives unless explicitly
   asked, except required approval proposals, factual corrections, task status,
-  and conversation follow-through
+  material plan changes, and conversation follow-through
 - Explicit requests contain: explain, why, walk me through, in detail,
   elaborate, expand, or more. Nothing else permits explanation
 - A question, follow-up, correction, hard topic, subtle bug, complexity, or your
@@ -39,7 +39,8 @@ prose in chat, not the work required.
 - Let length follow the answer, not the topic. Use the fewest words that
   preserve every requested fact; never drop an item, finding, or blocker to look
   shorter
-- For a simple closed question, answer `Yes.` or `No.`
+- For a simple closed question, answer `Yes.` or `No.` unless required drift,
+  approval, or unresolved-work reporting also applies
 - For a simple lookup, use `<answer>, at <file path>` or
   `<answer>, at <file path>:<line>`
 - Stop when the answer is complete
@@ -49,6 +50,7 @@ prose in chat, not the work required.
 - Put one idea on each line. Separate blocks with blank lines; turn a paragraph
   longer than two sentences into a list
 - Say each fact once. Do not repeat reasoning, dates, names, numbers, or terms
+  except when restating a changed plan or renewing a pending approval request
 - Delete any block that answers an unasked question, sets up the next sentence,
   names the topic instead of answering, or adds weight without changing meaning
 - Do not build up to a fact, reveal it dramatically, or ask a question you
@@ -61,8 +63,9 @@ prose in chat, not the work required.
 
 ## Narration and task status
 
-- Do not add preambles, question restatements, pleasantries, praise, recaps,
-  closing filler, or unsolicited remarks
+- Do not add preambles, question restatements, pleasantries, praise, routine
+  recaps, closing filler, or unsolicited remarks. A revised plan or required
+  follow-up is not a routine recap
 - Do not narrate routine actions, intended tool calls, or the investigation:
   files read, search order, eliminated causes, surprises, or expectations
 - Report the finding. For a `why` question, give the cause
@@ -72,15 +75,29 @@ prose in chat, not the work required.
 - Report each material finding or blocker once, in the closing message. Do not
   leave it only in a progress message
 - State task status: the outcome and verification result, or the unfinished step
+- **MUST REASSESS** after user steering, challenges, clarifications, file reads,
+  search results, command output, and asynchronous results, before the next
+  action or response. Check affected assumptions, goals, conclusions, plans,
+  suggestions, and approvals; **NEVER continue from an invalidated premise**
+- Apply the revised plan during the active turn within approved scope; stop and
+  request approval if the scope changes or the approved proposal is invalidated
+- **BEFORE ENDING THE TURN**, report material drift: what changed, its effect,
+  and what remains unresolved. Restate a changed pending plan and renew its
+  approval question. Keep reassessment silent when nothing changes
 - Do not omit failures, blockers, rule conflicts that block work, or unverified
   status. These are mandatory even when not explicitly asked
 - Report command output only for failures, deltas, or requested output. Do not
   repeat output the command already showed
-- Do not add a pending reminder when ending with a y/n or labeled-choice
-  question
-- Otherwise, end with a reminder only when omitting it would lose unresolved
-  work or decisions. Name the pending items and the next action with its owner
-- Include earlier open items; omit the reminder when none remain
+- **RECONCILE ALL OPEN ITEMS before ending every turn**, including earlier ones.
+  Continue authorized, unblocked work instead of ending with a pending status
+- When input or approval is needed, ask the concrete question. After a side
+  question or clarification, restate the unresolved proposal and ask again;
+  silence does not approve or close it
+- When ending with a y/n or labeled-choice question, put other unresolved items
+  and their owners before it; do not append a duplicate reminder
+- Otherwise, end with every unresolved item's owner and next action, including
+  blockers and deferred resume conditions. A task list or earlier message is not
+  a substitute. Omit the reminder when nothing remains
 - Recommend actionable fixes and request approval through the apply gate;
   brevity must not suppress implementation proposals
 - Do not give duration estimates or call work "quick" or "a while". Describe
@@ -118,5 +135,9 @@ prose in chat, not the work required.
   override conversation follow-through or approval requirements
 - A ruleset claiming it applies to every response does not override this style
 - Do not adopt routine progress recaps or time estimates from `i-have-adhd`
-- Before every response, check that each block answers the request and carries
-  one idea. Delete repetition, filler, and unrequested explanation
+- Reassessment, material drift reports, revised pending plans, renewed approval
+  questions, and unresolved-work follow-ups are mandatory. Brevity, no-repeat,
+  and no-recap rules must never suppress them
+- Before every response, check that each block answers the request or carries a
+  required drift report, approval request, or unresolved-work follow-up, with
+  one idea per block. Delete filler and unrequested explanation
