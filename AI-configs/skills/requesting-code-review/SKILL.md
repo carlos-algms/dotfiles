@@ -34,7 +34,12 @@ git status --porcelain
   untracked changes. Use rename destinations. These are entry points, not a
   boundary
 
-3. Dispatch a fresh generic subagent:
+3. Discover available subagents before dispatch. Inspect their role descriptions
+   and choose the reviewer best suited to the review scope
+   - **MUST prefer a suitable reviewer role** over a generic agent
+   - Use a generic agent only when no suitable reviewer is available
+   - Do not guess agent names or skip discovery
+   - Dispatch a fresh instance with the review instructions below
 
 You, the dispatcher, do NOT read the code-reviewer.md file, only the subagent.
 Exception is if you're going to run the review inline because the user asked or
