@@ -49,7 +49,7 @@ AI-configs/scripts/sync-components.sh
 AI-configs/scripts/sync-components.sh --update
 
 # Update one entry only (and any sibling entry sharing its repo).
-AI-configs/scripts/sync-components.sh --update grill-with-docs
+AI-configs/scripts/sync-components.sh --update domain-modeling
 
 # Print the manifest.
 AI-configs/scripts/sync-components.sh --list

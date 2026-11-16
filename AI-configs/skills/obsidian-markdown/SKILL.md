@@ -6,87 +6,221 @@ description: >
   or moving notes unless Markdown content will be changed.
 ---
 
-# Obsidian Flavoured Markdown
+# Obsidian Flavored Markdown Skill
+
+Create and edit valid Obsidian Flavored Markdown. Obsidian extends CommonMark
+and GFM with wikilinks, embeds, callouts, properties, comments, and other
+syntax. This skill covers only Obsidian-specific extensions -- standard Markdown
+(headings, bold, italic, lists, quotes, code blocks, tables) is assumed
+knowledge.
 
 Use standard Markdown normally. Apply the extensions below only when the note
 needs them; do not add frontmatter, links, embeds or callouts by default.
 
-## Wikilinks
+## Workflow: Creating an Obsidian Note
 
-Use wikilinks for vault content and Markdown links for external URLs.
+1. **Add frontmatter** with properties (title, tags, aliases) at the top of the
+   file. See [PROPERTIES.md](references/PROPERTIES.md) for all property types.
+2. **Write content** using standard Markdown for structure, plus
+   Obsidian-specific syntax below.
+3. **Link related notes** using wikilinks (`[[Note]]`) for internal vault
+   connections, or standard Markdown links for external URLs.
+4. **Embed content** from other notes, images, or PDFs using the `![[embed]]`
+   syntax. See [EMBEDS.md](references/EMBEDS.md) for all embed types.
+5. **Add callouts** for highlighted information using `> [!type]` syntax. See
+   [CALLOUTS.md](references/CALLOUTS.md) for all callout types.
+6. **Verify** the note renders correctly in Obsidian's reading view.
 
-<!-- prettier-ignore -->
+> When choosing between wikilinks and Markdown links: use `[[wikilinks]]` for
+> notes within the vault (Obsidian tracks renames automatically) and
+> `[text](url)` for external URLs only.
+
+## Internal Links (Wikilinks)
+
 ```markdown
-[[Note Name]]
-[[Note Name|Display Text]]
-[[Note Name#Heading]]
-[[Note Name#^block-id]]
-[[#Heading in same note]]
+[[Note Name]] Link to note [[Note Name|Display Text]] Custom display text
+[[Note Name#Heading]] Link to heading [[Note Name#^block-id]] Link to block
+[[#Heading in same note]] Same-note heading link
 ```
 
-Append `^block-id` to a paragraph. Put it on its own line after a list or
-blockquote. Obsidian resolves links by filename; aliases affect suggestions, not
-resolution.
+Inside Markdown tables, escape wikilink alias pipes as `[[Note\|Alias]]` so the
+alias separator is not parsed as a table cell delimiter. When a table follows a
+paragraph, leave a blank line above it, or it renders as plain text.
+
+Links resolve by file name, not by the `aliases` property. A bare `[[Alias]]`
+stays unresolved; write `[[Note|Alias]]` to show an alias.
+
+Define a block ID by appending `^block-id` to any paragraph:
+
+```markdown
+This paragraph can be linked to. ^my-block-id
+```
+
+For lists and quotes, place the block ID on a separate line after the block:
+
+```markdown
+> A quote block
+
+^quote-id
+```
 
 ## Embeds
 
-Prefix a wikilink with `!`:
+Prefix any wikilink with `!` to embed its content inline:
 
 ```markdown
-![[Note Name]]
-![[Note Name#Heading]]
-![[image.png|300]]
-![[document.pdf#page=3]]
+![[Note Name]]                         Embed full note
+![[Note Name#Heading]]                 Embed section
+![[image.png]]                         Embed image
+![[image.png|300]]                     Embed image with width
+![[document.pdf#page=3]]               Embed PDF page
 ```
 
-Load `references/EMBEDS.md` only for other media, search embeds or sizing
-details.
+See [EMBEDS.md](references/EMBEDS.md) for audio, video, search embeds, and
+external images.
 
 ## Callouts
 
-<!-- prettier-ignore -->
 ```markdown
-> [!note]
-> Content.
+> [!note] Basic callout.
 
-> [!warning] Custom title
-> Content.
+> [!warning] Custom Title Callout with a custom title.
 
-> [!faq]- Collapsed
-> Content.
+> [!faq]- Collapsed by default Foldable callout (- collapsed, + expanded).
 ```
 
-Load `references/CALLOUTS.md` only for aliases, nesting or custom callouts.
+Common types: `note`, `tip`, `warning`, `info`, `example`, `quote`, `bug`,
+`danger`, `success`, `failure`, `question`, `abstract`, `todo`.
 
-## Properties
+See [CALLOUTS.md](references/CALLOUTS.md) for the full list with aliases,
+nesting, and custom CSS callouts.
+
+## Properties (Frontmatter)
 
 ```yaml
 ---
 title: My Note
+date: 2024-01-15
 tags:
   - project
+  - active
 aliases:
-  - Alternate Name
+  - Alternative Name
 cssclasses:
   - custom-class
 ---
 ```
 
-Load `references/PROPERTIES.md` only when selecting property types or handling
-advanced property and tag syntax.
+Default properties: `tags` (searchable labels), `aliases` (alternative names
+offered in link suggestions; links still use the file name), `cssclasses` (CSS
+classes for styling).
 
-## Other extensions
+See [PROPERTIES.md](references/PROPERTIES.md) for all property types, tag syntax
+rules, and advanced usage.
 
-<!-- prettier-ignore -->
+## Tags
+
 ```markdown
-#nested/tag
-==highlighted text==
-Visible text %%hidden text%%
-
-%%
-Hidden block
-%%
+#tag Inline tag #nested/tag Nested tag with hierarchy
 ```
 
-Obsidian also supports standard fenced Mermaid, LaTeX and footnote syntax; use
-normal Markdown knowledge for those.
+Tags can contain letters, numbers, underscores, hyphens, and forward slashes,
+but must include at least one non-numerical character (`#1984` is invalid,
+`#1984book` is valid). A space ends a tag, so `#my tag` is the tag `#my`. Tags
+can also be defined in frontmatter under the `tags` property.
+
+## Comments
+
+```markdown
+This is visible %%but this is hidden%% text.
+
+%% This entire block is hidden in reading view. %%
+```
+
+## Obsidian-Specific Formatting
+
+```markdown
+==Highlighted text== Highlight syntax ==🔴Highlighted text== Colored highlight
+(Obsidian 1.14.1 and later)
+```
+
+A colored highlight starts with 🔴, 🟠, 🟡, 🟢, 🔵 or 🟣 (or the matching
+square) right after `==`. Other emoji stay as text.
+
+## Math (LaTeX)
+
+```markdown
+Inline: $e^{i\pi} + 1 = 0$
+
+Block:
+
+$$
+\frac{a}{b} = c
+$$
+```
+
+## Diagrams (Mermaid)
+
+````markdown
+```mermaid
+graph TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Do this]
+    B -->|No| D[Do that]
+```
+````
+
+To link Mermaid nodes to Obsidian notes, add `class NodeName internal-link;`.
+
+## Footnotes
+
+```markdown
+Text with a footnote[^1].
+
+[^1]: Footnote content.
+
+Inline footnote.^[This is inline.]
+```
+
+## Complete Example
+
+```markdown
+---
+title: Project Alpha
+date: 2024-01-15
+tags:
+  - project
+  - active
+status: in-progress
+---
+
+# Project Alpha
+
+This project aims to [[improve workflow]] using modern techniques.
+
+> [!important] Key Deadline The first milestone is due on ==January 30th==.
+
+## Tasks
+
+- [x] Initial planning
+- [ ] Development phase
+  - [ ] Backend implementation
+  - [ ] Frontend design
+
+## Notes
+
+The algorithm uses $O(n \log n)$ sorting. See [[Algorithm Notes#Sorting]] for
+details.
+
+![[Architecture Diagram.png|600]]
+
+Reviewed in [[Meeting Notes 2024-01-10#Decisions]].
+```
+
+## References
+
+- [Obsidian Flavored Markdown](https://help.obsidian.md/obsidian-flavored-markdown)
+- [Internal links](https://help.obsidian.md/links)
+- [Embed files](https://help.obsidian.md/embeds)
+- [Callouts](https://help.obsidian.md/callouts)
+- [Properties](https://help.obsidian.md/properties)

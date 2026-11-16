@@ -1,6 +1,6 @@
 ---
 name: defuddle
-description:
+description: >
   Extract clean markdown content from web pages using Defuddle CLI, removing
   clutter and navigation to save tokens. Use instead of WebFetch when the user
   provides a URL to read or analyze, for online documentation, articles, blog
@@ -18,7 +18,9 @@ reducing token usage.
 Do not use Defuddle for GitHub. Use `gh` for GitHub repositories, files, issues,
 pull requests, discussions, releases, actions, and API data.
 
-If not installed: `npm install -g defuddle`
+Check availability with `defuddle --help`. If it is missing, explain the
+dependency and offer installation with `npm install -g defuddle`. Do not claim
+extraction succeeded if the tool is unavailable or returns an error.
 
 ## Usage
 

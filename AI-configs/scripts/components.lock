@@ -4,43 +4,43 @@
       "name": "defuddle",
       "target": "skills",
       "repo": "https://github.com/kepano/obsidian-skills",
-      "subpath": "skills/defuddle",
-      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+      "subpath": "plugins/obsidian/skills/defuddle",
+      "sha": "398127736bd4ba42d767b1419fee1a927508370b"
     },
     {
       "name": "json-canvas",
       "target": "skills",
       "repo": "https://github.com/kepano/obsidian-skills",
-      "subpath": "skills/json-canvas",
-      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+      "subpath": "plugins/obsidian/skills/json-canvas",
+      "sha": "398127736bd4ba42d767b1419fee1a927508370b"
     },
     {
       "name": "obsidian-bases",
       "target": "skills",
       "repo": "https://github.com/kepano/obsidian-skills",
-      "subpath": "skills/obsidian-bases",
-      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+      "subpath": "plugins/obsidian/skills/obsidian-bases",
+      "sha": "398127736bd4ba42d767b1419fee1a927508370b"
     },
     {
       "name": "obsidian-cli",
       "target": "skills",
       "repo": "https://github.com/kepano/obsidian-skills",
-      "subpath": "skills/obsidian-cli",
-      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+      "subpath": "plugins/obsidian/skills/obsidian-cli",
+      "sha": "398127736bd4ba42d767b1419fee1a927508370b"
     },
     {
       "name": "obsidian-markdown",
       "target": "skills",
       "repo": "https://github.com/kepano/obsidian-skills",
-      "subpath": "skills/obsidian-markdown",
-      "sha": "ac9398734fe719565809f7a6048b05c36b1ca38f"
+      "subpath": "plugins/obsidian/skills/obsidian-markdown",
+      "sha": "398127736bd4ba42d767b1419fee1a927508370b"
     },
     {
-      "name": "grill-with-docs",
+      "name": "domain-modeling",
       "target": "skills",
       "repo": "https://github.com/mattpocock/skills",
-      "subpath": "skills/engineering/grill-with-docs",
-      "sha": "e74f0061bb67222181640effa98c675bdb2fdaa7"
+      "subpath": "skills/engineering/domain-modeling",
+      "sha": "5863806dd4e15c63174bee4e7515a4256792ecfa"
     },
     {
       "name": "code-simplifier",
