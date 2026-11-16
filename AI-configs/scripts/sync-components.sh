@@ -9,6 +9,16 @@ ROOT_DIR="${SCRIPT_DIR%/*}"
 MANIFEST="$SCRIPT_DIR/components.json"
 LOCK="$SCRIPT_DIR/components.lock"
 
+if (( BASH_VERSINFO[0] < 4 )); then
+  for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$candidate" ]] && "$candidate" -c '(( BASH_VERSINFO[0] >= 4 ))' 2>/dev/null; then
+      exec "$candidate" "$0" "$@"
+    fi
+  done
+  printf 'bash 4+ required (found %s); install with: brew install bash\n' "$BASH_VERSION" >&2
+  exit 1
+fi
+
 # shellcheck source=/dev/null
 source "$SCRIPT_DIR/../../shell/common/01_logging.sh"
 
@@ -126,6 +136,12 @@ while IFS=$'\t' read -r name target repo subpath; do
   fi
 done < <(manifest_tsv)
 
+TARGET_REPO=""
+if [[ -n "$TARGET" ]]; then
+  TARGET_REPO="$(manifest_tsv | awk -F'\t' -v n="$TARGET" '$1==n {print $3}')"
+  [[ -n "$TARGET_REPO" ]] || { e_error "unknown component: $TARGET"; exit 2; }
+fi
+
 prepare_repo() {
   local repo="$1" want_sha="$2"
   [[ -n "${REPO_DIR[$repo]:-}" ]] && return 0
@@ -141,6 +157,7 @@ prepare_repo() {
 }
 
 for repo in "${!WANT_SHA[@]}"; do
+  [[ -n "$TARGET_REPO" && "$repo" != "$TARGET_REPO" ]] && continue
   prepare_repo "$repo" "${WANT_SHA[$repo]}"
 done
 
@@ -150,23 +167,25 @@ new_lock_tsv=""
 declare -A KEEP=()
 while IFS=$'\t' read -r name target repo subpath; do
   [[ -z "$name" ]] && continue
-  src="${REPO_DIR[$repo]}/$subpath"
-  [[ -e "$src" ]] || { e_error "$name: not found at $repo:$subpath"; exit 1; }
-  dst="$(dest_path "$target" "$name" "$src")"
+  if [[ -z "$TARGET_REPO" || "$repo" == "$TARGET_REPO" ]]; then
+    src="${REPO_DIR[$repo]}/$subpath"
+    [[ -e "$src" ]] || { e_error "$name: not found at $repo:$subpath"; exit 1; }
+    dst="$(dest_path "$target" "$name" "$src")"
 
-  if [[ -e "$dst" && -z "${LOCK_KEYS["$target/$name"]:-}" ]]; then
-    e_error "refusing to overwrite unmanaged path: $dst"
-    e_error "delete it manually or remove the manifest entry"
-    exit 1
+    if [[ -e "$dst" && -z "${LOCK_KEYS["$target/$name"]:-}" ]]; then
+      e_error "refusing to overwrite unmanaged path: $dst"
+      e_error "delete it manually or remove the manifest entry"
+      exit 1
+    fi
+
+    mkdir -p "$(dirname "$dst")"
+    rm -rf "$dst"
+    cp -R "$src" "$dst"
+    e_success "synced $target/$name <- $repo @ ${WANT_SHA[$repo]:0:7}"
   fi
-
-  mkdir -p "$(dirname "$dst")"
-  rm -rf "$dst"
-  cp -R "$src" "$dst"
   sha="${WANT_SHA[$repo]}"
   new_lock_tsv+="$name"$'\t'"$target"$'\t'"$repo"$'\t'"$subpath"$'\t'"$sha"$'\n'
   KEEP["$target/$name"]=1
-  e_success "synced $target/$name <- $repo @ ${sha:0:7}"
 done < <(manifest_tsv)
 
 while IFS=$'\t' read -r old_name old_target _old_subpath; do
