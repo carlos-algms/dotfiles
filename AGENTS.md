@@ -36,6 +36,10 @@ before proposing, editing, staging, or committing any path it covers:
   - `~/.codex/`, `~/.gemini/`, `~/.cursor/rules/`, `~/.pi/agent/`
   - `~/.config/opencode/`, `~/.agents/skills/` (whole-dir links)
   - `~/.config/crush/crush.json`, `~/.opencodereview/rule.json`
+- `AI-configs/google-elephant-goldfish/AGENTS.md` - vendored EGM port (Google's
+  elephant-goldfish design-review skills): layout, patch manifest, update
+  procedure. Covers `AI-configs/google-elephant-goldfish/`, the skill dirs
+  `AI-configs/skills/egm-*`, and the persona files `AI-configs/agents/egm-*.md`
 - `AI-configs/pi/AGENTS.md` - Pi config quirks, model search and pricing lookup
   via `shell/bin/llm-models`, promotional routing to revisit. Covers
   `AI-configs/pi/`

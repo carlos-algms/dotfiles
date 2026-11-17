@@ -16,6 +16,11 @@ natively; Claude and opencode use their own per-CLI agent links below. The
 per-CLI install steps below only set up what each CLI does **not**
 auto-discover.
 
+Vendored EGM (`google-elephant-goldfish/`) needs no extra links: its skills
+(`skills/egm-*`) and personas (`agents/egm-*.md`) are inside the two shared
+dirs. Invoke with `/egm-<skill>` in Claude, `/skill:egm-<skill>` elsewhere. Port
+doc and update procedure: `google-elephant-goldfish/AGENTS.md`.
+
 ## Skills needing a binary on PATH
 
 The symlink is not enough; install the tool too.

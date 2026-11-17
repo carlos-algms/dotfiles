@@ -1,0 +1,9 @@
+# Vendored upstream files stay byte-identical to their source.
+# Patches vs upstream are tracked in the component's own port patch.
+AI-configs/google-elephant-goldfish/docs/claude.md
+AI-configs/google-elephant-goldfish/docs/codex.md
+AI-configs/google-elephant-goldfish/docs/harnesses.md
+AI-configs/google-elephant-goldfish/resources/
+AI-configs/google-elephant-goldfish/README.md
+AI-configs/skills/egm-*/
+AI-configs/agents/egm-*.md

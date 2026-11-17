@@ -15,6 +15,11 @@ in `AI-Config-README.md`; read it only when installing or relinking.
   `~/.agents/agents` (cross-tool user-scope path). Claude Code frontmatter is
   read as-is by pi-subagents, but its capitalized `tools` names and model
   aliases (`sonnet`, `opus`, `haiku`) fail a Pi launch; `inherit` works
+- `google-elephant-goldfish/` - vendored port of Google's Elephant-Goldfish
+  Model (design-review skills). Skills live in `skills/egm-*`, personas in
+  `agents/egm-*.md`, resources and runtime docs here. Port doc, patch manifest,
+  and update procedure in its `AGENTS.md`; update via `port/port.patch`, never
+  hand-edit the vendored skills
 - `claude/` - Claude settings, statusline, hooks, output styles, mods
 - `claude/mods/<name>/` - Claude Code mods (plugins with a hooks module), one
   folder each. Each folder must be listed in `CLAUDE_CODE_PLUGIN_DIRS`

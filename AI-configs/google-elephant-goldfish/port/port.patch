@@ -1,0 +1,277 @@
+--- a/skills/egm-brainstorm/SKILL.md
++++ b/AI-configs/skills/egm-brainstorm/SKILL.md
+@@ -12,8 +12,9 @@
+ 
+ # EGM Brainstorm: Interactive Multi-Lens Ideation & Refinement
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ ## Overview
+ 
+@@ -27,7 +28,7 @@
+ ## Delegation
+ 
+ A Goldfish runs in a fresh context with no conversation history. Spawn each
+-subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
++subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `~/.agents/agents/egm-<name>.md`, and its
+ frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+ where your harness registers named subagents. Otherwise spawn a general-purpose
+ subagent and tell it to read that persona file first. Pass the prompt verbatim
+@@ -162,7 +163,7 @@
+ 1.  **Delegate to Synthesizer Subagent**: Spawn the intermediate
+     **`egm-synthesizer`** agent (or parallel Goldfish subagents across the 7
+     specialized lenses if your harness cannot nest subagents):
+-    *   Subagent: `egm-synthesizer` (`agents/synthesizer.md`)
++    *   Subagent: `egm-synthesizer` (`~/.agents/agents/egm-synthesizer.md`)
+     *   `Prompt`: >- Conduct multi-lens brainstorm for feature concept:
+         `[AnchoredFeatureHypothesis]`. Mode: `BRAINSTORM`. Reviewers:
+         `[egm-design, egm-codebase-details, egm-zoom-out, egm-comprehension,
+--- a/skills/egm-draft/SKILL.md
++++ b/AI-configs/skills/egm-draft/SKILL.md
+@@ -11,8 +11,9 @@
+ 
+ # Design Drafting (Document Construction)
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ This skill guides the user through drafting a technical design document based on
+ the aligned problem and requirements from the brainstorm phase.
+@@ -20,7 +21,7 @@
+ ## Execution Constraints (CRITICAL)
+ 
+ 1.  You **MUST** read and apply the
+-    execution instructions in `resources/execution_instructions.md`.
++    execution instructions in `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/execution_instructions.md`.
+ 2.  **Artifact-First Delivery (MANDATORY)**: You are **STRICTLY FORBIDDEN** from
+     presenting large proposals, drafts, summaries, or plans directly in the chat
+     pane. You **MUST** write them directly to the working directory (or your
+--- a/skills/egm-review/SKILL.md
++++ b/AI-configs/skills/egm-review/SKILL.md
+@@ -11,15 +11,16 @@
+ 
+ # Review, Validation & Automated Remediation
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ Reviews and validates a design document through specialized reviewer personas.
+ 
+ ## Delegation
+ 
+ A Goldfish runs in a fresh context with no conversation history. Spawn each
+-subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
++subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `~/.agents/agents/egm-<name>.md`, and its
+ frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+ where your harness registers named subagents. Otherwise spawn a general-purpose
+ subagent and tell it to read that persona file first. Pass the prompt verbatim
+@@ -315,8 +316,8 @@
+ ### Subflow: Zoom Out Review
+ 
+ 1.  **Delegate to Synthesizer Subagent**: Spawn `egm-synthesizer` (or the
+-    specialized `egm-zoom-out` subagent at `agents/zoom_out.md`) on `full file`
+-    applying `resources/document_standards/zoom-out-standard.md`. When running
++    specialized `egm-zoom-out` subagent at `~/.agents/agents/egm-zoom-out.md`) on `full file`
++    applying `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/zoom-out-standard.md`. When running
+     as Step 8 (Intermediate Zoom Out), include `zoom_out_report.md` path in
+     context and focus on additions/mitigations from Comprehension and Critic
+     stages. When running as Step 5, also
+@@ -349,7 +350,7 @@
+ ### Subflow: Comprehension Test
+ 
+ 1.  **Spawn the Reviewer Directly**: Spawn the `egm-comprehension` subagent
+-    at `agents/comprehension.md` on `FeatureRange` & `DetailedRange` with no
++    at `~/.agents/agents/egm-comprehension.md` on `FeatureRange` & `DetailedRange` with no
+     document standard. Do not use the synthesizer: its report keeps only
+     findings, and the author must see the paraphrase. The test is self-containment,
+     not detail. Do not apply `re-implementation-standard.md`: it asks for
+--- a/skills/egm-review-loop/SKILL.md
++++ b/AI-configs/skills/egm-review-loop/SKILL.md
+@@ -13,8 +13,9 @@
+ 
+ # Goldfish Review: Loop (Orchestration Driver)
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ ## Overview
+ 
+@@ -34,7 +35,7 @@
+ ## Delegation
+ 
+ A Goldfish runs in a fresh context with no conversation history. Spawn each
+-subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
++subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `~/.agents/agents/egm-<name>.md`, and its
+ frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+ where your harness registers named subagents. Otherwise spawn a general-purpose
+ subagent and tell it to read that persona file first. Pass the prompt verbatim
+@@ -68,12 +69,12 @@
+ 
+ *   **Reviewer Shortnames**: Map reviewer shortname (e.g., `design_critic`,
+     `structural`, `style`, `implementation_readiness`,
+-    `codebase_details`, `comprehension`, `zoom_out`) to `agents/{name}.md`.
++    `codebase_details`, `comprehension`, `zoom_out`) to `~/.agents/agents/egm-{name}.md`.
+     The persona file defines the reviewer's core mandates, audit vectors, and
+     output format.
+ *   **Standard Shortnames**: Map standard shortname (e.g., `feature-spec-standard`,
+     `implementation-readiness-standard`, `zoom-out-standard`, `heilmeier-standard`,
+-    `re-implementation-standard`) to `resources/document_standards/{name}.md`.
++    `re-implementation-standard`) to `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/{name}.md`.
+ *   **Custom Paths**: If the name contains a slash (`/`), treat it as an
+     absolute or workspace-relative path and read it directly.
+ 
+@@ -92,10 +93,10 @@
+         **only for the missing inputs**, one at a time via chat messages.
+ 3.  **Reviewer Recommendations**:
+     *   *Feature Specs*: Recommend `design_critic` (mapped to
+-        `resources/document_standards/feature-spec-standard.md`) and
+-        `structural` (mapped to `resources/document_standards/feature-spec-standard.md`).
++        `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/feature-spec-standard.md`) and
++        `structural` (mapped to `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/feature-spec-standard.md`).
+     *   *Implementation Plans*: Recommend `implementation_readiness`
+-        (mapped to `resources/document_standards/implementation-readiness-standard.md`)
++        (mapped to `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/implementation-readiness-standard.md`)
+         and `codebase_details`.
+ 4.  **Confirm Configuration**: Display the consolidated plan (Target, Reviewers,
+     and mapped Standards) and ask the user to confirm before proceeding.
+@@ -117,7 +118,7 @@
+ 1.  **Launch Subagent Swarm**:
+     Spawn subagents to execute the review:
+     *   **Hierarchical Dispatch (Synthesizer)**: Spawn the intermediate
+-        synthesizer subagent (`agents/synthesizer.md` / `egm-synthesizer`).
++        synthesizer subagent (`~/.agents/agents/egm-synthesizer.md` / `egm-synthesizer`).
+         The synthesizer spawns the Goldfish review swarm in
+         parallel, deduplicates findings, writes the report artifact, and
+         returns a single summary message to avoid context pollution in the root
+@@ -128,8 +129,8 @@
+     *   **Direct Dispatch (Flat Swarm)**: Alternatively, spawn each requested
+         reviewer subagent in `Reviewers` directly.
+         Instruct each subagent to first read its persona definition in
+-        `agents/{name}.md`, then audit `TargetFile` at the resolved line range
+-        against its designated standard in `resources/document_standards/`,
++        `~/.agents/agents/egm-{name}.md`, then audit `TargetFile` at the resolved line range
++        against its designated standard in `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/document_standards/`,
+         supplying `GoldfishContext`.
+     *   Each reviewer produces findings with severity (🔴 Blocker, 🟡 Major, 🟢
+         Nit), line numbers, discrepancy descriptions, and rationales.
+--- a/skills/egm-resolve/SKILL.md
++++ b/AI-configs/skills/egm-resolve/SKILL.md
+@@ -11,8 +11,9 @@
+ 
+ # Goldfish Review: Resolve
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ ## Overview
+ 
+--- a/skills/egm-drift-report/SKILL.md
++++ b/AI-configs/skills/egm-drift-report/SKILL.md
+@@ -11,8 +11,9 @@
+ 
+ # Detect Drift In Designs and Code
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ When the user asks to detect drift across all designs or a set of READMEs, the
+ goal is to identify all instances where the codebase has diverged or failed to
+--- a/skills/egm-bootstrap/SKILL.md
++++ b/AI-configs/skills/egm-bootstrap/SKILL.md
+@@ -7,8 +7,9 @@
+ 
+ # EGM Peanuts and Hay Bootstrap (`egm-bootstrap`)
+ 
+-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
+-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
++When running in Codex or ChatGPT Work, first read [Codex integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/codex.md).
++In Claude Code or Cowork, read [Claude integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/claude.md) first.
++In Pi, read [Pi integration](~/projects/dotfiles/AI-configs/google-elephant-goldfish/docs/pi.md) first.
+ 
+ ## Overview
+ 
+@@ -26,7 +27,7 @@
+ ## Delegation
+ 
+ A Goldfish runs in a fresh context with no conversation history. Spawn each
+-subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
++subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `~/.agents/agents/egm-<name>.md`, and its
+ frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+ where your harness registers named subagents. Otherwise spawn a general-purpose
+ subagent and tell it to read that persona file first. Pass the prompt verbatim
+@@ -191,7 +192,7 @@
+             execution).
+     *   **Spawn Unbounded Sub-Orchestrators**: For each partition subtree root,
+         use your harness's subagent tool to spawn a parallel worker:
+-        *   Subagent: `egm-bootstrap-orchestrator` (`agents/bootstrap_orchestrator.md`) (or a general-purpose subagent)
++        *   Subagent: `egm-bootstrap-orchestrator` (`~/.agents/agents/egm-bootstrap-orchestrator.md`) (or a general-purpose subagent)
+         *   `Prompt`: "Run egm-bootstrap with path=`[path]`,
+             is_worker=true, sub_tree_root=`[partition_root]`,
+             target_filename=`[target_filename]`."
+--- a/resources/README.md
++++ b/AI-configs/google-elephant-goldfish/resources/README.md
+@@ -12,5 +12,6 @@
+ - [Zoom-out standard](document_standards/zoom-out-standard.md)
+ 
+ For installation, usage, and design rationale, see the
+-[documentation index](../docs/index.md). Workflow definitions live in
+-[`skills/`](../skills/), and reviewer personas live in [`agents/`](../agents/).
++[upstream documentation index](https://github.com/google/elephant-goldfish-model/blob/main/docs/index.md).
++In this ported layout, workflow definitions live in `AI-configs/skills/egm-*`,
++and reviewer personas live in `~/.agents/agents/egm-*.md` (see `../AGENTS.md`).
+--- a/docs/claude.md
++++ b/AI-configs/google-elephant-goldfish/docs/claude.md
+@@ -5,6 +5,15 @@
+ 
+ # Claude Code integration
+ 
++> **Ported install (this copy).** EGM here is a vendored skills port, not a
++> Claude Code plugin. There is no marketplace install and no plugin cache.
++> Wherever this guide says `${CLAUDE_PLUGIN_ROOT}`, use
++> `~/projects/dotfiles/AI-configs/google-elephant-goldfish`. Skill commands are
++> `/egm-brainstorm`, `/egm-draft`, `/egm-review` (no `/egm:` prefix). The
++> permission examples below describe upstream plugin-cache paths and do not
++> apply here; grant reads on the resolved bundle path instead. Port details:
++> `../AGENTS.md`.
++
+ Use Claude Code 2.1.271 or later for `omitClaudeMd` support. Older versions
+ must not be treated as verified Goldfish isolation environments.
+ 
+--- a/docs/codex.md
++++ b/AI-configs/google-elephant-goldfish/docs/codex.md
+@@ -5,6 +5,16 @@
+ 
+ # Codex integration
+ 
++> **Ported install (this copy).** EGM here is a vendored skills port, not a
++> Codex plugin. There is no plugin bundle root: resolve personas as
++> `~/.agents/agents/egm-<name>.md` (files renamed from upstream
++> `agents/<upstream_name>.md`; e.g. role `egm-design` →
++> `~/.agents/agents/egm-design.md`), and resources as
++> `~/projects/dotfiles/AI-configs/google-elephant-goldfish/resources/...`.
++> Skills live at `AI-configs/skills/egm-*/`. The `agents/<upstream_name>.md`
++> mapping examples below use upstream filenames; translate them per this note.
++> Port details: `../AGENTS.md`.
++
+ ## Install and locate the plugin
+ 
+ For the desktop app, install the [published EGM plugin](https://chatgpt.com/plugins/plugins_6aeb90f47ec88191a3c107e01d3eb357). This listing is desktop-only.
