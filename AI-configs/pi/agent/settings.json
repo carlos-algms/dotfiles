@@ -1,19 +1,22 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
   "lastChangelogVersion": "1.5.2",
-  "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-flash",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4.1-flash",
   "defaultThinkingLevel": "high",
-  "defaultTools": [
-    "+codemode"
-  ],
+  "defaultTools": ["+codemode"],
   "enabledModels": [
+    "opencode-go/deepseek-v4.1-flash",
     "deepseek/deepseek-flash",
-    "openai-codex/gpt-6.1-sol",
-    "openai-codex/gpt-5.6-terra",
-    "openai-codex/gpt-6-luna",
-    "openrouter/xiaomi/mimo-v2.6-pro",
-    "openrouter/z-ai/glm-5.3"
+    "opencode-go/longcat-2.5-free",
+    "opencode-go/beam-free",
+    "opencode-go/iceman-free",
+    "opencode-go/hy4-flash-free",
+    "opencode-go/glm-5.3-flash",
+    "opencode-go/mimo-v2.6-flash-free",
+    "opencode-go/deepseek-v4.1-flash-free",
+    "openrouter/z-ai/glm-5.3",
+    "opencode-go/glm-5.3"
   ],
   "modelThinkingLevels": {
     "openai-codex/gpt-6.1-sol": "medium",
@@ -26,9 +29,7 @@
   "packages": [
     {
       "source": "npm:pi-subagents",
-      "skills": [
-        "-skills/council-mode/SKILL.md"
-      ],
+      "skills": ["-skills/council-mode/SKILL.md"],
       "prompts": []
     },
     "npm:@gotgenes/pi-anthropic-auth",
