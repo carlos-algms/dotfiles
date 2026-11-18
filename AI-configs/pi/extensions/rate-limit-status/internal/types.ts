@@ -18,6 +18,8 @@ export interface RateLimitProvider {
   pick?(rawHeaders: HeaderMap): HeaderMap;
   /** Raw provider stream event -> flat map to store, or undefined to ignore. */
   pickEvent?(data: unknown): HeaderMap | undefined;
+  /** Fetch a snapshot out of band (API call); runs on the refresh triggers. */
+  refresh?(ctx: ExtensionContext): Promise<HeaderMap | undefined>;
   /** Time-based line, shown without a snapshot (e.g. DeepSeek peak window). */
   formatTime?(ctx: ExtensionContext): string | undefined;
   /** Footer line, or undefined when no window is usable. */

@@ -14,8 +14,10 @@ import type {
   ExtensionContext,
 } from '@earendil-works/pi-coding-agent';
 import rateLimitStatus from './index.ts';
+import { bar } from './internal/format-shared.ts';
 import { getRateLimitProvider } from './internal/registry.ts';
 import { readSnapshot, writeSnapshot } from './internal/snapshot-store.ts';
+import { stopRefreshes } from './internal/refresh.ts';
 import type { HeaderMap, Snapshot } from './internal/types.ts';
 import { anthropic } from './providers/anthropic.ts';
 import {
@@ -27,6 +29,7 @@ import {
 } from './providers/deepseek.ts';
 import { nous } from './providers/nous.ts';
 import { openaiCodex } from './providers/openai-codex.ts';
+import { opencodeGo, pickUsage } from './providers/opencode-go.ts';
 
 /** Unregistered provider used as the "no rate-limit data" fixture. */
 const UNREGISTERED = 'kimi-coding';
@@ -108,6 +111,7 @@ test('registry resolves providers by id and restricts deepseek to deepseek-flash
   assert.equal(getRateLimitProvider('anthropic')?.provider, 'anthropic');
   assert.equal(getRateLimitProvider('nous')?.provider, 'nous');
   assert.equal(getRateLimitProvider('openai-codex')?.provider, 'openai-codex');
+  assert.equal(getRateLimitProvider('opencode-go')?.provider, 'opencode-go');
   assert.equal(getRateLimitProvider(UNREGISTERED), undefined);
   assert.equal(getRateLimitProvider('openai'), undefined);
   assert.equal(getRateLimitProvider('constructor'), undefined);
@@ -645,4 +649,431 @@ test('headless hooks still sync deepseek-flash cost', (t) => {
     assert.deepEqual(model.cost, OFF_PEAK_RATES, hook);
     assert.deepEqual(statuses, [], hook);
   }
+});
+
+/** Shape captured from a real `GET https://opencode.ai/zen/go/v1/usage`. */
+function goUsageBody(percent = 1, resetsAt?: string) {
+  const reset = resetsAt ?? new Date(Date.now() + 3_600_000).toISOString();
+  const meter = { status: 'ok', percent, resetsAt: reset };
+  return { usage: { rolling: meter, weekly: meter, monthly: meter } };
+}
+
+test('opencode-go pickUsage flattens rolling, weekly, and monthly meters', () => {
+  const body = goUsageBody();
+  const reset = String(Date.parse(body.usage.rolling.resetsAt) / 1000);
+  assert.deepEqual(pickUsage(body), {
+    '5h-used': '1',
+    '5h-reset': reset,
+    '7d-used': '1',
+    '7d-reset': reset,
+    '1M-used': '1',
+    '1M-reset': reset,
+  });
+  assert.equal(pickUsage(goUsageBody(0.04))?.['5h-used'], '0'); // no decimal noise
+  assert.equal(pickUsage(goUsageBody(12.34))?.['5h-used'], '12.3');
+});
+
+test('opencode-go pickUsage drops unusable meters and malformed bodies', () => {
+  assert.deepEqual(
+    Object.keys(
+      pickUsage({
+        usage: {
+          rolling: { percent: 5, resetsAt: '2026-11-18T13:08:31.000Z' },
+          weekly: { percent: 'x', resetsAt: '2026-11-23T00:00:00.000Z' },
+          monthly: { percent: 1, resetsAt: 'not a date' },
+        },
+      }) ?? {},
+    ),
+    ['5h-used', '5h-reset'],
+  );
+  for (const body of [
+    undefined,
+    null,
+    'x',
+    {},
+    { usage: {} },
+    { usage: { rolling: { percent: 1 } } },
+  ]) {
+    assert.equal(pickUsage(body), undefined, JSON.stringify(body));
+  }
+});
+
+test('opencode-go format renders the three windows, each coloured once', () => {
+  const text = opencodeGo.format(ctx, snap(pickUsage(goUsageBody(42)) ?? {}));
+  assert.match(text ?? '', /^<dim>5h .*42% \(.*\)<\/dim>/);
+  assert.match(text ?? '', /7d .*42%/);
+  assert.match(text ?? '', /1M .*42%/);
+  assert.doesNotMatch(text ?? '', /<\w+>[^<]*<\w+>/);
+  const past = new Date(Date.now() - 3_600_000).toISOString();
+  assert.equal(
+    opencodeGo.format(ctx, snap(pickUsage(goUsageBody(42, past)) ?? {})),
+    undefined,
+  );
+  const mixed = opencodeGo.format(
+    ctx,
+    snap({
+      '5h-used': '42',
+      '5h-reset': String(Date.now() / 1000 + 3600),
+      '7d-used': '42',
+      '7d-reset': String(Date.now() / 1000 - 3600),
+    }),
+  );
+  assert.match(mixed ?? '', /^<dim>5h .*42%/);
+  assert.equal(opencodeGo.format(ctx, snap({})), undefined);
+});
+
+test('opencode-go refresh reads the Pi-stored key and sends no org header', async () => {
+  const calls: { url: string; headers: Record<string, string> }[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
+    calls.push({ url, headers: init.headers as Record<string, string> });
+    return { ok: true, json: async () => goUsageBody() };
+  }) as unknown as typeof fetch;
+  const goCtx = {
+    ...fakeCtx('opencode-go').ctx,
+    modelRegistry: {
+      getApiKeyForProvider: async (provider: string) =>
+        provider === 'opencode-go' ? 'oc_sk_test' : undefined,
+    },
+  } as unknown as ExtensionContext;
+  try {
+    const headers = await opencodeGo.refresh?.(goCtx);
+    assert.equal(calls[0]?.url, 'https://opencode.ai/zen/go/v1/usage');
+    assert.deepEqual(calls[0]?.headers, {
+      authorization: 'Bearer oc_sk_test',
+    });
+    assert.deepEqual(headers, pickUsage(goUsageBody()));
+
+    globalThis.fetch = (async () => ({ ok: false })) as unknown as typeof fetch;
+    assert.equal(await opencodeGo.refresh?.(goCtx), undefined);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+/** `withHome`, but awaiting an async body. */
+async function withHomeAsync(
+  run: (home: string) => Promise<void>,
+): Promise<void> {
+  const previous = process.env.HOME;
+  const home = mkdtempSync(join(tmpdir(), 'rate-limits-'));
+  process.env.HOME = home;
+  try {
+    await run(home);
+  } finally {
+    process.env.HOME = previous;
+    rmSync(home, { recursive: true, force: true });
+  }
+}
+
+/** Real fetch replacement that records URLs; restore in a `finally`. */
+function fetchSpy(ok = true, body: unknown = goUsageBody()) {
+  const calls: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (url: string) => {
+    calls.push(url);
+    return ok ? { ok: true, json: async () => body } : { ok: false };
+  }) as unknown as typeof fetch;
+  return {
+    calls,
+    restore() {
+      globalThis.fetch = original;
+    },
+  };
+}
+
+/** UI context on opencode-go, with `apiKey` as the registry resolves it. */
+function goCtx(apiKey: string | null = 'oc_sk_test', hasUI = true) {
+  const { ctx: base, statuses } = fakeCtx('opencode-go', hasUI);
+  const ctx = {
+    ...base,
+    modelRegistry: {
+      getApiKeyForProvider: async (provider: string) =>
+        provider === 'opencode-go' ? (apiKey ?? undefined) : undefined,
+    },
+  } as unknown as ExtensionContext;
+  return { ctx, statuses };
+}
+
+/** Drain the refresh promise chain between mocked timer steps. */
+async function settled(): Promise<void> {
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+test('opencode-go session start fetches once and persists the snapshot', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const body = goUsageBody();
+    const spy = fetchSpy(true, body);
+    const handlers = installExtension();
+    const { ctx: uiCtx, statuses } = goCtx();
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.deepEqual(spy.calls, ['https://opencode.ai/zen/go/v1/usage']);
+      assert.match(statuses.at(-1) ?? '', /5h .*7d .*1M/);
+      assert.deepEqual(readSnapshot('opencode-go')?.headers, pickUsage(body));
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('opencode-go response refresh is throttled until the window passes', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.now() });
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: uiCtx } = goCtx();
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        uiCtx,
+      );
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      t.mock.timers.setTime(Date.now() + 10_000);
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        uiCtx,
+      );
+      await settled();
+      assert.equal(spy.calls.length, 2);
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('refresh never arms for other providers or without a key', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: nousCtx } = fakeCtx('nous');
+    const { ctx: noKey } = goCtx(null);
+    try {
+      for (const target of [nousCtx, noKey]) {
+        handlers.get('session_start')?.({}, target);
+        handlers.get('after_provider_response')?.(
+          { status: 200, headers: NOUS_HEADERS },
+          target,
+        );
+        handlers.get('agent_settled')?.({}, target);
+      }
+      await settled();
+      assert.deepEqual(spy.calls, []);
+      assert.equal(readSnapshot('opencode-go'), undefined);
+    } finally {
+      handlers.get('session_shutdown')?.({}, nousCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('a failed usage fetch keeps the previous snapshot', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const seed = pickUsage(goUsageBody(9)) ?? {};
+    writeSnapshot('opencode-go', seed);
+    const spy = fetchSpy(false);
+    const handlers = installExtension();
+    const { ctx: uiCtx } = goCtx();
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+      assert.deepEqual(readSnapshot('opencode-go')?.headers, seed);
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('agent_settled schedules the refresh the throttle dropped', async (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.now() });
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: uiCtx } = goCtx();
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      t.mock.timers.setTime(Date.now() + 2000);
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        uiCtx,
+      );
+      handlers.get('agent_settled')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      t.mock.timers.tick(7999);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      t.mock.timers.tick(1);
+      await settled();
+      assert.equal(spy.calls.length, 2);
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('a throwing usage fetch keeps the previous snapshot', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const seed = pickUsage(goUsageBody(9)) ?? {};
+    writeSnapshot('opencode-go', seed);
+    const original = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = (async () => {
+      calls += 1;
+      throw new Error('offline');
+    }) as unknown as typeof fetch;
+    const handlers = installExtension();
+    const { ctx: uiCtx } = goCtx();
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.equal(calls, 1);
+      assert.deepEqual(readSnapshot('opencode-go')?.headers, seed);
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      globalThis.fetch = original;
+      stopRefreshes();
+    }
+  });
+});
+
+test('bar clamps out-of-range percents instead of throwing', () => {
+  assert.equal(bar(-5), '░'.repeat(10));
+  assert.equal(bar(150), '█'.repeat(10));
+  assert.equal(bar(0), '░'.repeat(10));
+  assert.equal(bar(100), '█'.repeat(10));
+});
+
+test('opencode-go maps a rate-limited meter to an exhausted window', () => {
+  const limited = {
+    usage: {
+      rolling: {
+        status: 'rate-limited',
+        percent: 40,
+        resetsAt: new Date(Date.now() + 3_600_000).toISOString(),
+      },
+      weekly: {
+        status: 'ok',
+        percent: 40,
+        resetsAt: new Date(Date.now() + 86_400_000).toISOString(),
+      },
+    },
+  };
+  const headers = pickUsage(limited) ?? {};
+  assert.equal(headers['5h-used'], '100');
+  assert.equal(headers['7d-used'], '40');
+  assert.match(opencodeGo.format(ctx, snap(headers)) ?? '', /<error>5h .*100%/);
+});
+
+test('headless opencode-go sessions still refresh but never render', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: headlessCtx, statuses } = goCtx('oc_sk_test', false);
+    try {
+      handlers.get('session_start')?.({}, headlessCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+      assert.match(spy.calls[0] ?? '', /^https:\/\/opencode\.ai\//);
+
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        headlessCtx,
+      );
+      handlers.get('agent_settled')?.({}, headlessCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1, 'throttle still applies');
+      assert.deepEqual(statuses, []);
+      assert.ok(readSnapshot('opencode-go')?.headers['5h-used']);
+    } finally {
+      handlers.get('session_shutdown')?.({}, headlessCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('a headless response refreshes when the throttle is free', async () => {
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: headlessCtx, statuses } = goCtx('oc_sk_test', false);
+    try {
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        headlessCtx,
+      );
+      await settled();
+      assert.equal(spy.calls.length, 1);
+      assert.deepEqual(statuses, []);
+    } finally {
+      spy.restore();
+      stopRefreshes();
+    }
+  });
+});
+
+test('an armed trailing refresh outlives another session shutting down', async (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.now() });
+  await withHomeAsync(async () => {
+    stopRefreshes();
+    const spy = fetchSpy();
+    const handlers = installExtension();
+    const { ctx: uiCtx } = goCtx();
+    const { ctx: otherCtx } = fakeCtx('nous');
+    try {
+      handlers.get('session_start')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      t.mock.timers.setTime(Date.now() + 2000);
+      handlers.get('after_provider_response')?.(
+        { status: 200, headers: {} },
+        uiCtx,
+      );
+      handlers.get('agent_settled')?.({}, uiCtx);
+      await settled();
+      assert.equal(spy.calls.length, 1);
+
+      // A subagent child session ends in this process; the parent keeps its timer.
+      handlers.get('session_shutdown')?.({}, otherCtx);
+      t.mock.timers.tick(8000);
+      await settled();
+      assert.equal(spy.calls.length, 2);
+    } finally {
+      handlers.get('session_shutdown')?.({}, uiCtx);
+      spy.restore();
+      stopRefreshes();
+    }
+  });
 });

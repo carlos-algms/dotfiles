@@ -2,6 +2,7 @@ import { anthropic } from '../providers/anthropic.ts';
 import { deepseek } from '../providers/deepseek.ts';
 import { nous } from '../providers/nous.ts';
 import { openaiCodex } from '../providers/openai-codex.ts';
+import { opencodeGo } from '../providers/opencode-go.ts';
 import type { RateLimitProvider } from './types.ts';
 
 const PROVIDERS = new Map<string, RateLimitProvider>([
@@ -9,6 +10,7 @@ const PROVIDERS = new Map<string, RateLimitProvider>([
   [deepseek.provider, deepseek],
   [nous.provider, nous],
   [openaiCodex.provider, openaiCodex],
+  [opencodeGo.provider, opencodeGo],
 ]);
 
 export function getRateLimitProvider(

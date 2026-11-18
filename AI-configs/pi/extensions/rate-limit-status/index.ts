@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from '@earendil-works/pi-coding-agent';
+import { refreshProvider } from './internal/refresh.ts';
 import { getRateLimitProvider } from './internal/registry.ts';
 import { record, render } from './internal/render.ts';
 import { syncDeepSeekCost } from './providers/deepseek.ts';
@@ -41,14 +42,22 @@ export default function rateLimitStatus(pi: ExtensionAPI): void {
     }
   }
 
+  // Refreshing is UI-independent: headless runs still write the shared snapshot.
+  function refreshFor(ctx: ExtensionContext, trailing = false) {
+    refreshProvider(
+      ctx,
+      getRateLimitProvider(ctx.model?.provider, ctx.model?.id),
+      trailing,
+    );
+  }
+
   pi.on('session_start', (_event, ctx) => {
     stopPolling();
-    // Headless sessions have no timer; per-request sync below still prices them.
     syncDeepSeekCost(ctx.model);
-    if (!ctx.hasUI) {
-      return;
+    refreshFor(ctx);
+    if (ctx.hasUI) {
+      track(ctx, ctx.model?.provider, ctx.model?.id);
     }
-    track(ctx, ctx.model?.provider, ctx.model?.id);
   });
 
   pi.on('session_shutdown', () => {
@@ -57,10 +66,10 @@ export default function rateLimitStatus(pi: ExtensionAPI): void {
 
   pi.on('model_select', (event, ctx) => {
     syncDeepSeekCost(event.model);
-    if (!ctx.hasUI) {
-      return;
+    refreshFor(ctx);
+    if (ctx.hasUI) {
+      track(ctx, event.model.provider, event.model.id);
     }
-    track(ctx, event.model.provider, event.model.id);
   });
 
   pi.on('before_provider_request', (_event, ctx) => {
@@ -76,6 +85,12 @@ export default function rateLimitStatus(pi: ExtensionAPI): void {
       return;
     }
     record(ctx, provider, provider.pick?.(event.headers));
+    refreshProvider(ctx, provider);
+  });
+
+  // Final boundary of a run: pick up the update the throttle dropped above.
+  pi.on('agent_settled', (_event, ctx) => {
+    refreshFor(ctx, true);
   });
 
   pi.on('provider_stream_event', (event, ctx) => {

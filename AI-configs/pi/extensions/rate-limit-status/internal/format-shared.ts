@@ -15,7 +15,9 @@ export function pickColor(percent: number): 'error' | 'warning' | 'dim' {
 }
 
 export function bar(percent: number): string {
-  const filled = Math.floor((Math.min(percent, 100) * BAR_WIDTH) / 100);
+  const filled = Math.floor(
+    (Math.max(0, Math.min(percent, 100)) * BAR_WIDTH) / 100,
+  );
   return '█'.repeat(filled) + '░'.repeat(BAR_WIDTH - filled);
 }
 
