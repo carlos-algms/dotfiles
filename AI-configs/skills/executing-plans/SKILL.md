@@ -136,7 +136,7 @@ owning Git, any milestone update, and any requested PR.
 Shared parallel execution requires disjoint owned paths and command outputs.
 Only the coordinator stages, commits, or integrates while shared workers run.
 
-Isolated workers use `git_owner=executor` for mechanical checkpoint commits and
+Isolated workers use `git_owner=executor` for mechanical task commits and
 `pr_owner=coordinator`. The coordinator squashes each result into the active
 feature branch serially, rebuilds the package from the same owned path list, and
 requires the integrated digest to equal the worker's reviewed digest.
@@ -149,9 +149,10 @@ plan passes. Workers never edit a coordinator-owned milestone.
 
 ## Commit ownership
 
-- `Checkpoint commits`: create mechanical state commits at written checkpoints.
-  The plan is the user's standing approval for these commits and for coordinator
-  squashes into the feature branch. Never ask per commit
+- `Checkpoint commits`: create mechanical state commits at each task's
+  `Mark this task as done [x] and commit` step and at the final-state
+  checkpoint. The plan is the user's standing approval for these commits and for
+  coordinator squashes into the feature branch. Never ask per commit
 - Creating a PR, or squashing the feature branch into the default branch, is a
   user gate. The main agent asks first; a subagent returns `PR | pending`
 - `No commits`: never stage or commit
@@ -192,11 +193,11 @@ For each task:
    canonical formatter-only output
 9. Rebuild the package, retain its final digest, and update every `VERIFY` line
    to it
-10. Under `Checkpoint commits`, execute the written checkpoint when this
+10. Tick the task after its green gate, so the tick is committed with it
+11. Under `Checkpoint commits`, execute the task's commit step when this
     executor owns Git
-11. Run record-only `scripts/task-done` with the ledger, refs, digest, and
+12. Run record-only `scripts/task-done` with the ledger, refs, digest, and
     report
-12. Tick the task; tick its checkpoint only after its Git owner committed
 
 Never dispatch review on a red gate. Never rerun a passing gate without an
 invalidating semantic edit.

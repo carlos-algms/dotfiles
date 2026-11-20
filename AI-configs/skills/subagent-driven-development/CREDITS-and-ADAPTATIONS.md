@@ -60,7 +60,8 @@ Original source:
 - `scripts/task-brief`, REWRITTEN not ported. Upstream matches
   `^#+[ \t]+Task[ \t]+N`; this fork's plans use `- [ ] **Task N:**` and its awk
   extracts zero lines from them. The rewrite also handles indented list-item
-  fences and carries each task's trailing commit checkpoint
+  fences and ends each task block at the next top-level checkbox, with the
+  task's commit step nested inside it
 - `scripts/plan-preamble`, this fork only. Upstream inlines global constraints
   into the dispatch; extracting them to a file keeps them out of orchestrator
   context

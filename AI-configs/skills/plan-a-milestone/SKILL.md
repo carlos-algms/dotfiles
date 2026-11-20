@@ -168,7 +168,7 @@ The root coordinator owns these steps:
 3. Commit under `Checkpoint commits` with `git_owner=coordinator`: create one
    commit from the plan's `final-paths.txt`, plus its plan state under
    `Plan file policy: Include`, following `executing-plans`
-   `## Commit ownership`. Tick every commit checkpoint in the plan first
+   `## Commit ownership`. Tick every task in the plan first
 4. Integration under `isolated`: squash and verify the digest as above
 5. Milestone update
 6. Delete the plan workspace

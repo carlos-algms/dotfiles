@@ -16,9 +16,9 @@ the sync point above; update that line after each comparison.
 - Removed isolated worktree skill requirement
 - Changed default saved plan path from `docs/superpowers/plans/` to
   `docs/plans/`
-- Added pre-plan commit policy prompt with per-task commits, one commit at the
-  end, or no commits
-- Added commit policy metadata and plan-owned commit checkpoints
+- Added pre-plan commit policy prompt: `Checkpoint commits` (per-task commit
+  steps) or `No commits`
+- Added commit policy metadata and per-task commit steps
 - Added immediate checkbox ticking requirement
 - Added single-writer task ownership for nested implementer review loops
 - Moved the execution-mode prompt before writing so the header never saves an
@@ -35,8 +35,10 @@ the sync point above; update that line after each comparison.
 - Added `**Difficulty:**` per task (`low`/`medium`/`high`) driving model
   selection at dispatch, with no model map in the skill so it stays portable
   across harnesses
-- Replaced every commit-checkpoint template body with a bare checkpoint line.
-  The executing skill owns the mechanics; upstream repeats them per plan
+- Made each task's commit a final task step
+  (`Mark this task as done [x] and commit`) and kept only the final-state
+  checkpoint as a bare line. The executing skill owns the mechanics; upstream
+  repeats them per plan
 - Moved progress state to the execution ledger. Checkboxes remain the
   implementer's explicit done-claim; the ledger is authoritative on resume
 - Removed the `Solved defects` and `Execution log` header fields. Both live in

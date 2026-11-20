@@ -22,9 +22,11 @@ For each incomplete task:
    existing `task-<N>-report.md`, else `none`
 4. On `PASS`, retain its exact `PACKAGE`, `REVIEW`, `VERIFY`, `LEARNED`, and
    `DISMISSED` lines
-5. Under `Checkpoint commits` with `git_owner=coordinator`, leave the checkpoint
-   unticked. The root coordinator commits it after the finalizer's `PASS`
-6. Tick the task; tick its checkpoint only after its Git owner committed
+5. Under `Checkpoint commits` with `git_owner=coordinator`, the root coordinator
+   creates the commit after the finalizer's `PASS`
+6. Tick the task after its implementer's `PASS`. Under `git_owner=executor` the
+   implementer already committed inside its dispatch and never reads the plan,
+   so the tick rides the final-state commit instead of its task's commit
 7. Dispatch the next task
 8. On `BLOCKED`, read its `need` field
    1. It names `path claim <path>`: resolve it per `executing-plans`
@@ -58,9 +60,9 @@ the finalizer's `PASS`.
 milestone coordinator from `plan-a-milestone`, never this orchestrator.
 
 The implementer owns implementation, verification, review fixes, path-list
-updates, task recording, and executor-owned checkpoint commits. The orchestrator
-never edits implementation files, runs gates, reads review packages, or
-interprets nested reviewer output.
+updates, task recording, and executor-owned task commits. The orchestrator never
+edits implementation files, runs gates, reads review packages, or interprets
+nested reviewer output.
 
 ## Model selection
 

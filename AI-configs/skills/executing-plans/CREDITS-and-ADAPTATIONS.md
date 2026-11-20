@@ -13,7 +13,7 @@ Original source:
   Upstream splits these into two skills; this one owns the shared start gates
   and hands off
 - Added immediate checkbox ticking after verified steps
-- Added plan-owned commit cadence with inline or delegated checkpoint ownership
+- Added plan-owned commit cadence with inline or delegated Git ownership
 - Added final whole-plan review with a reuse-first evidence gate
 - Added a single-runner rule for final verification, owned per execution mode
 - Added owned path lists seeded from each task's `**Files:**` and `**Changes:**`

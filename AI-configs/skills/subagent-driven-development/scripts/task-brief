@@ -3,10 +3,10 @@
 # implementer reads in one call, so the task text never passes through the
 # orchestrator's context.
 #
-# Plan format: tasks are top-level checkboxes, `- [ ] **Task N: ...**`.
-# A task block runs to the next top-level `- [ ] **Task`, and carries the
-# commit checkpoint that follows it (`- [ ] **Commit task N**`), which the
-# implementer owns. A trailing `---` separator is dropped.
+# Plan format: tasks are top-level checkboxes, `- [ ] **Task N: ...**`, each
+# ending with its `Mark this task as done [x] and commit` step under
+# `Checkpoint commits`. A task block runs to the next top-level checkbox. A
+# trailing `---` separator is dropped.
 #
 # Usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE]
 # Default OUTFILE: <workspace>/task-<N>-brief.md
@@ -57,10 +57,8 @@ awk -v n="$n" '
     intask = ($0 ~ ("^- \\[[ xX]\\] \\*\\*Task[ \t]+" n "([^0-9]|$)"))
     if (intask) { print; next }
   }
-  # Any other top-level checkbox that is not this task, and not a commit
-  # checkpoint, ends the block. A commit checkpoint belongs to the task above.
+  # Any other top-level checkbox ends the block.
   !infence && intask && /^- \[[ xX]\] / {
-    if ($0 ~ /^- \[[ xX]\] \*\*([A-Za-z]+[ \t]+)?[Cc]ommit/) { print; next }
     intask = 0
     next
   }

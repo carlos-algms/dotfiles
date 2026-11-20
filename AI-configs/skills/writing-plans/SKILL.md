@@ -327,8 +327,6 @@ inherits blind.
 
 - [ ] **Task 1: [Observable outcome]**
 
-- [ ] **Commit task 1**
-
 - [ ] **Final verification checkpoint**
 
 - [ ] **Final state commit checkpoint**
@@ -338,8 +336,7 @@ inherits blind.
 - Keep the stop rule as the first preamble item, verbatim
 - A milestone plan's coordinator completion action is the last step of the
   final-verification checkpoint
-- Put every task, commit checkpoint, and the final-verification checkpoint under
-  `## Tasks`
+- Put every task and the final-verification checkpoint under `## Tasks`
 
 ## Task template
 
@@ -401,6 +398,14 @@ inherits blind.
      3. `[affected test command]`
 
      Green: every command exits 0.
+
+  4. **Mark this task as done `[x]` and commit**
+
+     Written only under `Checkpoint commits`. The executing skill owns the
+     mechanics: tick this task's checkbox, then create its mechanical state
+     commit from the task's owned paths. A subagent executor that never reads
+     the plan: its dispatcher ticks after `PASS`, and the tick rides the
+     final-state commit
 ````
 
 ## Difficulty
@@ -540,24 +545,24 @@ Ask whether execution may create mechanical commits. Record the answer as
 `Plan file policy: Include | Exclude`, default `Include`, and apply it to the
 plan file plus every `Additional plan state files` path.
 
-Encode the policy with checkpoints:
+Encode the policy in the task templates:
 
-- `Checkpoint commits`: one checkpoint per task and one final-state checkpoint
+- `Checkpoint commits`: every task ends with a
+  `Mark this task as done [x] and commit` step, plus one final-state checkpoint
   after final verification
-- `No commits`: no checkpoints
+- `No commits`: every task ends at its task gate; write no final-state
+  checkpoint
 
-Write each checkpoint as a bare line. The executing skill owns the mechanics:
-
-```markdown
-- [ ] **Commit task N**
-```
+Write the final-state checkpoint as a bare line. The executing skill owns the
+mechanics:
 
 ```markdown
 - [ ] **Final state commit checkpoint**
 ```
 
-Never write a commit command, message, or file list into a checkpoint. The owner
-derives all three from the diff at checkpoint time.
+Never write a commit command, message, or file list into a commit step or the
+final-state checkpoint. The owner derives all three from the diff at commit
+time.
 
 `No commits` plus a requested PR is invalid. Resolve the conflict while writing
 the plan.

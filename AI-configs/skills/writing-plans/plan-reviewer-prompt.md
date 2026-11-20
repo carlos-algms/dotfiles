@@ -38,7 +38,8 @@ Check these reviewer-only boundaries:
   the implementer's first run
 - Check cross-task ordering, file ownership, interfaces, and task independence
 - Check destructive operations and shared writers
-- Check exact header literals and checkpoint placement
+- Check exact header literals, per-task commit-step placement, and the
+  final-state checkpoint
 - Check that every command applies to changed behavior or a governing rule
 - Reject duplicated review work. Executors drop dominated verification
 - Reject a plan-owned decision left open: an interface, a case, a file, a scope
