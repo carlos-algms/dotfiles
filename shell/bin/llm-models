@@ -6,7 +6,7 @@ set -euo pipefail
 # llm-models — List model IDs from public model APIs (no auth needed)
 #
 # Usage: llm-models [-h|--help] [-a] [-f REGEX] [provider ...]
-#   providers: zen openrouter nous (default: all)
+#   providers: zen go openrouter nous (default: all)
 #   default    keep only models priced at zero on both input and output
 #   -a         keep every model, priced or not
 #   -f REGEX   also keep only IDs matching REGEX, case-insensitive
@@ -16,6 +16,7 @@ set -euo pipefail
 # ==============================================================================
 
 readonly URL_ZEN="https://opencode.ai/zen/v1/models"
+readonly URL_GO="https://opencode.ai/zen/go/v1/models"
 readonly URL_OPENROUTER="https://openrouter.ai/api/v1/models"
 readonly URL_NOUS="https://inference-api.nousresearch.com/v1/models"
 
@@ -52,11 +53,12 @@ done
 shift $((OPTIND - 1))
 
 providers=("$@")
-[ ${#providers[@]} -eq 0 ] && providers=(zen openrouter nous)
+[ ${#providers[@]} -eq 0 ] && providers=(zen go openrouter nous)
 
 for p in "${providers[@]}"; do
     case "$p" in
         zen) url="$URL_ZEN" ;;
+        go) url="$URL_GO" ;;
         openrouter) url="$URL_OPENROUTER" ;;
         nous) url="$URL_NOUS" ;;
         *)
