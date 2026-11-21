@@ -162,8 +162,13 @@ alwaysApply: true
   - Each line: label, action, then when to use or tradeoff
 - Close with `Choose A/B/C, or say no`, listing only the labels you offered
 - Never offer custom word choices; labels only
-- If you have access to a tool that asks questions to the user, **always** use
-  it instead of plain A,B,C on chat
+- If a question tool is available, use it for choices and approvals. Otherwise,
+  ask in chat
+- For single-select questions, use option `preview` when supported and useful.
+  Put what the user needs to compare or approve next to the option: for example,
+  a shortlist, proposed text, commands, or a mockup. If previews are not
+  supported, show those details in chat before asking. Skip previews when the
+  label and description are enough
 
 ## File operations
 
@@ -178,7 +183,10 @@ alwaysApply: true
 ### Running commands
 
 - File edits remain subject to file-edit rules and approval gates
-- Group known sequential shell commands in one bash call to save turns
+- Prefer `codemode` when available to run multiple commands in parallel or
+  sequence: It allows to write JS to treats data between commands and return
+  processed values instead of full output. If not available, group known
+  sequential shell commands in one bash call chain to save turns
 - Group only real shell commands. Never use bash, Python, or Ruby scripts to
   edit files; use the edit tool, even for many files. Its in-chat diff is the
   reason
