@@ -23,17 +23,35 @@ motions, and one-shot commands.
 - Motions: `h` `j` `k` `l` `0` `$` `w` `W` `b` `B` `e` `E` `gg` `G` (both land
   on column 0)
 - Edits: `x` `D` `C` `S` `s` `~`
-- Operators: `d{motion}` / `c{motion}` over `w` `b` `e` `h` `l` `0` `$`
-- Linewise: `dd` deletes the line, `cc` / `S` empty it and enter insert. `dG` /
-  `dgg` / `cG` / `cgg` cover the cursor line to the last or first line. `ggdG`
-  empties the buffer. One undo step each; `c` leaves one empty line
+- Operators: `d{motion}` / `c{motion}` over `w` `W` `b` `B` `e` `E` `h` `l` `0`
+  `$`
+- Linewise: `dd` deletes the line, `cc` / `S` empty it and enter insert. `dj` /
+  `dk` / `cj` / `ck` delete (or empty and retype) the current line plus the line
+  below / above; on the buffer edge they are a no-op, as in vim. `dG` / `dgg` /
+  `cG` / `cgg` cover the cursor line to the last or first line. `ggdG` empties
+  the buffer. Undo restores the deleted lines in one step; undo replacement
+  typing first after a change. `c` leaves one empty line
 - Char search motions: `f` `F` `t` `T` with `;` / `,` repeat. Built on pi's
   char-jump (`ctrl+]` / `ctrl+alt+]`), so they search across lines
 - Paste: `p` pastes pi's kill ring after the cursor, inline (not linewise). Word
-  and line deletes fill it (`dw` `db` `d0` `d$` `D` `C` `dd` `cc` `S` `dG` `dgg`
-  `cG` `cgg`); `x`, `dh`, `dl`, `dt`, `df`, `gu`, `gU`, `~` do not
+  and line deletes fill it (`dw` `de` `db` `d0` `d$` `D` `C` `dd` `cc` `S` `dj`
+  `dk` `cj` `ck` `dG` `dgg` `cG` `cgg`, and text-object deletes `diw` etc); `x`,
+  `dh`, `dl`, `dt`, `df`, `gu`, `gU`, `~` do not
 - Char search operators: `dt<char>` / `df<char>` / `ct<char>` / `cf<char>`
   (forward, single-line)
+- Text objects: press `d` (delete) or `c` (change), then `i` (inside) or `a`
+  (around), then an object key:
+  - `w` / `W`: a run of whitespace, ASCII punctuation, or other text. `aw` takes
+    adjacent whitespace but does not extend a word selection back into the
+    indent. From whitespace, `iw` takes the run and `aw` adds the next run
+  - `"`, `'`, or `` ` ``: a quote pair on the current line. `i` excludes the
+    quotes; `a` includes them and adjacent whitespace
+  - `(`, `[`, `{`, `<`, their closers, or `b` / `B`: a bracket pair. `a`
+    includes the delimiters; `i` excludes them. In `f(\n  arg\n)`, `di(` removes
+    the whole `arg` line and `ci(` leaves one empty line. In `f(\n  arg)`, `di(`
+    removes only the selected characters
+  - Both operators fill the kill ring. `c` enters insert at the region start.
+    Undo restores the deletion in one step; undo replacement typing first
 - Case ops: `gu{motion}` / `gU{motion}`
 - Open lines: `o` `O`
 - Join: `J` inserts one space (none after trailing whitespace; empty or
@@ -85,7 +103,7 @@ This file is a fork of upstream's example. To keep upstream merges clean:
 Intentional divergences outside the markers (re-apply on each upstream merge):
 
 - `LOCAL FORK NOTES` comment block above the imports
-- Import line: no `truncateToWidth` / `visibleWidth`
+- Imports: no `truncateToWidth` / `visibleWidth`; adds local editing helpers
 - Class fields `pendingOp`, `lastFind`, `cursorShape` on `ModalEditor`
 - The `handleLocal()` hook (comment plus `if` line) at the top of `handleInput`
 - Comment above the printable-char guard in `handleInput` is reworded
@@ -107,12 +125,22 @@ word-right) bypasses the keybinding indirection and keeps the extension small.
 Trade-off: user-overridden keybindings in pi don't propagate here. Acceptable
 for personal use; revisit if the editor needs to honor custom bindings.
 
-### Two-key `g` prefix held as state
+### Operator prefixes held as one state slot
 
-`pendingOp` state holds `g` waiting for `u` / `U` / `g`. Same machinery handles
-`d` and `c` waiting for a motion, `dg` / `cg` waiting for the second `g`,
-`dt`/`df`/`ct`/`cf` and `f`/`F`/`t`/`T` waiting for a target char. One state
-slot rather than a parser.
+`pendingOp` holds one prefix. `resolvePendingOperator` in `pending-operator.ts`
+turns that prefix plus the next key into a step without touching the editor. `g`
+waits for `u` / `U` / `g`. The same resolver handles `d` and `c` waiting for a
+motion, `dg` / `cg` waiting for the second `g`, `dt`/`df`/`ct`/`cf` and
+`f`/`F`/`t`/`T` waiting for a target char, and `di`/`da`/`ci`/`ca` waiting for
+the object char.
+
+### Text objects compute regions directly
+
+Same pattern as `gu` / `dt` for the buffer write: no pi primitive exists, so
+`text-objects.ts` computes a region (word run, quote pair, bracket pair) and
+`applyRegion` removes it. `line-edits.ts` handles line ranges and removes whole
+lines for both line motions and text objects. `index.ts` applies the edit,
+updates the kill ring, and sets the cursor.
 
 ### `~` uses direct buffer mutation
 
@@ -128,26 +156,38 @@ undo steps and clobbered the kill ring.
 pi's `handleForwardDelete` pushes one undo snapshot per char, so the natural
 implementation (loop N forward-deletes) creates N undo steps. Edits that need
 one undo step (`dt`/`df`/`ct`/`cf`, `dd`/`cc`/`S`, `dG`/`dgg`/`cG`/`cgg`,
-`gu`/`gU`, `~`) build the new lines and call `replaceBuffer`:
+`dj`/`dk`/`cj`/`ck`, `di`/`da`/`ci`/`ca`, `gu`/`gU`, `~`) build the new lines
+and call `replaceBuffer`:
 
 - `setText` for a single snapshot
 - restore pi's paste registry (`pastes`, `pasteCounter`), which `setText`
   clears; without it `[paste #N]` markers are sent as literal text
 - set the cursor via `state.cursorLine` / `state.cursorCol`. Safe because pi's
   `UndoStack.push` deep-clones via `structuredClone`
-- `killRing.push` for edits that delete lines, since `setText` skips the ring
+- `killRing.push` for edits that delete text, since `setText` skips the ring.
+  The kill text goes through `internals.expandPasteMarkers` first, so `p`
+  inserts the pasted payload rather than a `[paste #N]` marker. Edits that go
+  through pi's own primitives instead (`x` `dw` `dh` `dl` `D` `C`) push the raw
+  buffer text, marker included
 
 `gg` / `G` also set the cursor directly: `Up` on the first line at col 0 and
 `Down` on the last line (while browsing history) navigate history instead.
 
-All private access (`state`, `killRing`, `pastes`, `pasteCounter`) goes through
-one cast in `ModalEditor.internals`, with hand-written types because pi's
-`.d.ts` erases private member types. A pi rename fails at runtime, not in `tsc`.
+All private access (`state`, `killRing`, `pastes`, `pasteCounter`, and the
+`expandPasteMarkers` method) goes through one cast in `ModalEditor.internals`,
+with hand-written types because pi's `.d.ts` erases private member types. A pi
+rename fails at runtime, not in `tsc`.
 
-### No tests
+## Testing
 
-Personal fork, manually exercised. Add tests if the operator state machine
-grows.
+From the repo root, use Node.js 24 and the Pi release pinned in `tsconfig.json`:
+
+```bash
+node --test 'AI-configs/pi/extensions/vim-mode/*.test.ts'
+```
+
+The suite covers pure helpers and sends key sequences to Pi's editor without a
+terminal.
 
 ## Limitations
 
@@ -155,7 +195,15 @@ grows.
 - No `P`, `y`, or registers: `p` only reads pi's kill ring.
 - `f` / `F` / `t` / `T` cross lines (pi's jump primitive); vim stays on the
   line. `d`/`c` with `f`/`t` are forward and single-line only.
-- No `i` / `a` text objects (`diw`, `da"`, etc).
+- Text objects: brackets scan the whole buffer. They skip delimiters inside live
+  paste markers, double-quoted strings on one line, and single-character
+  literals. With the cursor strictly inside a quoted string, that string's own
+  brackets win. Every `replaceBuffer` edit rejects a change whose boundary falls
+  strictly inside a live paste marker. `aw` from trailing whitespace does
+  nothing where vim crosses the line break. `iw` groups non-ASCII punctuation
+  with words where pi's `w` treats it as a boundary. No `ip` / `as` / `at`, no
+  counts. Empty inner blocks (`""`, `()`) delete nothing; `c` still enters
+  insert. Quotes honor only backslash escapes.
 - No counts (e.g. `3w`, `5dd`).
 - `g` prefix only resolves to `gu` / `gU` / `gg`.
 - pi allows the cursor at `col == line length`. Normal-mode commands keep it on
@@ -167,15 +215,11 @@ grows.
 - `dh` / `d0` / `ch` / `c0` at column 0 do nothing, as in vim. `db` there still
   joins the previous line.
 - The cursor shape reset on `session_shutdown` is untested in a live session.
-- `gu` / `gU` / `~` / `dt` / `df` / `ct` / `cf` are not paste-marker aware.
-  Applied on or through a `[paste #N +M lines]` marker they can alter it (for
-  example `[PASTE #1 ...]`), and the marker then submits as literal text.
+- `gu` / `gU` / `~` / `dt` / `df` / `ct` / `cf` are not paste-marker aware: a
+  marker lying entirely inside the edit is rewritten, and pi then submits it as
+  literal text. Only a marker split by an edit boundary is rejected.
 - `gg` / `G` do not reset pi's sticky column (`preferredVisualCol`, private). A
   following `j` / `k` can land on a stale column.
-- `d{motion}` / `c{motion}` only over `w` `b` `e` `h` `l` `0` `$` (plus
-  `dd`/`cc`).
-- `de` / `dE` are aliased to `dw` / `dW` (pi has no "to end of word" delete), so
-  they leave the trailing space like `dw`.
 - `dt`/`df`/`ct`/`cf` are forward + single-line only. `dT`/`dF` (backward) not
   implemented.
 - Word definition follows pi (single rule), not vim's word/WORD split.

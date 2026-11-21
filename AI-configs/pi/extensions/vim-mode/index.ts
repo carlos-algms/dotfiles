@@ -1,4 +1,4 @@
-/**
+/**!
  * Modal Editor - vim-like modal editing example
  *
  * Usage: pi --extension ./examples/extensions/modal-editor.ts
@@ -22,6 +22,13 @@ import {
   type ExtensionAPI,
 } from '@earendil-works/pi-coding-agent';
 import { matchesKey } from '@earendil-works/pi-tui';
+import { type LineMotion, lineRange, removeLines } from './line-edits.ts';
+import {
+  type FindKind,
+  type PendingOp,
+  resolvePendingOperator,
+} from './pending-operator.ts';
+import { applyRegion, resolveTextObject } from './text-objects.ts';
 import { expandFenceSnippet } from './vim-snippets.ts';
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
@@ -52,41 +59,8 @@ const MOTION_KEYS: Record<string, string[]> = {
   B: ['\x1b[1;3D'],
 };
 
-// Delete primitive applied when an operator (d/c) is followed by a motion.
-// alt+letter uses CSI-u (\x1b[<cp>;3u) not legacy \x1b<letter>: pi's matcher
-// rejects the legacy form when kitty keyboard protocol is active (kitty, wezterm,
-// ghostty, foot, ...). CSI-u matches in both modes.
-const DELETE_FOR_MOTION: Record<string, string> = {
-  w: '\x1b[100;3u', // alt+d = delete word forward (codepoint 100 = 'd', mod 3 = alt)
-  W: '\x1b[100;3u',
-  e: '\x1b[100;3u', // alias of dw: deletes leading ws + word, leaves trailing ws
-  E: '\x1b[100;3u',
-  b: '\x17', // ctrl+w = delete word backward (raw ctrl char, kitty-safe)
-  B: '\x17',
-  h: '\x7f', // backspace
-  l: '\x1b[3~', // delete
-  '0': '\x15', // ctrl+u = delete to line start
-  $: '\x0b', // ctrl+k = delete to line end
-};
-
-// Motions whose delete primitive acts forward from the cursor. pi's forward
-// delete at end of line joins the next line, so these go through forwardDelete.
-const FORWARD_DELETE_MOTIONS = new Set(['w', 'W', 'e', 'E', 'l', '$']);
-
-// Cursor-only motions that give the region for gu/gU. Same boundaries as the
-// DELETE_FOR_MOTION primitives (e/E alias w/W), but nothing is deleted.
-const CASE_MOTION: Record<string, string[]> = {
-  w: ['\x1b[1;3C'],
-  W: ['\x1b[1;3C'],
-  e: ['\x1b[1;3C'],
-  E: ['\x1b[1;3C'],
-  b: ['\x1b[1;3D'],
-  B: ['\x1b[1;3D'],
-  h: ['\x1b[D'],
-  l: ['\x1b[C'],
-  '0': ['\x01'],
-  $: ['\x05'],
-};
+// Cursor-only motions that give the region for gu/gU, and pi's primitive for
+// each d/c motion, live in one table: pending-operator.ts MOTIONS.
 
 // One-shot normal-mode commands: key -> sequences + optional mode switch.
 // Composites built from pi's existing editor primitives.
@@ -106,7 +80,6 @@ const CURSOR_SHAPE = {
 
 // f/F/t/T reuse pi's char-jump primitive (tui.editor.jumpForward/Backward).
 // It searches across lines, unlike vim. ctrl+alt+] uses CSI-u (kitty-safe).
-type FindKind = 'f' | 'F' | 't' | 'T';
 const JUMP_FORWARD = '\x1d'; // ctrl+]
 const JUMP_BACKWARD = '\x1b[93;7u'; // ctrl+alt+]
 const FLIP_FIND: Record<FindKind, FindKind> = {
@@ -116,10 +89,6 @@ const FLIP_FIND: Record<FindKind, FindKind> = {
   T: 't',
 };
 
-function isFindKind(s: string): s is FindKind {
-  return s in FLIP_FIND;
-}
-
 // pi's Editor keeps these private and its .d.ts erases their types, so the
 // shapes are declared by hand. Reached only through ModalEditor.internals.
 type EditorInternals = {
@@ -127,31 +96,12 @@ type EditorInternals = {
   killRing: { push(text: string, opts: { prepend: boolean }): void };
   pastes: Map<number, string>;
   pasteCounter: number;
+  expandPasteMarkers(text: string): string;
 };
 
-// One state slot holds the operator machinery: a bare operator, a `g` prefix
-// (gu/gU/gg), a dg/cg range, a char operator waiting for its target (dt/df/ct/cf)
-// or a find waiting for its target char.
-type PendingOp =
-  | 'd'
-  | 'c'
-  | 'g'
-  | 'gu'
-  | 'gU'
-  | 'dt'
-  | 'df'
-  | 'ct'
-  | 'cf'
-  | 'dg'
-  | 'cg'
-  | FindKind;
+// A range of the old buffer that an edit replaces.
+type ReplacedRange = { line: number; start: number; end: number };
 
-// d/c followed by t/f. Nested by operator and target key so the lookup is typed
-// with no cast and no undefined (noUncheckedIndexedAccess is on).
-const CHAR_OP_PENDING: Record<'d' | 'c', Record<'t' | 'f', PendingOp>> = {
-  d: { t: 'dt', f: 'df' },
-  c: { t: 'ct', f: 'cf' },
-};
 // === END LOCAL ADDITIONS ==================================================
 
 class ModalEditor extends CustomEditor {
@@ -223,7 +173,9 @@ class ModalEditor extends CustomEditor {
         const { line, col } = this.getCursor();
         const edit = expandFenceSnippet(this.getLines(), line, col);
         if (edit) {
-          this.replaceBuffer(edit.lines, edit.line, edit.col);
+          this.replaceBuffer(edit.lines, edit.line, edit.col, {
+            replaced: [{ line, start: 0, end: col }],
+          });
           return true;
         }
       }
@@ -237,140 +189,76 @@ class ModalEditor extends CustomEditor {
       return true;
     }
 
-    // Esc cancels a pending operator instead of aborting the agent.
-    if (matchesKey(data, 'escape')) {
-      if (this.pendingOp) {
-        this.pendingOp = null;
-        return true;
-      }
-      return false;
-    }
-
-    // Resolve pending operators.
-    if (this.pendingOp) {
-      // Control keys and escape sequences (ctrl+c, enter, arrows) cancel the
-      // operator and still reach pi.
-      if (data.charCodeAt(0) < 32) {
-        this.pendingOp = null;
-        return false;
-      }
-
-      // `g` waits for u/U/g to become gu/gU/gg. Anything else cancels.
-      if (this.pendingOp === 'g') {
-        if (data === 'g') {
-          this.pendingOp = null;
-          this.gotoFirstLine();
-        } else if (data === 'u') {
-          this.pendingOp = 'gu';
-        } else if (data === 'U') {
-          this.pendingOp = 'gU';
-        } else {
-          this.pendingOp = null;
-        }
-        return true;
-      }
-
-      // f/F/t/T: data is the target char.
-      if (isFindKind(this.pendingOp)) {
-        const kind = this.pendingOp;
-        this.pendingOp = null;
-        if (data.length === 1 && data.charCodeAt(0) >= 32) {
-          this.lastFind = { kind, ch: data };
-          this.findChar(kind, data, false);
-        }
-        return true;
-      }
-
-      const op = this.pendingOp;
-      this.pendingOp = null;
-
-      // d/c: dd/cc clears line, t/f waits for target char, else apply delete
-      // primitive for motion.
-      if (op === 'd' || op === 'c') {
-        if (data === op) {
-          this.deleteLines('current', op === 'c');
-          return true;
-        }
-        if (data === 't' || data === 'f') {
-          this.pendingOp = CHAR_OP_PENDING[op][data];
-          return true;
-        }
-        if (data === 'g') {
-          this.pendingOp = op === 'd' ? 'dg' : 'cg';
-          return true;
-        }
-        if (data === 'G') {
-          this.deleteLines('toLast', op === 'c');
-          return true;
-        }
-        const seq = DELETE_FOR_MOTION[data];
-        if (seq) {
-          // Backward primitives at col 0 would join the previous line; vim does
-          // nothing there (db still joins, as in vim).
-          const nothingBefore =
-            (data === 'h' || data === '0') && this.getCursor().col === 0;
-          if (FORWARD_DELETE_MOTIONS.has(data)) {
-            this.forwardDelete(seq, op === 'd');
-          } else if (!nothingBefore) {
-            super.handleInput(seq);
-          }
-          if (op === 'c') {
-            this.mode = 'insert';
-          }
-        }
-        return true; // swallow even on unknown motion, like vim
-      }
-
-      // dgg/cgg: second g completes the range. Anything else cancels.
-      if (op === 'dg' || op === 'cg') {
-        if (data === 'g') {
-          this.deleteLines('toFirst', op === 'cg');
-        }
-        return true;
-      }
-
-      // dt/df/ct/cf: data is the target char. Single-line, forward only.
-      // Uses replaceBuffer for one undo step (pi's forward-delete pushes one
-      // snapshot per char).
-      if (op === 'dt' || op === 'df' || op === 'ct' || op === 'cf') {
-        if (data.length === 1 && data.charCodeAt(0) >= 32) {
-          const { line, col } = this.getCursor();
-          const lines = this.getLines();
-          const lineText = lines[line] ?? '';
-          const idx = lineText.indexOf(data, col + 1);
-          if (idx !== -1) {
-            const inclusive = op === 'df' || op === 'cf';
-            const endCol = inclusive ? idx + 1 : idx;
-            const newLines = lines.slice();
-            newLines[line] = lineText.slice(0, col) + lineText.slice(endCol);
-            this.replaceBuffer(newLines, line, col);
-            if (op === 'ct' || op === 'cf') {
-              this.mode = 'insert';
-            } else {
-              this.clampCursor();
+    const escape = matchesKey(data, 'escape');
+    const step = resolvePendingOperator(this.pendingOp, data, escape);
+    this.pendingOp = typeof step === 'string' ? step : null;
+    if (step !== null) {
+      if (typeof step !== 'string') {
+        switch (step.kind) {
+          case 'cancel':
+            break;
+          case 'firstLine':
+            this.gotoFirstLine();
+            break;
+          case 'find':
+            this.lastFind = { kind: step.find, ch: step.target };
+            this.findChar(step.find, step.target, false);
+            break;
+          case 'lineEdit':
+            this.deleteLines(step.range, step.change);
+            break;
+          case 'motionEdit': {
+            // Unlike Pi's backward primitives, dh and d0 do not join lines.
+            const atStart = step.guardLineStart && this.getCursor().col === 0;
+            if (step.forward) {
+              this.forwardDelete(step.sequence, !step.change);
+            } else if (!atStart) {
+              super.handleInput(step.sequence);
             }
+            if (step.change) {
+              this.mode = 'insert';
+            }
+            break;
           }
+          case 'wordEndEdit':
+            this.wordEndEdit(step.change);
+            break;
+          case 'textObject':
+            this.applyTextObject(step.key, step.change, step.outer);
+            break;
+          case 'charEdit': {
+            // One buffer edit avoids an undo snapshot for every character.
+            const { line, col } = this.getCursor();
+            const lines = this.getLines();
+            const text = lines[line] ?? '';
+            const idx = text.indexOf(step.target, col + 1);
+            if (idx !== -1) {
+              const endCol = step.inclusive ? idx + 1 : idx;
+              const newLines = lines.slice();
+              newLines[line] = text.slice(0, col) + text.slice(endCol);
+              const edited = this.replaceBuffer(newLines, line, col, {
+                replaced: [{ line, start: col, end: endCol }],
+              });
+              if (!edited) {
+                break;
+              }
+              if (step.change) {
+                this.mode = 'insert';
+              } else {
+                this.clampCursor();
+              }
+            }
+            break;
+          }
+          case 'case':
+            this.transformCase(step.sequences, step.upper);
+            break;
         }
-        return true; // no match: stay in normal mode, like vim
       }
-
-      // gu/gU: transform the region the motion covers.
-      if (op === 'gu' || op === 'gU') {
-        this.transformCase(data, op === 'gU');
-        return true;
-      }
-
       return true;
     }
-
-    // Start an operator.
-    if (data === 'd' || data === 'c' || data === 'g') {
-      this.pendingOp = data;
-      return true;
-    }
-    if (isFindKind(data)) {
-      this.pendingOp = data;
-      return true;
+    if (escape) {
+      return false;
     }
 
     // ; and , repeat the last f/F/t/T (, reverses direction).
@@ -459,6 +347,16 @@ class ModalEditor extends CustomEditor {
           newLines,
           line,
           Math.max(Math.min(cur.length, joined.length - 1), 0),
+          {
+            replaced: [
+              { line, start: cur.length, end: cur.length },
+              {
+                line: line + 1,
+                start: 0,
+                end: (lines[line + 1] ?? '').length - nextTrim.length,
+              },
+            ],
+          },
         );
       }
       return true;
@@ -497,8 +395,12 @@ class ModalEditor extends CustomEditor {
           ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase();
         lines[line] =
           lineText.slice(0, col) + toggled + lineText.slice(col + ch.length);
-        this.replaceBuffer(lines, line, col + toggled.length);
-        this.clampCursor();
+        const edited = this.replaceBuffer(lines, line, col + toggled.length, {
+          replaced: [{ line, start: col, end: col + ch.length }],
+        });
+        if (edited) {
+          this.clampCursor();
+        }
       }
       return true;
     }
@@ -522,15 +424,22 @@ class ModalEditor extends CustomEditor {
   // Rewrite the buffer as one undo step and place the cursor. setText clears
   // pi's paste registry, so restore it or [paste #N] markers stop expanding on
   // submit. setText also skips the kill ring, so push killText directly.
+  // `replaced` names the old-buffer ranges the edit touches: an edit whose
+  // boundary falls strictly inside a live paste marker would corrupt it, so it
+  // is dropped (returns false) and the caller skips its follow-up.
   private replaceBuffer(
     lines: string[],
     cursorLine: number,
     cursorCol: number,
-    killText?: string,
-  ): void {
+    { kill, replaced = [] }: { kill?: string; replaced?: ReplacedRange[] } = {},
+  ): boolean {
+    if (!this.canReplace(replaced)) {
+      return false;
+    }
     const internals = this.internals;
     const savedPastes = new Map(internals.pastes);
     const savedCounter = internals.pasteCounter;
+    const killed = kill && internals.expandPasteMarkers(kill);
     this.setText(lines.join('\n'));
     for (const [id, text] of savedPastes) {
       internals.pastes.set(id, text);
@@ -539,9 +448,38 @@ class ModalEditor extends CustomEditor {
     // pi has no public cursor setter. Safe after setText: UndoStack deep-clones.
     internals.state.cursorLine = cursorLine;
     internals.state.cursorCol = cursorCol;
-    if (killText) {
-      internals.killRing.push(killText, { prepend: false });
+    if (killed) {
+      internals.killRing.push(killed, { prepend: false });
     }
+    return true;
+  }
+
+  private canReplace(replaced: ReplacedRange[]): boolean {
+    const old = this.getLines();
+    return replaced.every(({ line, start, end }) =>
+      this.pasteSpans(old[line] ?? '').every(
+        ({ start: spanStart, end: spanEnd }) =>
+          !(spanStart < start && start < spanEnd) &&
+          !(spanStart < end && end < spanEnd),
+      ),
+    );
+  }
+
+  private pasteSpans(text: string): { start: number; end: number }[] {
+    const { pastes } = this.internals;
+    if (!pastes.size) {
+      return [];
+    }
+    // Pi matches markers by ID even when a grapheme crosses the marker start.
+    const spans: { start: number; end: number }[] = [];
+    for (const match of text.matchAll(
+      /\[paste #(\d+)( (\+\d+ lines|\d+ chars))?\]/g,
+    )) {
+      if (match.index !== undefined && pastes.has(Number(match[1]))) {
+        spans.push({ start: match.index, end: match.index + match[0].length });
+      }
+    }
+    return spans;
   }
 
   private lineLength(): number {
@@ -646,41 +584,150 @@ class ModalEditor extends CustomEditor {
     state.cursorCol = 0;
   }
 
-  // dd/dG/dgg and cc/cG/cgg/S: linewise delete of the current line, or from the
-  // cursor line to the last/first line. c leaves one empty line and enters insert.
-  private deleteLines(
-    range: 'toLast' | 'toFirst' | 'current',
-    change: boolean,
-  ): void {
+  // dd/dj/dk/dG/dgg and cc/cj/ck/cG/cgg/S: linewise delete of the current
+  // line, the current line plus the one below/above, or from the cursor line
+  // to the last/first line. c leaves one empty line and enters insert. A
+  // down/up range on the edge line is a no-op, as in vim.
+  private deleteLines(range: LineMotion, change: boolean): void {
     const { line } = this.getCursor();
     const lines = this.getLines();
-    const first = range === 'toFirst' ? 0 : line;
-    const last = range === 'toLast' ? lines.length - 1 : line;
-    const rest = [
-      ...lines.slice(0, first),
-      ...(change ? [''] : []),
-      ...lines.slice(last + 1),
-    ];
-    const kept = rest.length > 0 ? rest : [''];
-    this.replaceBuffer(
-      kept,
-      Math.min(first, kept.length - 1),
-      0,
-      lines.slice(first, last + 1).join('\n'),
+    const span = lineRange(lines.length, line, range);
+    if (!span) {
+      return;
+    }
+    const { lines: kept, killed } = removeLines(
+      lines,
+      span.first,
+      span.last,
+      change,
     );
+    // Whole lines are removed, so no marker can be split.
+    const edited = this.replaceBuffer(
+      kept,
+      Math.min(span.first, kept.length - 1),
+      0,
+      { kill: killed },
+    );
+    if (edited && change) {
+      this.mode = 'insert';
+    }
+  }
+
+  // di/da/ci/ca: compute the text-object region and apply delete/change to
+  // it. d and c both push the region to the kill ring; c enters insert at
+  // the region start. One undo step via replaceBuffer.
+  private applyTextObject(obj: string, change: boolean, outer: boolean): void {
+    const { line, col } = this.getCursor();
+    const lines = this.getLines();
+    const region = resolveTextObject(lines, line, col, obj, outer, (text) => {
+      // Hide marker delimiters without moving the region's offsets.
+      let masked = text;
+      for (const { start, end } of this.pasteSpans(text)) {
+        masked =
+          masked.slice(0, start) + '\0'.repeat(end - start) + masked.slice(end);
+      }
+      return masked;
+    });
+    if (!region) {
+      return;
+    }
+    // Empty inner block ("" or ()): vim aborts the delete; c still enters
+    // insert between the delimiters. No buffer edit, so no undo snapshot.
+    if (
+      !region.linewise &&
+      region.startLine === region.endLine &&
+      region.startCol === region.endCol
+    ) {
+      if (change) {
+        this.internals.state.cursorLine = region.startLine;
+        this.internals.state.cursorCol = region.startCol;
+        this.mode = 'insert';
+      }
+      return;
+    }
+    const { lines: newLines, killed } = applyRegion(lines, region, change);
+    this.commitEdit(newLines, region.startLine, region.startCol, {
+      kill: killed,
+      change,
+      replaced: [
+        {
+          line: region.startLine,
+          start: region.startCol,
+          end: region.startCol,
+        },
+        { line: region.endLine, start: region.endCol, end: region.endCol },
+      ],
+    });
+  }
+
+  // de/dE: vim deletes to the end of the word inclusive, so the e motion gives
+  // the region. Move, restore the cursor, then rewrite in one step: pi has no
+  // "to end of word" delete, and its d{w} leaves the trailing space.
+  private wordEndEdit(change: boolean): void {
+    const start = this.getCursor();
+    this.wordEnd();
+    const end = this.getCursor();
+    const { state } = this.internals;
+    state.cursorLine = start.line;
+    state.cursorCol = start.col;
+    const lines = this.getLines();
+    const lineText = lines[start.line] ?? '';
+    // A motion that crossed the line ends the region at the line end, as vim's
+    // de does on a line's last word.
+    const to =
+      end.line === start.line
+        ? Math.min(end.col + 1, lineText.length)
+        : lineText.length;
+    const region = {
+      startLine: start.line,
+      startCol: Math.min(start.col, to),
+      endLine: start.line,
+      endCol: Math.max(start.col, to),
+    };
+    if (region.startCol === region.endCol) {
+      return;
+    }
+    const { lines: newLines, killed } = applyRegion(lines, region, change);
+    this.commitEdit(newLines, region.startLine, region.startCol, {
+      kill: killed,
+      change,
+      replaced: [
+        {
+          line: region.startLine,
+          start: region.startCol,
+          end: region.startCol,
+        },
+        { line: region.endLine, start: region.endCol, end: region.endCol },
+      ],
+    });
+  }
+
+  // Shared tail of the region edits: abort leaves the buffer and mode alone,
+  // otherwise place the cursor or enter insert.
+  private commitEdit(
+    lines: string[],
+    line: number,
+    col: number,
+    {
+      kill,
+      change,
+      replaced,
+    }: { kill?: string; change: boolean; replaced: ReplacedRange[] },
+  ): void {
+    if (!this.replaceBuffer(lines, line, col, { kill, replaced })) {
+      return;
+    }
     if (change) {
       this.mode = 'insert';
+    } else {
+      this.clampCursor();
     }
   }
 
   // gu/gU: move the cursor over the motion to find the region, restore the
   // cursor, then rewrite the line in one step. Cross-line motions stop at the
   // line edge. Cursor ends at the region start, as in vim.
-  private transformCase(motion: string, upper: boolean): void {
-    const seqs = CASE_MOTION[motion];
-    if (!seqs) {
-      return;
-    }
+  private transformCase(seqs: string[], upper: boolean): void {
     const { state } = this.internals;
     const start = this.getCursor();
     for (const s of seqs) {
@@ -706,7 +753,9 @@ class ModalEditor extends CustomEditor {
       return;
     }
     lines[start.line] = lineText.slice(0, from) + changed + lineText.slice(to);
-    this.replaceBuffer(lines, start.line, from);
+    this.replaceBuffer(lines, start.line, from, {
+      replaced: [{ line: start.line, start: from, end: to }],
+    });
   }
 
   // Restore the terminal's default cursor shape (DECSCUSR 0) on shutdown.
