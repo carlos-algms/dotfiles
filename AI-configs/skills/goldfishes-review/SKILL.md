@@ -47,66 +47,78 @@ model names.
    - PR: number, `gh pr diff <n> -R <owner/repo>`, head SHA
      (`gh pr view <n> -R <owner/repo> --json headRefOid`), and whether its
      branch is the current checkout
-   - branch, range, or PR that is not the current checkout: add
-     `Read files at <ref> with git -C <repo> show <ref>:<path>` to the Target
+   - branch, range, or PR that is not the current checkout: verify the reviewed
+     commit is local with `git cat-file -e '<ref>^{commit}'` in the target repo.
+     If available, add
+     `Read files at <ref> with git -C <repo> show <ref>:<path>` to the Target.
+     Otherwise pass the diff as the only available evidence and mark checks that
+     need files at that ref as partial. Never use the working tree as a
+     substitute
 2. Content that exists only in chat: write it to the session scratch directory,
    or a new temp directory when the harness has none, and pass that path
 3. Ask only when the target cannot be found
 
 ## 2. Shortlist lenses
 
-| Lens                 | Pick when                                     | Checks                                                      |
-| -------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `zoom-out`           | Almost always                                 | Simplest solution, YAGNI, over-engineering, reuse, dedupe   |
-| `design`             | The target shapes architecture or operations  | Data flow, scale, cost, security, rollout, failure modes    |
-| `plan-readiness`     | A plan someone will execute                   | Open decisions, plan vs code, call chain of planned changes |
-| `readability`        | Other people will read it                     | Undefined terms, clarity, fluff, structure, paraphrase      |
-| `inventive-catalyst` | The target accepts a trade-off as unavoidable | Patterns that remove the contradiction                      |
-| `correctness`        | Code, prompts, or skills                      | Bugs, contradictions, edge cases, tests, call chain         |
+| Lens                 | Question it answers                                                   |
+| -------------------- | --------------------------------------------------------------------- |
+| `correctness`        | Does the implemented code or instruction behave as required?          |
+| `plan-readiness`     | Can someone implement this plan without consequential guesses?        |
+| `design`             | Will the system work across boundaries and during failure or rollout? |
+| `zoom-out`           | What can we remove, reuse, or simplify without losing behavior?       |
+| `test-quality`       | Which cases protect behavior, overlap, or leave gaps?                 |
+| `module-boundaries`  | Where would moving code improve isolation or testability?             |
+| `readability`        | Will readers understand the text as intended?                         |
+| `inventive-catalyst` | Can a concrete trade-off be avoided, and at what cost?                |
 
-Rules:
+Start with `correctness` for implemented code or instructions, and
+`plan-readiness` for proposed implementation steps. Add a lens only if its
+question can change what happens next. Test presence and file size are signals,
+not triggers. Give each lens only the relevant portion of a mixed target.
 
-1. **Code or instruction target** (source files, branch, commit range,
-   uncommitted changes, PR, prompt, skill, agent definition): always shortlist
-   `correctness` with `Scope: both`
-2. Changes to shared code, exported types, interfaces, or public APIs: shortlist
-   `correctness` twice, `Scope: change` and `Scope: chain`
-3. Skip a lens when its findings would not change what happens next
-4. Default cap: 4 workers in the shortlist. A split `correctness` counts as 2.
-   The cap never limits lenses the user picks or names
-5. If the instruction names lenses, use exactly those, ignore rules 3-4, and
-   skip §3 Lens gate. A named `correctness` gets `Scope: both`
+Correctness defaults to `Scope: both`. If changed contracts warrant a separate
+consumer investigation, replace `both` with exactly two workers: `change` and
+`chain`. One checks local behavior; the other maps the full blast radius. Assign
+one owner per traversal: plan-readiness for proposed changes, correctness for
+implemented changes. Never narrow that owner's search to files in the plan or
+diff to avoid overlap.
+
+Default cap: six workers, counting a split correctness as two. The cap does not
+limit lenses the user picks or names. If the user names lenses, run exactly
+those. A named `correctness` gets `Scope: both`. If a selected lens has no
+applicable target, mark it `not run: <reason>` instead of inventing work.
 
 ## 3. Lens gate
 
 Skip the gate and run the shortlist, saying so in one line, when:
 
-- the instruction names lenses (§2 rule 5)
+- the instruction names lenses
 - the review is a step in work the user already approved, such as executing an
   approved plan or a review cycle the user started
 - a subagent or an automated routine invoked this skill
 - the session is non-interactive: no ask-question tool and no user turn can
   follow
 
-Otherwise, print the shortlist in chat as a numbered list, one lens per line
-with its one-line reason. Then:
+If the user asks to pick lenses, go straight to selection when interaction is
+available. Otherwise, report that selection cannot run and stop. For the normal
+gate, show the shortlist with one reason per lens.
 
 **With the harness's ask-question tool** (any name, if one exists):
 
 1. Round 1, one single-select question: "Run shortlisted" or "Pick lenses"
-2. Round 2, only for "Pick lenses": multi-select over all 6 lenses, shortlisted
-   first, with descriptions that start `Shortlisted: <reason>` for those. Split
-   the lenses into 2 questions so each has 2-4 options. `correctness` is one
-   option: picked, it keeps its shortlisted Scope, and a split keeps both
-   workers. Otherwise it gets `Scope: both`. A typed answer instead of an
-   option: treat the lenses it names as picked
+2. For "Pick lenses" or a direct request to pick: multi-select over the lens
+   table, shortlisted first, with descriptions that start
+   `Shortlisted: <reason>` for those. Split the lenses into questions of 2-4
+   options each. `correctness` is one option: picked, it keeps its shortlisted
+   Scope, and a split keeps both workers. Otherwise it gets `Scope: both`. A
+   typed answer instead of an option: treat the lenses it names as picked
 3. Limits that keep the call valid across harnesses: 1-4 questions per call, 2-4
    options per question, `header` at most 12 characters, never label an option
    `Other`, `Next`, or `Type something.`
 
-**Without the tool:** list all 6 lenses numbered, shortlisted first and marked.
-Ask the user to reply `ok` for the shortlist or the numbers to run. End the turn
-and wait.
+**Without the tool:** list the lenses from the table, numbered, with shortlisted
+lenses first and marked. Ask the user to reply `ok` for the shortlist or the
+numbers to run. End the turn and wait.
 
 If the user picks nothing, stop.
 
@@ -132,14 +144,22 @@ Read and follow ~/.agents/skills/goldfishes-review/lenses/<lens>.md
 Target: <from step 1>
 User focus: <the user's focus, or "none">
 Context files: <absolute paths the user gave, or "none">
+Other lenses: <other lenses active on this portion of the target, with correctness scopes, or "none">
 Scope: <change | chain | both>
 ```
+
+Before spawning, partition mixed targets and list only peers that share the
+worker's target portion. Workers use that list to skip checks already assigned
+elsewhere, not just suppress findings. Keep project instructions in
+`Context files` when already resolved; pass paths, not interpretations.
 
 Omit the `Scope` line for every lens except `correctness`.
 
 A worker that replies `not run: <reason>`, fails, times out, or returns nothing
 did not review. Retry it once. If it fails again, report it as `not run` with
-the reason, never as "no findings".
+the reason, never as "no findings". Do not retry an inapplicable lens. For a
+failed or partial pass, name the checks left uncovered. Reroute them only if
+coverage would change the outcome.
 
 ### Worker replies
 
@@ -178,8 +198,8 @@ Workers lack context and are often wrong. For each finding:
 ## 7. Report in chat
 
 1. Lenses run, partial (with what they did not read), and `not run`, in one line
-2. Lens blocks returned before findings: the `readability` paraphrase, verbatim,
-   so the user can compare it with their intent, and impact map trees
+2. The `readability` paraphrase verbatim, proposed split maps, and full impact
+   maps from plan-readiness and correctness (`chain` or `both`)
 3. Fixed: severity, location, what changed, and the files touched
 4. Needs decision: the finding and the options
 5. Rejected: the finding and the contradicting evidence, one line each

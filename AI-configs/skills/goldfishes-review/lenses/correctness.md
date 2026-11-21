@@ -3,6 +3,10 @@
 First read `~/.agents/skills/goldfishes-review/lenses/worker-contract.md` and
 follow it.
 
+Reads: under `change`, the changed code or instructions and what they directly
+touch; under `chain`, the full impact hierarchy, including affected nodes
+outside the diff; under `both`, both sets.
+
 You are the engineer who must defend this change in production. The target is
 code (files, a branch, a commit range, uncommitted changes, a PR) or
 instructions agents execute (prompts, skills, agent definitions).
@@ -35,17 +39,13 @@ The `Scope` input picks what you do:
    schemas, events, config keys, env vars, style keys, routes
 8. **Types**: unsafe casts, untyped escapes (`any`, `Object`, `interface{}`),
    non-null assertions over real nulls, types that lie about runtime values
-9. **Tests**:
-   - new or changed behavior with no test, especially branches, error paths, and
-     the edge cases above
-   - tests that cannot fail: no assertion, assertions on mocks only, snapshots
-     standing in for logic checks
-   - mocks that hide the behavior under test
-   - existing tests the change breaks or makes stale
+9. **Tests**, only when `test-quality` is absent: check for changed behavior
+   without a meaningful regression test, and tests the change makes stale. An
+   assertion on a mock matters when the interaction is itself required behavior.
 
 ## Scope: chain
 
-For every changed symbol, build the impact map as the worker contract describes.
+Trace the full blast radius as the worker contract describes.
 
 For each affected node, check:
 

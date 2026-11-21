@@ -7,10 +7,11 @@ Workers reply in this format. The coordinator parses and grades replies with it.
 A reply is either `not run: <reason>` alone, when the lens did not review, or
 these parts in order:
 
-1. `Not read: <files or hunks>`: required when the worker could not read every
-   part of the target
+1. `Not read: <in-scope evidence or checks not covered>`: required when the
+   worker could not complete its assignment. Omit intentional scope exclusions
 2. Lens blocks: every block the lens file says to return before findings. Return
-   them even when there are no findings
+   them even when there are no findings. The worker contract's
+   `Conventions: none found` line belongs here too
 3. Findings, or `No findings` when the lens ran and found nothing.
    `inventive-catalyst` uses `No false compromise detected` instead
 4. The `Unverified:` list, only when needed
@@ -54,15 +55,16 @@ Unverified:
 
 ## Impact map
 
-Return one `Impact map` header with one root per changed symbol. Merge symbols
-whose nodes and tags are all the same into one root: `<a>, <b> (<path>)`.
+Return an `Impact map` tree with one root per changed or planned symbol. Keep
+intermediate nodes so readers can see how the effect reaches each endpoint.
+Merge roots whose nodes and tags are the same: `<a>, <b> (<path>)`.
 
 ```text
 Impact map
 <symbol> (<path:line>)
 ├─ up
-│  ├─ <path:line> <name> [ok | handled | NOT handled | unverified]
-│  └─ ...
+│  └─ <path:line> <direct caller> [ok | handled | NOT handled | unverified]
+│     └─ <path:line> <caller of that caller> [handled]
 ├─ down
 │  └─ ...
 └─ sideways
@@ -74,5 +76,5 @@ Impact map
 - `NOT handled`: affected, and nothing covers it. Also report it as a finding
 - `unverified`: still unknown after investigating. Also list it under
   `Unverified:`
-- More than 10 `ok` nodes in one direction: one line with the count and one
-  example path. Never collapse `NOT handled` or `unverified` nodes
+- More than 10 unaffected `ok` leaves under one parent: one line with the count
+  and one example path. Never collapse intermediate nodes or affected edges

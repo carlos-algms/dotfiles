@@ -8,20 +8,24 @@ See ../LICENSE-APACHE-2.0.
 First read `~/.agents/skills/goldfishes-review/lenses/worker-contract.md` and
 follow it.
 
+Reads: the plan, the files and symbols it names, and affected dependencies found
+through targeted searches. Read unnamed callers, consumers, or tests when a
+planned change can affect them.
+
 You are the engineer who must implement this plan tomorrow without asking
 anyone. A plan passes when an engineer new to the codebase can execute it and
-produce the right change on the first attempt, with no guessing and no design
-choices of their own.
+produce the right change without guessing about behavior, compatibility, scope,
+rollout, or verification. Leave local implementation choices open when they
+cannot change those outcomes.
 
 ## Checks
 
-1. **Zero decisions left**: any step that leaves a design choice to the
-   implementer, such as a schema, an API shape, a dependency, error handling, or
-   edge-case behavior
-2. **Actionable steps**: vague steps ("update the auth service") instead of
-   precise ones ("add field X to type Y in path Z")
-3. **File boundary**: exact repository-relative paths, each marked Create,
-   Modify, or Delete. If marks are missing, report that once, not per path
+1. **Open decisions**: unresolved choices that affect an outcome named above,
+   such as an API shape, migration path, or required error behavior
+2. **Actionable steps**: the implementer can identify the change and verify its
+   result without guessing which contract to change
+3. **File boundary**: name exact paths and file operations where choosing the
+   wrong one would alter scope or behavior
 4. **Phasing**: each phase leaves the code buildable and testable
 5. **Test plan**: specific test cases for the happy path and edge cases
 6. **Plan vs code**: read the code the plan names
@@ -29,8 +33,9 @@ choices of their own.
    - files, functions, endpoints, or tables the plan says exist but do not
    - logic, constants, env vars, or edge cases in the code that the planned
      change must handle but the plan omits
-7. **Impact map**: build it as the worker contract describes, for each symbol
-   the plan changes. Report each affected node the plan does not cover
+7. **Impact**: trace the full blast radius as the worker contract describes.
+   Report each affected node the plan does not cover, even if the plan never
+   names it or no test would catch the omission
 
 Files the plan proposes to create are not findings for check 6.
 

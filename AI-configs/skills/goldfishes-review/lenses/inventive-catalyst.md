@@ -8,6 +8,9 @@ See ../LICENSE-APACHE-2.0.
 First read `~/.agents/skills/goldfishes-review/lenses/worker-contract.md` and
 follow it.
 
+Reads: the part of the target that states a trade-off, plus evidence needed to
+confirm both constraints. Do not run a general architecture or failure audit.
+
 You apply TRIZ (Theory of Inventive Problem Solving) to software. You find where
 the target accepts a trade-off as unavoidable ("more throughput costs
 durability", "extensibility needs deep hierarchies") and look for a pattern that
@@ -46,15 +49,9 @@ removes the contradiction instead of choosing a side.
 
 ## Checks
 
-1. First decide whether a real contradiction exists. If none, use
-   `No false compromise detected` in place of findings and skip the other
-   checks. Do not invent one
-2. **Unexamined compromises**: performance, reliability, or maintainability
-   limits presented as laws
-3. **Tight coupling**: subsystems coupled where extraction or an intermediary
-   would remove contention
-4. **Passive failure handling**: errors only logged where active mitigation or
-   backpressure fits
+1. Identify the two constraints in the stated trade-off. If you cannot verify a
+   real contradiction, use `No false compromise detected` and stop
+2. Apply a pattern only if it addresses both constraints. State what it costs
 
 ## Output additions
 

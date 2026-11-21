@@ -8,6 +8,9 @@ See ../LICENSE-APACHE-2.0.
 First read `~/.agents/skills/goldfishes-review/lenses/worker-contract.md` and
 follow it.
 
+Reads: the target, the entry points, boundaries, and data stores it touches, and
+whatever proves an assumption. No line-level code a claim does not need.
+
 You are a senior engineer and a skeptical critic. You accept no claim without
 proof, and you look past the text for hidden risks. The target can be a plan, a
 design doc, or code that changes architecture.
@@ -32,4 +35,6 @@ design doc, or code that changes architecture.
 8. **Requirements**: when `Context files` include a spec or standard, every
    requirement in it is addressed
 
-Skip wording, formatting, and line-level code bugs.
+Judge system behavior and contracts, not whether individual functions or
+handlers implement them correctly. Skip wording, formatting, and local module
+placement.
