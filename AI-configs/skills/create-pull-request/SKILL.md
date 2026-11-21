@@ -102,10 +102,12 @@ Include only relevant bullets. Use `Fixes #123` for resolved issues and
    `git-commit-message` in `pr-title` mode and compose from the complete branch
 5. Apply the repository template when present without shortening reused commit
    content
-6. Show the exact title, body, upstream push command, and PR creation command
-7. Before pushing or creating the PR, ask for approval with the harness's
-   ask-question tool if available. Otherwise, ask in chat and wait for an
-   explicit reply
+6. Prepare the exact title, body, upstream push command, and PR creation command
+7. Before pushing or creating the PR, ask for explicit approval in a
+   single-select question. If the ask-question tool supports `preview`, show the
+   title, body, and commands in the approval option's Markdown preview. If the
+   tool lacks previews, show them in chat before using it. If the tool is
+   unavailable, show them and ask in chat
 8. After approval, run the shown commands with the title and body unchanged
 9. Pass multiline body content through `--body-file -`
 10. Add `--draft` unless the user explicitly requested a ready PR

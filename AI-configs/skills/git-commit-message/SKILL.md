@@ -206,9 +206,11 @@ Keep the result in context. Do not re-check for the same repository.
 4. Resolve the exact commit set from current state and requested scope
 5. Read the full diff for that set
 6. Compose the message for its branch position
-7. Show the exact message in a `markdown` fence and the exact commands in a
-   `bash` fence. Ask for approval with the harness's ask-question tool if
-   available. Otherwise, ask in chat and wait for an explicit reply
+7. Ask for explicit approval in a single-select question. If the ask-question
+   tool supports `preview`, put the exact commit message in a `markdown` fence
+   and the exact commands in a `bash` fence in the approval option's preview. If
+   the tool lacks previews, show both fences in chat before using it. If the
+   tool is unavailable, show both fences and ask in chat
 8. Recheck status and the staged diff after approval
 9. Run the approved staging and commit commands with the message unchanged
 10. Use `git commit -F-` with a quoted heredoc for multiline messages

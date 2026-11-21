@@ -100,12 +100,14 @@ Skip the gate and run the shortlist, saying so in one line, when:
   follow
 
 If the user asks to pick lenses, go straight to selection when interaction is
-available. Otherwise, report that selection cannot run and stop. For the normal
-gate, show the shortlist with one reason per lens.
+available. Otherwise, report that selection cannot run and stop.
 
 **With the harness's ask-question tool** (any name, if one exists):
 
-1. Round 1, one single-select question: "Run shortlisted" or "Pick lenses"
+1. Round 1, one single-select question: "Run shortlisted" or "Pick lenses". On
+   "Run shortlisted", set `preview` to a Markdown list with one
+   `- <lens name>: <reason>` per shortlisted pass. Include correctness scope
+   when split. If the tool lacks previews, show the list in chat before asking
 2. For "Pick lenses" or a direct request to pick: multi-select over the lens
    table, shortlisted first, with descriptions that start
    `Shortlisted: <reason>` for those. Split the lenses into questions of 2-4
