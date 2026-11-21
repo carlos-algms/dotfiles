@@ -103,7 +103,9 @@ Include only relevant bullets. Use `Fixes #123` for resolved issues and
 5. Apply the repository template when present without shortening reused commit
    content
 6. Show the exact title, body, upstream push command, and PR creation command
-7. Get approval before pushing or creating the PR
+7. Before pushing or creating the PR, ask for approval with the harness's
+   ask-question tool if available. Otherwise, ask in chat and wait for an
+   explicit reply
 8. After approval, run the shown commands with the title and body unchanged
 9. Pass multiline body content through `--body-file -`
 10. Add `--draft` unless the user explicitly requested a ready PR
