@@ -28,8 +28,9 @@ import {
   type PendingOp,
   resolvePendingOperator,
 } from './pending-operator.ts';
-import { applyRegion, resolveTextObject } from './text-objects.ts';
+import { type Region, applyRegion, resolveTextObject } from './text-objects.ts';
 import { expandFenceSnippet } from './vim-snippets.ts';
+import { type WordScan, scanWord, wordScanRegion } from './word-motions.ts';
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
 // Annotate, not `satisfies`: these tables are indexed by an arbitrary key, and
@@ -47,17 +48,6 @@ const NORMAL_KEYS: Record<string, string | null> = {
 };
 
 // === LOCAL ADDITIONS ======================================================
-// Extra motions and operators. W/B collapse to w/b (pi has one word
-// definition). pi's word-right ends at the END of the word (emacs forward-word),
-// so w lands on the word end, not the next word start. w/W: see wordForward();
-// e/E: see wordEnd().
-//
-// IMPORTANT: pi's Editor.handleInput matches one keybinding per call. Compound
-// sequences must be sent as separate array entries, not concatenated strings.
-const MOTION_KEYS: Record<string, string[]> = {
-  b: ['\x1b[1;3D'], // alt+left  = word left
-  B: ['\x1b[1;3D'],
-};
 
 // Cursor-only motions that give the region for gu/gU, and pi's primitive for
 // each d/c motion, live in one table: pending-operator.ts MOTIONS.
@@ -220,8 +210,8 @@ class ModalEditor extends CustomEditor {
             }
             break;
           }
-          case 'wordEndEdit':
-            this.wordEndEdit(step.change);
+          case 'scanEdit':
+            this.scanEdit(step.scan, step.change);
             break;
           case 'textObject':
             this.applyTextObject(step.key, step.change, step.outer);
@@ -250,9 +240,15 @@ class ModalEditor extends CustomEditor {
             }
             break;
           }
-          case 'case':
-            this.transformCase(step.sequences, step.upper);
+          case 'case': {
+            const { upper } = step;
+            const region =
+              'scan' in step
+                ? wordScanRegion(this.getLines(), this.getCursor(), step.scan)
+                : this.motionRegion(step.sequences);
+            this.transformCase(upper, region);
             break;
+          }
         }
       }
       return true;
@@ -316,13 +312,16 @@ class ModalEditor extends CustomEditor {
       return true;
     }
 
-    if (data === 'w' || data === 'W') {
-      this.wordForward();
-      return true;
-    }
-
-    if (data === 'e' || data === 'E') {
-      this.wordEnd();
+    // w/B/e word motions: vim word rule, not pi's.
+    if (
+      data === 'w' ||
+      data === 'b' ||
+      data === 'e' ||
+      data === 'W' ||
+      data === 'B' ||
+      data === 'E'
+    ) {
+      this.scanMotion(data);
       return true;
     }
 
@@ -402,14 +401,6 @@ class ModalEditor extends CustomEditor {
           this.clampCursor();
         }
       }
-      return true;
-    }
-
-    // Extended word motions (w/W/b/B/e/E).
-    const motion = MOTION_KEYS[data];
-    if (motion) {
-      for (const s of motion) super.handleInput(s);
-      this.clampCursor();
       return true;
     }
 
@@ -514,60 +505,42 @@ class ModalEditor extends CustomEditor {
     }
   }
 
-  // w/W: pi's word-right, kept on the last char. On a line's last char that
-  // would stay put, so step past it and cross to the next line's first word
-  // (an empty next line is a stop, as in vim). No next line: stay.
-  private wordForward(): void {
-    const start = this.getCursor();
-    super.handleInput('\x1b[1;3C');
+  // w/b/e and W/B/E: vim word motions, computed on the buffer instead of pi's
+  // word primitives. Lowercase splits runs by character class; uppercase treats
+  // a punctuation run and its neighbours as one WORD.
+  private scanMotion(scan: WordScan): void {
+    const target = scanWord(this.getLines(), this.getCursor(), scan);
+    const { state } = this.internals;
+    state.cursorLine = target.line;
+    state.cursorCol = target.col;
     this.clampCursor();
-    const end = this.getCursor();
-    if (end.line !== start.line || end.col !== start.col) {
+  }
+
+  // dw/cw/db/cb/de/ce and their WORD forms: the scan gives the region, then one
+  // buffer rewrite. A motion that crosses the line edge stops there, so it never
+  // joins lines. An empty region still enters insert for c, as vim does.
+  private scanEdit(scan: WordScan, change: boolean): void {
+    const lines = this.getLines();
+    const region = wordScanRegion(lines, this.getCursor(), scan, change);
+    if (!region) {
+      if (change) {
+        this.mode = 'insert';
+      }
       return;
     }
-    super.handleInput('\x1b[C');
-    super.handleInput('\x1b[1;3C');
-    if (this.getCursor().line !== start.line && this.lineLength() > 0) {
-      super.handleInput('\x1b[1;3C');
-    }
-    this.clampCursor();
-  }
-
-  // Word-right until the cursor is on a non-empty line, or cannot move.
-  private skipEmptyLines(): void {
-    while (this.lineLength() === 0) {
-      const before = this.getCursor();
-      super.handleInput('\x1b[1;3C');
-      const after = this.getCursor();
-      if (after.line === before.line && after.col === before.col) {
-        return;
-      }
-    }
-  }
-
-  // e/E: end of the current or next word. pi's word-right ends at the word end,
-  // so one step left lands on the last letter. From a last letter that is a
-  // no-op, so step past it and retry. If word-right wraps to the next line it
-  // stops at col 0: skip empty lines, then go once more to the first word's end.
-  private wordEnd(): void {
-    const start = this.getCursor();
-    for (const stepFirst of [false, true]) {
-      if (stepFirst) {
-        super.handleInput('\x1b[C');
-      }
-      const from = this.getCursor();
-      super.handleInput('\x1b[1;3C');
-      if (this.getCursor().line !== from.line) {
-        this.skipEmptyLines();
-        super.handleInput('\x1b[1;3C');
-      }
-      super.handleInput('\x1b[D');
-      const end = this.getCursor();
-      if (end.line !== start.line || end.col !== start.col) {
-        break;
-      }
-    }
-    this.clampCursor();
+    const { lines: newLines, killed } = applyRegion(lines, region, change);
+    this.commitEdit(newLines, region.startLine, region.startCol, {
+      kill: killed,
+      change,
+      replaced: [
+        {
+          line: region.startLine,
+          start: region.startCol,
+          end: region.startCol,
+        },
+        { line: region.endLine, start: region.endCol, end: region.endCol },
+      ],
+    });
   }
 
   // gg/G poke the cursor: Up on the first line at col 0 browses history, and
@@ -660,48 +633,6 @@ class ModalEditor extends CustomEditor {
     });
   }
 
-  // de/dE: vim deletes to the end of the word inclusive, so the e motion gives
-  // the region. Move, restore the cursor, then rewrite in one step: pi has no
-  // "to end of word" delete, and its d{w} leaves the trailing space.
-  private wordEndEdit(change: boolean): void {
-    const start = this.getCursor();
-    this.wordEnd();
-    const end = this.getCursor();
-    const { state } = this.internals;
-    state.cursorLine = start.line;
-    state.cursorCol = start.col;
-    const lines = this.getLines();
-    const lineText = lines[start.line] ?? '';
-    // A motion that crossed the line ends the region at the line end, as vim's
-    // de does on a line's last word.
-    const to =
-      end.line === start.line
-        ? Math.min(end.col + 1, lineText.length)
-        : lineText.length;
-    const region = {
-      startLine: start.line,
-      startCol: Math.min(start.col, to),
-      endLine: start.line,
-      endCol: Math.max(start.col, to),
-    };
-    if (region.startCol === region.endCol) {
-      return;
-    }
-    const { lines: newLines, killed } = applyRegion(lines, region, change);
-    this.commitEdit(newLines, region.startLine, region.startCol, {
-      kill: killed,
-      change,
-      replaced: [
-        {
-          line: region.startLine,
-          start: region.startCol,
-          end: region.startCol,
-        },
-        { line: region.endLine, start: region.endCol, end: region.endCol },
-      ],
-    });
-  }
-
   // Shared tail of the region edits: abort leaves the buffer and mode alone,
   // otherwise place the cursor or enter insert.
   private commitEdit(
@@ -724,38 +655,53 @@ class ModalEditor extends CustomEditor {
     }
   }
 
-  // gu/gU: move the cursor over the motion to find the region, restore the
-  // cursor, then rewrite the line in one step. Cross-line motions stop at the
-  // line edge. Cursor ends at the region start, as in vim.
-  private transformCase(seqs: string[], upper: boolean): void {
+  // gu/gU: rewrite the line the region covers in one step. The region is already
+  // clamped to one line, and the cursor ends at its start.
+  private transformCase(upper: boolean, region: Region | null): void {
+    if (!region) {
+      return;
+    }
+    const lines = [...this.getLines()];
+    const { startLine, startCol, endCol } = region;
+    const lineText = lines[startLine] ?? '';
+    const covered = lineText.slice(startCol, endCol);
+    const changed = upper ? covered.toUpperCase() : covered.toLowerCase();
+    if (changed === covered) {
+      return;
+    }
+    lines[startLine] =
+      lineText.slice(0, startCol) + changed + lineText.slice(endCol);
+    this.replaceBuffer(lines, startLine, startCol, {
+      replaced: [{ line: startLine, start: startCol, end: endCol }],
+    });
+  }
+
+  // Region covered by a cursor-only motion, for gu/gU over pi's primitives.
+  // pi wraps `h` / `l` across lines; a wrapped motion leaves no covered column
+  // on this line, so it is a no-op here (vim cases the wrap target instead).
+  private motionRegion(sequences: string[]): Region | null {
     const { state } = this.internals;
     const start = this.getCursor();
-    for (const s of seqs) {
+    for (const s of sequences) {
       super.handleInput(s);
     }
     const end = this.getCursor();
     state.cursorLine = start.line;
     state.cursorCol = start.col;
-    const lines = [...this.getLines()];
-    const lineText = lines[start.line] ?? '';
-    let from = Math.min(start.col, end.col);
-    let to = Math.max(start.col, end.col);
-    if (end.line < start.line) {
-      from = 0;
-      to = start.col;
-    } else if (end.line > start.line) {
-      from = start.col;
-      to = lineText.length;
+    if (end.line !== start.line) {
+      return null;
     }
-    const region = lineText.slice(from, to);
-    const changed = upper ? region.toUpperCase() : region.toLowerCase();
-    if (changed === region) {
-      return;
+    const from = Math.min(start.col, end.col);
+    const to = Math.max(start.col, end.col);
+    if (from === to) {
+      return null;
     }
-    lines[start.line] = lineText.slice(0, from) + changed + lineText.slice(to);
-    this.replaceBuffer(lines, start.line, from, {
-      replaced: [{ line: start.line, start: from, end: to }],
-    });
+    return {
+      startLine: start.line,
+      startCol: from,
+      endLine: start.line,
+      endCol: to,
+    };
   }
 
   // Restore the terminal's default cursor shape (DECSCUSR 0) on shutdown.

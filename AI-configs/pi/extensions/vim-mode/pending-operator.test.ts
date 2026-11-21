@@ -36,13 +36,10 @@ test('g resolves navigation, range edits, and case changes', () => {
     ['g', 'g', false, { kind: 'firstLine' }],
     ['g', 'u', false, 'gu'],
     ['g', 'U', false, 'gU'],
-    [
-      'gu',
-      'w',
-      false,
-      { kind: 'case', sequences: ['\x1b[1;3C'], upper: false },
-    ],
+    ['gu', 'w', false, { kind: 'case', scan: 'w', upper: false }],
     ['gU', '$', false, { kind: 'case', sequences: ['\x05'], upper: true }],
+    ['gu', 'W', false, { kind: 'case', scan: 'W', upper: false }],
+    ['gU', 'B', false, { kind: 'case', scan: 'B', upper: true }],
     ['gu', 'z', false, { kind: 'cancel' }],
     ['d', 'g', false, 'dg'],
     ['c', 'g', false, 'cg'],
@@ -77,12 +74,8 @@ test('d and c resolve line, motion, and text-object edits', () => {
   ]);
 });
 
-test('every motion maps to its delete primitive and forward flag', () => {
+test('cursor-only motions map to their delete primitive and forward flag', () => {
   const rows = [
-    ['w', '\x1b[100;3u', true, false],
-    ['W', '\x1b[100;3u', true, false],
-    ['b', '\x17', false, false],
-    ['B', '\x17', false, false],
     ['h', '\x7f', false, true],
     ['l', '\x1b[3~', true, false],
     ['0', '\x15', false, true],
@@ -108,19 +101,20 @@ test('every motion maps to its delete primitive and forward flag', () => {
   }
 });
 
-test('de and dE need the word end region, not a pi delete primitive', () => {
-  for (const motion of ['e', 'E']) {
-    assert.deepEqual(resolvePendingOperator('d', motion, false), {
-      kind: 'wordEndEdit',
-      change: false,
-    });
-    assert.deepEqual(resolvePendingOperator('c', motion, false), {
-      kind: 'wordEndEdit',
-      change: true,
-    });
+test('every word motion maps to its scan, for d and c', () => {
+  for (const motion of ['w', 'b', 'e', 'W', 'B', 'E']) {
+    for (const [pending, change] of [
+      ['d', false],
+      ['c', true],
+    ] as const) {
+      assert.deepEqual(
+        resolvePendingOperator(pending, motion, false),
+        { kind: 'scanEdit', scan: motion, change },
+        `${pending}${motion}`,
+      );
+    }
   }
 });
-
 test('finds and character edits take one printable target', () => {
   check([
     [null, 'T', false, 'T'],

@@ -83,10 +83,25 @@ function createEditor(): Editor {
   return editor;
 }
 
+// EditorComponent hides getCursor; the concrete editor exposes it.
+function cursor(editor: Editor): { line: number; col: number } {
+  return (
+    editor as unknown as { getCursor(): { line: number; col: number } }
+  ).getCursor();
+}
+
 function send(editor: Editor, keys: Iterable<string>): void {
   for (const key of keys) {
     editor.handleInput(key);
   }
+}
+
+// Editor with text, in normal mode at the cursor one keys sequence leaves.
+function normalMode(text: string, keys: string): Editor {
+  const editor = createEditor();
+  editor.setText(text);
+  send(editor, ['\x1b', ...keys]);
+  return editor;
 }
 
 function paste(editor: Editor, text: string): void {
@@ -126,34 +141,27 @@ test('dh deletes left of the cursor and is a no-op at column 0', () => {
 });
 
 test('dl at the last char deletes it without joining the next line', () => {
-  const editor = createEditor();
-  editor.setText('one\ntwo');
-  send(editor, ['\x1b', ...'gglldl']);
-  assert.equal(editor.getText(), 'on\ntwo');
+  assert.equal(normalMode('one\ntwo', 'gglldl').getText(), 'on\ntwo');
 });
 
 test('cw changes to the end of the word and enters insert', () => {
-  const editor = createEditor();
-  editor.setText('foo bar');
-  send(editor, ['\x1b', ...'ggcwX', '\x1b']);
+  const editor = normalMode('foo bar', 'ggcwX');
+  send(editor, '\x1b');
   assert.equal(editor.getText(), 'X bar');
 });
 
+test('b moves to the start of the previous word', () => {
+  assert.deepEqual(cursor(normalMode('one two', 'gg$b')), { line: 0, col: 4 });
+});
+
 test('de deletes to the end of the word inclusive and never joins lines', () => {
-  const lineEnd = createEditor();
-  lineEnd.setText('one\ntwo');
-  send(lineEnd, ['\x1b', ...'gglllde']);
-  assert.equal(lineEnd.getText(), 'on\ntwo');
-  const word = createEditor();
-  word.setText('foo bar');
-  send(word, ['\x1b', ...'ggde']);
-  assert.equal(word.getText(), ' bar');
+  assert.equal(normalMode('one\ntwo', 'gglllde').getText(), 'on\ntwo');
+  assert.equal(normalMode('foo bar', 'ggde').getText(), ' bar');
 });
 
 test('cE on the last word enters insert at the region start', () => {
-  const editor = createEditor();
-  editor.setText('one two');
-  send(editor, ['\x1b', ...'ggllllcEX', '\x1b']);
+  const editor = normalMode('one two', 'ggllllcEX');
+  send(editor, '\x1b');
   assert.equal(editor.getText(), 'one X');
 });
 
@@ -198,4 +206,129 @@ test('edge ck is a no-op and dj deletes two lines in one undo step', () => {
   assert.equal(editor.getText(), 'three');
   send(editor, 'u');
   assert.equal(editor.getText(), 'one\ntwo\nthree');
+});
+
+test('W and B move by whitespace-delimited WORD', () => {
+  const editor = normalMode('foo.bar baz', 'ggW');
+  assert.deepEqual(cursor(editor), { line: 0, col: 8 });
+  send(editor, 'B');
+  assert.deepEqual(cursor(editor), { line: 0, col: 0 });
+});
+
+test('B crosses to the previous line and W stops on an empty line', () => {
+  const crossed = normalMode('one two\nthree\n\nfour', 'ggj0B');
+  assert.deepEqual(cursor(crossed), { line: 0, col: 4 });
+  const walked = normalMode('one two\nthree\n\nfour', 'ggW');
+  assert.deepEqual(cursor(walked), { line: 0, col: 4 });
+  send(walked, 'W');
+  assert.deepEqual(cursor(walked), { line: 1, col: 0 });
+  send(walked, 'W');
+  assert.deepEqual(cursor(walked), { line: 2, col: 0 });
+});
+
+test('E ends a WORD, so a punctuation run counts as one', () => {
+  const editor = normalMode('foo.bar baz', 'ggE');
+  assert.deepEqual(cursor(editor), { line: 0, col: 6 });
+  send(editor, 'E');
+  assert.deepEqual(cursor(editor), { line: 0, col: 10 });
+});
+
+test('dW deletes the WORD and its trailing blanks, never joining lines', () => {
+  assert.equal(normalMode('one   two', 'ggdW').getText(), 'two');
+  assert.equal(normalMode('one\ntwo', 'ggdW').getText(), '\ntwo');
+});
+
+test('dB deletes back to the previous WORD and dE is inclusive', () => {
+  assert.equal(normalMode('foo.bar baz', 'ggWdB').getText(), 'baz');
+  assert.equal(normalMode('foo.bar baz', 'ggdE').getText(), ' baz');
+});
+
+test('cW keeps the blanks after the WORD', () => {
+  const changed = normalMode('one two', 'ggcWX');
+  send(changed, '\x1b');
+  assert.equal(changed.getText(), 'X two');
+  const spaced = normalMode('one  two', 'ggcWX');
+  send(spaced, '\x1b');
+  assert.equal(spaced.getText(), 'X  two');
+});
+
+test('gu and gU over a WORD include the WORD end', () => {
+  assert.equal(normalMode('ONE TWO', 'ggguE').getText(), 'one TWO');
+  assert.equal(normalMode('ONE', 'ggguW').getText(), 'one');
+  const upper = normalMode('foo.bar baz', 'gggUW');
+  assert.equal(upper.getText(), 'FOO.BAR baz');
+  assert.deepEqual(cursor(upper), { line: 0, col: 0 });
+});
+
+test('w lands on the next word start, not on the blank before it', () => {
+  const editor = normalMode('foo bar', 'ggw');
+  assert.deepEqual(cursor(editor), { line: 0, col: 4 });
+  const punct = normalMode('foo-bar baz', 'ggwww');
+  assert.deepEqual(cursor(punct), { line: 0, col: 8 });
+});
+
+test('e keeps punctuation runs as words', () => {
+  const editor = normalMode('foo-bar baz', 'ggeee');
+  assert.deepEqual(cursor(editor), { line: 0, col: 6 });
+  const quoted = normalMode('a"b c', 'gge');
+  assert.deepEqual(cursor(quoted), { line: 0, col: 1 });
+});
+
+test('dw and de follow the lowercase scans', () => {
+  assert.equal(normalMode('foo bar baz', 'ggdw').getText(), 'bar baz');
+  assert.equal(normalMode('foo-bar baz', 'ggdw').getText(), '-bar baz');
+  assert.equal(normalMode('foo-bar baz', 'ggde').getText(), '-bar baz');
+});
+
+test('cw on punctuation and db across words match vim', () => {
+  const changed = normalMode('foo-bar baz', 'ggcwX');
+  send(changed, '\x1b');
+  assert.equal(changed.getText(), 'X-bar baz');
+  assert.equal(normalMode('foo bar baz', 'ggWdb').getText(), 'bar baz');
+});
+
+test('cw on the last character of a word changes one character', () => {
+  const changed = normalMode('ab cd', 'gglcwX');
+  send(changed, '\x1b');
+  assert.equal(changed.getText(), 'aX cd');
+});
+
+test('gu and gU over cursor-only motions stop at the line edge', () => {
+  const toEnd = normalMode('AB CD', 'ggllgu$');
+  assert.equal(toEnd.getText(), 'AB cd');
+  assert.deepEqual(cursor(toEnd), { line: 0, col: 2 });
+  const toStart = normalMode('AB CD', 'ggllgu0');
+  assert.equal(toStart.getText(), 'ab CD');
+  assert.deepEqual(cursor(toStart), { line: 0, col: 0 });
+  assert.equal(normalMode('HELLO\nCDEW', 'ggj0guh').getText(), 'HELLO\nCDEW');
+  assert.equal(normalMode('AB CD', 'gg0gu0').getText(), 'AB CD');
+});
+
+test('word deletes fill the kill ring, gu does not', () => {
+  const ringed = normalMode('one two', 'ggdW');
+  send(ringed, 'p');
+  assert.equal(ringed.getText(), 'tone wo');
+  const cased = normalMode('AAA\nbbb', 'ggddgU$');
+  send(cased, 'p');
+  assert.equal(cased.getText(), 'BAAABB');
+});
+
+test('a word delete rejects a boundary inside a paste marker', () => {
+  const editor = createEditor();
+  editor.setText('x');
+  paste(editor, largePaste);
+  const before = editor.getText();
+  send(editor, ['\x1b', ...'llllllllll', ...'dw']);
+  assert.equal(editor.getText(), before);
+  assert.equal(editor.getExpandedText?.(), `x${largePaste}`);
+});
+
+test('c with an empty word region enters insert, d does nothing', () => {
+  const changed = normalMode('abc\ndef', 'gg0jcb');
+  send(changed, 'X');
+  send(changed, '\x1b');
+  assert.equal(changed.getText(), 'abc\nXdef');
+  const deleted = normalMode('abc\ndef', 'gg0jdb');
+  send(deleted, 'X');
+  assert.equal(deleted.getText(), 'abc\ndef');
 });

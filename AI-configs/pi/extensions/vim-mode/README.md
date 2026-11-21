@@ -14,9 +14,9 @@ motions, and one-shot commands.
   cursor (`showHardwareCursor: true` required; pi then hides its own fake
   cursor). Unfocused shape comes from the terminal (kitty
   `cursor_shape_unfocused`, default `hollow`).
-- Translates `vim` keys to pi's existing editor primitives (cursor moves,
-  delete-word, delete-to-line-end, etc). Does not call pi's keybinding manager
-  directly.
+- Translates `vim` keys to pi's existing editor primitives where one exists
+  (cursor moves, delete-to-line-end, char jump) and computes the rest on the
+  buffer. Does not call pi's keybinding manager directly.
 
 ## Supported keys (normal mode)
 
@@ -34,9 +34,9 @@ motions, and one-shot commands.
 - Char search motions: `f` `F` `t` `T` with `;` / `,` repeat. Built on pi's
   char-jump (`ctrl+]` / `ctrl+alt+]`), so they search across lines
 - Paste: `p` pastes pi's kill ring after the cursor, inline (not linewise). Word
-  and line deletes fill it (`dw` `de` `db` `d0` `d$` `D` `C` `dd` `cc` `S` `dj`
-  `dk` `cj` `ck` `dG` `dgg` `cG` `cgg`, and text-object deletes `diw` etc); `x`,
-  `dh`, `dl`, `dt`, `df`, `gu`, `gU`, `~` do not
+  and line deletes fill it (`dw` `de` `db` `dW` `dE` `dB` `d0` `d$` `D` `C` `dd`
+  `cc` `S` `dj` `dk` `cj` `ck` `dG` `dgg` `cG` `cgg`, and text-object deletes
+  `diw` etc); `x`, `dh`, `dl`, `dt`, `df`, `gu`, `gU`, `~` do not
 - Char search operators: `dt<char>` / `df<char>` / `ct<char>` / `cf<char>`
   (forward, single-line)
 - Text objects: press `d` (delete) or `c` (change), then `i` (inside) or `a`
@@ -69,23 +69,19 @@ Reload pi or restart.
 
 - `u` (undo) maps to `\x1f` (ctrl+_), pi's default undo binding. Some terminals
   do not emit ctrl+_ at all; mapping falls flat there.
-- Word motions (`w` `b` `e` and their capital variants) rely on pi binding
-  `alt+left` / `alt+right` to word-step. If those are remapped, motions break.
-- `dw` / `dW` send the kitty CSI-u form `\x1b[100;3u` for `alt+d`, not the
-  legacy `\x1bd`. pi's key matcher (`pi-tui/dist/keys.js`) rejects
-  `\x1b<letter>` when the kitty keyboard protocol is active (kitty, wezterm,
-  ghostty, foot). CSI-u matches in both modes.
-- pi's word-right goes to the END of the word (emacs forward-word), so `w` / `W`
-  land on the word end, not the next word start as in vim. On a line's last char
-  they cross to the next line's first word (an empty line is a stop).
-- `e` / `E` is `word-right` then `left-one-char`, because pi has no native
-  "end-of-word" primitive. From a word's last letter that is a no-op, so it
-  steps right and retries, crossing and skipping empty lines. Punctuation runs
-  follow pi's word rule and can differ from vim.
-- `dw` / `dW` delete leading whitespace plus the word and leave the trailing
-  space, unlike vim's `dw`.
-- Upper-case word motions (`W` `B` `E`) collapse to lower-case behavior. pi has
-  one word definition; vim's WORD (whitespace-delimited) is not exposed.
+- Word motions (`w` `b` `e` `W` `B` `E`) and their `d` / `c` operators are the
+  fork's own scan (`word-motions.ts`), not pi's word primitives, so no
+  `alt+left` / `alt+right` binding is involved. A word is a keyword run
+  (letters, digits, `_`, non-ASCII) or a separate punctuation run; a WORD is a
+  run of non-blank characters, so punctuation stays attached. Both stop on an
+  empty line, skip blank-only lines, and fall back to the buffer's last
+  character when no word is left, as in vim. `cw` / `cW` act like `ce` / `cE` on
+  a non-blank, like `dw` / `dW` on a blank, and like `cl` on a run's last
+  character.
+- A word motion that crosses the line edge stops there, so `dw` / `dW` / `de` /
+  `dE` / `db` / `dB` never join lines. vim joins for `de` / `dE` / `db` / `dB`
+  only; its `dw` / `dW` avoid the join at a line's last word too, so those two
+  match vim.
 
 ## Fork merge contract
 
@@ -120,10 +116,12 @@ Upstream source:
 ### Direct escape sequences instead of pi's keybinding manager
 
 `CustomEditor` overrides `handleInput(data)` which receives raw input strings.
-Translating vim keys to pi's underlying escape sequences (e.g. `\x1b[1;3C` for
-word-right) bypasses the keybinding indirection and keeps the extension small.
-Trade-off: user-overridden keybindings in pi don't propagate here. Acceptable
-for personal use; revisit if the editor needs to honor custom bindings.
+Translating vim keys to pi's underlying escape sequences (e.g. `\x1b[D` for
+left) bypasses the keybinding indirection and keeps the extension small. Edits
+that no key sequence can express read the buffer instead (word motions, case
+changes, char edits). Trade-off: user-overridden keybindings in pi don't
+propagate here. Acceptable for personal use; revisit if the editor needs to
+honor custom bindings.
 
 ### Operator prefixes held as one state slot
 
@@ -147,7 +145,7 @@ updates the kill ring, and sets the cursor.
 No editor primitive for "toggle case at cursor", so `~` reads via `getLines()` /
 `getCursor()` (one grapheme, via `Intl.Segmenter`) and rewrites the line through
 `replaceBuffer`. The alternative (sequence-only) would need a new pi primitive.
-`gu` / `gU` work the same way: a cursor-only motion finds the region, then one
+`gu` / `gU` work the same way: the motion gives the region, then one
 `replaceBuffer` call rewrites it. Delete-then-reinsert was dropped: it took two
 undo steps and clobbered the kill ring.
 
@@ -167,7 +165,7 @@ and call `replaceBuffer`:
 - `killRing.push` for edits that delete text, since `setText` skips the ring.
   The kill text goes through `internals.expandPasteMarkers` first, so `p`
   inserts the pasted payload rather than a `[paste #N]` marker. Edits that go
-  through pi's own primitives instead (`x` `dw` `dh` `dl` `D` `C`) push the raw
+  through pi's own primitives instead (`x` `dh` `dl` `D` `C`) push the raw
   buffer text, marker included
 
 `gg` / `G` also set the cursor directly: `Up` on the first line at col 0 and
@@ -209,17 +207,23 @@ terminal.
 - pi allows the cursor at `col == line length`. Normal-mode commands keep it on
   the last char, except `j`, `k` and `u`, which can leave it past the end
   (cosmetic; clamping `j` / `k` would lose the sticky column). Forward deletes
-  (`x` `s` `D` `C` `dl` `dw` `d$`) first step onto the last char and do nothing
-  on an empty line, so they never join lines.
+  (`x` `s` `D` `C` `dl` `d$`) first step onto the last char and do nothing on an
+  empty line, so they never join lines.
 - `cc` / `S` do not keep indentation.
-- `dh` / `d0` / `ch` / `c0` at column 0 do nothing, as in vim. `db` there still
-  joins the previous line.
+- `dh` / `d0` / `ch` / `c0` at column 0 do nothing, as in vim. `db` / `dB` there
+  do nothing, where vim joins the previous line; `cb` / `cB` delete nothing and
+  enter insert, where vim empties the previous line and inserts at its start.
 - The cursor shape reset on `session_shutdown` is untested in a live session.
 - `gu` / `gU` / `~` / `dt` / `df` / `ct` / `cf` are not paste-marker aware: a
   marker lying entirely inside the edit is rewritten, and pi then submits it as
   literal text. Only a marker split by an edit boundary is rejected.
-- `gg` / `G` do not reset pi's sticky column (`preferredVisualCol`, private). A
-  following `j` / `k` can land on a stale column.
+- `gg` / `G` / `W` / `B` / `E` do not reset pi's sticky column
+  (`preferredVisualCol`, private). A following `j` / `k` can land on a stale
+  column.
 - `dt`/`df`/`ct`/`cf` are forward + single-line only. `dT`/`dF` (backward) not
   implemented.
-- Word definition follows pi (single rule), not vim's word/WORD split.
+- Word definition follows vim: `w` / `b` / `e` move over keyword and punctuation
+  runs, `W` / `B` / `E` over whitespace-delimited WORDs. `iskeyword` is
+  approximated by letters, digits, `_` and non-ASCII. A word operator that
+  crosses the line edge stops there; vim joins, except for `dw` / `dW`. `db` /
+  `dB` at a line start are a no-op; `cb` / `cB` delete nothing and enter insert.
